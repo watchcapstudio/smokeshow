@@ -144,7 +144,65 @@
   .rig input[type=range]{width:100%;accent-color:#C96F2E}
   .foot{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:9.5px;color:#5E6864;letter-spacing:.06em;line-height:1.7}
 
-  @media (max-width:760px){ body{gap:28px} .rig{width:370px} }
+  /* ---------- widgets column ---------- */
+  .wcolm{width:340px;display:flex;flex-direction:column;gap:16px}
+  .home-card{
+    border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:16px;align-items:center;
+    background:radial-gradient(120% 90% at 85% 0%, #3D4E57 0%, #2E3D46 45%, #151C22 100%);
+  }
+  .widget{border-radius:22px;overflow:hidden;box-shadow:0 16px 34px -16px rgba(0,0,0,.6);position:relative;color:#26221B}
+  .widget.dark-air{color:#F4E9D6}
+  .w-small{width:148px;height:148px}
+  .w-med{width:296px;height:140px}
+  .widget .wsun{position:absolute;border-radius:50%;transform:translate(-50%,-50%)}
+  .widget .wgrain{position:absolute;inset:0;opacity:.09;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .widget .overlay{position:absolute;inset:0;padding:13px 15px;display:flex;flex-direction:column;justify-content:flex-end}
+  .widget .w-loc{position:absolute;top:11px;left:15px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:8.5px;letter-spacing:.14em;opacity:.65}
+  .w-dots{display:flex;gap:4px;margin-bottom:6px}
+  .w-dots i{width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,.16)}
+  .widget.dark-air .w-dots i{background:rgba(255,255,255,.28)}
+  .w-dots i.on{transform:scale(1.4)}
+  .widget .w-word{font-weight:800;font-size:16px;letter-spacing:-.01em;line-height:1.05}
+  .w-med .w-word{font-size:20px}
+  .widget .w-sub{font-size:10.5px;font-weight:600;margin-top:2px;color:#8C3E10}
+  .widget.dark-air .w-sub{color:#F0A468}
+  .widget.calm .w-word{font-size:13px;font-weight:650}
+  .widget.calm .w-sub{color:inherit;opacity:.6}
+  .w-days{display:flex;gap:10px;margin-top:8px}
+  .w-days span{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:8.5px;letter-spacing:.08em;
+    display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.85}
+  .w-days .pip{width:7px;height:7px;border-radius:50%}
+
+  .lock-mock{
+    border-radius:24px;padding:26px 22px 24px;color:#EFE9DC;text-align:center;
+    background:linear-gradient(180deg,#33302B 0%,#211E19 55%,#141210 100%);
+  }
+  .lk-date{font-size:12.5px;font-weight:600;opacity:.85}
+  .lk-clock{font-size:56px;font-weight:250;line-height:1;margin-top:2px;font-variant-numeric:tabular-nums}
+  .lk-inline{
+    margin:14px auto 0;display:inline-flex;align-items:center;gap:7px;
+    background:rgba(255,255,255,.12);border-radius:13px;padding:6px 12px;
+    font-size:11px;font-weight:600;
+  }
+  .lk-inline .pip{width:7px;height:7px;border-radius:50%}
+  .lk-row{display:flex;gap:12px;justify-content:center;margin-top:14px}
+  .acc-circ{
+    width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.12);
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+  }
+  .acc-circ svg{width:58px;height:58px}
+  .acc-rect{
+    width:168px;border-radius:14px;background:rgba(255,255,255,.12);
+    padding:8px 12px;text-align:left;display:flex;flex-direction:column;gap:2px;justify-content:center;
+  }
+  .ar-word{font-size:12.5px;font-weight:750}
+  .ar-sub{font-size:10px;opacity:.75;font-weight:600}
+  .ar-dots{display:flex;gap:4px;margin-top:3px}
+  .ar-dots i{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.25)}
+  .ar-dots i.on{transform:scale(1.4)}
+
+  @media (max-width:760px){ body{gap:28px} .rig{width:370px} .wcolm{width:370px} }
   @media (prefers-reduced-motion: reduce){ *{transition:none !important} }
 </style>
 </head>
@@ -171,6 +229,50 @@
           <input type="range" id="scrub" min="-12" max="48" step="0.25" value="0" aria-label="Scrub the smoke forecast">
         </div>
         <div class="days" id="days"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wcolm">
+  <div class="home-card">
+    <div class="widget w-small" id="wSmall">
+      <div class="wsun"></div><div class="wgrain"></div>
+      <div class="w-loc" id="wLoc1">—</div>
+      <div class="overlay">
+        <div class="w-dots"></div>
+        <div class="w-word">—</div>
+        <div class="w-sub">—</div>
+      </div>
+    </div>
+    <div class="widget w-med" id="wMed">
+      <div class="wsun"></div><div class="wgrain"></div>
+      <div class="w-loc" id="wLoc2">—</div>
+      <div class="overlay">
+        <div class="w-dots"></div>
+        <div class="w-word">—</div>
+        <div class="w-sub">—</div>
+        <div class="w-days" id="wDays"></div>
+      </div>
+    </div>
+  </div>
+  <div class="lock-mock">
+    <div class="lk-date" id="lkDate">—</div>
+    <div class="lk-clock" id="lkClock">—</div>
+    <div class="lk-inline"><span class="pip" id="inlinePip"></span><span id="inlineTxt">—</span></div>
+    <div class="lk-row">
+      <div class="acc-circ">
+        <svg viewBox="0 0 60 60" aria-hidden="true">
+          <circle cx="30" cy="30" r="24" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="4.5"/>
+          <circle id="circArc" cx="30" cy="30" r="24" fill="none" stroke="#E07226" stroke-width="4.5"
+                  stroke-linecap="round" stroke-dasharray="0 151" transform="rotate(-90 30 30)"/>
+          <text id="circNum" x="30" y="35" text-anchor="middle" font-size="15" font-weight="700" fill="#F4E9D6">—</text>
+        </svg>
+      </div>
+      <div class="acc-rect">
+        <div class="ar-word" id="arWord">—</div>
+        <div class="ar-sub" id="arSub">—</div>
+        <div class="ar-dots" id="arDots"></div>
       </div>
     </div>
   </div>
@@ -368,6 +470,16 @@
       fetchedAt: new Date()
     };
     $('locName').textContent = name;
+    const shortName = name.split(',')[0].toUpperCase();
+    $('wLoc1').textContent = shortName; $('wLoc2').textContent = shortName;
+    $('lkDate').textContent = new Date((nowT + offset)*1000).toLocaleDateString('en-US',
+      {weekday:'long', month:'long', day:'numeric', timeZone:'UTC'});
+    const wd = $('wDays'); wd.innerHTML = '';
+    days.forEach(d => {
+      const li = levelFor(d.max);
+      wd.insertAdjacentHTML('beforeend',
+        `<span>${localDate(d.t + 14*3600, offset).wd[0]}<span class="pip" style="background:${PIPS[li]}"></span></span>`);
+    });
     buildDays();
     buildCurve();
     setStatus(`<b>${name}</b><br>CAMS model · fetched ${S.live.fetchedAt.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}<br>peak next 48h: ${Math.round(peakPM)} µg/m³`);
@@ -418,6 +530,54 @@
 
   /* ---------- render ---------- */
   let currentH = 0;
+  function widgetSub(pm, h){
+    if(S.mode === 'puppet')
+      return ["Clear all week","Thins by evening","Clears Thu 6 AM","Clears Thu 6 AM","Clears Fri morning"][levelFor(pm)];
+    const L = S.live; if(!L) return "—";
+    if(pm >= 35)
+      return L.clearH ? `Clears ${localDate(L.nowT + L.clearH*3600, L.offset).label}` : "Hazy on";
+    if(L.peakPM >= 35 && h < L.peakH)
+      return `Peaks ${localDate(L.nowT + L.peakH*3600, L.offset).label}`;
+    return "Clear all week";
+  }
+  function setDots(host, li, dark){
+    host.innerHTML = '';
+    for(let i=0;i<5;i++){
+      const d = document.createElement('i');
+      if(i === li){ d.className = 'on'; d.style.background = PIPS[li]; }
+      host.appendChild(d);
+    }
+  }
+  function renderWidgets(pm, t, h){
+    const r = ratingFor(pm), li = levelFor(pm);
+    const sub = widgetSub(pm, h);
+    ['wSmall','wMed'].forEach(id => {
+      const w = $(id);
+      const s = skyB(pm, t);
+      w.style.background = `linear-gradient(180deg, ${rgb(s.zen)}, ${rgb(s.mid)} 52%, ${rgb(s.hor)})`;
+      const sun = w.querySelector('.wsun');
+      const dim = clamp01(pm/150);
+      sun.style.left = "76%"; sun.style.top = "24%";
+      sun.style.width = sun.style.height = "64px";
+      sun.style.background = `radial-gradient(circle, ${rgb(mix([255,246,224],[206,110,48],dim))} 0%, transparent ${44-26*dim}%)`;
+      w.classList.toggle('dark-air', lum(s.mid) < 0.42);
+      w.classList.toggle('calm', li === 0);
+      w.querySelector('.w-word').textContent = r.word;
+      w.querySelector('.w-sub').textContent = sub;
+      setDots(w.querySelector('.w-dots'), li);
+    });
+    // lock screen accessories
+    const hr = Math.floor(t), mn = Math.round((t - hr) * 60);
+    $('lkClock').textContent = `${hr % 12 || 12}:${String(mn).padStart(2,'0')}`;
+    $('inlinePip').style.background = PIPS[li];
+    $('inlineTxt').textContent = `${r.word} · ${sub.replace('Clears ','clears ').replace('Peaks ','peaks ')}`;
+    $('circArc').setAttribute('stroke', PIPS[li]);
+    $('circArc').setAttribute('stroke-dasharray', `${clamp01(pm/250)*151} 151`);
+    $('circNum').textContent = Math.round(pm);
+    $('arWord').textContent = r.word;
+    $('arSub').textContent = sub;
+    setDots($('arDots'), li);
+  }
   function update(h){
     currentH = h; S.h = h;
     const pm = pmAt(h);
@@ -430,6 +590,7 @@
     $('clock').textContent = S.mode==='puppet' ? "PUPPET" : (Math.abs(h)<0.5 ? "NOW" : (h<0?"":"+")+Math.round(h)+"H");
     $('clearline').textContent = verdictLine(pm, h);
     $('scrub').value = h;
+    renderWidgets(pm, hourAt(h), h);
   }
   $('scrub').addEventListener('input', e => update(parseFloat(e.target.value)));
 
