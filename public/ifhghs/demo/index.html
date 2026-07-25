@@ -272,10 +272,15 @@
       <div class="acc-circ">
         <svg viewBox="0 0 60 60" aria-hidden="true">
           <clipPath id="fillClip"><circle cx="30" cy="30" r="25"/></clipPath>
+          <linearGradient id="smokeFade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#E9E2D4" stop-opacity="0.58"/>
+            <stop offset="0.65" stop-color="#E9E2D4" stop-opacity="0.5"/>
+            <stop offset="1" stop-color="#E9E2D4" stop-opacity="0"/>
+          </linearGradient>
           <g clip-path="url(#fillClip)">
-            <circle id="fillSun" cx="30" cy="17" r="6" fill="#F4F0E6"/>
-            <path id="fillWave2" fill="#E9E2D4" opacity="0.30" d=""/>
-            <path id="fillWave1" fill="#E9E2D4" opacity="0.52" d=""/>
+            <circle id="fillSun" cx="30" cy="40" r="6" fill="#F4F0E6"/>
+            <rect id="fillBank2" x="0" y="0" width="60" height="0" fill="url(#smokeFade)" opacity="0.5"/>
+            <rect id="fillBank1" x="0" y="0" width="60" height="0" fill="url(#smokeFade)"/>
           </g>
         </svg>
       </div>
@@ -584,16 +589,14 @@
     $('circArc').setAttribute('stroke', PIPS[li]);
     $('circArc').setAttribute('stroke-dasharray', `${clamp01(pm/250)*151} 151`);
     $('circNum').textContent = Math.round(pm);
-    // smoke-fill: the circle fills with smoke by severity; the sun drowns at the top
+    // smoke-fill: a smoke ceiling descends from the top by severity; the sun drowns last
     const BOUNDS = [0,12,35,55,150,250];
     const inner = clamp01((pm - BOUNDS[li]) / (BOUNDS[li+1] - BOUNDS[li]));
     const frac = (li + inner) / 5;
-    const y1 = 58 - 50*frac, y2 = y1 + 4;
-    $('fillWave1').setAttribute('d',
-      `M-5 ${y1} q 6 -3.5 12 0 t 12 0 t 12 0 t 12 0 t 12 0 L65 65 L-5 65 Z`);
-    $('fillWave2').setAttribute('d',
-      `M-5 ${y2} q 6 3.5 12 0 t 12 0 t 12 0 t 12 0 t 12 0 L65 65 L-5 65 Z`);
-    $('fillSun').style.opacity = 1 - 0.68*clamp01((24 - y1)/14);
+    const depth = 3 + 52*frac;
+    $('fillBank1').setAttribute('height', depth);
+    $('fillBank2').setAttribute('height', Math.min(60, depth + 7));
+    $('fillSun').style.opacity = 1 - 0.7*clamp01((depth - 30)/16);
     $('arWord').textContent = r.word;
     $('arSub').textContent = sub;
     setDots($('arDots'), li);
