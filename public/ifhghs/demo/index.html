@@ -62,6 +62,11 @@
   }
   .why::after{content:"›";font-size:16px;line-height:1;opacity:.8;transform:translateY(-1px)}
   .why:focus-visible{outline:2px solid #BC5A1E;outline-offset:3px}
+  .watch{
+    display:flex;align-items:center;gap:7px;margin-top:6px;
+    font-size:11px;line-height:1.4;opacity:.58;
+  }
+  .watch .wpip{width:6px;height:6px;border-radius:50%;background:currentColor;flex:0 0 auto}
 
   .timeline{margin-top:8px}
   .t-label{display:flex;justify-content:space-between;align-items:baseline;
@@ -339,6 +344,7 @@
       <div class="sense" id="sense">Finding the air…</div>
       <div class="num mono" id="num">—</div>
       <button type="button" class="why" id="why">What this means</button>
+      <div class="watch"><span class="wpip"></span><span>Watching this air. You'll hear when it changes, and when it clears.</span></div>
       <div class="timeline">
         <div class="t-label"><span class="when" id="when">Now</span><span class="tag" id="tag">-12h · +48h</span></div>
         <div class="curve-wrap" id="curveWrap">
@@ -651,12 +657,31 @@
   function verdictLine(pm, h){
     if(S.mode === 'puppet') return PUPPET_CLEARS[levelFor(pm)];
     const L = S.live; if(!L) return "—";
-    if(pm >= 35)
-      return L.clearH ? `Clears ${localDate(L.nowT + L.clearH*3600, L.offset).label}` : "Hazy beyond this window";
-    if(L.peakPM >= 35 && h < L.peakH)
-      return `Peaks ${localDate(L.nowT + L.peakH*3600, L.offset).label} at ${ratingFor(L.peakPM).word}`;
+    if(pm >= 35){
+      if(!L.clearH){
+        const dayClear = L.days.find(d => (d.t - L.nowT)/3600 > 40 && d.max < 35);
+        return dayClear
+          ? `Smoky for days · clears around ${localDate(dayClear.t + 14*3600, L.offset).wdLong}`
+          : "Smoky all week";
+      }
+      const dh = Math.max(1, Math.round(L.clearH - h));
+      return `Clears in ${dh}h · ${localDate(L.nowT + L.clearH*3600, L.offset).label}`;
+    }
+    if(L.peakPM >= 35 && h < L.peakH){
+      const dp = Math.max(1, Math.round(L.peakH - h));
+      return `Smoke in ${dp}h · peaks ${localDate(L.nowT + L.peakH*3600, L.offset).label} at ${ratingFor(L.peakPM).word}`;
+    }
     const allClear = L.days.every(d => d.max < 35);
     return allClear ? "Stays clear for the next 5 days" : "Stays clear from here";
+  }
+
+  function trendAt(h){
+    const ahead = pmAt(Math.min(48, h + 6)), now = pmAt(h);
+    if(Math.max(ahead, now) < 12) return "steady →";
+    const d = ahead - now;
+    if(d >= 4) return "rising ↗";
+    if(d <= -4) return "falling ↘";
+    return "steady →";
   }
 
   /* ---------- render ---------- */
@@ -724,7 +749,7 @@
     const r = ratingFor(pm);
     $('word').textContent = r.word;
     $('sense').textContent = r.sense;
-    $('num').textContent = `${Math.round(pm)} µg/m³ PM2.5 · model estimate`;
+    $('num').textContent = `${Math.round(pm)} µg/m³ PM2.5 · ${S.mode==='puppet' ? 'forced' : trendAt(h)} · model estimate`;
     $('when').textContent = whenAt(h);
     $('clock').textContent = S.mode==='puppet' ? "PUPPET" : (Math.abs(h)<0.5 ? "NOW" : (h<0?"":"+")+Math.round(h)+"H");
     $('clearline').textContent = verdictLine(pm, h);
