@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>SMOKESHOW — live demo</title>
+<style>
+  *{box-sizing:border-box}
+  body{
+    margin:0;min-height:100vh;background:#191C1E;color:#E8E4DA;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+    display:flex;align-items:center;justify-content:center;gap:52px;flex-wrap:wrap;
+    padding:40px 24px;
+  }
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+
+  /* ---------- phone ---------- */
+  .phone{
+    width:370px;border-radius:56px;padding:10px;background:#0D0B09;
+    box-shadow:0 40px 80px -30px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.06);
+  }
+  .screen{
+    position:relative;border-radius:47px;overflow:hidden;height:724px;
+    display:flex;flex-direction:column;background:#20272B;transition:background .25s linear;
+  }
+  .island{
+    position:absolute;top:13px;left:50%;transform:translateX(-50%);
+    width:104px;height:30px;border-radius:17px;background:#0B0906;z-index:6;
+  }
+  .sky-el{position:absolute;inset:0;z-index:1;pointer-events:none}
+  .sun-b{position:absolute;width:150px;height:150px;border-radius:50%;transform:translate(-50%,-50%);transition:opacity .3s linear}
+  .stars{position:absolute;inset:0;opacity:0;transition:opacity .4s linear}
+  .stars i{position:absolute;width:2px;height:2px;border-radius:50%;background:#E8E4D8;opacity:.8}
+  .grain{
+    position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.10;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .app{
+    position:relative;z-index:3;flex:1;display:flex;flex-direction:column;
+    padding:64px 24px 22px;color:#26221B;transition:color .4s linear;
+  }
+  .screen.dark-air .app{color:#F4E9D6}
+  .loc-row{display:flex;justify-content:space-between;align-items:baseline}
+  .loc{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:.72;
+    max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .spacer{flex:1}
+  .word{font-size:44px;line-height:1.02;font-weight:800;letter-spacing:-.02em;margin-top:16px;text-wrap:balance;cursor:pointer}
+  .clearline{margin-top:9px;font-weight:650;font-size:16px;color:#BC5A1E;transition:color .4s linear;cursor:pointer}
+  .screen.dark-air .clearline{color:#F0A468}
+  .sense{margin-top:7px;font-size:13px;line-height:1.45;opacity:.78;max-width:38ch;cursor:pointer}
+  .num{margin-top:11px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px;opacity:.6;letter-spacing:.05em;cursor:pointer}
+
+  .timeline{margin-top:8px}
+  .t-label{display:flex;justify-content:space-between;align-items:baseline;
+    font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px;letter-spacing:.08em}
+  .t-label .when{font-weight:700;font-size:13px}
+  .t-label .tag{opacity:.55}
+  .curve-wrap{position:relative;height:58px;margin-top:7px}
+  .curve-wrap svg{position:absolute;inset:0;width:100%;height:100%}
+  .curve-wrap input[type=range]{
+    position:absolute;inset:0;width:100%;height:100%;margin:0;
+    -webkit-appearance:none;appearance:none;background:transparent;cursor:ew-resize;
+  }
+  .curve-wrap input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:3px;height:58px;border-radius:2px;background:currentColor;
+  }
+  .curve-wrap input[type=range]:focus-visible{outline:2px solid #BC5A1E;outline-offset:3px}
+  .screen.puppet .curve-wrap{opacity:.35;pointer-events:none}
+  .days{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:13px}
+  .day{
+    text-align:center;font-family:ui-monospace,"SF Mono",Menlo,monospace;
+    font-size:10px;letter-spacing:.06em;padding:8px 0 7px;border-radius:11px;
+    background:rgba(255,255,255,.30);border:0;cursor:pointer;color:inherit;
+    appearance:none;-webkit-appearance:none;
+  }
+  .screen.dark-air .day{background:rgba(0,0,0,.24)}
+  .day:focus-visible{outline:2px solid #BC5A1E;outline-offset:2px}
+  .day b{display:block;font-size:9.5px;letter-spacing:.14em;opacity:.65;font-weight:600;margin-bottom:3px}
+  .day i{display:block;font-style:normal;font-weight:700;font-size:10px;margin-top:3px}
+  .day .pip{display:inline-block;width:7px;height:7px;border-radius:50%}
+
+  /* sheet */
+  .sheet-backdrop{position:absolute;inset:0;background:rgba(22,15,8,.38);opacity:0;pointer-events:none;transition:opacity .3s;z-index:7}
+  .screen.sheet-open .sheet-backdrop{opacity:1;pointer-events:auto}
+  .sheet{
+    position:absolute;left:0;right:0;bottom:0;z-index:8;
+    background:rgba(251,247,238,.97);color:#26221B;
+    border-radius:24px 24px 45px 45px;padding:10px 20px 24px;
+    transform:translateY(106%);transition:transform .35s cubic-bezier(.32,.72,.33,1);
+    max-height:84%;overflow:auto;
+  }
+  .screen.sheet-open .sheet{transform:none}
+  .grab{width:36px;height:4px;border-radius:2px;background:#C9BFAC;margin:2px auto 12px;cursor:pointer}
+  .sh-eyebrow{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:10.5px;letter-spacing:.05em;color:#8A7C64}
+  .ladder{position:relative;margin:10px 0 4px;display:flex;flex-direction:column}
+  .ladder::before{content:"";position:absolute;left:4px;top:12px;bottom:12px;width:1.5px;background:#DDD3C0}
+  .lad{display:flex;align-items:center;gap:13px;padding:4px 0;font-size:12.5px;font-weight:500;opacity:.42}
+  .lad.cur{opacity:1;font-size:20px;font-weight:800;letter-spacing:-.01em;padding:7px 0}
+  .lad .pip{width:9px;height:9px;border-radius:50%;flex:0 0 auto;box-shadow:0 0 0 3px rgba(251,247,238,.97)}
+  .lad.cur .pip{width:11px;height:11px;margin-left:-1px}
+  .lad .th{margin-left:auto;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:10px;color:#8A7C64;font-weight:500}
+  .sh-p{margin:12px 0 0;font-size:13px;line-height:1.55}
+  .sh-p .lead{font-weight:700}
+  .sh-cav{margin-top:12px;font-size:10.5px;color:#8A7C64;line-height:1.5}
+
+  /* ---------- demo rig ---------- */
+  .rig{width:280px;display:flex;flex-direction:column;gap:18px}
+  .rig h1{font-size:13px;font-weight:800;letter-spacing:.3em;margin:0}
+  .rig h1 span{color:#C96F2E}
+  .rig .rig-cap{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:10px;letter-spacing:.14em;color:#8B948F;text-transform:uppercase}
+  .seg{display:flex;border:1px solid #333B3F;border-radius:11px;overflow:hidden}
+  .seg button{
+    flex:1;padding:8px 0;border:0;background:transparent;color:#8B948F;
+    font:inherit;font-size:12px;font-weight:650;cursor:pointer;
+  }
+  .seg button.on{background:#2A3236;color:#E8E4DA}
+  .pane{display:flex;flex-direction:column;gap:12px}
+  .pane.hidden{display:none}
+  .rig input[type=text]{
+    width:100%;padding:10px 12px;border-radius:11px;border:1px solid #333B3F;
+    background:#20262A;color:#E8E4DA;font:inherit;font-size:13.5px;outline:none;
+  }
+  .rig input[type=text]:focus{border-color:#C96F2E}
+  .geo-list{display:flex;flex-direction:column;gap:6px}
+  .geo-list button{
+    text-align:left;padding:9px 12px;border-radius:10px;border:1px solid #2C3438;
+    background:#20262A;color:#D8D4C8;font:inherit;font-size:12.5px;cursor:pointer;
+  }
+  .geo-list button:hover{border-color:#C96F2E}
+  .status{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:10.5px;line-height:1.7;color:#8B948F;letter-spacing:.04em}
+  .status b{color:#C9C4B6;font-weight:600}
+  .levels{display:flex;flex-direction:column;gap:6px}
+  .levels button{
+    display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;
+    border:1px solid #2C3438;background:#20262A;color:#D8D4C8;
+    font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;text-align:left;
+  }
+  .levels button:hover{border-color:#C96F2E}
+  .levels .pip{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .slider-row{display:flex;flex-direction:column;gap:6px}
+  .slider-row label{display:flex;justify-content:space-between;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:10.5px;letter-spacing:.08em;color:#8B948F}
+  .slider-row label b{color:#C9C4B6}
+  .rig input[type=range]{width:100%;accent-color:#C96F2E}
+  .foot{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:9.5px;color:#5E6864;letter-spacing:.06em;line-height:1.7}
+
+  @media (max-width:760px){ body{gap:28px} .rig{width:370px} }
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important} }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="screen" id="screen">
+    <div class="island"></div>
+    <div class="sky-el"><div class="stars" id="stars"></div><div class="sun-b" id="sun"></div></div>
+    <div class="grain"></div>
+    <div class="app">
+      <div class="loc-row">
+        <div class="loc" id="locName">Loading…</div>
+        <div class="loc" id="clock">—</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="word" id="word">—</div>
+      <div class="clearline" id="clearline">—</div>
+      <div class="sense" id="sense">Finding the air…</div>
+      <div class="num mono" id="num">—</div>
+      <div class="timeline">
+        <div class="t-label"><span class="when" id="when">Now</span><span class="tag" id="tag">-12h · +48h</span></div>
+        <div class="curve-wrap" id="curveWrap">
+          <input type="range" id="scrub" min="-12" max="48" step="0.25" value="0" aria-label="Scrub the smoke forecast">
+        </div>
+        <div class="days" id="days"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<aside class="rig">
+  <div>
+    <h1>SMOKESHOW<span>.</span></h1>
+    <div class="rig-cap" style="margin-top:8px">iOS demo rig · concept B</div>
+  </div>
+  <div class="seg" role="tablist">
+    <button id="tabLive" class="on">Live</button>
+    <button id="tabPuppet">Puppet</button>
+  </div>
+
+  <div class="pane" id="paneLive">
+    <input type="text" id="q" placeholder="City, town, or ZIP…" autocomplete="off">
+    <div class="geo-list" id="geoList"></div>
+    <div class="status" id="status">Fetching…</div>
+  </div>
+
+  <div class="pane hidden" id="panePuppet">
+    <div class="rig-cap">Force a state</div>
+    <div class="levels" id="levelBtns"></div>
+    <div class="slider-row">
+      <label>PM2.5 <b id="pmVal">45 µg/m³</b></label>
+      <input type="range" id="pmSlider" min="2" max="250" step="1" value="45">
+    </div>
+    <div class="slider-row">
+      <label>Time of day <b id="hrVal">2 PM</b></label>
+      <input type="range" id="hrSlider" min="0" max="23.5" step="0.5" value="14">
+    </div>
+  </div>
+
+  <div class="foot">
+    DATA: OPEN-METEO CAMS · MODEL ESTIMATES, NOT MEASUREMENTS · SCRUB THE PHONE, TAP A DAY, TAP THE VERDICT
+  </div>
+</aside>
+
+<script>
+(function(){
+  const clamp01 = v => Math.max(0, Math.min(1, v));
+  const lerp = (a,b,t) => a + (b-a)*t;
+  const mix = (a,b,t) => [0,1,2].map(k => Math.round(lerp(a[k], b[k], t)));
+  const rgb = c => `rgb(${c[0]},${c[1]},${c[2]})`;
+  const $ = id => document.getElementById(id);
+
+  const RATINGS = [
+    {max:12,  word:"All clear",              sense:"No smell. Sky looks normal. You can see 10+ miles."},
+    {max:35,  word:"Something's in the air", sense:"Faint campfire smell outdoors. Distant treelines look soft."},
+    {max:55,  word:"Smells like fire",       sense:"You smell it the moment you step outside. Roughly 3 to 5 miles of visibility."},
+    {max:150, word:"Tastes like fire",       sense:"Smell reaches indoors near windows. Eyes sting. A full day of this is on the order of a few cigarettes."},
+    {max:1e9, word:"Smokeshow",              sense:"Visibility under 1.5 miles. Everyone inside, windows closed, run filtration if you have it."}
+  ];
+  const ratingFor = pm => RATINGS.find(r => pm < r.max);
+  const levelFor = pm => RATINGS.indexOf(ratingFor(pm));
+  const PIPS = ["#3F9B52","#D9A821","#E07226","#CE2F1F","#701B14"];
+  const SHORTS = ["Clear","Hazy","Smoky","Smoke","Show"];
+  const RANGES = ["< 12 µg/m³","12 – 35","35 – 55","55 – 150","150+"];
+  const NOT_LINES = [
+    "No smoke story today. This is normal, clean air.",
+    "A full day outside in this is nowhere near a cigarette. A faint campfire smell is the whole event for most people.",
+    "Still well short of one cigarette over a full day outside. You'll smell it, and most plans can carry on.",
+    "Now it adds up: a full day breathing this is on the order of a few cigarettes. Worth moving the run indoors.",
+    "The heaviest level we track. Everyone inside, windows closed, filtration on if you have it."
+  ];
+  const EPA_LINES = [
+    "it's a great day to be active outside.",
+    "unusually sensitive people should consider easing off long, hard exertion. Everyone else, carry on as usual.",
+    "sensitive groups should cut back on long or heavy exertion. Everyone else, your usual outdoor plans are okay.",
+    "sensitive groups should avoid prolonged exertion; everyone else, cut back on it.",
+    "everyone should avoid outdoor exertion."
+  ];
+  const PUPPET_CLEARS = [
+    "Stays clear all week",
+    "Thins out by evening",
+    "Clears Thursday 6 AM",
+    "Peaks tonight · clears Thursday 6 AM",
+    "Peaks tonight · clears Friday morning"
+  ];
+
+  /* ---------- state ---------- */
+  const S = {
+    mode: 'live',
+    puppet: { pm: 45, hour: 14 },
+    live: null,   // {name, times[], pm[], offset, nowT, nowIdx, days[], fetchedAt, bestDayName, clearH, peakH, peakPM}
+    h: 0
+  };
+
+  /* ---------- sky (concept B) ---------- */
+  const DAY_ZEN=[139,169,196], DAY_HOR=[226,222,206];
+  const GOLD_ZEN=[126,138,168], GOLD_HOR=[228,172,116];
+  const NIGHT_ZEN=[14,18,28],   NIGHT_HOR=[42,48,62];
+  const SMK_MID=[124,88,52],    SMK_HOR=[168,116,64], SMK_DK=[52,37,24], SMK_DKH=[80,56,34];
+
+  function skyB(pm, t){
+    const alt = Math.sin(Math.PI * (t-6)/15);
+    const day = clamp01(alt*1.6);
+    const gold = clamp01(1 - Math.abs(alt-0.18)/0.26) * (alt>0?1:0);
+    let zen = mix(NIGHT_ZEN, DAY_ZEN, day);
+    let hor = mix(NIGHT_HOR, DAY_HOR, day);
+    zen = mix(zen, GOLD_ZEN, gold*0.6);
+    hor = mix(hor, GOLD_HOR, gold*0.75);
+    const s1 = clamp01(pm/150), s2 = clamp01((pm-150)/130);
+    const night = 1 - day;
+    zen = mix(zen, mix(SMK_MID, SMK_DK, night), s1*0.8);
+    hor = mix(hor, mix(SMK_HOR, SMK_DKH, night), s1*0.9);
+    zen = mix(zen, SMK_DK, s2*0.75);
+    hor = mix(hor, SMK_DKH, s2*0.7);
+    return {zen, hor, mid: mix(zen,hor,0.55), alt, day, s1, s2};
+  }
+  const lum = c => (0.299*c[0] + 0.587*c[1] + 0.114*c[2]) / 255;
+
+  (function stars(){
+    const host = $('stars');
+    [[12,10],[30,6],[52,13],[70,8],[86,16],[22,22],[62,24],[80,30],[40,17],[8,30]].forEach(p=>{
+      const i=document.createElement('i'); i.style.left=p[0]+"%"; i.style.top=p[1]+"%"; host.appendChild(i);
+    });
+  })();
+
+  const screen = $('screen');
+  function renderSky(pm, t){
+    const s = skyB(pm, t);
+    screen.style.background = `linear-gradient(180deg, ${rgb(s.zen)} 0%, ${rgb(s.mid)} 52%, ${rgb(s.hor)} 100%)`;
+    const sun = $('sun');
+    if(s.alt > 0.02){
+      const frac = clamp01((t-6)/15);
+      sun.style.left = (20 + frac*60) + "%";
+      sun.style.top  = (12 + (1-clamp01(s.alt*1.4))*40) + "%";
+      const dim = s.s1;
+      const gold = s.alt < 0.3 ? 0.3 : 0;
+      const core = mix([255,246,224],[206,110,48], clamp01(dim*1.2 + gold));
+      sun.style.opacity = 1 - 0.25*s.s2;
+      sun.style.background =
+        `radial-gradient(circle, ${rgb(core)} 0%, ${rgb(core)} ${14+8*(1-dim)}%, transparent ${46-24*dim}%)`;
+    } else sun.style.opacity = 0;
+    $('stars').style.opacity = (1 - s.day) * (1 - s.s1) * 0.9;
+    screen.classList.toggle('dark-air', lum(s.mid) < 0.42);
+  }
+
+  /* ---------- live data ---------- */
+  async function geocode(q){
+    const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=5&language=en&format=json`);
+    if(!r.ok) throw new Error('geocoding failed');
+    return (await r.json()).results || [];
+  }
+  async function loadPlace(name, lat, lon){
+    setStatus(`Fetching ${name}…`);
+    const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}`+
+      `&hourly=pm2_5&past_days=1&forecast_days=5&timezone=auto&timeformat=unixtime`;
+    const r = await fetch(url);
+    if(!r.ok) throw new Error('air quality fetch failed');
+    const j = await r.json();
+    const times = j.hourly.time, pm = j.hourly.pm2_5.map(v => v==null ? 0 : v);
+    const offset = j.utc_offset_seconds;
+    const nowT = Date.now()/1000;
+    let nowIdx = times.findIndex(t => t > nowT) - 1;
+    if(nowIdx < 0) nowIdx = 0;
+
+    // per-local-day maxima for the strip (5 days from today)
+    const dayKey = t => Math.floor((t + offset) / 86400);
+    const todayKey = dayKey(nowT);
+    const days = [];
+    for(let d=0; d<5; d++){
+      let max = 0, first = null;
+      for(let i=0;i<times.length;i++){
+        if(dayKey(times[i]) === todayKey + d){
+          if(first === null) first = times[i];
+          if(pm[i] > max) max = pm[i];
+        }
+      }
+      if(first !== null) days.push({t: first, max, dayOffset: d});
+    }
+
+    // peak + clear time (6-hour hold) within now..+48h
+    let peakPM = -1, peakH = 0;
+    const idxAt = h => Math.max(0, Math.min(times.length-1, Math.round(nowIdx + h)));
+    for(let h=0; h<=48; h++){
+      const v = pm[idxAt(h)];
+      if(v > peakPM){ peakPM = v; peakH = h; }
+    }
+    let clearH = null;
+    for(let h=Math.max(1,peakH); h<=48; h++){
+      let held = true;
+      for(let k=0; k<6; k++){ if(pm[idxAt(h+k)] >= 35){ held = false; break; } }
+      if(held){ clearH = h; break; }
+    }
+
+    let bestIdx = days.length > 1 ? 1 : 0;
+    for(let i=1;i<days.length;i++) if(days[i].max < days[bestIdx].max) bestIdx = i;
+
+    S.live = {
+      name, times, pm, offset, nowT, nowIdx, days, peakPM, peakH, clearH,
+      bestDayName: days.length ? localDate(days[bestIdx].t + 14*3600, offset).wdLong : "later this week",
+      fetchedAt: new Date()
+    };
+    $('locName').textContent = name;
+    buildDays();
+    buildCurve();
+    setStatus(`<b>${name}</b><br>CAMS model · fetched ${S.live.fetchedAt.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}<br>peak next 48h: ${Math.round(peakPM)} µg/m³`);
+    update(0);
+  }
+
+  function localDate(t, offset){
+    const d = new Date((t + offset) * 1000);
+    let hr = d.getUTCHours(), ap = hr>=12?'PM':'AM'; const hr12 = hr%12 || 12;
+    return {
+      wd: d.toLocaleDateString('en-US',{weekday:'short', timeZone:'UTC'}),
+      wdLong: d.toLocaleDateString('en-US',{weekday:'long', timeZone:'UTC'}),
+      label: `${d.toLocaleDateString('en-US',{weekday:'short', timeZone:'UTC'})} ${hr12} ${ap}`,
+      hourOfDay: hr + d.getUTCMinutes()/60
+    };
+  }
+
+  /* ---------- phone data plumbing ---------- */
+  function pmAt(h){
+    if(S.mode === 'puppet') return S.puppet.pm;
+    const L = S.live; if(!L) return 0;
+    const f = L.nowIdx + h;
+    const i = Math.max(0, Math.min(L.times.length-2, Math.floor(f)));
+    return lerp(L.pm[i], L.pm[i+1], clamp01(f - i));
+  }
+  function hourAt(h){
+    if(S.mode === 'puppet') return S.puppet.hour;
+    const L = S.live; if(!L) return 12;
+    return localDate(L.nowT + h*3600, L.offset).hourOfDay;
+  }
+  function whenAt(h){
+    if(S.mode === 'puppet') return "Puppet";
+    if(Math.abs(h) < 0.5) return "Now";
+    const L = S.live; if(!L) return "—";
+    return localDate(L.nowT + h*3600, L.offset).label;
+  }
+
+  function verdictLine(pm, h){
+    if(S.mode === 'puppet') return PUPPET_CLEARS[levelFor(pm)];
+    const L = S.live; if(!L) return "—";
+    if(pm >= 35)
+      return L.clearH ? `Clears ${localDate(L.nowT + L.clearH*3600, L.offset).label}` : "Hazy beyond this window";
+    if(L.peakPM >= 35 && h < L.peakH)
+      return `Peaks ${localDate(L.nowT + L.peakH*3600, L.offset).label} at ${ratingFor(L.peakPM).word}`;
+    const allClear = L.days.every(d => d.max < 35);
+    return allClear ? "Stays clear for the next 5 days" : "Stays clear from here";
+  }
+
+  /* ---------- render ---------- */
+  let currentH = 0;
+  function update(h){
+    currentH = h; S.h = h;
+    const pm = pmAt(h);
+    renderSky(pm, hourAt(h));
+    const r = ratingFor(pm);
+    $('word').textContent = r.word;
+    $('sense').textContent = r.sense;
+    $('num').textContent = `${Math.round(pm)} µg/m³ PM2.5 · model estimate`;
+    $('when').textContent = whenAt(h);
+    $('clock').textContent = S.mode==='puppet' ? "PUPPET" : (Math.abs(h)<0.5 ? "NOW" : (h<0?"":"+")+Math.round(h)+"H");
+    $('clearline').textContent = verdictLine(pm, h);
+    $('scrub').value = h;
+  }
+  $('scrub').addEventListener('input', e => update(parseFloat(e.target.value)));
+
+  /* curve */
+  function buildCurve(){
+    const wrap = $('curveWrap');
+    const old = wrap.querySelector('svg'); if(old) old.remove();
+    const L = S.live; if(!L) return;
+    const ns = "http://www.w3.org/2000/svg", W=300, H=58;
+    const vals = []; for(let h=-12; h<=48; h++) vals.push(pmAt(h));
+    const maxPM = Math.max(60, Math.max(...vals)*1.15);
+    const pts = vals.map((v,i)=>`${(i/60*W).toFixed(1)},${(H-4-(v/maxPM)*(H-10)).toFixed(1)}`);
+    const svg = document.createElementNS(ns,'svg');
+    svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.setAttribute('preserveAspectRatio','none');
+    const area = document.createElementNS(ns,'path');
+    area.setAttribute('d',`M0,${H} L${pts.join(' L')} L${W},${H} Z`);
+    area.setAttribute('fill','currentColor'); area.setAttribute('opacity','0.14');
+    const line = document.createElementNS(ns,'path');
+    line.setAttribute('d',`M${pts.join(' L')}`);
+    line.setAttribute('fill','none'); line.setAttribute('stroke','currentColor');
+    line.setAttribute('stroke-width','2'); line.setAttribute('opacity','0.75');
+    const thr = document.createElementNS(ns,'line');
+    const ty = H-4-(35/maxPM)*(H-10);
+    thr.setAttribute('x1',0); thr.setAttribute('x2',W); thr.setAttribute('y1',ty); thr.setAttribute('y2',ty);
+    thr.setAttribute('stroke','currentColor'); thr.setAttribute('stroke-width','1');
+    thr.setAttribute('stroke-dasharray','2 4'); thr.setAttribute('opacity','0.4');
+    const nowLine = document.createElementNS(ns,'line');
+    const nx = (12/60*W);
+    nowLine.setAttribute('x1',nx); nowLine.setAttribute('x2',nx); nowLine.setAttribute('y1',4); nowLine.setAttribute('y2',H-4);
+    nowLine.setAttribute('stroke','currentColor'); nowLine.setAttribute('stroke-width','1'); nowLine.setAttribute('opacity','0.35');
+    svg.append(area,line,thr,nowLine);
+    wrap.insertBefore(svg, wrap.firstChild);
+  }
+
+  /* day strip */
+  function buildDays(){
+    const host = $('days'); host.innerHTML = '';
+    const L = S.live; if(!L) return;
+    L.days.forEach(d => {
+      const el = document.createElement('button');
+      el.type='button'; el.className='day';
+      const li = levelFor(d.max);
+      el.innerHTML = `<b>${localDate(d.t + 14*3600, L.offset).wd.toUpperCase()}</b>
+        <span class="pip" style="background:${PIPS[li]}"></span><i>${SHORTS[li]}</i>`;
+      el.addEventListener('click', () => {
+        if(S.mode === 'puppet') return;
+        const targetT = d.t + 14*3600;  // 2 PM local-ish
+        const h = Math.max(-12, Math.min(48, (targetT - L.nowT)/3600));
+        glideTo(h);
+      });
+      host.appendChild(el);
+    });
+  }
+
+  let raf = null;
+  function glideTo(target){
+    if(raf) cancelAnimationFrame(raf);
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches){ update(target); return; }
+    const from = currentH, t0 = performance.now(), dur = 650;
+    const ease = t => 1 - Math.pow(1-t, 3);
+    const step = now => {
+      const t = Math.max(0, Math.min(1, (now-t0)/dur));
+      update(from + (target-from)*ease(t));
+      if(t < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  }
+
+  /* ---------- sheet ---------- */
+  (function buildSheet(){
+    const back = document.createElement('div'); back.className='sheet-backdrop';
+    const sheet = document.createElement('div'); sheet.className='sheet';
+    screen.append(back, sheet);
+    const close = () => screen.classList.remove('sheet-open');
+    back.addEventListener('click', close);
+    const open = () => {
+      const pm = pmAt(currentH);
+      const li = levelFor(pm);
+      const best = S.mode==='live' && S.live ? S.live.bestDayName : "Wednesday";
+      const plan = li === 0
+        ? `<span class="lead">The plan:</span> it's clear right now. Go.`
+        : `<span class="lead">The plan:</span> cleanest upcoming air is <span class="lead">${best}</span>. Don't cancel the lake day; move it.`;
+      sheet.innerHTML = `
+        <div class="grab" role="button" aria-label="Close"></div>
+        <div class="sh-eyebrow mono">Level ${li+1} of 5 · ${Math.round(pm)} µg/m³ PM2.5 · model estimate</div>
+        <div class="ladder">${RATINGS.map((r,i)=>`
+          <div class="lad${i===li?' cur':''}"><span class="pip" style="background:${PIPS[i]}"></span>${r.word}<span class="th mono">${RANGES[i]}</span></div>`).join('')}
+        </div>
+        <p class="sh-p">${NOT_LINES[li]}</p>
+        <p class="sh-p"><span class="lead">EPA's guidance at this level:</span> ${EPA_LINES[li]}</p>
+        <p class="sh-p">${plan}</p>
+        <div class="sh-cav">For health decisions rely on AirNow.gov, local authorities, and your doctor.</div>`;
+      sheet.querySelector('.grab').addEventListener('click', close);
+      screen.classList.add('sheet-open');
+    };
+    ['word','clearline','sense','num'].forEach(id => $(id).addEventListener('click', open));
+  })();
+
+  /* ---------- rig ---------- */
+  function setStatus(html){ $('status').innerHTML = html; }
+
+  $('tabLive').addEventListener('click', () => setMode('live'));
+  $('tabPuppet').addEventListener('click', () => setMode('puppet'));
+  function setMode(m){
+    S.mode = m;
+    $('tabLive').classList.toggle('on', m==='live');
+    $('tabPuppet').classList.toggle('on', m==='puppet');
+    $('paneLive').classList.toggle('hidden', m!=='live');
+    $('panePuppet').classList.toggle('hidden', m!=='puppet');
+    screen.classList.toggle('puppet', m==='puppet');
+    $('tag').textContent = m==='puppet' ? 'forced state' : '-12h · +48h';
+    update(m==='puppet' ? currentH : 0);
+  }
+
+  /* search */
+  let searchTimer = null;
+  $('q').addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    const q = $('q').value.trim();
+    if(q.length < 2){ $('geoList').innerHTML=''; return; }
+    searchTimer = setTimeout(async () => {
+      try{
+        const results = await geocode(q);
+        $('geoList').innerHTML = '';
+        results.forEach(r => {
+          const b = document.createElement('button');
+          const label = [r.name, r.admin1, r.country_code].filter(Boolean).join(', ');
+          b.textContent = label;
+          b.addEventListener('click', () => {
+            $('geoList').innerHTML=''; $('q').value = '';
+            loadPlace(`${r.name}${r.admin1 ? ', '+r.admin1 : ''}`, r.latitude, r.longitude)
+              .catch(e => setStatus('Fetch failed: '+e.message));
+          });
+          $('geoList').appendChild(b);
+        });
+      }catch(e){ setStatus('Search failed: '+e.message); }
+    }, 350);
+  });
+
+  /* puppet controls */
+  const LVL_PMS = [5, 22, 45, 95, 200];
+  RATINGS.forEach((r,i) => {
+    const b = document.createElement('button');
+    b.innerHTML = `<span class="pip" style="background:${PIPS[i]}"></span>${r.word}`;
+    b.addEventListener('click', () => {
+      S.puppet.pm = LVL_PMS[i];
+      $('pmSlider').value = LVL_PMS[i];
+      $('pmVal').textContent = LVL_PMS[i]+' µg/m³';
+      if(S.mode!=='puppet') setMode('puppet'); else update(currentH);
+    });
+    $('levelBtns').appendChild(b);
+  });
+  $('pmSlider').addEventListener('input', e => {
+    S.puppet.pm = +e.target.value;
+    $('pmVal').textContent = e.target.value+' µg/m³';
+    if(S.mode==='puppet') update(currentH);
+  });
+  $('hrSlider').addEventListener('input', e => {
+    S.puppet.hour = +e.target.value;
+    const hr = Math.floor(S.puppet.hour), mn = S.puppet.hour%1 ? '30' : '00';
+    const ap = hr>=12?'PM':'AM';
+    $('hrVal').textContent = `${hr%12||12}:${mn} ${ap}`;
+    if(S.mode==='puppet') update(currentH);
+  });
+
+  /* ---------- boot ---------- */
+  function boot(){
+    const fallback = () => loadPlace('Missoula, Montana', 46.87, -113.99)
+      .catch(e => setStatus('Fetch failed: '+e.message+'<br>Check the network and reload.'));
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        pos => loadPlace('Your location', pos.coords.latitude, pos.coords.longitude).catch(fallback),
+        fallback, {timeout: 4000}
+      );
+    } else fallback();
+  }
+  boot();
+})();
+</script>
+</body>
+</html>
