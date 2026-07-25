@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>SMOKESHOW — live demo</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   *{box-sizing:border-box}
   body{
@@ -44,6 +46,9 @@
   .loc-row{display:flex;justify-content:space-between;align-items:baseline}
   .loc{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:.72;
     max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #locBtn{cursor:pointer;border:0;background:none;color:inherit;padding:6px 0;display:inline-flex;align-items:center;gap:5px}
+  #locBtn::after{content:"›";font-size:13px;opacity:.8}
+  #locBtn:focus-visible{outline:2px solid #BC5A1E;outline-offset:3px}
   .spacer{flex:1}
   .word{font-size:44px;line-height:1.02;font-weight:800;letter-spacing:-.02em;margin-top:16px;text-wrap:balance;cursor:pointer}
   .clearline{margin-top:9px;font-weight:650;font-size:16px;color:#BC5A1E;transition:color .4s linear;cursor:pointer}
@@ -86,6 +91,43 @@
   .day b{display:block;font-size:9.5px;letter-spacing:.14em;opacity:.65;font-weight:600;margin-bottom:3px}
   .day i{display:block;font-style:normal;font-weight:700;font-size:10px;margin-top:3px}
   .day .pip{display:inline-block;width:7px;height:7px;border-radius:50%}
+
+  /* map view */
+  .mapview{position:absolute;inset:0;z-index:5;background:#14171A;opacity:0;pointer-events:none;transition:opacity .3s}
+  .screen.map-open .mapview{opacity:1;pointer-events:auto}
+  #map{position:absolute;inset:0}
+  .map-canvas{position:absolute;inset:0;pointer-events:none;z-index:450}
+  .map-top{
+    position:absolute;top:0;left:0;right:0;z-index:500;padding:56px 20px 14px;
+    display:flex;justify-content:space-between;align-items:baseline;color:#E8E4DA;
+    background:linear-gradient(180deg, rgba(10,12,14,.8) 0%, rgba(10,12,14,0) 100%);
+    pointer-events:none;
+  }
+  .map-back{
+    cursor:pointer;border:0;background:none;color:inherit;font-family:ui-monospace,"SF Mono",Menlo,monospace;
+    font-size:11px;letter-spacing:.16em;padding:4px 0;pointer-events:auto;
+  }
+  .map-back:focus-visible{outline:2px solid #BC5A1E;outline-offset:3px}
+  .map-clock{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px;letter-spacing:.16em;opacity:.72}
+  .map-bottom{
+    position:absolute;left:0;right:0;bottom:0;z-index:500;padding:14px 20px 20px;color:#E8E4DA;
+    background:linear-gradient(0deg, rgba(10,12,14,.85) 0%, rgba(10,12,14,0) 100%);
+  }
+  .map-bottom input[type=range]{
+    width:100%;margin:8px 0 0;-webkit-appearance:none;appearance:none;height:26px;background:transparent;cursor:ew-resize;
+  }
+  .map-bottom input[type=range]::-webkit-slider-runnable-track{height:2px;background:rgba(255,255,255,.25);border-radius:1px}
+  .map-bottom input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:#E8E4DA;margin-top:-6px;
+  }
+  .map-bottom input[type=range]:focus-visible{outline:2px solid #BC5A1E;outline-offset:3px}
+  .me-dot{
+    width:14px;height:14px;border-radius:50%;background:#F4F0E6;
+    box-shadow:0 0 0 4px rgba(244,240,230,.25), 0 0 14px rgba(244,240,230,.5);
+  }
+  .leaflet-container{background:#14171A;font:inherit}
+  .leaflet-control-attribution{background:rgba(10,12,14,.5) !important;color:#6B7378 !important;font-size:8px !important}
+  .leaflet-control-attribution a{color:#8B948F !important}
 
   /* sheet */
   .sheet-backdrop{position:absolute;inset:0;background:rgba(22,15,8,.38);opacity:0;pointer-events:none;transition:opacity .3s;z-index:7}
@@ -220,9 +262,21 @@
     <div class="island"></div>
     <div class="sky-el"><div class="stars" id="stars"></div><div class="sun-b" id="sun"></div></div>
     <div class="grain"></div>
+    <div class="mapview" id="mapview">
+      <div id="map"></div>
+      <canvas class="map-canvas" id="mapCanvas"></canvas>
+      <div class="map-top">
+        <button type="button" class="map-back" id="mapBack">‹ BACK</button>
+        <div class="map-clock" id="mapClock">NOW</div>
+      </div>
+      <div class="map-bottom">
+        <div class="t-label"><span class="when" id="mapWhen">Now</span><span class="tag mono" id="mapStatus">smoke · model estimate</span></div>
+        <input type="range" id="mapScrub" min="-12" max="48" step="0.5" value="0" aria-label="Scrub the smoke map through time">
+      </div>
+    </div>
     <div class="app">
       <div class="loc-row">
-        <div class="loc" id="locName">Loading…</div>
+        <button type="button" class="loc" id="locBtn"><span id="locName">Loading…</span></button>
         <div class="loc" id="clock">—</div>
       </div>
       <div class="spacer"></div>
@@ -488,7 +542,7 @@
     for(let i=1;i<days.length;i++) if(days[i].max < days[bestIdx].max) bestIdx = i;
 
     S.live = {
-      name, times, pm, offset, nowT, nowIdx, days, peakPM, peakH, clearH,
+      name, lat, lon, times, pm, offset, nowT, nowIdx, days, peakPM, peakH, clearH,
       bestDayName: days.length ? localDate(days[bestIdx].t + 14*3600, offset).wdLong : "later this week",
       fetchedAt: new Date()
     };
@@ -622,6 +676,12 @@
     $('clearline').textContent = verdictLine(pm, h);
     $('scrub').value = h;
     renderWidgets(pm, hourAt(h), h);
+    if(screen.classList.contains('map-open')){
+      $('mapWhen').textContent = whenAt(h);
+      $('mapClock').textContent = $('clock').textContent;
+      $('mapScrub').value = h;
+      mapRedraw(h);
+    }
   }
   $('scrub').addEventListener('input', e => update(parseFloat(e.target.value)));
 
@@ -719,6 +779,109 @@
     };
     ['word','clearline','sense','num','why'].forEach(id => $(id).addEventListener('click', open));
   })();
+
+  /* ---------- the map: smoke as smoke ---------- */
+  const M = { map:null, marker:null, pts:null, gridTimes:null, gridNowIdx:0, fetchedFor:null, loading:false };
+
+  function rampColor(pm){
+    const t1 = clamp01(pm/55), t2 = clamp01((pm-55)/150);
+    let c = mix([150,146,138],[104,74,46], t1);
+    c = mix(c, [28,20,12], t2);
+    const a = 0.4*clamp01((pm-4)/30) + 0.25*clamp01((pm-35)/70) + 0.15*clamp01((pm-105)/145);
+    return {c, a: Math.min(0.85, a)};
+  }
+
+  async function fetchGrid(){
+    const L0 = S.live; if(!L0 || M.loading) return;
+    M.loading = true;
+    $('mapStatus').textContent = 'loading grid…';
+    const N = 7, step = 0.35;
+    const lats = [], lons = [];
+    const lonStep = step / Math.max(0.2, Math.cos(L0.lat * Math.PI/180));
+    for(let r=0;r<N;r++) for(let c=0;c<N;c++){
+      lats.push((L0.lat + (r-(N-1)/2)*step).toFixed(3));
+      lons.push((L0.lon + (c-(N-1)/2)*lonStep).toFixed(3));
+    }
+    try{
+      const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lats.join(',')}&longitude=${lons.join(',')}`+
+        `&hourly=pm2_5&past_days=1&forecast_days=3&timezone=UTC&timeformat=unixtime`;
+      const r = await fetch(url);
+      if(!r.ok) throw new Error('grid fetch failed');
+      let j = await r.json();
+      if(!Array.isArray(j)) j = [j];
+      M.pts = j.map((it,i) => ({
+        lat: +lats[i], lon: +lons[i],
+        pm: it.hourly.pm2_5.map(v => v==null ? 0 : v)
+      }));
+      M.gridTimes = j[0].hourly.time;
+      let gi = M.gridTimes.findIndex(t => t > L0.nowT) - 1;
+      M.gridNowIdx = gi < 0 ? 0 : gi;
+      M.fetchedFor = L0.name;
+      $('mapStatus').textContent = 'smoke · model estimate';
+      mapRedraw(currentH);
+    }catch(e){
+      $('mapStatus').textContent = 'grid failed: ' + e.message;
+    }finally{ M.loading = false; }
+  }
+
+  function gridPmAt(pt, h){
+    const f = M.gridNowIdx + h;
+    const i = Math.max(0, Math.min(pt.pm.length-2, Math.floor(f)));
+    return lerp(pt.pm[i], pt.pm[i+1], clamp01(f - i));
+  }
+
+  function mapRedraw(h){
+    if(!M.map || !M.pts) return;
+    const cv = $('mapCanvas'), box = $('mapview');
+    const w = box.clientWidth, hh = box.clientHeight, dpr = window.devicePixelRatio || 1;
+    if(cv.width !== w*dpr){ cv.width = w*dpr; cv.height = hh*dpr; }
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,w,hh);
+    // blob radius from grid spacing in pixels
+    const a = M.pts[0], b = M.pts[1];
+    const pa = M.map.latLngToContainerPoint([a.lat, a.lon]);
+    const pb = M.map.latLngToContainerPoint([b.lat, b.lon]);
+    const rad = Math.max(18, Math.hypot(pb.x-pa.x, pb.y-pa.y) * 0.95);
+    M.pts.forEach(pt => {
+      const pm = gridPmAt(pt, h);
+      const {c, a: alpha} = rampColor(pm);
+      if(alpha < 0.02) return;
+      const p = M.map.latLngToContainerPoint([pt.lat, pt.lon]);
+      if(p.x < -rad || p.y < -rad || p.x > w+rad || p.y > hh+rad) return;
+      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, rad);
+      g.addColorStop(0, `rgba(${c[0]},${c[1]},${c[2]},${alpha})`);
+      g.addColorStop(1, `rgba(${c[0]},${c[1]},${c[2]},0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(p.x, p.y, rad, 0, Math.PI*2); ctx.fill();
+    });
+  }
+
+  function openMap(){
+    const L0 = S.live; if(!L0 || typeof L === 'undefined') return;
+    screen.classList.add('map-open');
+    if(!M.map){
+      M.map = L.map('map', {zoomControl:false}).setView([L0.lat, L0.lon], 7);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+        {attribution:'&copy; OSM &copy; CARTO', maxZoom:11, minZoom:5}).addTo(M.map);
+      M.marker = L.marker([L0.lat, L0.lon],
+        {icon: L.divIcon({className:'', html:'<div class="me-dot"></div>', iconSize:[14,14], iconAnchor:[7,7]})}).addTo(M.map);
+      M.map.on('move zoom', () => mapRedraw(currentH));
+    } else {
+      M.map.invalidateSize();
+    }
+    if(M.fetchedFor !== L0.name){
+      M.map.setView([L0.lat, L0.lon], 7);
+      M.marker.setLatLng([L0.lat, L0.lon]);
+      M.pts = null;
+      fetchGrid();
+    } else {
+      setTimeout(() => { M.map.invalidateSize(); mapRedraw(currentH); }, 50);
+    }
+  }
+  $('locBtn').addEventListener('click', openMap);
+  $('mapBack').addEventListener('click', () => screen.classList.remove('map-open'));
+  $('mapScrub').addEventListener('input', e => update(parseFloat(e.target.value)));
 
   /* ---------- rig ---------- */
   function setStatus(html){ $('status').innerHTML = html; }
