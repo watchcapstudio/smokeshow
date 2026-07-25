@@ -50,6 +50,13 @@
   .screen.dark-air .clearline{color:#F0A468}
   .sense{margin-top:7px;font-size:13px;line-height:1.45;opacity:.78;max-width:38ch;cursor:pointer}
   .num{margin-top:11px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px;opacity:.6;letter-spacing:.05em;cursor:pointer}
+  .why{
+    margin-top:10px;align-self:flex-start;display:inline-flex;align-items:center;gap:5px;
+    font-size:13px;font-weight:650;opacity:.72;cursor:pointer;
+    padding:6px 0;border:0;background:none;color:inherit;font-family:inherit;
+  }
+  .why::after{content:"›";font-size:16px;line-height:1;opacity:.8;transform:translateY(-1px)}
+  .why:focus-visible{outline:2px solid #BC5A1E;outline-offset:3px}
 
   .timeline{margin-top:8px}
   .t-label{display:flex;justify-content:space-between;align-items:baseline;
@@ -223,6 +230,7 @@
       <div class="clearline" id="clearline">—</div>
       <div class="sense" id="sense">Finding the air…</div>
       <div class="num mono" id="num">—</div>
+      <button type="button" class="why" id="why">What this means</button>
       <div class="timeline">
         <div class="t-label"><span class="when" id="when">Now</span><span class="tag" id="tag">-12h · +48h</span></div>
         <div class="curve-wrap" id="curveWrap">
@@ -709,7 +717,7 @@
       sheet.querySelector('.grab').addEventListener('click', close);
       screen.classList.add('sheet-open');
     };
-    ['word','clearline','sense','num'].forEach(id => $(id).addEventListener('click', open));
+    ['word','clearline','sense','num','why'].forEach(id => $(id).addEventListener('click', open));
   })();
 
   /* ---------- rig ---------- */
