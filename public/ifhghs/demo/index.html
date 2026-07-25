@@ -121,6 +121,40 @@
     -webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:#E8E4DA;margin-top:-6px;
   }
   .map-bottom input[type=range]:focus-visible{outline:2px solid #BC5A1E;outline-offset:3px}
+  .map-fabs{position:absolute;right:14px;bottom:168px;z-index:520;display:flex;flex-direction:column;gap:10px}
+  .fab{
+    width:44px;height:44px;border-radius:50%;border:0;cursor:pointer;
+    background:rgba(18,22,25,.78);backdrop-filter:blur(6px);color:#E8E4DA;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .fab svg{width:19px;height:19px}
+  .fab:focus-visible{outline:2px solid #BC5A1E;outline-offset:2px}
+  .map-search{
+    position:absolute;inset:0;z-index:600;background:rgba(12,14,16,.94);
+    padding:64px 18px 18px;display:none;flex-direction:column;gap:12px;
+  }
+  .map-search.open{display:flex}
+  .ms-bar{display:flex;gap:10px;align-items:center}
+  .ms-bar input{
+    flex:1;padding:11px 14px;border-radius:12px;border:1px solid #333B3F;
+    background:#20262A;color:#E8E4DA;font:inherit;font-size:14px;outline:none;min-width:0;
+  }
+  .ms-bar input:focus{border-color:#C96F2E}
+  .ms-cancel{border:0;background:none;color:#C96F2E;font:inherit;font-size:13px;cursor:pointer}
+  .ms-list{display:flex;flex-direction:column;gap:6px;overflow:auto}
+  .ms-list button{
+    text-align:left;padding:11px 13px;border-radius:11px;border:1px solid #2C3438;
+    background:#20262A;color:#D8D4C8;font:inherit;font-size:13px;cursor:pointer;
+  }
+  .chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{
+    flex:0 0 auto;border:0;cursor:pointer;border-radius:999px;padding:7px 12px;
+    background:rgba(255,255,255,.14);backdrop-filter:blur(4px);color:#E8E4DA;
+    font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:10px;letter-spacing:.08em;
+  }
+  .chip.star{background:rgba(201,111,46,.3)}
+  .chip.cur{box-shadow:0 0 0 1px rgba(232,228,218,.45)}
   .me-dot{
     width:14px;height:14px;border-radius:50%;background:#F4F0E6;
     box-shadow:0 0 0 4px rgba(244,240,230,.25), 0 0 14px rgba(244,240,230,.5);
@@ -269,7 +303,27 @@
         <button type="button" class="map-back" id="mapBack">‹ BACK</button>
         <div class="map-clock" id="mapClock">NOW</div>
       </div>
+      <div class="map-fabs">
+        <button type="button" class="fab" id="fabSearch" aria-label="Search for a place">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <circle cx="8.5" cy="8.5" r="5.5"/><line x1="13" y1="13" x2="17.5" y2="17.5"/>
+          </svg>
+        </button>
+        <button type="button" class="fab" id="fabLocate" aria-label="Go to my location">
+          <svg viewBox="0 0 20 20" fill="currentColor" stroke="none">
+            <path d="M10 2 L14.5 16 L10 12.5 L5.5 16 Z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="map-search" id="mapSearch">
+        <div class="ms-bar">
+          <input type="text" id="msInput" placeholder="City, town, or ZIP…" autocomplete="off">
+          <button type="button" class="ms-cancel" id="msCancel">Cancel</button>
+        </div>
+        <div class="ms-list" id="msList"></div>
+      </div>
       <div class="map-bottom">
+        <div class="chips" id="chips"></div>
         <div class="t-label"><span class="when" id="mapWhen">Now</span><span class="tag mono" id="mapStatus">smoke · model estimate</span></div>
         <input type="range" id="mapScrub" min="-12" max="48" step="0.5" value="0" aria-label="Scrub the smoke map through time">
       </div>
@@ -366,9 +420,8 @@
   </div>
 
   <div class="pane" id="paneLive">
-    <input type="text" id="q" placeholder="City, town, or ZIP…" autocomplete="off">
-    <div class="geo-list" id="geoList"></div>
     <div class="status" id="status">Fetching…</div>
+    <div class="status">Search, saved places, and locate-me now live in the phone: tap the location name, then the map buttons.</div>
   </div>
 
   <div class="pane hidden" id="panePuppet">
@@ -561,6 +614,7 @@
     buildCurve();
     setStatus(`<b>${name}</b><br>CAMS model · fetched ${S.live.fetchedAt.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}<br>peak next 48h: ${Math.round(peakPM)} µg/m³`);
     update(0);
+    refreshMapForPlace();
   }
 
   function localDate(t, offset){
@@ -878,6 +932,8 @@
     } else {
       setTimeout(() => { M.map.invalidateSize(); mapRedraw(currentH); }, 50);
     }
+    renderChips();
+    renderSavedPins();
   }
   $('locBtn').addEventListener('click', openMap);
   $('mapBack').addEventListener('click', () => screen.classList.remove('map-open'));
@@ -899,29 +955,94 @@
     update(m==='puppet' ? currentH : 0);
   }
 
-  /* search */
-  let searchTimer = null;
-  $('q').addEventListener('input', () => {
-    clearTimeout(searchTimer);
-    const q = $('q').value.trim();
-    if(q.length < 2){ $('geoList').innerHTML=''; return; }
-    searchTimer = setTimeout(async () => {
+  /* ---------- in-phone location UI: search, saved, locate ---------- */
+  const SAVED_KEY = 'ss_saved';
+  let saved = [];
+  try{ saved = JSON.parse(localStorage.getItem(SAVED_KEY) || '[]'); }catch(e){}
+  const persistSaved = () => localStorage.setItem(SAVED_KEY, JSON.stringify(saved));
+  let savedLayer = null;
+  const isSaved = () => S.live && saved.some(s => s.name === S.live.name);
+
+  function renderChips(){
+    const host = $('chips'), L0 = S.live;
+    host.innerHTML = '';
+    if(!L0) return;
+    const star = document.createElement('button');
+    star.type = 'button'; star.className = 'chip star';
+    star.textContent = (isSaved() ? '★ SAVED' : '☆ SAVE') + ' · ' + L0.name.split(',')[0].toUpperCase();
+    star.addEventListener('click', () => {
+      if(isSaved()) saved = saved.filter(s => s.name !== L0.name);
+      else saved.push({name: L0.name, lat: L0.lat, lon: L0.lon});
+      persistSaved(); renderChips(); renderSavedPins();
+    });
+    host.appendChild(star);
+    saved.forEach(s => {
+      const c = document.createElement('button');
+      c.type = 'button';
+      c.className = 'chip' + (L0.name === s.name ? ' cur' : '');
+      c.textContent = s.name.split(',')[0].toUpperCase();
+      c.addEventListener('click', () => {
+        if(L0.name !== s.name) loadPlace(s.name, s.lat, s.lon).catch(e => setStatus('Fetch failed: '+e.message));
+      });
+      host.appendChild(c);
+    });
+  }
+
+  function renderSavedPins(){
+    if(!M.map) return;
+    if(savedLayer) savedLayer.remove();
+    savedLayer = L.layerGroup(saved.map(s =>
+      L.circleMarker([s.lat, s.lon], {radius:4, color:'#E8E4DA', weight:1.5, fillColor:'#C96F2E', fillOpacity:.9})
+    )).addTo(M.map);
+  }
+
+  function refreshMapForPlace(){
+    const L0 = S.live;
+    renderChips();
+    if(M.map && L0){
+      M.map.setView([L0.lat, L0.lon], M.map.getZoom() || 7);
+      M.marker.setLatLng([L0.lat, L0.lon]);
+      if(M.fetchedFor !== L0.name){ M.pts = null; fetchGrid(); }
+      renderSavedPins();
+    }
+  }
+
+  const msClose = () => { $('mapSearch').classList.remove('open'); $('msInput').value=''; $('msList').innerHTML=''; };
+  $('fabSearch').addEventListener('click', () => { $('mapSearch').classList.add('open'); $('msInput').focus(); });
+  $('msCancel').addEventListener('click', msClose);
+  let msTimer = null;
+  $('msInput').addEventListener('input', () => {
+    clearTimeout(msTimer);
+    const q = $('msInput').value.trim();
+    if(q.length < 2){ $('msList').innerHTML=''; return; }
+    msTimer = setTimeout(async () => {
       try{
         const results = await geocode(q);
-        $('geoList').innerHTML = '';
+        $('msList').innerHTML = '';
         results.forEach(r => {
           const b = document.createElement('button');
-          const label = [r.name, r.admin1, r.country_code].filter(Boolean).join(', ');
-          b.textContent = label;
+          b.type = 'button';
+          b.textContent = [r.name, r.admin1, r.country_code].filter(Boolean).join(', ');
           b.addEventListener('click', () => {
-            $('geoList').innerHTML=''; $('q').value = '';
+            msClose();
             loadPlace(`${r.name}${r.admin1 ? ', '+r.admin1 : ''}`, r.latitude, r.longitude)
               .catch(e => setStatus('Fetch failed: '+e.message));
           });
-          $('geoList').appendChild(b);
+          $('msList').appendChild(b);
         });
-      }catch(e){ setStatus('Search failed: '+e.message); }
+      }catch(e){ $('mapStatus').textContent = 'search failed'; }
     }, 350);
+  });
+  $('fabLocate').addEventListener('click', () => {
+    if(!navigator.geolocation){ $('mapStatus').textContent = 'no geolocation'; return; }
+    $('mapStatus').textContent = 'locating…';
+    navigator.geolocation.getCurrentPosition(
+      pos => loadPlace('Your location', pos.coords.latitude, pos.coords.longitude)
+        .then(() => { $('mapStatus').textContent = 'smoke · model estimate'; })
+        .catch(e => { $('mapStatus').textContent = 'fetch failed'; }),
+      () => { $('mapStatus').textContent = 'location denied'; },
+      {timeout: 6000}
+    );
   });
 
   /* puppet controls */
