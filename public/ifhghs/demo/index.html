@@ -269,6 +269,23 @@
           <text id="circNum" x="30" y="35" text-anchor="middle" font-size="15" font-weight="700" fill="#F4E9D6">—</text>
         </svg>
       </div>
+      <div class="acc-circ">
+        <svg viewBox="0 0 60 60" aria-hidden="true">
+          <clipPath id="portClip"><circle cx="30" cy="30" r="25"/></clipPath>
+          <g clip-path="url(#portClip)" stroke="#F4F0E6" fill="none" stroke-linecap="round">
+            <circle id="portHalo" cx="38" cy="17" r="10" fill="#F4F0E6" stroke="none" opacity="0"/>
+            <circle id="portSun" cx="38" cy="17" r="5.5" fill="#F4F0E6" stroke="none" opacity="1"/>
+            <path id="portTrees" stroke-width="1.6"
+              d="M4 36 l3.5 -4.5 3.5 4.5 3.5 -4.5 3.5 4.5 3.5 -4.5 3.5 4.5 3.5 -4.5 3.5 4.5 3.5 -4.5 3.5 4.5 3.5 -4.5 3.5 4.5 3.5 -4.5 3.5 4.5 3.5 -4.5 3.5 4.5"/>
+            <g id="portLake" stroke-width="1.6">
+              <line x1="12" y1="44" x2="24" y2="44"/>
+              <line x1="32" y1="48" x2="44" y2="48"/>
+              <line x1="20" y1="52" x2="30" y2="52"/>
+            </g>
+            <circle id="portFog" cx="30" cy="30" r="25" fill="#E9E2D4" stroke="none" opacity="0"/>
+          </g>
+        </svg>
+      </div>
       <div class="acc-rect">
         <div class="ar-word" id="arWord">—</div>
         <div class="ar-sub" id="arSub">—</div>
@@ -574,6 +591,12 @@
     $('circArc').setAttribute('stroke', PIPS[li]);
     $('circArc').setAttribute('stroke-dasharray', `${clamp01(pm/250)*151} 151`);
     $('circNum').textContent = Math.round(pm);
+    // porthole: fog eats the layers, monochrome by design
+    $('portTrees').style.opacity = 1 - clamp01((pm-12)/30);
+    $('portLake').style.opacity  = 1 - clamp01((pm-45)/80);
+    $('portSun').style.opacity   = 1 - 0.75*clamp01((pm-35)/180);
+    $('portHalo').style.opacity  = 0.35*clamp01((pm-25)/120);
+    $('portFog').style.opacity   = 0.12 + 0.62*clamp01(pm/230);
     $('arWord').textContent = r.word;
     $('arSub').textContent = sub;
     setDots($('arDots'), li);
