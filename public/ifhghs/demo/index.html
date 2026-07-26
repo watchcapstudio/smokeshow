@@ -51,7 +51,7 @@
   #locBtn:focus-visible{outline:2px solid #BC5A1E;outline-offset:3px}
   .spacer{flex:1}
   .word{font-size:44px;line-height:1.02;font-weight:800;letter-spacing:-.02em;margin-top:16px;text-wrap:balance;cursor:pointer}
-  .clearline{margin-top:9px;font-weight:650;font-size:16px;color:#BC5A1E;transition:color .4s linear;cursor:pointer}
+  .clearline{margin-top:9px;font-weight:650;font-size:16px;color:#8C3E10;transition:color .4s linear;cursor:pointer}
   .screen.dark-air .clearline{color:#F0A468}
   .sense{margin-top:7px;font-size:13px;line-height:1.45;opacity:.78;max-width:38ch;cursor:pointer}
   .num{margin-top:11px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px;opacity:.6;letter-spacing:.05em;cursor:pointer}
@@ -65,8 +65,32 @@
   .watch{
     display:flex;align-items:center;gap:7px;margin-top:6px;
     font-size:11px;line-height:1.4;opacity:.58;
+    border:0;background:none;color:inherit;font-family:inherit;cursor:pointer;text-align:left;padding:4px 0;
   }
   .watch .wpip{width:6px;height:6px;border-radius:50%;background:currentColor;flex:0 0 auto}
+  .watch::after{content:"›";font-size:14px;opacity:.85;margin-left:2px}
+  .watch:focus-visible{outline:2px solid #BC5A1E;outline-offset:3px}
+  .trend-chip{
+    display:inline-flex;align-items:center;gap:7px;margin-top:10px;padding:5px 11px;
+    border-radius:999px;background:rgba(255,255,255,.35);font-size:12.5px;font-weight:700;align-self:flex-start;
+  }
+  .screen.dark-air .trend-chip{background:rgba(0,0,0,.28)}
+  .trend-chip .tpip{width:8px;height:8px;border-radius:50%}
+  [hidden]{display:none !important}
+  /* settings sheet bits */
+  .set-sec{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:9.5px;letter-spacing:.14em;color:#8A7C64;margin:16px 0 2px;text-transform:uppercase}
+  .set-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #EFE7D8;font-size:13.5px;font-weight:600}
+  .set-row:last-child{border-bottom:0}
+  .set-row .sub2{display:block;font-size:10.5px;color:#8A7C64;font-weight:500;margin-top:2px}
+  .tgl{width:46px;height:28px;border-radius:14px;background:#D8CDB8;border:0;cursor:pointer;position:relative;flex:0 0 auto;transition:background .2s}
+  .tgl::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#FFF;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+  .tgl.on{background:#3F9B52}
+  .tgl.on::after{transform:translateX(18px)}
+  .tgl:focus-visible{outline:2px solid #BC5A1E;outline-offset:2px}
+  .seg2{display:flex;border:1px solid #D9CFBC;border-radius:9px;overflow:hidden;flex:0 0 auto}
+  .seg2 button{border:0;background:none;padding:6px 12px;font:inherit;font-size:12px;font-weight:650;color:#8A7C64;cursor:pointer}
+  .seg2 button.on{background:#EFE3CE;color:#26221B}
+  .dis{color:#B4A88E}
 
   .timeline{margin-top:8px}
   .t-label{display:flex;justify-content:space-between;align-items:baseline;
@@ -340,11 +364,12 @@
       </div>
       <div class="spacer"></div>
       <div class="word" id="word">—</div>
+      <div class="trend-chip" id="trendChip" hidden><span class="tpip" id="trendPip"></span><span id="trendTxt">—</span></div>
       <div class="clearline" id="clearline">—</div>
       <div class="sense" id="sense">Finding the air…</div>
       <div class="num mono" id="num">—</div>
       <button type="button" class="why" id="why">What this means</button>
-      <div class="watch"><span class="wpip"></span><span>Watching this air. You'll hear when it changes, and when it clears.</span></div>
+      <button type="button" class="watch" id="watchBtn"><span class="wpip"></span><span>Watching this air. You'll hear when it changes, and when it clears.</span></button>
       <div class="timeline">
         <div class="t-label"><span class="when" id="when">Now</span><span class="tag" id="tag">-12h · +48h</span></div>
         <div class="curve-wrap" id="curveWrap">
@@ -388,7 +413,8 @@
           <circle cx="30" cy="30" r="24" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="4.5"/>
           <circle id="circArc" cx="30" cy="30" r="24" fill="none" stroke="#E07226" stroke-width="4.5"
                   stroke-linecap="round" stroke-dasharray="0 151" transform="rotate(-90 30 30)"/>
-          <text id="circNum" x="30" y="35" text-anchor="middle" font-size="15" font-weight="700" fill="#F4E9D6">—</text>
+          <text id="circNum" x="30" y="33" text-anchor="middle" font-size="15" font-weight="700" fill="#F4E9D6">—</text>
+          <text id="circTrend" x="30" y="45" text-anchor="middle" font-size="10" fill="#F4E9D6" opacity="0.8"></text>
         </svg>
       </div>
       <div class="acc-circ">
@@ -482,6 +508,13 @@
     "sensitive groups should avoid prolonged exertion; everyone else, cut back on it.",
     "everyone should avoid outdoor exertion."
   ];
+  const EPA_SENS = [
+    "it's a great day to be active outside.",
+    "consider easing off long or hard exertion, and watch for symptoms.",
+    "cut back on long or heavy exertion. Move the workout indoors if there's any wheeze.",
+    "avoid prolonged exertion. Keep inhalers close; indoors with filtration is the good call.",
+    "stay inside, windows closed, filtration on. This level is for no one."
+  ];
   const PUPPET_CLEARS = [
     "Stays clear all week",
     "Thins out by evening",
@@ -489,6 +522,17 @@
     "Peaks tonight · clears Thursday 6 AM",
     "Peaks tonight · clears Friday morning"
   ];
+
+  /* ---------- prefs ---------- */
+  const PREFS_KEY = 'ss_prefs';
+  let PREFS = {inbound:true, peak:true, clear:true, quiet:true, units:'ug', sensitive:false};
+  try{ PREFS = {...PREFS, ...JSON.parse(localStorage.getItem(PREFS_KEY) || '{}')}; }catch(e){}
+  const savePrefs = () => localStorage.setItem(PREFS_KEY, JSON.stringify(PREFS));
+  function pmToAqi(pm){
+    const B = [[0,12,0,50],[12.1,35.4,51,100],[35.5,55.4,101,150],[55.5,150.4,151,200],[150.5,250.4,201,300],[250.5,500.4,301,500]];
+    const b = B.find(x => pm <= x[1]) || B[B.length-1];
+    return Math.round(b[2] + (Math.min(pm,b[1]) - b[0]) / (b[1]-b[0]) * (b[3]-b[2]));
+  }
 
   /* ---------- state ---------- */
   const S = {
@@ -605,7 +649,7 @@
       bestDayName: days.length ? localDate(days[bestIdx].t + 14*3600, offset).wdLong : "later this week",
       fetchedAt: new Date()
     };
-    $('locName').textContent = name;
+    $('locName').textContent = name.split(',')[0];
     const shortName = name.split(',')[0].toUpperCase();
     $('wLoc1').textContent = shortName; $('wLoc2').textContent = shortName;
     $('lkDate').textContent = new Date((nowT + offset)*1000).toLocaleDateString('en-US',
@@ -691,9 +735,9 @@
       return ["Clear all week","Thins by evening","Clears Thu 6 AM","Clears Thu 6 AM","Clears Fri morning"][levelFor(pm)];
     const L = S.live; if(!L) return "—";
     if(pm >= 35)
-      return L.clearH ? `Clears ${localDate(L.nowT + L.clearH*3600, L.offset).label}` : "Hazy on";
+      return L.clearH ? `Clears ${localDate(L.nowT + L.clearH*3600, L.offset).label}` : "Smoky for days";
     if(L.peakPM >= 35 && h < L.peakH)
-      return `Peaks ${localDate(L.nowT + L.peakH*3600, L.offset).label}`;
+      return `Smoke in ${Math.max(1,Math.round(L.peakH - h))}h`;
     return "Clear all week";
   }
   function setDots(host, li, dark){
@@ -706,7 +750,9 @@
   }
   function renderWidgets(pm, t, h){
     const r = ratingFor(pm), li = levelFor(pm);
-    const sub = widgetSub(pm, h);
+    const trw = trendAt(h);
+    const arrow = trw.startsWith('rising') ? ' ↗' : trw.startsWith('falling') ? ' ↘' : '';
+    const sub = widgetSub(pm, h) + arrow;
     ['wSmall','wMed'].forEach(id => {
       const w = $(id);
       const s = skyB(pm, t);
@@ -730,6 +776,7 @@
     $('circArc').setAttribute('stroke', PIPS[li]);
     $('circArc').setAttribute('stroke-dasharray', `${clamp01(pm/250)*151} 151`);
     $('circNum').textContent = Math.round(pm);
+    $('circTrend').textContent = arrow.trim();
     // smoke-fill: a smoke ceiling descends from the top by severity; the sun drowns last
     const BOUNDS = [0,12,35,55,150,250];
     const inner = clamp01((pm - BOUNDS[li]) / (BOUNDS[li+1] - BOUNDS[li]));
@@ -749,7 +796,19 @@
     const r = ratingFor(pm);
     $('word').textContent = r.word;
     $('sense').textContent = r.sense;
-    $('num').textContent = `${Math.round(pm)} µg/m³ PM2.5 · ${S.mode==='puppet' ? 'forced' : trendAt(h)} · model estimate`;
+    $('num').textContent = (PREFS.units === 'aqi'
+      ? `AQI ${pmToAqi(pm)} (approx)` : `${Math.round(pm)} µg/m³ PM2.5`) + ' · model estimate';
+    const tr = trendAt(h);
+    const chip = $('trendChip');
+    if(tr.startsWith('steady') && pm < 12){
+      chip.hidden = true;
+    } else {
+      chip.hidden = false;
+      const [txt, col] = tr.startsWith('rising') ? ['Getting worse', '#CE2F1F']
+        : tr.startsWith('falling') ? ['Improving', '#3F9B52'] : ['Holding steady', '#9A9284'];
+      $('trendTxt').textContent = txt;
+      $('trendPip').style.background = col;
+    }
     $('when').textContent = whenAt(h);
     $('clock').textContent = S.mode==='puppet' ? "PUPPET" : (Math.abs(h)<0.5 ? "NOW" : (h<0?"":"+")+Math.round(h)+"H");
     $('clearline').textContent = verdictLine(pm, h);
@@ -850,13 +909,56 @@
           <div class="lad${i===li?' cur':''}"><span class="pip" style="background:${PIPS[i]}"></span>${r.word}<span class="th mono">${RANGES[i]}</span></div>`).join('')}
         </div>
         <p class="sh-p">${NOT_LINES[li]}</p>
-        <p class="sh-p"><span class="lead">EPA's guidance at this level:</span> ${EPA_LINES[li]}</p>
+        <p class="sh-p"><span class="lead">${PREFS.sensitive ? "For your household (EPA sensitive-groups guidance):" : "EPA's guidance at this level:"}</span> ${PREFS.sensitive ? EPA_SENS[li] : EPA_LINES[li]}</p>
         <p class="sh-p">${plan}</p>
         <div class="sh-cav">For health decisions rely on AirNow.gov, local authorities, and your doctor.</div>`;
       sheet.querySelector('.grab').addEventListener('click', close);
       screen.classList.add('sheet-open');
     };
     ['word','clearline','sense','num','why'].forEach(id => $(id).addEventListener('click', open));
+
+    const openSettings = () => {
+      sheet.innerHTML = `
+        <div class="grab" role="button" aria-label="Close"></div>
+        <div class="sh-eyebrow mono">Settings</div>
+        <div class="set-sec">Notifications</div>
+        <div class="set-row"><div>Smoke inbound<span class="sub2">Before it reaches you, with the peak and clear-time</span></div><button type="button" class="tgl" data-k="inbound"></button></div>
+        <div class="set-row"><div>Peak<span class="sub2">When it's as bad as it will get</span></div><button type="button" class="tgl" data-k="peak"></button></div>
+        <div class="set-row"><div>All clear<span class="sub2">The one worth waiting for</span></div><button type="button" class="tgl" data-k="clear"></button></div>
+        <div class="set-row"><div>Quiet hours<span class="sub2">10 PM to 7 AM, urgent only</span></div><button type="button" class="tgl" data-k="quiet"></button></div>
+        <div class="set-row"><div>Sensitive household<span class="sub2">Asthma, young kids, older adults, pregnancy, heart or lung conditions. Guidance and alerts follow EPA's sensitive-groups line, one level earlier.</span></div><button type="button" class="tgl" data-k="sensitive"></button></div>
+        <p class="sh-p" style="opacity:.65">Threshold alerts only. No digests, no streaks, no engagement pings.</p>
+        <div class="set-sec">Units</div>
+        <div class="set-row"><div>Numbers shown as</div>
+          <div class="seg2">
+            <button type="button" data-u="ug">µg/m³</button>
+            <button type="button" data-u="aqi">AQI</button>
+          </div>
+        </div>
+        <div class="set-row"><div class="dis">Text message alerts<span class="sub2 dis">Later: for the family members who won't install an app</span></div><span class="sub2 dis">soon</span></div>`;
+      sheet.querySelector('.grab').addEventListener('click', close);
+      sheet.querySelectorAll('.tgl').forEach(t => {
+        t.classList.toggle('on', !!PREFS[t.dataset.k]);
+        t.setAttribute('aria-pressed', !!PREFS[t.dataset.k]);
+        t.addEventListener('click', () => {
+          PREFS[t.dataset.k] = !PREFS[t.dataset.k];
+          savePrefs();
+          t.classList.toggle('on', PREFS[t.dataset.k]);
+          t.setAttribute('aria-pressed', PREFS[t.dataset.k]);
+        });
+      });
+      sheet.querySelectorAll('.seg2 button').forEach(b => {
+        b.classList.toggle('on', PREFS.units === b.dataset.u);
+        b.addEventListener('click', () => {
+          PREFS.units = b.dataset.u;
+          savePrefs();
+          sheet.querySelectorAll('.seg2 button').forEach(x => x.classList.toggle('on', PREFS.units === x.dataset.u));
+          update(currentH);
+        });
+      });
+      screen.classList.add('sheet-open');
+    };
+    $('watchBtn').addEventListener('click', openSettings);
   })();
 
   /* ---------- the map: smoke as smoke ---------- */
