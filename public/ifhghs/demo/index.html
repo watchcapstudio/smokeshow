@@ -419,17 +419,11 @@
       </div>
       <div class="acc-circ">
         <svg viewBox="0 0 60 60" aria-hidden="true">
-          <clipPath id="fillClip"><circle cx="30" cy="30" r="25"/></clipPath>
-          <linearGradient id="smokeFade" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#E9E2D4" stop-opacity="0.58"/>
-            <stop offset="0.65" stop-color="#E9E2D4" stop-opacity="0.5"/>
-            <stop offset="1" stop-color="#E9E2D4" stop-opacity="0"/>
-          </linearGradient>
-          <g clip-path="url(#fillClip)">
-            <circle id="fillSun" cx="30" cy="40" r="6" fill="#F4F0E6"/>
-            <rect id="fillBank2" x="0" y="0" width="60" height="0" fill="url(#smokeFade)" opacity="0.5"/>
-            <rect id="fillBank1" x="0" y="0" width="60" height="0" fill="url(#smokeFade)"/>
-          </g>
+          <circle cx="30" cy="30" r="24" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="3.5"/>
+          <circle id="cdArc" cx="30" cy="30" r="24" fill="none" stroke="#3F9B52" stroke-width="3.5"
+                  stroke-linecap="round" stroke-dasharray="0 151" transform="rotate(-90 30 30)"/>
+          <text id="cdNum" x="30" y="31" text-anchor="middle" font-size="14" font-weight="700" fill="#F4E9D6">—</text>
+          <text id="cdLbl" x="30" y="43" text-anchor="middle" font-size="6.5" letter-spacing="1" fill="#F4E9D6" opacity="0.7">—</text>
         </svg>
       </div>
       <div class="acc-rect">
@@ -734,11 +728,45 @@
     if(S.mode === 'puppet')
       return ["Clear all week","Thins by evening","Clears Thu 6 AM","Clears Thu 6 AM","Clears Fri morning"][levelFor(pm)];
     const L = S.live; if(!L) return "—";
-    if(pm >= 35)
-      return L.clearH ? `Clears ${localDate(L.nowT + L.clearH*3600, L.offset).label}` : "Smoky for days";
+    const tr = trendAt(h);
+    if(pm >= 35){
+      if(L.clearH) return `Clears ${localDate(L.nowT + L.clearH*3600, L.offset).label}`;
+      const dayClear = L.days.find(d => (d.t - L.nowT)/3600 > 40 && d.max < 35);
+      if(tr.startsWith('falling')) return dayClear
+        ? `Improving · clears ~${localDate(dayClear.t + 14*3600, L.offset).wd}` : "Improving slowly";
+      if(tr.startsWith('rising')) return "Getting worse";
+      return dayClear ? `Smoky into ${localDate(dayClear.t + 14*3600, L.offset).wd}` : "Smoky for days";
+    }
     if(L.peakPM >= 35 && h < L.peakH)
       return `Smoke in ${Math.max(1,Math.round(L.peakH - h))}h`;
     return "Clear all week";
+  }
+
+  function nextChangeInfo(pm, h){
+    if(S.mode === 'puppet'){
+      const li = levelFor(pm);
+      if(li === 0) return {txt:'5d+', label:'CLEAR', color:'#3F9B52', frac:1};
+      if(li === 1) return {txt:'9h', label:'TO SMOKE', color:'#CE2F1F', frac:9/48};
+      return {txt:'14h', label:'TO CLEAR', color:'#3F9B52', frac:14/48};
+    }
+    const L = S.live; if(!L) return {txt:'—', label:'', color:'#9A9284', frac:0};
+    if(pm >= 35){
+      if(L.clearH){
+        const n = Math.max(1, Math.round(L.clearH - h));
+        return {txt:n+'h', label:'TO CLEAR', color:'#3F9B52', frac:Math.min(1, n/48)};
+      }
+      const dayClear = L.days.find(d => (d.t - L.nowT)/3600 > 40 && d.max < 35);
+      if(dayClear){
+        const nd = Math.max(1, Math.round((dayClear.t - L.nowT)/86400));
+        return {txt:nd+'d', label:'TO CLEAR', color:'#3F9B52', frac:1};
+      }
+      return {txt:'5d+', label:'SMOKY', color:'#CE2F1F', frac:1};
+    }
+    if(L.peakPM >= 35 && h < L.peakH){
+      const n = Math.max(1, Math.round(L.peakH - h));
+      return {txt:n+'h', label:'TO SMOKE', color:'#CE2F1F', frac:Math.min(1, n/48)};
+    }
+    return {txt:'5d+', label:'CLEAR', color:'#3F9B52', frac:1};
   }
   function setDots(host, li, dark){
     host.innerHTML = '';
@@ -750,9 +778,7 @@
   }
   function renderWidgets(pm, t, h){
     const r = ratingFor(pm), li = levelFor(pm);
-    const trw = trendAt(h);
-    const arrow = trw.startsWith('rising') ? ' ↗' : trw.startsWith('falling') ? ' ↘' : '';
-    const sub = widgetSub(pm, h) + arrow;
+    const sub = widgetSub(pm, h);
     ['wSmall','wMed'].forEach(id => {
       const w = $(id);
       const s = skyB(pm, t);
@@ -776,15 +802,12 @@
     $('circArc').setAttribute('stroke', PIPS[li]);
     $('circArc').setAttribute('stroke-dasharray', `${clamp01(pm/250)*151} 151`);
     $('circNum').textContent = Math.round(pm);
-    $('circTrend').textContent = arrow.trim();
-    // smoke-fill: a smoke ceiling descends from the top by severity; the sun drowns last
-    const BOUNDS = [0,12,35,55,150,250];
-    const inner = clamp01((pm - BOUNDS[li]) / (BOUNDS[li+1] - BOUNDS[li]));
-    const frac = (li + inner) / 5;
-    const depth = 3 + 52*frac;
-    $('fillBank1').setAttribute('height', depth);
-    $('fillBank2').setAttribute('height', Math.min(60, depth + 7));
-    $('fillSun').style.opacity = 1 - 0.7*clamp01((depth - 30)/16);
+    // countdown circle: how long until the next change
+    const ch = nextChangeInfo(pm, h);
+    $('cdNum').textContent = ch.txt;
+    $('cdLbl').textContent = ch.label;
+    $('cdArc').setAttribute('stroke', ch.color);
+    $('cdArc').setAttribute('stroke-dasharray', `${ch.frac*151} 151`);
     $('arWord').textContent = r.word;
     $('arSub').textContent = sub;
     setDots($('arDots'), li);
