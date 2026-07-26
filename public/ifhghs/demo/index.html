@@ -277,6 +277,18 @@
   .w-small .wcurve{height:54px}
   .w-med .wcurve{height:46px}
   .ar-curve{display:block;width:100%;height:17px;margin-top:5px}
+  .ridge{position:absolute;left:0;right:0;pointer-events:none}
+  .ridge svg{width:100%;height:100%;display:block}
+  .w-small .ridge{bottom:44px;height:30px}
+  .w-med .ridge{bottom:38px;height:26px}
+  .screen .ridge{bottom:336px;height:52px;z-index:1}
+  .wtaps{position:absolute;left:0;right:0;bottom:0;display:flex;z-index:4}
+  .w-small .wtaps{height:54px}
+  .w-med .wtaps{height:46px}
+  .wtaps button{flex:1;height:100%;border:0;background:none;cursor:pointer;padding:0;
+    -webkit-tap-highlight-color:transparent}
+  .wtaps button:active{background:rgba(255,255,255,.14)}
+  .wtaps button:focus-visible{outline:2px solid #BC5A1E;outline-offset:-2px}
   .widget .w-word{font-weight:800;font-size:16px;letter-spacing:-.01em;line-height:1.05}
   .w-med .w-word{font-size:20px}
   .widget .w-sub{font-size:10.5px;font-weight:600;margin-top:2px;color:#8C3E10}
@@ -326,6 +338,7 @@
   <div class="screen" id="screen">
     <div class="island"></div>
     <div class="sky-el"><div class="stars" id="stars"></div><div class="sun-b" id="sun"></div></div>
+    <div class="ridge" id="ridgePhone"></div>
     <div class="grain"></div>
     <div class="mapview" id="mapview">
       <div id="map"></div>
@@ -387,7 +400,9 @@
   <div class="home-card">
     <div class="widget w-small" id="wSmall">
       <div class="wsun"></div><div class="wgrain"></div>
+      <div class="ridge" id="ridgeSmall"></div>
       <svg class="wcurve" id="curveSmall" aria-hidden="true"></svg>
+      <div class="wtaps" id="tapsSmall"></div>
       <div class="w-loc" id="wLoc1">—</div>
       <div class="overlay">
         <div class="w-word">—</div>
@@ -396,7 +411,9 @@
     </div>
     <div class="widget w-med" id="wMed">
       <div class="wsun"></div><div class="wgrain"></div>
+      <div class="ridge" id="ridgeMed"></div>
       <svg class="wcurve" id="curveMed" aria-hidden="true"></svg>
+      <div class="wtaps" id="tapsMed"></div>
       <div class="w-loc" id="wLoc2">—</div>
       <div class="overlay">
         <div class="w-word">—</div>
@@ -585,6 +602,8 @@
         `radial-gradient(circle, ${rgb(core)} 0%, ${rgb(core)} ${14+8*(1-dim)}%, transparent ${46-24*dim}%)`;
     } else sun.style.opacity = 0;
     $('stars').style.opacity = (1 - s.day) * (1 - s.s1) * 0.9;
+    setRidge($('ridgePhone'), pm, 0.55);
+    placePhoneRidge();
     screen.classList.toggle('dark-air', lum(s.mid) < 0.42);
   }
 
@@ -763,6 +782,44 @@
     }
     return {txt:'5d+', label:'CLEAR', color:'#3F9B52', frac:1};
   }
+  /* the ridgeline IS the visibility gauge: far ridge dissolves first, near one goes soft, then both are gone */
+  const RIDGE_FAR  = "M0,40 L0,26 Q12,13 22,20 Q32,27 44,11 Q56,1 68,16 Q79,27 88,17 Q95,12 100,20 L100,40 Z";
+  const RIDGE_NEAR = "M0,40 L0,33 Q18,24 34,30 Q48,36 62,26 Q76,17 88,28 Q95,34 100,30 L100,40 Z";
+  function setRidge(host, pm, strength){
+    if(!host) return;
+    const k = strength == null ? 1 : strength;
+    if(!host.firstChild){
+      const u = host.id;
+      host.innerHTML = `<svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="${u}F" x1="0" y1="0" x2="0" y2="1">
+            <stop class="fTop" offset="0" stop-color="#1E1A14" stop-opacity="0"/>
+            <stop class="fBot" offset="1" stop-color="#1E1A14" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="${u}N" x1="0" y1="0" x2="0" y2="1">
+            <stop class="nTop" offset="0" stop-color="#1E1A14" stop-opacity="0"/>
+            <stop class="nBot" offset="1" stop-color="#1E1A14" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path class="rFar" d="${RIDGE_FAR}" fill="url(#${u}F)"></path>
+        <path class="rNear" d="${RIDGE_NEAR}" fill="url(#${u}N)"></path></svg>`;
+    }
+    // haze pools in the valleys: solid at the peaks, dissolving toward the base
+    const far  = (1 - clamp01((pm - 6)/26))  * 0.42 * k;   // gone by ~32 µg/m³
+    const near = (1 - clamp01((pm - 20)/110)) * 0.58 * k;  // soft, then swallowed
+    host.querySelector('.fTop').setAttribute('stop-opacity', far.toFixed(3));
+    host.querySelector('.fBot').setAttribute('stop-opacity', '0');
+    host.querySelector('.nTop').setAttribute('stop-opacity', near.toFixed(3));
+    host.querySelector('.nBot').setAttribute('stop-opacity', '0');
+  }
+
+  function placePhoneRidge(){
+    const r = $('ridgePhone'), w = $('word');
+    if(!r || !w) return;
+    const sRect = screen.getBoundingClientRect(), wRect = w.getBoundingClientRect();
+    r.style.bottom = Math.round(sRect.bottom - wRect.top + 4) + 'px';
+  }
+
   /* the shape of it: 60-hour smoke curve, trend as a shape */
   const CURVE_N = 61, CURVE_NOW = 12;
   function curveVals(){
@@ -843,6 +900,7 @@
       w.querySelector('.w-sub').textContent = sub;
       const dark = w.classList.contains('dark-air');
       const ink = dark ? '#F4E9D6' : '#26221B';
+      setRidge($(id === 'wSmall' ? 'ridgeSmall' : 'ridgeMed'), pm);
       if(id === 'wSmall') drawCurve($('curveSmall'), 148, 54, ink, {});
       else drawCurve($('curveMed'), 296, 46, ink, {ticks:true});
     });
@@ -1272,6 +1330,28 @@
     $('hrVal').textContent = `${hr%12||12}:${mn} ${ap}`;
     if(S.mode==='puppet') update(currentH);
   });
+
+  /* ---------- iOS 17 tap regions: slices of the curve deep-link into the app ---------- */
+  (function buildTapRegions(){
+    const REGIONS = 10, SPAN = 6;   // 10 slices x 6 hours = the 60-hour curve
+    [['tapsSmall'],['tapsMed']].forEach(([id]) => {
+      const host = $(id);
+      for(let i=0;i<REGIONS;i++){
+        const centre = Math.max(-12, Math.min(48, -12 + i*SPAN + SPAN/2));
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('aria-label', centre < 0
+          ? `Open the app ${Math.abs(centre)} hours ago`
+          : `Open the app in ${centre} hours`);
+        b.addEventListener('click', () => {
+          if(S.mode === 'puppet') return;
+          if(screen.classList.contains('map-open')) screen.classList.remove('map-open');
+          glideTo(centre);
+        });
+        host.appendChild(b);
+      }
+    });
+  })();
 
   /* ---------- boot ---------- */
   function boot(){
