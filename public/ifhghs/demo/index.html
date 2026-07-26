@@ -875,11 +875,11 @@
         </linearGradient>
       </defs>
       <path d="M0,${h} L${pts.join(' L')} L${w},${h} Z" fill="url(#${uid})"/>
-      ${ticks}
-      ${o.thin ? '' : `<line x1="0" y1="${thrY}" x2="${w}" y2="${thrY}" stroke="${ink}" stroke-opacity="0.22" stroke-width="1" stroke-dasharray="2 4"/>`}
-      <path d="M${pts.join(' L')}" fill="none" stroke="${ink}" stroke-opacity="${o.thin ? 0.6 : 0.72}" stroke-width="${o.thin ? 1.2 : 1.6}" stroke-linejoin="round" stroke-linecap="round"/>
-      ${o.thin ? '' : `<line x1="${nowX}" y1="${Y(maxV*0.98)}" x2="${nowX}" y2="${h-pad}" stroke="${ink}" stroke-opacity="0.18" stroke-width="1"/>`}
-      <circle cx="${nowX}" cy="${nowY}" r="${o.thin ? 1.8 : 2.6}" fill="${ink}" fill-opacity="0.9"/>`;
+      ${o.marks ? ticks : ''}
+      ${o.marks ? `<line x1="0" y1="${thrY}" x2="${w}" y2="${thrY}" stroke="${ink}" stroke-opacity="0.22" stroke-width="1" stroke-dasharray="2 4"/>` : ''}
+      <path d="M${pts.join(' L')}" fill="none" stroke="${ink}" stroke-opacity="${o.thin ? 0.6 : 0.7}" stroke-width="${o.thin ? 1.2 : 1.5}" stroke-linejoin="round" stroke-linecap="round"/>
+      ${o.marks ? `<line x1="${nowX}" y1="${Y(maxV*0.98)}" x2="${nowX}" y2="${h-pad}" stroke="${ink}" stroke-opacity="0.18" stroke-width="1"/>` : ''}
+      <circle cx="${nowX}" cy="${nowY}" r="${o.thin ? 1.8 : 2.4}" fill="${ink}" fill-opacity="0.9"/>`;
   }
   function renderWidgets(pm, t, h){
     const r = ratingFor(pm), li = levelFor(pm);
@@ -901,7 +901,7 @@
       const ink = dark ? '#F4E9D6' : '#26221B';
       setRidge($(id === 'wSmall' ? 'ridgeSmall' : 'ridgeMed'), pm);
       if(id === 'wSmall') drawCurve($('curveSmall'), 148, 54, ink, {});
-      else drawCurve($('curveMed'), 296, 46, ink, {ticks:true});
+      else drawCurve($('curveMed'), 296, 46, ink, {});
     });
     // lock screen accessories
     const hr = Math.floor(t), mn = Math.round((t - hr) * 60);
