@@ -3,6 +3,27 @@
 // into one median. Pure fetch logic — no window, no Vite.
 import { aqiToUgm3, ugm3ToAqi } from './aqi.js';
 
+// Both providers are garnish on a verdict the model can render alone, so
+// neither is allowed to hold the request open. Without a cap, one stalled
+// upstream rode out the whole edge invocation until Vercel killed it at 25s
+// and the Official/Local tabs never painted. 3.5s leaves room for a slow but
+// real response while keeping the pooled call comfortably inside the limit.
+const UPSTREAM_TIMEOUT_MS = 3500;
+
+// The timer spans the body read too, not just the headers: an upstream that
+// answers fast and then stalls mid-stream is the same hang.
+async function fetchJsonCapped(url, options = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    if (!res.ok) return null;
+    return await res.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function haversineMi(lat1, lon1, lat2, lon2) {
   const R = 3958.8;
   const toRad = (d) => (d * Math.PI) / 180;
@@ -17,12 +38,12 @@ function haversineMi(lat1, lon1, lat2, lon2) {
 async function airnowUgm3(lat, lon, key) {
   if (!key) return [];
   try {
-    const res = await fetch(
+    const body = await fetchJsonCapped(
       `https://www.airnowapi.org/aq/observation/latLong/current/` +
         `?format=application/json&latitude=${lat}&longitude=${lon}&distance=50&API_KEY=${key}`,
     );
-    if (!res.ok) return [];
-    const rows = (await res.json()).filter((r) => r.ParameterName === 'PM2.5' && r.AQI >= 0);
+    if (!Array.isArray(body)) return [];
+    const rows = body.filter((r) => r.ParameterName === 'PM2.5' && r.AQI >= 0);
     return rows.map((r) => ({
       ug: aqiToUgm3(r.AQI),
       distanceMi: Number.isFinite(r.Latitude)
@@ -51,9 +72,8 @@ async function purpleairUgm3(lat, lon, key) {
       `https://api.purpleair.com/v1/sensors` +
       `?fields=pm2.5_cf_1,humidity,latitude,longitude&location_type=0&max_age=3600` +
       `&nwlng=${lon - 0.5}&nwlat=${lat + 0.4}&selng=${lon + 0.5}&selat=${lat - 0.4}`;
-    const res = await fetch(url, { headers: { 'X-API-Key': key } });
-    if (!res.ok) return [];
-    const data = await res.json();
+    const data = await fetchJsonCapped(url, { headers: { 'X-API-Key': key } });
+    if (!data?.fields || !data?.data) return [];
     const iPm = data.fields.indexOf('pm2.5_cf_1');
     const iRh = data.fields.indexOf('humidity');
     const iLat = data.fields.indexOf('latitude');
