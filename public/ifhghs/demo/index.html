@@ -270,11 +270,13 @@
   .widget .wgrain{position:absolute;inset:0;opacity:.09;mix-blend-mode:overlay;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E")}
   .widget .overlay{position:absolute;inset:0;padding:13px 15px;display:flex;flex-direction:column;justify-content:flex-end}
+  .w-small .overlay{padding-bottom:50px}
+  .w-med .overlay{padding-bottom:44px}
   .widget .w-loc{position:absolute;top:11px;left:15px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:8.5px;letter-spacing:.14em;opacity:.65}
-  .w-dots{display:flex;gap:4px;margin-bottom:6px}
-  .w-dots i{width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,.16)}
-  .widget.dark-air .w-dots i{background:rgba(255,255,255,.28)}
-  .w-dots i.on{transform:scale(1.4)}
+  .wcurve{position:absolute;left:0;right:0;bottom:0;display:block}
+  .w-small .wcurve{height:54px}
+  .w-med .wcurve{height:46px}
+  .ar-curve{display:block;width:100%;height:17px;margin-top:5px}
   .widget .w-word{font-weight:800;font-size:16px;letter-spacing:-.01em;line-height:1.05}
   .w-med .w-word{font-size:20px}
   .widget .w-sub{font-size:10.5px;font-weight:600;margin-top:2px;color:#8C3E10}
@@ -385,21 +387,20 @@
   <div class="home-card">
     <div class="widget w-small" id="wSmall">
       <div class="wsun"></div><div class="wgrain"></div>
+      <svg class="wcurve" id="curveSmall" aria-hidden="true"></svg>
       <div class="w-loc" id="wLoc1">—</div>
       <div class="overlay">
-        <div class="w-dots"></div>
         <div class="w-word">—</div>
         <div class="w-sub">—</div>
       </div>
     </div>
     <div class="widget w-med" id="wMed">
       <div class="wsun"></div><div class="wgrain"></div>
+      <svg class="wcurve" id="curveMed" aria-hidden="true"></svg>
       <div class="w-loc" id="wLoc2">—</div>
       <div class="overlay">
-        <div class="w-dots"></div>
         <div class="w-word">—</div>
         <div class="w-sub">—</div>
-        <div class="w-days" id="wDays"></div>
       </div>
     </div>
   </div>
@@ -429,7 +430,7 @@
       <div class="acc-rect">
         <div class="ar-word" id="arWord">—</div>
         <div class="ar-sub" id="arSub">—</div>
-        <div class="ar-dots" id="arDots"></div>
+        <svg class="ar-curve" id="curveRect" aria-hidden="true"></svg>
       </div>
     </div>
   </div>
@@ -648,12 +649,6 @@
     $('wLoc1').textContent = shortName; $('wLoc2').textContent = shortName;
     $('lkDate').textContent = new Date((nowT + offset)*1000).toLocaleDateString('en-US',
       {weekday:'long', month:'long', day:'numeric', timeZone:'UTC'});
-    const wd = $('wDays'); wd.innerHTML = '';
-    days.forEach(d => {
-      const li = levelFor(d.max);
-      wd.insertAdjacentHTML('beforeend',
-        `<span>${localDate(d.t + 14*3600, offset).wd[0]}<span class="pip" style="background:${PIPS[li]}"></span></span>`);
-    });
     buildDays();
     buildCurve();
     setStatus(`<b>${name}</b><br>CAMS model · fetched ${S.live.fetchedAt.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}<br>peak next 48h: ${Math.round(peakPM)} µg/m³`);
@@ -768,13 +763,67 @@
     }
     return {txt:'5d+', label:'CLEAR', color:'#3F9B52', frac:1};
   }
-  function setDots(host, li, dark){
-    host.innerHTML = '';
-    for(let i=0;i<5;i++){
-      const d = document.createElement('i');
-      if(i === li){ d.className = 'on'; d.style.background = PIPS[li]; }
-      host.appendChild(d);
+  /* the shape of it: 60-hour smoke curve, trend as a shape */
+  const CURVE_N = 61, CURVE_NOW = 12;
+  function curveVals(){
+    const out = [];
+    if(S.mode === 'puppet'){
+      const base = S.puppet.pm, li = levelFor(base);
+      for(let i=0;i<CURVE_N;i++){
+        const h = i - CURVE_NOW;
+        if(li <= 1){
+          out.push(Math.max(2, base*(0.86 + 0.14*Math.sin(h/6))));
+        } else {
+          // was cleaner, rising now, peaks soon, clears after
+          const g = x => Math.exp(-Math.pow(x-8,2)/200);
+          out.push(Math.max(3, base * (0.15 + 1.15*g(h))));
+        }
+      }
+    } else {
+      for(let i=0;i<CURVE_N;i++) out.push(pmAt(i - CURVE_NOW));
     }
+    return out;
+  }
+
+  function drawCurve(svg, w, h, ink, opts){
+    const o = opts || {};
+    const vals = curveVals();
+    const maxV = Math.max(55, Math.max.apply(null, vals) * 1.18);
+    const pad = o.thin ? 1.5 : 3;
+    const X = i => (i/(CURVE_N-1))*w;
+    const Y = v => h - pad - clamp01(v/maxV)*(h - pad*2);
+    const pts = vals.map((v,i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`);
+    const uid = svg.id + 'g';
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    svg.setAttribute('width', w);
+    svg.setAttribute('height', h);
+    const thrY = Y(35).toFixed(1);
+    const nowX = X(CURVE_NOW).toFixed(1);
+    const nowY = Y(vals[CURVE_NOW]).toFixed(1);
+    // midnight ticks give the curve a timeline (wide widgets only)
+    let ticks = '';
+    if(o.ticks && S.mode === 'live' && S.live){
+      const L0 = S.live;
+      for(let i=0;i<CURVE_N;i++){
+        const hod = localDate(L0.nowT + (i-CURVE_NOW)*3600, L0.offset).hourOfDay;
+        if(Math.round(hod) % 24 === 0){
+          ticks += `<line x1="${X(i).toFixed(1)}" y1="${h-pad-6}" x2="${X(i).toFixed(1)}" y2="${h-pad}" stroke="${ink}" stroke-opacity="0.3" stroke-width="1"/>`;
+        }
+      }
+    }
+    svg.innerHTML = `
+      <defs>
+        <linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="${ink}" stop-opacity="${o.thin ? 0.30 : 0.34}"/>
+          <stop offset="1" stop-color="${ink}" stop-opacity="0.02"/>
+        </linearGradient>
+      </defs>
+      <path d="M0,${h} L${pts.join(' L')} L${w},${h} Z" fill="url(#${uid})"/>
+      ${ticks}
+      ${o.thin ? '' : `<line x1="0" y1="${thrY}" x2="${w}" y2="${thrY}" stroke="${ink}" stroke-opacity="0.22" stroke-width="1" stroke-dasharray="2 4"/>`}
+      <path d="M${pts.join(' L')}" fill="none" stroke="${ink}" stroke-opacity="${o.thin ? 0.6 : 0.72}" stroke-width="${o.thin ? 1.2 : 1.6}" stroke-linejoin="round" stroke-linecap="round"/>
+      ${o.thin ? '' : `<line x1="${nowX}" y1="${Y(maxV*0.98)}" x2="${nowX}" y2="${h-pad}" stroke="${ink}" stroke-opacity="0.18" stroke-width="1"/>`}
+      <circle cx="${nowX}" cy="${nowY}" r="${o.thin ? 1.8 : 2.6}" fill="${ink}" fill-opacity="0.9"/>`;
   }
   function renderWidgets(pm, t, h){
     const r = ratingFor(pm), li = levelFor(pm);
@@ -792,7 +841,10 @@
       w.classList.toggle('calm', li === 0);
       w.querySelector('.w-word').textContent = r.word;
       w.querySelector('.w-sub').textContent = sub;
-      setDots(w.querySelector('.w-dots'), li);
+      const dark = w.classList.contains('dark-air');
+      const ink = dark ? '#F4E9D6' : '#26221B';
+      if(id === 'wSmall') drawCurve($('curveSmall'), 148, 54, ink, {});
+      else drawCurve($('curveMed'), 296, 46, ink, {ticks:true});
     });
     // lock screen accessories
     const hr = Math.floor(t), mn = Math.round((t - hr) * 60);
@@ -810,7 +862,7 @@
     $('cdArc').setAttribute('stroke-dasharray', `${ch.frac*151} 151`);
     $('arWord').textContent = r.word;
     $('arSub').textContent = sub;
-    setDots($('arDots'), li);
+    drawCurve($('curveRect'), 144, 17, '#F4E9D6', {thin:true});
   }
   function update(h){
     currentH = h; S.h = h;
