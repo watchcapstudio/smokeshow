@@ -275,6 +275,7 @@ once its dependency lands. Prompts for each are in `docs/branch-prompts.md`.
 | **5** | **B7** | `claude/b7-notify-backend` | B8, B9 | Device registry, entitlement, eval loop, APNs/FCM | **Opus 5** | 2–3w |
 | **5** | **B8** | `claude/b8-apple` | B7, B9 | SwiftUI app + WidgetKit, iOS + macOS, StoreKit | **Opus 5** | 5–7w |
 | **5** | **B9** | `claude/b9-android` | B7, B8 | Kotlin/Compose + Glance, Play Billing | **Opus 5** | 3–5w |
+| **5** | **B10** | `claude/b10-dark-map` | B7, B8, B9 | Dark basemap + inverted smoke ramp | **Opus 5** | 1d |
 
 Web re-skin: ~4–6 days elapsed with the concurrency above (vs. ~8 serial).
 
