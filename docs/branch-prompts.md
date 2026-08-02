@@ -37,6 +37,7 @@ git fetch origin && git ls-tree --name-only origin/main docs/ src/lib/
 | — | *web re-skin ships* | | |
 | **4** | B1 | — | re-skin live |
 | **5** | B7, B8, B9 | yes | B1's contract commit |
+| **5** | B10 | yes (render layer — no overlap with B1/B7/B8/B9) | B1 merged |
 
 Every prompt assumes the agent reads `CLAUDE.md`,
 `docs/smokeshow-build-brief.md`, and `docs/smokeshow-share-spec.md` first.
@@ -500,3 +501,87 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 > Start with the Glance responsive widget spec — it's the riskiest unknown and
 > it constrains everything else. Commit and push to `claude/b9-android`. Do not
 > open a PR.
+
+---
+
+<a id="b10"></a>
+## B10 — Dark basemap + inverted smoke ramp · **Opus 5** · `claude/b10-dark-map`
+*Queued behind B1. Touches the render layer only — no collision with B1's data layer.*
+
+> Branch from `main`. Read `CLAUDE.md`, `docs/smokeshow-platform-plan.md`, and
+> the demo's map at `public/ifhghs/demo/index.html` (~line 1490), which is the
+> design reference.
+>
+> **The problem.** Production's map uses bright OpenStreetMap tiles
+> (`SmokeMap.jsx:77`). The demo uses CARTO `dark_all`, and smoke reads as a pale
+> glow against it — that look is the target. But the demo's ramp *darkens* with
+> concentration (`rgb(150,146,138)` → `rgb(28,20,12)`), which on a dark basemap
+> inverts the meaning. Measured, compositing the ramp over a `rgb(20,23,26)`
+> basemap:
+>
+> | PM2.5 | 20 | 35 | 150 | 250 | 400 |
+> | --- | --- | --- | --- | --- | --- |
+> | demo ramp on dark | 1.29 | **1.51 ← peak** | 1.17 | 1.01 | 1.01 |
+> | production ramp on dark | 2.13 | **2.34 ← peak** | 1.32 | 1.05 | 1.04 |
+>
+> Contrast peaks near 35 µg/m³ and then collapses. At Smokeshow-level air the
+> smoke composites to `rgb(26,21,15)` against `rgb(20,23,26)` — **the worst air
+> on the map becomes invisible.** Production's light basemap avoids this only
+> because it runs the ramp the other way (1.04 → 12.08, monotonic).
+>
+> **The fix.** Dark basemap *and* invert the ramp so intensity rides brightness.
+> A validated candidate — hue stays smoke-neutral and warms slightly, alpha
+> carries the load:
+>
+> ```
+> pm:    0     5    12    20    35    55   150   300
+> rgb: 180,186,196 / 190,194,200 / 205,206,208 / 218,216,212
+>    / 230,226,216 / 240,234,220 / 250,244,228 / 255,251,240
+> a:  0.00  0.10  0.24  0.38  0.52  0.66  0.82  0.92
+> ```
+>
+> Composited on `rgb(20,23,26)` this is monotonic 1.21 → 14.81, crossing 4.60 at
+> the 35 µg/m³ "Smells like fire" threshold. Treat it as a starting point, not
+> gospel — tune it, but **prove monotonicity across the full range** and ship
+> the check as a script alongside `scripts/contrast-audit.mjs`.
+>
+> **Rule tension, already resolved — note it in your summary.** `CLAUDE.md`
+> mandates a "gray→brown ramp, not AQI colors." White-on-black breaks the
+> letter of that but keeps its intent: it's how smoke reads in GOES/VIIRS
+> imagery and NOAA's own HRRR smoke products, so it still looks like smoke
+> rather than a legend. Joe approved the direction. Update the `CLAUDE.md` line
+> so the next reader isn't misled.
+>
+> **Scope:**
+> - `src/components/SmokeMap.jsx` — swap the tile layer. **Use the three-layer
+>   sandwich**, not `dark_all`: `dark_nolabels` → the smoke canvas →
+>   `dark_only_labels` on top. Heavy smoke must never bury the city names, and
+>   this is the only clean way to keep them readable. Keep CARTO's attribution.
+> - `src/lib/rating.js` — replace `SMOKE_STOPS`.
+> - `scripts/hrrr/render_frames.py:45-49` — the hand-synced NumPy copy of the
+>   same ramp. **Both must change together**; the comment at `rating.js:80` and
+>   `render_frames.py:43` exists precisely because they drift. Re-render the
+>   frames and confirm the `data`-branch output still loads.
+> - `src/components/SmokeLayer.js` — verify the per-pixel path still composites
+>   correctly with the new alphas; the old ramp got darker as alpha rose, the
+>   new one gets lighter, so any assumption baked in there will surface here.
+>
+> **Constraints:**
+> - **The map section must hold a fixed dark context.** The rest of the page now
+>   flips ink/cream with the live sky (branch B2); a basemap cannot flip with it
+>   or the tiles will fight the type. Pin the map's own surface and make sure
+>   the scrubber, agreement band, and clock chrome sitting over it stay legible
+>   in that fixed context regardless of the sky above.
+> - Do not change the map's placement — it stays portalled into `#map-slot`
+>   above the FAQ for SEO, and it stays deferred behind the verdict. The
+>   under-3-seconds-on-cellular rule is unaffected and must remain so.
+> - Check the share card (`src/lib/shareCard.js`) and OG function (`api/og.js`)
+>   do not inherit the ramp change unintentionally.
+> - CARTO's free tier has usage limits and requires attribution. Confirm the
+>   attribution renders, and note the ceiling in your summary — a viral smoke
+>   event is exactly when it would bite.
+>
+> **Verify with the puppet rig** at `/ifhghs/demo` — branch B5 gave it a shape
+> selector and platform frames, so you can force each level and compare. Deliver
+> before/after captures at all five levels, plus the monotonicity check output.
+> Commit and push to `claude/b10-dark-map`. Do not open a PR.
