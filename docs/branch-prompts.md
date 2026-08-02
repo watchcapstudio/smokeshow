@@ -3,6 +3,30 @@
 Copy-paste prompts for each work branch in `docs/smokeshow-platform-plan.md` §8.
 Each is written to be self-contained for a fresh session.
 
+## Before you start: branch from `main`, and check it's current
+
+Every prompt below opens by asking the agent to read planning docs in `docs/`.
+**Those docs must already be on `main`, or the agent will branch from a commit
+where they don't exist and report them missing.** That happened to B0 and B5 —
+they branched from `main` before the planning docs were merged. The work
+survived because the prompt bodies carry the substance, but don't repeat it.
+
+Before starting any wave, confirm `main` contains the previous wave's output:
+
+| Starting | `main` must already contain |
+| --- | --- |
+| Wave 1 (B0, B5) | the planning docs in `docs/` |
+| Wave 2 (B2, B3, B4) | **B0** — `src/lib/sky.js`, `src/lib/trend.js`, `design/tokens.json`, the split CSS, and the `App.jsx` slots |
+| Wave 3 (B6) | **B2** |
+| Wave 4 (B1) | the shipped re-skin |
+| Wave 5 (B7, B8, B9) | **B1's contract commit** — `docs/forecast-api-contract.md` |
+
+Quick check before dispatching a branch:
+
+```sh
+git fetch origin && git ls-tree --name-only origin/main docs/ src/lib/
+```
+
 **Order — the web re-skin ships first, then the platform work.**
 
 | Wave | Branches | Concurrent? | Gate |
