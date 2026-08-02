@@ -11,6 +11,26 @@
   --smells: #d68a4a;
   --tastes: #b85c3a;
   --smokeshow: #7a4030;
+
+  --font-size-xs: 0.7rem;
+  --font-size-sm: 0.8rem;
+  --font-size-base: 0.95rem;
+  --font-size-md: 1.1rem;
+  --font-size-lg: 1.3rem;
+  --font-size-xl: 1.6rem;
+  --font-size-display: 2.6rem;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-pill: 999px;
+
+  --duration-base: 0.35s;
+  --easing-base: ease;
+  --duration-slow: 0.4s;
+  --easing-slow: ease;
+  --duration-bounce: 1.2s;
+  --easing-bounce: ease-in-out;
 }
 
 @media (prefers-color-scheme: light) {
