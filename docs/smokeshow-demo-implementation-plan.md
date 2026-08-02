@@ -5,6 +5,15 @@ Implementation plan for adopting the demo's design across the live app.
 Source reviewed: the committed demo at `public/ifhghs/demo/index.html`
 (1,428 lines, 17 commits, `#2`–`#17`), against `src/` at `eace33a`.
 
+> **This document is Phase A of `docs/smokeshow-platform-plan.md`**, which
+> covers the full product: free web plus paid iOS, macOS, and Android apps.
+> The work here is split across branches **B0, B2, B3, B4, and B6** — prompts
+> in `docs/branch-prompts.md`.
+>
+> Decisions since first draft: **the lake illustration is dropped** (the sky is
+> the illustration now); **the web carries no notification settings**, only a
+> call to action for the paid apps.
+
 ---
 
 ## 0. The governing constraint
@@ -104,12 +113,10 @@ the map where it is and re-skin its chrome**, then optionally add an expand
 affordance to go full-screen. Moving it behind a tap on the location name hides
 it from crawlers and from anyone who doesn't know to tap.
 
-**The lake illustration.** `LakeScene.jsx` and the sky are two answers to the
-same question, and stacking them is busy. The lake is the more distinctive,
-more shareable asset and `CLAUDE.md` mandates the parametric crossfade
-deliberately. Recommendation: **sky in-app, lake retained for the OG image and
-share card**, where it already does its best work. Your call — this is the one
-place the re-skin genuinely removes something visible.
+**The lake illustration — decided: dropped.** `LakeScene.jsx` and the sky were
+two answers to the same question and stacking them is busy. The sky is the
+illustration now. `LakeScene.jsx` and its CSS come out (branch B2);
+`assets/gen_smokeshow_art.py` and the SVGs stay in the repo as an archive.
 
 ---
 
@@ -252,17 +259,20 @@ The change that makes the app feel like the demo.
   `lib/geolocation.js` rather than the demo's inline geocoder.
 - Keep production's `SMOKE_STOPS` ramp, tiered grid, and `/api/aq` routing.
 
-### Phase 5 — Settings sheet (½ day, scope decision needed)
+### Phase 5 — Settings sheet and app CTA (1–2 days)
 
-The demo's settings sheet is mostly notification toggles, which the live site
-doesn't have. Notifications need a stored push subscription, a cron, and VAPID
-keys — a stateful backend, against the "static-first / no accounts" hard rule,
-and a separate project.
+**Decided: the web carries no notification settings.** Notifications are a paid
+app feature (`docs/smokeshow-platform-plan.md` §5), so the web's settings sheet
+holds the units toggle and the sensitive-household pref only. The demo's
+"Watching this air. You'll hear when it changes" row does **not** ship — it
+promises push the site can't deliver.
 
-For the re-skin: **ship the sheet with the units toggle and sensitive-household
-pref only**, and either omit the notification rows or mark them "soon" as the
-demo already does for SMS. The "Watching this air" row on the main screen
-should come out until the feature exists — it's a promise the site can't keep.
+In its place, the web gets a **call to action for the paid apps** (branch B6).
+The demo already renders live widget mocks from real data (`renderWidgets()`,
+demo:921) — reuse that as a "your air, on your home screen" section whose
+widgets update as the visitor scrubs their own timeline. Store badges go behind
+a feature flag until the apps exist. No email capture, no waitlist — the hard
+rule stands.
 
 ---
 
@@ -275,23 +285,22 @@ should come out until the feature exists — it's a promise the site can't keep.
 | 2 | Ridgeline, curve scrubber, agreement band, motion | 1–1.5 days |
 | 3 | Trend chip, explain sheet, prefs, share button | 1.5 days |
 | 4 | Map chrome | 1–1.5 days |
-| 5 | Settings sheet | 0.5 day |
-| **Total** | | **~6–7 days** |
+| 5 | Settings sheet + app CTA | 1–2 days |
+| **Total** | | **~7–8 days** |
 
 Phases 0–3 are the core look and stand alone at ~4.5–5 days if you want to ship
-in two passes.
+in two passes. Phase 0 is branch B0, which also unblocks the rest to run
+concurrently — see `docs/branch-prompts.md`.
 
 ---
 
 ## 7. Open questions
 
-1. **Lake or sky in-app?** Recommendation: sky in-app, lake for share cards and
-   OG. The only place the re-skin removes something visible, and `CLAUDE.md`
-   mandates the parametric lake deliberately — needs your call.
-2. **Map placement** — confirm it stays inline above the FAQ (SEO) with an
+1. **Map placement** — confirm it stays inline above the FAQ (SEO) with an
    optional expand, rather than moving behind the location name.
-3. **Copy** — confirm production's level names and notices win over the demo's,
+2. **Copy** — confirm production's level names and notices win over the demo's,
    and sign off on `NOT_LINES` against the no-invented-dose-response rule.
-4. **The "Watching this air" row** — cut for now, or ship marked "soon"?
-5. **Test runner** — add Vitest, or keep extending the Puppeteer
-   `scripts/verify-*.mjs` pattern?
+3. **Test runner** — Vitest is now scoped into branch B0. Confirm, or say if
+   you'd rather keep extending the Puppeteer `scripts/verify-*.mjs` pattern.
+
+Settled: lake dropped (§3), no web notification settings (Phase 5).
