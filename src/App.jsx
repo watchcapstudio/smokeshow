@@ -12,6 +12,7 @@ import AgreementBand from './components/AgreementBand.jsx';
 import FiveDayStrip from './components/FiveDayStrip.jsx';
 import SharedBanner from './components/SharedBanner.jsx';
 import ShareButton from './components/ShareButton.jsx';
+import AppWidgetCTA from './components/AppWidgetCTA.jsx';
 import InstallNudge from './components/InstallNudge.jsx';
 import PullToRefresh from './components/PullToRefresh.jsx';
 // Order matters: sky.css re-points the tokens.css palette at the live ink, and
@@ -558,6 +559,19 @@ export default function App() {
         measuredDays={measuredDays}
       />
       {/* SLOT: cta */}
+      <AppWidgetCTA
+        pm25={anchoredPm25}
+        timesUTC={centerData.timesUTC}
+        selectedIndex={selectedIndex}
+        nowIndex={nowIndex}
+        windowStart={windowStart}
+        windowEnd={windowEnd}
+        verdict={verdict}
+        headline={headline}
+        level={selectedLevel}
+        placeName={placeName}
+        timezone={TIMEZONE}
+      />
       <InstallNudge levelIndex={nowLevel?.index ?? 0} headline={headline} />
     </div>
   );

@@ -63,7 +63,8 @@
 
 /* FAQ */
 .faq h2,
-.explainer h2 {
+.explainer h2,
+.app-cta h2 {
   font-family: var(--font-mono);
   font-size: 10.5px;
   font-weight: 600;
@@ -116,18 +117,21 @@
 }
 
 .faq p,
-.explainer p {
+.explainer p,
+.app-cta p {
   color: var(--text-dim);
   line-height: 1.6;
   font-size: 0.92rem;
   margin: 0 0 0.7rem;
 }
 
-.explainer p:last-child {
+.explainer p:last-child,
+.app-cta p:last-child {
   margin-bottom: 0;
 }
 
-.explainer strong {
+.explainer strong,
+.app-cta strong {
   color: var(--ink);
 }
 
