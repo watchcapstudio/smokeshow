@@ -1,15 +1,16 @@
-name: hrrr-smoke
+name: cams-global-smoke
 
 on:
   schedule:
-    # ~2h40m after each 00/06/12/18Z HRRR cycle (f48 needs the 6-hourly runs)
-    - cron: "40 2,8,14,20 * * *"
+    # CAMS global runs 00Z and 12Z and reaches the ADS ~6-8h later; 09:30 and
+    # 21:30 UTC leaves a conservative margin (see latest_cycle()).
+    - cron: "30 9,21 * * *"
   workflow_dispatch: {}
 
 permissions:
   contents: write
 
-# Shared with cams.yml: both jobs rewrite the `data` branch, so they queue
+# Shared with hrrr.yml: both jobs rewrite the `data` branch, so they queue
 # rather than race. cancel-in-progress must stay false — cancelling here would
 # mean one model's render killing the other's.
 concurrency:
@@ -19,32 +20,38 @@ concurrency:
 jobs:
   render:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # ADS retrievals sit in a queue before they start streaming; the render
+    # itself is a couple of minutes.
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
 
       - uses: mamba-org/setup-micromamba@v1
         with:
-          environment-name: hrrr
+          environment-name: cams
           create-args: >-
             python=3.11
-            herbie-data
             xarray
             cfgrib
             eccodes
             numpy
-            pyproj
             pillow
+            cdsapi
           cache-environment: true
           init-shell: bash
 
-      - name: Render HRRR smoke frames
+      - name: Render CAMS global smoke frames
         shell: bash -leo pipefail {0}
-        run: python scripts/hrrr/render_frames.py
+        env:
+          # ECMWF Atmosphere Data Store key. Free registration at
+          # https://ads.atmosphere.copernicus.eu/ — repository secret only,
+          # never bundled into the client.
+          ADS_API_KEY: ${{ secrets.ADS_API_KEY }}
+        run: python scripts/cams/render_frames.py
 
       - name: Publish to data branch
         shell: bash -leo pipefail {0}
         env:
-          DOMAIN: hrrr
+          DOMAIN: cams
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: bash scripts/render/publish.sh

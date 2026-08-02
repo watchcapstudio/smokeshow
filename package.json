@@ -12,7 +12,8 @@
     "contrast": "node scripts/contrast-audit.mjs",
     "ramp": "node scripts/smoke-ramp-audit.mjs",
     "verify:sky": "node scripts/verify-sky.mjs",
-    "verify:map": "node scripts/verify-map.mjs"
+    "verify:map": "node scripts/verify-map.mjs",
+    "verify:domains": "node scripts/verify-domains.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

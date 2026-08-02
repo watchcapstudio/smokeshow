@@ -15,8 +15,17 @@
 //                  screen-space grain), because a speck moving the wrong way
 //                  would undo the ramp.
 //   2. SEPARATED   each rating threshold lands a visible step above the last.
-//   3. IN SYNC     scripts/hrrr/render_frames.py's hand-copied NumPy ramp
-//                  still matches SMOKE_STOPS. These two have drifted before.
+//   3. IN SYNC     scripts/render/ramp.py's hand-copied NumPy ramp still
+//                  matches SMOKE_STOPS. These two have drifted before, and
+//                  they are the ONLY two copies — both renderers import that
+//                  module rather than transcribing the arrays again.
+//   4. PALETTE     the 256-entry PNG-8 palette the renderers actually write
+//                  is the ramp, sampled: every entry within a hair of
+//                  smokeRGBA(), and the whole table monotonic. Frames ship as
+//                  indexed PNG because the field is scalar and the ramp is a
+//                  function of it (see docs/global-frames.md) — so the palette
+//                  IS the encoding, and an unchecked palette is an unchecked
+//                  ramp. Needs python3 + numpy; reports SKIP without them.
 //
 // Contrast is WCAG 2.x relative-luminance ratio. It is not an accessibility
 // claim about the plume — nobody has to read the smoke — it is just the
@@ -25,6 +34,7 @@
 //
 // Run: node scripts/smoke-ramp-audit.mjs   (npm run ramp)
 import { readFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import {
@@ -59,7 +69,7 @@ const BASE_LUM = luminance(BASE);
 
 // ------------------------------------------------------- the paths that paint
 
-// 1. Flat: the ramp alone, which is what the HRRR PNGs carry and what the
+// 1. Flat: the ramp alone, which is what the domain PNGs carry and what the
 //    field renders between specks.
 function flatLum(pm) {
   const [r, g, b, a] = smokeRGBA(pm);
@@ -77,7 +87,7 @@ function fieldLum(pm) {
   return (1 - f) * flatLum(pm) + f * speck;
 }
 
-// 3. HRRR screen-space grain (SmokeCanvasLayer._redrawImage): a repeating
+// 3. Screen-space grain over a domain frame (SmokeCanvasLayer._redrawImage): a repeating
 //    pattern painted 'source-atop' over the composited plume. source-atop
 //    keeps the destination's alpha and blends colour by the SOURCE alpha, so a
 //    speck is the plume colour pulled toward the grain fill — at the plume's
@@ -97,9 +107,9 @@ function grainLum(pm) {
 }
 
 const PATHS = [
-  { key: 'flat ramp', lum: flatLum, note: 'HRRR PNG frames, field between specks' },
+  { key: 'flat ramp', lum: flatLum, note: 'domain PNG frames, field between specks' },
   { key: 'field + stipple', lum: fieldLum, note: 'SmokeCanvasLayer per-pixel path' },
-  { key: 'HRRR + grain', lum: grainLum, note: 'SmokeCanvasLayer screen-space path' },
+  { key: 'image + grain', lum: grainLum, note: 'SmokeCanvasLayer screen-space path' },
 ];
 
 // --------------------------------------------------- reference ramps, for why
@@ -186,11 +196,13 @@ function monotonicity(lum) {
 
 // ------------------------------------------------------------- python in sync
 
+const RAMP_PY = join(here, 'render', 'ramp.py');
+
 function pythonRamp() {
-  const src = readFileSync(join(here, 'hrrr', 'render_frames.py'), 'utf8');
+  const src = readFileSync(RAMP_PY, 'utf8');
   const grab = (name) => {
     const m = src.match(new RegExp(`${name}\\s*=\\s*np\\.array\\(\\[([^\\]]*)\\]`));
-    if (!m) throw new Error(`render_frames.py: could not find ${name}`);
+    if (!m) throw new Error(`render/ramp.py: could not find ${name}`);
     return m[1].split(',').map((s) => Number(s.trim()));
   };
   return {
@@ -287,10 +299,87 @@ for (const p of probes) {
   prevName = p.name;
 }
 
-console.log(`\n3. render_frames.py in sync with SMOKE_STOPS`);
+console.log(`\n3. scripts/render/ramp.py in sync with SMOKE_STOPS`);
 const drift = syncReport();
 if (drift.length) for (const d of drift) console.log(`   FAIL  ${d}`);
 else console.log(`   PASS  all ${STOPS.length} stops match`);
+
+// --------------------------------------------------------- the shipped palette
+
+// Ask ramp.py for the exact bytes it will write into every PNG-8 frame, then
+// check them against this file's own smokeRGBA(). This closes the loop the
+// text-diff above cannot: the arrays could match perfectly and the palette
+// still be sampled along a curve that skips part of the ramp.
+function shippedPalette() {
+  const py = `
+import sys, json
+sys.path.insert(0, ${JSON.stringify(join(here, 'render', '..'))})
+from render.ramp import palette, index_to_pm25, PALETTE_N
+import numpy as np
+rgb, alpha = palette()
+print(json.dumps({
+  "pm": [float(x) for x in index_to_pm25(np.arange(PALETTE_N))],
+  "rgb": list(rgb), "alpha": list(alpha),
+}))`;
+  const r = spawnSync('python3', ['-c', py], { encoding: 'utf8' });
+  if (r.status !== 0) return { skip: (r.stderr || r.error?.message || 'python3 failed').trim().split('\n').pop() };
+  return JSON.parse(r.stdout);
+}
+
+console.log(`\n4. shipped PNG-8 palette is the ramp`);
+const pal = shippedPalette();
+let palFail = 0;
+if (pal.skip) {
+  console.log(`   SKIP  could not run python3 + numpy (${pal.skip})`);
+  console.log(`         the frames' actual encoding is UNVERIFIED in this run`);
+} else {
+  let worstRGB = 0;
+  let worstA = 0;
+  let worstStep = 0;
+  let prev = -Infinity;
+  let reversals = 0;
+  for (let i = 0; i < pal.pm.length; i++) {
+    const [r, g, b, a] = smokeRGBA(pal.pm[i]);
+    worstRGB = Math.max(
+      worstRGB,
+      Math.abs(r - pal.rgb[i * 3]),
+      Math.abs(g - pal.rgb[i * 3 + 1]),
+      Math.abs(b - pal.rgb[i * 3 + 2]),
+    );
+    // Index 0 is forced to alpha 0 — it means "exactly clean air".
+    if (i > 0) worstA = Math.max(worstA, Math.abs(a - pal.alpha[i]));
+    if (i > 0) worstStep = Math.max(worstStep, pal.alpha[i] - pal.alpha[i - 1]);
+    const cur = ratioOfLum(
+      luminance(over([pal.rgb[i * 3], pal.rgb[i * 3 + 1], pal.rgb[i * 3 + 2]], BASE, pal.alpha[i] / 255)),
+      BASE_LUM,
+    );
+    if (prev - cur > 1e-9) reversals++;
+    prev = cur;
+  }
+  // 1 unit of 0-255 is the rounding both sides do independently; more than
+  // that means the palette curve is not tracking the ramp.
+  const okMatch = worstRGB <= 1 && worstA <= 1;
+  const okMono = reversals === 0;
+  // A palette step bigger than a few alpha units would band visibly on a
+  // smooth plume — the reason the index curve is quadratic, not linear.
+  const okStep = worstStep <= 4;
+  if (!okMatch) palFail++;
+  if (!okMono) palFail++;
+  if (!okStep) palFail++;
+  console.log(
+    `   ${okMatch ? 'PASS' : 'FAIL'}  ${pad('matches smokeRGBA', 18)} ` +
+      `worst rgb ${worstRGB}, worst alpha ${worstA} (of 255)`,
+  );
+  console.log(
+    `   ${okMono ? 'PASS' : 'FAIL'}  ${pad('monotonic', 18)} ` +
+      `${pal.pm.length} entries, ${reversals} reversals, ` +
+      `0 -> ${prev.toFixed(2)}:1 against the basemap`,
+  );
+  console.log(
+    `   ${okStep ? 'PASS' : 'FAIL'}  ${pad('no banding', 18)} ` +
+      `largest alpha step between adjacent indices: ${worstStep}/255`,
+  );
+}
 
 // Not a gate, but the number a reader will ask about: above the top stop the
 // ramp is flat, so the map stops differentiating there. Printed so the ceiling
@@ -305,7 +394,8 @@ console.log(
 const failures = [];
 if (monoFails.length) failures.push(`monotonicity (${monoFails.join(', ')})`);
 if (sepFails) failures.push(`threshold separation (${sepFails})`);
-if (drift.length) failures.push('render_frames.py drift');
+if (drift.length) failures.push('render/ramp.py drift');
+if (palFail) failures.push(`shipped palette (${palFail})`);
 console.log(
   failures.length ? `\nFAIL: ${failures.join('; ')}\n` : `\nPASS: ramp is monotonic, separated, and in sync\n`,
 );
