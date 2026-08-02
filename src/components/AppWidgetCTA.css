@@ -1,0 +1,351 @@
+/* The paid-app pitch: live widget mocks, ported from the demo's widget
+   column (public/ifhghs/demo/index.html ~line 337) but painted from the same
+   custom properties SkyBackdrop.jsx already writes to <html> — --sky-*,
+   --ink, --sun-* — so the widgets are always the same sky the verdict above
+   is showing, not a second render of it. */
+
+.cta-widgets {
+  display: flex;
+  flex-direction: column;
+}
+
+.cta-widgets__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cta-widgets__heading {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+
+.cta-widgets__lead {
+  margin: 0;
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  color: var(--text-dim);
+  max-width: 46ch;
+}
+
+/* ------------------------------------------------------- home-screen mock */
+
+.cta-widgets__home {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 20px;
+  border-radius: 22px;
+  margin-top: 0.25rem;
+  background: radial-gradient(120% 90% at 85% 0%, #3d4e57 0%, #2e3d46 45%, #151c22 100%);
+}
+
+.cta-widget {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  box-shadow: 0 16px 34px -16px rgba(0, 0, 0, 0.6);
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--sky-zen), var(--sky-mid) 52%, var(--sky-hor));
+}
+
+.cta-widget--small {
+  width: 148px;
+  height: 148px;
+}
+
+.cta-widget--medium {
+  width: 296px;
+  height: 140px;
+}
+
+.cta-widget__sun {
+  position: absolute;
+  left: var(--sun-x, 76%);
+  top: var(--sun-y, 24%);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: var(--sun-op, 0);
+  background: radial-gradient(circle, var(--sun-core, #fff6e0) 0%, transparent var(--sun-r1, 46%));
+}
+
+.cta-widget__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    var(--scrim-zen, transparent) 0%,
+    var(--scrim-mid, transparent) 52%,
+    var(--scrim-hor, transparent) 100%
+  );
+}
+
+.cta-widget__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.09;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.cta-widget__ridge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+.cta-widget--small .cta-widget__ridge {
+  bottom: 44px;
+  height: 30px;
+}
+
+.cta-widget--medium .cta-widget__ridge {
+  bottom: 38px;
+  height: 26px;
+}
+
+.cta-widget__ridge .ridgeline {
+  height: 100%;
+}
+
+/* Direct-child scope: the same .cta-widget__curve class is reused, un-
+   positioned, as the inline sparkline inside the lock screen's rectangular
+   accessory further down — it must not inherit this absolute placement. */
+.cta-widget > .cta-widget__curve {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
+  width: 100%;
+}
+
+.cta-widget--small > .cta-widget__curve {
+  height: 54px;
+}
+
+.cta-widget--medium > .cta-widget__curve {
+  height: 46px;
+}
+
+.cta-widget__curve-threshold {
+  stroke: var(--ink);
+  stroke-opacity: 0.22;
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.cta-widget__curve-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-opacity: 0.7;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.cta-widget__curve-dot {
+  fill: var(--ink);
+  fill-opacity: 0.9;
+}
+
+.cta-widget__curve-now {
+  stroke: var(--ink);
+  stroke-opacity: 0.18;
+  stroke-width: 1;
+}
+
+.cta-widget__loc {
+  position: absolute;
+  top: 11px;
+  left: 15px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.09em;
+  opacity: 0.55;
+  font-weight: 500;
+}
+
+.cta-widget__overlay {
+  position: absolute;
+  inset: 0;
+  padding: 13px 15px 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.cta-widget--medium .cta-widget__overlay {
+  padding-bottom: 44px;
+}
+
+.cta-widget__word {
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+
+.cta-widget--medium .cta-widget__word {
+  font-size: 20px;
+}
+
+.cta-widget__sub {
+  font-size: 10.5px;
+  font-weight: 600;
+  margin-top: 2px;
+  opacity: 0.72;
+}
+
+/* ------------------------------------------------------- lock-screen mock */
+
+.cta-lock {
+  margin-top: 0.25rem;
+  border-radius: 22px;
+  padding: 22px 20px 20px;
+  color: #efe9dc;
+  text-align: center;
+  background: linear-gradient(180deg, #33302b 0%, #211e19 55%, #141210 100%);
+  /* Shadowed for everything nested below: the lock screen is always dark
+     chrome, so var(--ink) inside it (the mini curve's stroke, via the same
+     custom property SkyBackdrop drives) should resolve to cream here even
+     while the live page ink is currently dark. */
+  --ink: #f4e9d6;
+}
+
+.cta-lock__clock {
+  font-size: 34px;
+  font-weight: 250;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.cta-lock__inline {
+  margin: 12px auto 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 13px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.cta-lock__pip {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.cta-lock__row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: stretch;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.cta-lock__circ {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.cta-lock__circ svg {
+  width: 58px;
+  height: 58px;
+}
+
+.cta-lock__rect {
+  width: 150px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 8px 12px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  justify-content: center;
+}
+
+.cta-lock__rect-word {
+  font-size: 12.5px;
+  font-weight: 750;
+}
+
+.cta-lock__rect-sub {
+  font-size: 10px;
+  opacity: 0.75;
+  font-weight: 600;
+}
+
+.cta-lock__rect .cta-widget__curve {
+  display: block;
+  width: 100%;
+  height: 17px;
+  margin-top: 4px;
+}
+
+/* ------------------------------------------------------------------ copy */
+
+.cta-widgets__secondary {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+  max-width: 46ch;
+}
+
+.cta-widgets__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.cta-widgets__price {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.cta-widgets__badges {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.cta-widgets__badge {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.cta-widgets__badge img {
+  display: block;
+  height: 40px;
+  width: auto;
+}
+
+@media (max-width: 400px) {
+  .cta-widget--medium {
+    width: 100%;
+    max-width: 296px;
+  }
+}
