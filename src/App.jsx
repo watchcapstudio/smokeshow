@@ -557,7 +557,6 @@ export default function App() {
         sources={sensorNow}
         aqiSource={aqiSource}
         onSourceChange={handleSourceChange}
-        units={units}
         onExplain={() => setExplainOpen(true)}
       />
       <TrendChip pm25={anchoredPm25} index={selectedIndex} verdict={verdict} />

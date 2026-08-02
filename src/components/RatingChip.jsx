@@ -19,7 +19,6 @@ export default function RatingChip({
   sources,
   aqiSource,
   onSourceChange,
-  units,
   onExplain,
 }) {
   if (!level) return null;
@@ -27,9 +26,11 @@ export default function RatingChip({
   const category = aqiCategory(aqi);
   const both = !!(sources?.official && sources?.local);
   const disagree = both && Math.abs(sources.official.aqi - sources.local.aqi) >= DISAGREE_AQI_GAP;
-  const primaryValue = units === 'aqi' ? aqi : Math.round(pm25);
-  const secondaryValue =
-    units === 'aqi' ? `${Math.round(pm25)} µg/m³ PM2.5` : `AQI ${aqi} · ${category?.name}`;
+  // AQI always leads. The source tabs above are quoted in AQI, so making µg/m³
+  // the hero meant the tab said 42 and the number under it said 18 — the same
+  // reading in two units, reading as two different answers.
+  const primaryValue = aqi;
+  const secondaryValue = `${Math.round(pm25)} µg/m³ PM2.5`;
 
   // Open by default for the first WHY_TWO_TEACH_VIEWS disagreement views, then
   // collapsed; the toggle lets the user reopen it. Sensor data arrives async,
@@ -55,7 +56,7 @@ export default function RatingChip({
             }
             onClick={() => onSourceChange('official')}
           >
-            Official · {sources.official.aqi}
+            Station · {sources.official.aqi}
           </button>
           <button
             type="button"
@@ -83,7 +84,7 @@ export default function RatingChip({
                 ? `${sensor.count} local sensor${sensor.count === 1 ? '' : 's'}${
                     sensor.medianDistanceMi != null ? `, typically ~${sensor.medianDistanceMi} mi away` : ' nearby'
                   }`
-                : `official monitor${sensor.distanceMi != null ? ` ~${sensor.distanceMi} mi away` : ' reading'}`
+                : `monitoring station${sensor.distanceMi != null ? ` ~${sensor.distanceMi} mi away` : ' reading'}`
               : ''}
           </span>
         </span>
@@ -116,7 +117,7 @@ export default function RatingChip({
           </button>
           {whyOpen && (
             <p className="rating-chip__why-body">
-              Official is the nearest government monitor,{' '}
+              Station is the nearest regulatory-grade monitor,{' '}
               {sources.official.distanceMi != null
                 ? `about ${sources.official.distanceMi} miles from you`
                 : 'which can sit many miles away'}
