@@ -20,30 +20,33 @@
 /* Map
  *
  * The one surface on the page that is pinned, not live. Everything above
- * flips ink and cream with the sky (see lib/ink.js); the basemap cannot —
- * CARTO ships one dark tile set, and a container that flipped underneath it
- * would put cream chrome on black tiles for half the day. So this block
- * declares its own fixed dark context and every mark drawn over the tiles
- * reads these, not the live tokens.
+ * flips ink and cream with the sky (see lib/ink.js); the basemap cannot — we
+ * ship one tile set, and a container that flipped underneath it would put
+ * cream chrome on light tiles for half the day. So this block declares its own
+ * fixed light context and every mark drawn over the tiles reads these, not the
+ * live tokens.
  *
  * Two backdrops matter, and chrome has to clear both: the bare basemap
- * rgb(20,23,26), and the heaviest smoke the ramp can paint, which composites
- * to rgb(236,233,223). Ratios below are measured against that pair.
+ * rgb(242,240,236), and the heaviest smoke the ramp can paint, which
+ * composites to rgb(42,38,37). That spread is nearly the full range, so chrome
+ * carries its own near-opaque pill and the ratios below are text-on-pill with
+ * the pill measured over each backdrop in turn.
  */
 .smoke-map {
-  --map-surface: #14171a;
-  --map-chrome: rgba(14, 16, 18, 0.82);
-  --map-chrome-text: #c7cfcb; /* 13.0:1 on bare tiles, 6.0:1 under heavy smoke */
-  --map-chrome-text-strong: #f4e9d6; /* the marker label: 15.7:1 / 9.9:1 */
-  --map-mark: #d9531e; /* marker core: 4.5:1 on tiles, 3.3:1 on heavy smoke */
+  --map-surface: #f2f0ec;
+  --map-chrome: rgba(250, 249, 246, 0.86);
+  --map-chrome-edge: rgba(24, 26, 28, 0.14); /* the pill is 1.07:1 on bare tiles — without this it has no edge */
+  --map-chrome-text: #3a4042; /* 9.9:1 on the pill over tiles, 7.6:1 over heavy smoke */
+  --map-chrome-text-strong: #16191b; /* the marker label: 16.6:1 / 12.8:1 */
+  --map-mark: #d9531e; /* marker core: 3.5:1 on tiles, 3.7:1 on heavy smoke */
 
   width: 100%;
   height: 340px;
   border-radius: 1rem;
   overflow: hidden;
   border: 1px solid var(--border);
-  /* Painted before the first tile lands, so the map fades up out of the dark
-     instead of flashing Leaflet's default gray. */
+  /* Painted before the first tile lands, so the map fades up out of the paper
+     tone instead of flashing Leaflet's default gray. */
   background: var(--map-surface);
 }
 
@@ -51,8 +54,8 @@
   background: var(--map-surface);
 }
 
-/* Leaflet's controls ship white-on-white and would sit on the dark tiles as
-   two glowing boxes. */
+/* Leaflet's controls ship white-on-white, which vanishes on light tiles and
+   glows on a heavy plume. Both get the same pill treatment as the marker. */
 .smoke-map .leaflet-control-attribution {
   background: var(--map-chrome);
   color: var(--map-chrome-text);
@@ -67,15 +70,15 @@
 .smoke-map .leaflet-bar a:hover {
   background: var(--map-chrome);
   color: var(--map-chrome-text-strong);
-  border-bottom-color: rgba(199, 207, 203, 0.25);
+  border-bottom-color: var(--map-chrome-edge);
 }
 
 .smoke-map .leaflet-bar a:hover {
-  background: rgba(32, 36, 40, 0.92);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .smoke-map .leaflet-bar {
-  border-color: rgba(199, 207, 203, 0.25);
+  border-color: var(--map-chrome-edge);
 }
 
 .user-marker {
@@ -87,24 +90,25 @@
 }
 
 /* Two rings, opposite polarity, so the dot survives both backdrops: on bare
-   tiles the pale ring carries it, and once the plume goes near-opaque ivory
-   the dark halo takes over. */
+   light tiles the dark halo carries it, and once the plume goes near-opaque
+   black the pale ring takes over. */
 .user-marker__dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
   background: var(--map-mark);
-  border: 2px solid #f4e9d6;
+  border: 2px solid #f7f4ee;
   box-shadow: 0 0 0 2px rgba(10, 12, 14, 0.65);
 }
 
-/* A pill, not a drop shadow: a soft dark shadow under white type disappears
-   against heavy smoke, which is exactly the moment this label matters. */
+/* A pill, not a drop shadow: soft-shadowed type has to pick a polarity, and
+   this label spans bare tiles to near-black plume. The pill decides for it. */
 .user-marker__label {
   margin-top: 3px;
   padding: 1px 5px;
   border-radius: 999px;
   background: var(--map-chrome);
+  border: 1px solid var(--map-chrome-edge);
   font-size: 0.7rem;
   font-weight: 600;
   white-space: nowrap;
@@ -113,4 +117,116 @@
 
 .user-marker__label:empty {
   display: none;
+}
+
+/* Fires
+ *
+ * Reported active wildfires, drawn above the labels and below the user's dot.
+ * These are facts filed by the incident teams, not model output, so they get a
+ * different visual language from everything else on this map: a hard-edged
+ * mark, not a soft field. Nothing here scrubs with the timeline — the smoke
+ * moves, the fire dot does not — and the card says which day its numbers are
+ * from so the two can't be read as the same kind of thing.
+ */
+.smoke-map-wrap {
+  position: relative;
+}
+
+.fire-dot {
+  fill: #c2410c;
+  fill-opacity: 0.9;
+  /* Pale stroke for the same reason the user marker has one: at Smokeshow
+     levels the plume composites to near-black and an unringed ember-coloured
+     dot would sink into it. */
+  stroke: #fff3e4;
+  stroke-opacity: 0.95;
+  cursor: pointer;
+  transition: fill-opacity 120ms ease;
+}
+
+.fire-dot:hover,
+.fire-dot:focus {
+  fill-opacity: 1;
+}
+
+/* Sibling of the map, not a Leaflet tooltip — see the note in SmokeMap.jsx.
+   Being outside .smoke-map means it escapes that element's rounded overflow
+   and Leaflet's transformed pane, so it can hang over the map's edge and over
+   the zoom control without a z-index fight.
+
+   Width is fixed rather than fit-to-content: these cards open and close under
+   a moving cursor, and a box that changes width per fire reads as flicker.
+   CARD_WIDTH in SmokeMap.jsx has to match, because the clamping that keeps a
+   card on screen is computed there. */
+.fire-card {
+  position: absolute;
+  /* Over Leaflet's control container, which sits at 1000 and would otherwise
+     print the zoom buttons through a card opened in that corner. Safe because
+     the card takes no pointer events and closes the moment the dot is
+     released, so the buttons under it are never unreachable. */
+  z-index: 1200;
+  width: 208px;
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--map-chrome-edge);
+  /* Denser than the rest of the map chrome. Those are pills over a few words;
+     this is four lines of small type, and at the chrome's usual opacity the
+     ash stipple reads straight through the middle of it. */
+  background: rgba(250, 249, 246, 0.95);
+  box-shadow: 0 6px 18px rgba(10, 12, 14, 0.28);
+  color: var(--map-chrome-text);
+  pointer-events: none; /* it follows the dot; it is never itself a target */
+}
+
+.fire-card__name {
+  color: var(--map-chrome-text-strong);
+  font-weight: 700;
+  font-size: 0.82rem;
+  line-height: 1.25;
+}
+
+.fire-card__facts {
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.fire-card__meta {
+  margin-top: 0.1rem;
+  font-size: 0.74rem;
+}
+
+/* Deliberately the quietest line in the card: it is the honesty note, and it
+   should be findable without competing with the fire's name. */
+.fire-card__stamp {
+  margin-top: 0.3rem;
+  font-size: 0.66rem;
+  opacity: 0.75;
+}
+
+.fire-hint {
+  position: absolute;
+  left: 0.6rem;
+  bottom: 0.6rem;
+  z-index: 500; /* over Leaflet's panes, under its controls (1000) */
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--map-chrome-edge);
+  background: var(--map-chrome);
+  color: var(--map-chrome-text);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.fire-hint__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #c2410c;
+  box-shadow: 0 0 0 1.5px #fff3e4;
 }

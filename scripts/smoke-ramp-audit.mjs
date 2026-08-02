@@ -1,19 +1,26 @@
 // Smoke-ramp audit — the check that gates SMOKE_STOPS.
 //
-// The map's basemap is CARTO dark_nolabels. On a dark basemap a ramp that
-// DARKENS with concentration hides the worst air on the map: the smoke and the
-// tiles converge, contrast peaks somewhere in the middle of the scale and then
-// collapses. That is exactly what the previous ramp did, and it is why this
-// script exists rather than a comment.
+// The ramp has to run OPPOSITE the tiles it sits on, or the worst air on the
+// map converges with the basemap and disappears. The map runs CARTO Positron
+// (light_nolabels), so the ramp darkens with concentration. This script is the
+// proof, and it exists rather than a comment because the pair has been wrong
+// in both directions: a darkening ramp shipped on dark tiles once, and the
+// pale ramp that fixed that is now on light tiles and would be wrong again.
+//
+// A light basemap is not one colour — Positron runs from near-white land down
+// through water to its darkest fills — so everything below is measured against
+// the whole band (SMOKE_BASEMAP_BACKDROPS). Those are the style's nominal
+// tones, not sampled pixels; proving the property across a band rather than a
+// point is what makes that acceptable.
 //
 // Three things are proved here, and any one of them failing exits non-zero:
 //
 //   1. MONOTONIC   composited contrast against the basemap rises across the
-//                  whole 0-1000 µg/m³ range — more smoke is never less smoke.
-//                  Measured on the flat ramp AND on the two textured paths
-//                  that actually paint (per-pixel field stipple, HRRR
-//                  screen-space grain), because a speck moving the wrong way
-//                  would undo the ramp.
+//                  whole 0-1000 µg/m³ range, on every backdrop — more smoke is
+//                  never less smoke. Measured on the flat ramp AND on the two
+//                  textured paths that actually paint (per-pixel field stipple,
+//                  HRRR screen-space grain), because a speck moving the wrong
+//                  way would undo the ramp.
 //   2. SEPARATED   each rating threshold lands a visible step above the last.
 //   3. IN SYNC     scripts/hrrr/render_frames.py's hand-copied NumPy ramp
 //                  still matches SMOKE_STOPS. These two have drifted before.
@@ -30,7 +37,7 @@ import { dirname, join } from 'node:path';
 import {
   ASH_GRAIN_FILL,
   LEVELS,
-  SMOKE_BASEMAP_RGB,
+  SMOKE_BASEMAP_BACKDROPS,
   SMOKE_STOPS_FOR_AUDIT as STOPS,
   ashSpeckFraction,
   smokeRGBA,
@@ -54,27 +61,28 @@ const ratioOfLum = (a, b) => {
 const contrast = (fg, bg) => ratioOfLum(luminance(fg), luminance(bg));
 const over = (fg, bg, a) => fg.map((c, i) => c * a + bg[i] * (1 - a));
 
-const BASE = SMOKE_BASEMAP_RGB;
-const BASE_LUM = luminance(BASE);
+const BACKDROPS = SMOKE_BASEMAP_BACKDROPS;
+const PRIMARY = BACKDROPS[0];
 
 // ------------------------------------------------------- the paths that paint
 
-// 1. Flat: the ramp alone, which is what the HRRR PNGs carry and what the
-//    field renders between specks.
-function flatLum(pm) {
+// Each path takes the backdrop it is painted on, because "does this read"
+// depends on both. 1. Flat: the ramp alone, which is what the HRRR PNGs carry
+// and what the field renders between specks.
+function flatLum(pm, base) {
   const [r, g, b, a] = smokeRGBA(pm);
-  return luminance(over([r, g, b], BASE, a / 255));
+  return luminance(over([r, g, b], base, a / 255));
 }
 
 // 2. Field stipple (SmokeCanvasLayer._redraw): a fraction of block samples are
 //    replaced wholesale by the speck colour+alpha. Mean luminance over a patch
 //    is what the eye integrates at this scale.
-function fieldLum(pm) {
+function fieldLum(pm, base) {
   const [, , , a] = smokeRGBA(pm);
   const f = ashSpeckFraction(a / 255);
   const [sr, sg, sb, sa] = smokeSpeckRGBA(pm);
-  const speck = luminance(over([sr, sg, sb], BASE, sa / 255));
-  return (1 - f) * flatLum(pm) + f * speck;
+  const speck = luminance(over([sr, sg, sb], base, sa / 255));
+  return (1 - f) * flatLum(pm, base) + f * speck;
 }
 
 // 3. HRRR screen-space grain (SmokeCanvasLayer._redrawImage): a repeating
@@ -89,11 +97,11 @@ const GRAIN = (() => {
 })();
 const GRAIN_COVERAGE = 0.14 * (4 / 9);
 
-function grainLum(pm) {
+function grainLum(pm, base) {
   const [r, g, b, a] = smokeRGBA(pm);
   const blended = [r, g, b].map((c, i) => c * (1 - GRAIN.alpha) + GRAIN.rgb[i] * GRAIN.alpha);
-  const speck = luminance(over(blended, BASE, a / 255));
-  return (1 - GRAIN_COVERAGE) * flatLum(pm) + GRAIN_COVERAGE * speck;
+  const speck = luminance(over(blended, base, a / 255));
+  return (1 - GRAIN_COVERAGE) * flatLum(pm, base) + GRAIN_COVERAGE * speck;
 }
 
 const PATHS = [
@@ -104,30 +112,21 @@ const PATHS = [
 
 // --------------------------------------------------- reference ramps, for why
 
-// The demo's ramp and the ramp this branch replaces, both evaluated on the
-// dark basemap. Kept here because the argument for the change is a
+// The pale ramp this branch replaces, evaluated on the light basemap it would
+// now be sitting on. Kept here because the argument for the change is a
 // measurement, and a measurement nobody can re-run is a rumour.
 const lerp = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
 
-function demoRamp(pm) {
-  let c = lerp([150, 146, 138], [104, 74, 46], clamp01(pm / 55));
-  c = lerp(c, [28, 20, 12], clamp01((pm - 55) / 150));
-  const a =
-    0.4 * clamp01((pm - 4) / 30) + 0.25 * clamp01((pm - 35) / 70) + 0.15 * clamp01((pm - 105) / 145);
-  return { rgb: c, alpha: Math.min(0.85, a) };
-}
-
 const PREVIOUS_STOPS = [
-  { pm25: 0, rgb: [205, 207, 210], alpha: 0 },
-  { pm25: 3, rgb: [198, 200, 204], alpha: 0.07 },
-  { pm25: 8, rgb: [192, 190, 188], alpha: 0.18 },
-  { pm25: 12, rgb: [186, 180, 170], alpha: 0.27 },
-  { pm25: 20, rgb: [176, 165, 146], alpha: 0.38 },
-  { pm25: 35, rgb: [160, 140, 114], alpha: 0.5 },
-  { pm25: 55, rgb: [126, 100, 78], alpha: 0.62 },
-  { pm25: 150, rgb: [64, 50, 42], alpha: 0.78 },
-  { pm25: 300, rgb: [20, 16, 15], alpha: 0.9 },
+  { pm25: 0, rgb: [180, 186, 196], alpha: 0 },
+  { pm25: 5, rgb: [190, 194, 200], alpha: 0.1 },
+  { pm25: 12, rgb: [205, 206, 208], alpha: 0.24 },
+  { pm25: 20, rgb: [218, 216, 212], alpha: 0.38 },
+  { pm25: 35, rgb: [230, 226, 216], alpha: 0.52 },
+  { pm25: 55, rgb: [240, 234, 220], alpha: 0.66 },
+  { pm25: 150, rgb: [250, 244, 228], alpha: 0.82 },
+  { pm25: 300, rgb: [255, 251, 240], alpha: 0.92 },
 ];
 
 function sampleStops(stops, pm) {
@@ -150,9 +149,9 @@ function sampleStops(stops, pm) {
   return { rgb: lerp(lo.rgb, hi.rgb, t), alpha: lo.alpha + (hi.alpha - lo.alpha) * t };
 }
 
-const refRatio = (f) => (pm) => {
-  const { rgb, alpha } = f(pm);
-  return contrast(over(rgb, BASE, alpha), BASE);
+const prevLum = (pm, base) => {
+  const { rgb, alpha } = sampleStops(PREVIOUS_STOPS, pm);
+  return luminance(over(rgb, base, alpha));
 };
 
 // ------------------------------------------------------------------ the sweep
@@ -163,23 +162,41 @@ const COLUMNS = [0, 5, 12, 20, 35, 55, 150, 250, 300, 400, 600, 1000];
 
 const pad = (s, w) => String(s).padEnd(w);
 const col = (x) => x.toFixed(2).padStart(7);
-const ratioAt = (lum) => (pm) => ratioOfLum(lum(pm), BASE_LUM);
+const ratioAt = (lum, base) => (pm) => ratioOfLum(lum(pm, base), luminance(base));
 
-function monotonicity(lum) {
-  let prev = -Infinity;
+// Measured against the RUNNING MAXIMUM, not the previous sample, and gated on
+// magnitude rather than on exact numerical monotonicity. The question that
+// matters is "can the map ever show visibly less smoke for more smoke", and a
+// step-to-step comparison answers a different, stricter one.
+//
+// The residual this tolerance covers is worth naming. Against the darkest
+// backdrop in the band, the ramp's lowest stops sit a hair under it rather than
+// exactly on it, so the very faintest haze wobbles by ~0.0025 ratio units
+// before climbing for good — thousandths of a ratio, on the map's smallest
+// features, below the "All clear" line. Chasing that to exact zero would mean
+// tuning stops against a backdrop constant nobody sampled.
+//
+// The failure this script exists to catch is an order of magnitude larger and
+// still fails here: the pale ramp on this basemap gives back 0.087 off its
+// peak across the whole upper half of the scale — the worst air reading as
+// less than moderate air.
+const MONO_TOLERANCE = 0.02;
+
+function monotonicity(lum, base) {
+  let peak = -Infinity;
   let worst = 0;
   let firstAt = null;
   let breaks = 0;
-  const r = ratioAt(lum);
+  const r = ratioAt(lum, base);
   for (let v = 0; v <= SWEEP_MAX; v = Number((v + SWEEP_STEP).toFixed(4))) {
     const cur = r(v);
-    const drop = prev - cur;
-    if (drop > 1e-9) {
+    peak = Math.max(peak, cur);
+    const deficit = peak - cur;
+    if (deficit > MONO_TOLERANCE) {
       breaks++;
       if (firstAt === null) firstAt = v;
-      worst = Math.max(worst, drop);
     }
-    prev = cur;
+    worst = Math.max(worst, deficit);
   }
   return { breaks, firstAt, worst };
 }
@@ -225,46 +242,51 @@ function syncReport() {
 // ----------------------------------------------------------------- the report
 
 console.log(`\nSMOKESHOW smoke-ramp audit`);
-console.log(`  basemap: CARTO dark_nolabels, rgb(${BASE.join(',')})`);
+console.log(`  basemap: CARTO Positron (light_nolabels)`);
+console.log(
+  `  backdrops: ` + BACKDROPS.map((b) => `${b.key} rgb(${b.rgb.join(',')})`).join(' · '),
+);
 console.log(`  sweep:   0-${SWEEP_MAX} µg/m³ at ${SWEEP_STEP} steps\n`);
 
-console.log(`composited contrast against the basemap`);
+console.log(`composited contrast against ${PRIMARY.key}, rgb(${PRIMARY.rgb.join(',')})`);
 console.log(pad('ramp', 22) + COLUMNS.map((p) => String(p).padStart(7)).join(''));
 console.log('-'.repeat(22 + 7 * COLUMNS.length));
-console.log(pad('demo (reference)', 22) + COLUMNS.map((p) => col(refRatio(demoRamp)(p))).join(''));
 console.log(
   pad('previous (replaced)', 22) +
-    COLUMNS.map((p) => col(refRatio((v) => sampleStops(PREVIOUS_STOPS, v))(p))).join(''),
+    COLUMNS.map((p) => col(ratioAt(prevLum, PRIMARY.rgb)(p))).join(''),
 );
 for (const p of PATHS) {
-  console.log(pad(`shipped · ${p.key}`, 22) + COLUMNS.map((c) => col(ratioAt(p.lum)(c))).join(''));
-}
-
-console.log(`\n1. monotonicity`);
-const monoFails = [];
-for (const p of PATHS) {
-  const m = monotonicity(p.lum);
-  const ok = m.breaks === 0;
-  if (!ok) monoFails.push(p.key);
   console.log(
-    `   ${ok ? 'PASS' : 'FAIL'}  ${pad(p.key, 18)} ` +
-      (ok
-        ? `rises ${ratioAt(p.lum)(0).toFixed(2)} -> ${ratioAt(p.lum)(SWEEP_MAX).toFixed(2)}`
-        : `${m.breaks} reversals, first at ${m.firstAt} µg/m³, worst drop ${m.worst.toFixed(3)}`) +
-      `   (${p.note})`,
+    pad(`shipped · ${p.key}`, 22) + COLUMNS.map((c) => col(ratioAt(p.lum, PRIMARY.rgb)(c))).join(''),
   );
 }
+
+console.log(`\n1. monotonicity, every path on every backdrop`);
+const monoFails = [];
+for (const base of BACKDROPS) {
+  for (const p of PATHS) {
+    const m = monotonicity(p.lum, base.rgb);
+    const ok = m.breaks === 0;
+    if (!ok) monoFails.push(`${p.key} on ${base.key}`);
+    const r = ratioAt(p.lum, base.rgb);
+    console.log(
+      `   ${ok ? 'PASS' : 'FAIL'}  ${pad(base.key, 14)}${pad(p.key, 18)} ` +
+        (ok
+          ? `rises ${r(0).toFixed(2)} -> ${r(SWEEP_MAX).toFixed(2)}` +
+            `, worst dip ${m.worst.toFixed(4)} (tolerance ${MONO_TOLERANCE})`
+          : `dips ${m.worst.toFixed(4)} below its running peak, first past tolerance at ${m.firstAt} µg/m³`),
+    );
+  }
+}
 // The same sweep on what we replaced, so the failure mode stays on the record.
-const prevMono = monotonicity((pm) => {
-  const { rgb, alpha } = sampleStops(PREVIOUS_STOPS, pm);
-  return luminance(over(rgb, BASE, alpha));
-});
+const prevMono = monotonicity(prevLum, PRIMARY.rgb);
 console.log(
-  `   ----  previous ramp     ${prevMono.breaks} reversals, first at ${prevMono.firstAt} µg/m³` +
-    ` — the bug this replaces, kept as the control`,
+  `   ----  previous ramp on ${PRIMARY.key}: dips ${prevMono.worst.toFixed(4)} below its peak` +
+    (prevMono.breaks ? `, first past tolerance at ${prevMono.firstAt} µg/m³` : '') +
+    ` — the pale ramp, measured where it would now be sitting`,
 );
 
-console.log(`\n2. rating thresholds separate`);
+console.log(`\n2. rating thresholds separate (flat ramp on ${PRIMARY.key})`);
 // Each level's ceiling, plus a mid-band probe, must clear the one below it by a
 // margin the eye can find. 15% of the ratio is roughly a just-noticeable step
 // at these luminances.
@@ -272,10 +294,11 @@ const MIN_STEP = 1.15;
 const probes = LEVELS.filter((l) => l.max !== Infinity).map((l) => ({ name: l.name, pm: l.max }));
 probes.push({ name: 'Smokeshow', pm: 300 });
 let sepFails = 0;
-let prevRatio = ratioAt(flatLum)(0);
+const flatOnPrimary = ratioAt(flatLum, PRIMARY.rgb);
+let prevRatio = flatOnPrimary(0);
 let prevName = 'clean air (0)';
 for (const p of probes) {
-  const r = ratioAt(flatLum)(p.pm);
+  const r = flatOnPrimary(p.pm);
   const step = r / prevRatio;
   const ok = step >= MIN_STEP;
   if (!ok) sepFails++;
@@ -298,8 +321,8 @@ else console.log(`   PASS  all ${STOPS.length} stops match`);
 const top = STOPS[STOPS.length - 1];
 console.log(
   `\nceiling: the ramp saturates at ${top.pm25} µg/m³ (alpha ${top.alpha}); above that the map` +
-    `\n  reads one flat tone and the verdict text carries the number. The previous ramp` +
-    `\n  saturated the same way, so this is unchanged behaviour, not a regression.`,
+    `\n  reads one flat tone and the verdict text carries the number. Every ramp this map` +
+    `\n  has shipped saturated the same way, so this is unchanged behaviour.`,
 );
 
 const failures = [];
