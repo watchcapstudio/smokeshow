@@ -115,7 +115,7 @@ export default function ExplainSheet({
             {measured.official && (
               <div className="explain-sheet__meas-row">
                 <span className="explain-sheet__who">
-                  Official monitor
+                  Monitoring station
                   <small>
                     {[
                       measured.official.area,
@@ -152,7 +152,7 @@ export default function ExplainSheet({
               <span className="explain-sheet__val">AQI {ugm3ToAqi(pm25)}</span>
             </div>
             <p className="explain-sheet__p explain-sheet__p--fine">
-              Official monitors are accurate but sparse; local sensors are close but
+              Monitoring stations are accurate but sparse; local sensors are close but
               consumer-grade. When they disagree during moving smoke, that gap is the real
               signal, so we show both instead of averaging them into a number neither one
               reported.
