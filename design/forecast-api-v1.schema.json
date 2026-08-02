@@ -1,0 +1,452 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smokeshow.earth/design/forecast-api-v1.schema.json",
+  "title": "SMOKESHOW /api/forecast response, contract v1",
+  "description": "Machine-readable form of docs/forecast-api-contract.md. A success payload matches #/$defs/forecast; an error payload matches #/$defs/error. Decoders must ignore unknown fields (additionalProperties is deliberately open) and must treat an unrecognised `v` as unavailable.",
+  "oneOf": [{ "$ref": "#/$defs/forecast" }, { "$ref": "#/$defs/error" }],
+
+  "$defs": {
+    "utcTimestamp": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+    },
+    "localDate": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "levelIndex": { "type": "integer", "minimum": 0, "maximum": 4 },
+    "nullableLevelIndex": { "type": ["integer", "null"], "minimum": 0, "maximum": 4 },
+    "nullableNumber": { "type": ["number", "null"] },
+    "rgb": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "type": "integer", "minimum": 0, "maximum": 255 }
+    },
+
+    "error": {
+      "type": "object",
+      "required": ["v", "error"],
+      "properties": {
+        "v": { "const": 1 },
+        "error": {
+          "type": "object",
+          "required": ["code", "message"],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": ["bad-coords", "upstream-failed", "no-series", "internal"]
+            },
+            "message": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "forecast": {
+      "type": "object",
+      "required": [
+        "v",
+        "generatedAt",
+        "location",
+        "now",
+        "window",
+        "source",
+        "scale",
+        "hours",
+        "verdict",
+        "days",
+        "pastDays",
+        "measured",
+        "agreement"
+      ],
+      "properties": {
+        "v": { "const": 1 },
+        "generatedAt": { "$ref": "#/$defs/utcTimestamp" },
+        "location": { "$ref": "#/$defs/location" },
+        "now": { "$ref": "#/$defs/now" },
+        "window": { "$ref": "#/$defs/window" },
+        "source": { "$ref": "#/$defs/source" },
+        "scale": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": { "$ref": "#/$defs/scaleEntry" }
+        },
+        "hours": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/hour" }
+        },
+        "verdict": { "$ref": "#/$defs/verdict" },
+        "days": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": { "$ref": "#/$defs/day" }
+        },
+        "pastDays": {
+          "type": "array",
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/pastDay" }
+        },
+        "measured": { "$ref": "#/$defs/measured" },
+        "agreement": { "$ref": "#/$defs/agreementSummary" }
+      }
+    },
+
+    "coords": {
+      "type": "object",
+      "required": ["lat", "lon"],
+      "properties": {
+        "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+        "lon": { "type": "number", "minimum": -180, "maximum": 180 }
+      }
+    },
+
+    "location": {
+      "type": "object",
+      "required": ["requested", "snapped", "timezone", "utcOffsetSeconds"],
+      "properties": {
+        "requested": { "$ref": "#/$defs/coords" },
+        "snapped": { "$ref": "#/$defs/coords" },
+        "timezone": {
+          "type": "string",
+          "minLength": 1,
+          "description": "IANA zone name. Never null; 'UTC' is the degenerate fallback."
+        },
+        "utcOffsetSeconds": {
+          "type": "integer",
+          "description": "Offset in effect at `now` only — not valid across a DST transition."
+        }
+      }
+    },
+
+    "now": {
+      "type": "object",
+      "required": ["index", "timeUTC", "exactUTC"],
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Always a valid index into hours[]. Accurate to +/-30 minutes."
+        },
+        "timeUTC": { "$ref": "#/$defs/utcTimestamp" },
+        "exactUTC": { "$ref": "#/$defs/utcTimestamp" }
+      }
+    },
+
+    "window": {
+      "type": "object",
+      "required": ["pastHours", "forecastHours"],
+      "properties": {
+        "pastHours": { "type": "integer", "minimum": 0 },
+        "forecastHours": { "type": "integer", "minimum": 0 }
+      },
+      "description": "Requested span. hours.length is typically 192 but must never be hardcoded."
+    },
+
+    "source": {
+      "type": "object",
+      "required": ["requested", "applied", "model"],
+      "properties": {
+        "requested": { "enum": ["official", "local", "model"] },
+        "applied": {
+          "enum": ["official", "local", "model"],
+          "description": "Degrades official -> local -> model when the requested row is absent."
+        },
+        "model": { "type": "string", "minLength": 1 }
+      }
+    },
+
+    "scaleEntry": {
+      "type": "object",
+      "required": [
+        "index",
+        "key",
+        "name",
+        "rangeUg",
+        "maxUg",
+        "visibility",
+        "notice",
+        "notLine",
+        "guidance"
+      ],
+      "properties": {
+        "index": { "$ref": "#/$defs/levelIndex" },
+        "key": { "enum": ["all-clear", "something", "smells", "tastes", "smokeshow"] },
+        "name": { "type": "string", "minLength": 1 },
+        "rangeUg": { "type": "string", "minLength": 1 },
+        "maxUg": {
+          "type": ["number", "null"],
+          "description": "Null on index 4 only (unbounded)."
+        },
+        "visibility": { "type": "string", "minLength": 1 },
+        "notice": { "type": "string", "minLength": 1 },
+        "notLine": { "type": "string", "minLength": 1 },
+        "guidance": {
+          "type": "object",
+          "required": ["general", "sensitive"],
+          "properties": {
+            "general": { "type": "string", "minLength": 1 },
+            "sensitive": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+
+    "hour": {
+      "type": "object",
+      "required": ["t", "pm25", "pm25Model", "aqi", "levelIndex", "trend", "agreement", "sky"],
+      "properties": {
+        "t": { "$ref": "#/$defs/utcTimestamp" },
+        "pm25": {
+          "$ref": "#/$defs/nullableNumber",
+          "description": "Delivered series: model plus the measured anchor. Null on a model gap — render as unknown, never as 0."
+        },
+        "pm25Model": { "$ref": "#/$defs/nullableNumber" },
+        "aqi": { "type": ["integer", "null"] },
+        "levelIndex": { "$ref": "#/$defs/nullableLevelIndex" },
+        "trend": { "enum": ["rising", "falling", "steady", null] },
+        "agreement": { "enum": ["agree", "fade", "diverge"] },
+        "sky": {
+          "oneOf": [{ "$ref": "#/$defs/sky" }, { "type": "null" }],
+          "description": "Never null in v1. Nullable so a future slimming option can omit it without a version bump."
+        }
+      }
+    },
+
+    "sky": {
+      "type": "object",
+      "required": ["zenith", "mid", "horizon", "isDark", "starOpacity", "smoke", "sun"],
+      "properties": {
+        "zenith": { "$ref": "#/$defs/rgb" },
+        "mid": { "$ref": "#/$defs/rgb" },
+        "horizon": { "$ref": "#/$defs/rgb" },
+        "isDark": {
+          "type": "boolean",
+          "description": "The ink inversion. Render foreground light when true; do not re-derive from the colours."
+        },
+        "starOpacity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "smoke": {
+          "type": "object",
+          "required": ["s1", "s2"],
+          "properties": {
+            "s1": { "type": "number", "minimum": 0, "maximum": 1 },
+            "s2": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "sun": {
+          "type": "object",
+          "required": ["altitudeDeg", "azimuthDeg", "visible", "xFrac", "yFrac", "dim"],
+          "properties": {
+            "altitudeDeg": { "type": "number", "minimum": -90, "maximum": 90 },
+            "azimuthDeg": { "type": "number", "minimum": 0, "maximum": 360 },
+            "visible": { "type": "boolean" },
+            "xFrac": { "type": "number", "minimum": 0, "maximum": 1 },
+            "yFrac": { "type": "number", "minimum": 0, "maximum": 1 },
+            "dim": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      }
+    },
+
+    "verdict": {
+      "type": "object",
+      "required": [
+        "above",
+        "levelIndex",
+        "trend",
+        "headline",
+        "clearIndex",
+        "clearAtUTC",
+        "clearLabel",
+        "arrivalIndex",
+        "arrivalAtUTC",
+        "arrivalLabel",
+        "peakIndex",
+        "peakAtUTC",
+        "peakPm25"
+      ],
+      "properties": {
+        "above": { "type": "boolean" },
+        "levelIndex": { "$ref": "#/$defs/levelIndex" },
+        "trend": { "enum": ["clearing", "stuck", "worsening", "steady"] },
+        "headline": { "type": "string", "minLength": 1 },
+        "clearIndex": { "type": ["integer", "null"], "minimum": 0 },
+        "clearAtUTC": {
+          "oneOf": [{ "$ref": "#/$defs/utcTimestamp" }, { "type": "null" }]
+        },
+        "clearLabel": { "type": ["string", "null"] },
+        "arrivalIndex": { "type": ["integer", "null"], "minimum": 0 },
+        "arrivalAtUTC": {
+          "oneOf": [{ "$ref": "#/$defs/utcTimestamp" }, { "type": "null" }]
+        },
+        "arrivalLabel": { "type": ["string", "null"] },
+        "peakIndex": { "type": "integer", "minimum": 0 },
+        "peakAtUTC": { "$ref": "#/$defs/utcTimestamp" },
+        "peakPm25": { "$ref": "#/$defs/nullableNumber" }
+      },
+      "allOf": [
+        {
+          "description": "clear* are null together",
+          "if": { "properties": { "clearIndex": { "type": "integer" } }, "required": ["clearIndex"] },
+          "then": {
+            "properties": {
+              "clearAtUTC": { "type": "string" },
+              "clearLabel": { "type": "string" }
+            }
+          },
+          "else": {
+            "properties": {
+              "clearAtUTC": { "type": "null" },
+              "clearLabel": { "type": "null" }
+            }
+          }
+        },
+        {
+          "description": "arrival* are null together",
+          "if": {
+            "properties": { "arrivalIndex": { "type": "integer" } },
+            "required": ["arrivalIndex"]
+          },
+          "then": {
+            "properties": {
+              "arrivalAtUTC": { "type": "string" },
+              "arrivalLabel": { "type": "string" }
+            }
+          },
+          "else": {
+            "properties": {
+              "arrivalAtUTC": { "type": "null" },
+              "arrivalLabel": { "type": "null" }
+            }
+          }
+        },
+        {
+          "description": "clearIndex and arrivalIndex are mutually exclusive",
+          "not": {
+            "properties": {
+              "clearIndex": { "type": "integer" },
+              "arrivalIndex": { "type": "integer" }
+            },
+            "required": ["clearIndex", "arrivalIndex"]
+          }
+        }
+      ]
+    },
+
+    "dayPart": {
+      "type": "object",
+      "required": ["key", "label", "bucket"],
+      "properties": {
+        "key": { "enum": ["morning", "afternoon", "evening"] },
+        "label": { "type": "string", "minLength": 1 },
+        "bucket": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["name", "color"],
+              "properties": {
+                "name": { "enum": ["Clear", "Middle", "Elevated", "Smokeshow"] },
+                "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+              }
+            },
+            { "type": "null" }
+          ],
+          "description": "Null when no hour of the day fell in this part. Coarse 4-step strip scale — not the 5-level rating scale."
+        }
+      }
+    },
+
+    "day": {
+      "type": "object",
+      "required": ["key", "weekday", "levelIndex", "minPm25", "maxPm25", "dayParts"],
+      "properties": {
+        "key": { "$ref": "#/$defs/localDate" },
+        "weekday": { "type": "string", "minLength": 1 },
+        "levelIndex": { "$ref": "#/$defs/nullableLevelIndex" },
+        "minPm25": { "$ref": "#/$defs/nullableNumber" },
+        "maxPm25": { "$ref": "#/$defs/nullableNumber" },
+        "dayParts": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/dayPart" }
+        }
+      }
+    },
+
+    "pastDay": {
+      "type": "object",
+      "required": ["key", "weekday", "levelIndex", "minPm25", "maxPm25"],
+      "properties": {
+        "key": { "$ref": "#/$defs/localDate" },
+        "weekday": { "type": "string", "minLength": 1 },
+        "levelIndex": { "$ref": "#/$defs/nullableLevelIndex" },
+        "minPm25": { "$ref": "#/$defs/nullableNumber" },
+        "maxPm25": { "$ref": "#/$defs/nullableNumber" }
+      },
+      "description": "Model estimate, never observation. A client showing these must label them so."
+    },
+
+    "measuredRow": {
+      "type": "object",
+      "required": ["ug", "aqi", "count"],
+      "properties": {
+        "ug": { "type": "number", "minimum": 0 },
+        "aqi": { "type": "integer", "minimum": 0 },
+        "count": { "type": "integer", "minimum": 0 },
+        "area": { "type": ["string", "null"] },
+        "distanceMi": { "$ref": "#/$defs/nullableNumber" },
+        "medianDistanceMi": { "$ref": "#/$defs/nullableNumber" },
+        "observedAt": {
+          "type": ["string", "null"],
+          "description": "AirNow's own local wall-clock stamp, no zone, no Z. Display-only — do not parse into an instant."
+        }
+      }
+    },
+
+    "measured": {
+      "type": "object",
+      "required": ["official", "local", "model", "anchor"],
+      "properties": {
+        "official": {
+          "oneOf": [{ "$ref": "#/$defs/measuredRow" }, { "type": "null" }],
+          "description": "Nearest AirNow regulatory monitor. Never averaged with `local`."
+        },
+        "local": {
+          "oneOf": [{ "$ref": "#/$defs/measuredRow" }, { "type": "null" }],
+          "description": "Median of EPA-corrected PurpleAir units. Never averaged with `official`."
+        },
+        "model": {
+          "type": "object",
+          "required": ["ug", "aqi"],
+          "properties": {
+            "ug": { "$ref": "#/$defs/nullableNumber" },
+            "aqi": { "type": ["integer", "null"] }
+          },
+          "description": "pm25Model at now.index. The object is always present; its fields may be null."
+        },
+        "anchor": {
+          "type": "object",
+          "required": ["source", "offsetUg", "decayHours"],
+          "properties": {
+            "source": { "enum": ["official", "local", "model"] },
+            "offsetUg": { "type": "number" },
+            "decayHours": { "type": "number", "minimum": 0 }
+          },
+          "description": "Never null. source 'model' with offsetUg 0 means nothing measured was available."
+        }
+      }
+    },
+
+    "agreementSummary": {
+      "type": "object",
+      "required": ["multiModel", "diverged", "label"],
+      "properties": {
+        "multiModel": { "type": "boolean" },
+        "diverged": { "type": "boolean" },
+        "label": { "type": "string", "minLength": 1 }
+      },
+      "description": "v1 emits multiModel=false, diverged=false: lead-time fade only. Shape is final so the HRRR comparison can land without a version bump."
+    }
+  }
+}
