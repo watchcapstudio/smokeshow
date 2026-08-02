@@ -72,7 +72,10 @@ export async function fetchMeasuredDays(lat, lon, dateKeys) {
   return new Map(results.filter(Boolean));
 }
 
-const DECAY_HOURS = 12;
+// Exported because /api/forecast reports it to clients as
+// `measured.anchor.decayHours` — the contract states the decay, so the number
+// has to come from the implementation rather than be retyped next to it.
+export const DECAY_HOURS = 12;
 
 // Sensor-anchored series: shift the model by the measured-vs-model gap at
 // "now", decaying the correction to zero over the next 12 hours. Past hours

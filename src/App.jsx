@@ -25,6 +25,7 @@ import { requestLocation, setManualLocation, clearLocation } from './lib/geoloca
 import { reverseGeocode } from './lib/geocoding.js';
 import { buildGrid, snapCoord } from './lib/grid.js';
 import { fetchGridPM25, findNowIndex } from './lib/openMeteo.js';
+import { fetchServerForecast } from './lib/forecastApi.js';
 import { computeAgreement } from './lib/agreement.js';
 import { fetchHRRR, hrrrSeriesAt } from './lib/hrrr.js';
 import { fetchSensorsNear, fetchMeasuredDays, applySensorAnchor } from './lib/sensors.js';
@@ -41,6 +42,9 @@ import { getUnits, setUnits, getSensitive, setSensitive } from './lib/prefs.js';
 // fetch; the 81-point grid and map hydrate behind it.
 const SmokeMap = lazy(() => import('./components/SmokeMap.jsx'));
 
+// The viewer's own zone. Used for labels until /api/forecast reports the
+// location's zone, which is the more correct answer for a shared link —
+// "when does it clear" is a question about the air over that place.
 const TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const PLAY_INTERVAL_MS = 600; // satellite-loop cadence; the map blends between hours at 60fps
 const LOCATION_MATCH_TOLERANCE_DEG = 0.05;
@@ -77,6 +81,10 @@ export default function App() {
   const [location, setLocation] = useState(null);
   const [placeName, setPlaceName] = useState(null);
   const [centerData, setCenterData] = useState(null); // stage 1: single point — paints the verdict
+  // The server-computed verdict (docs/forecast-api-contract.md). Null means
+  // the endpoint was unavailable and every derived value below falls back to
+  // the original client-side computation — same src/lib modules, same maths.
+  const [serverForecast, setServerForecast] = useState(null);
   const [gridTiers, setGridTiers] = useState({}); // stage 2+: per-zoom-tier grids — hydrate the map
   const [gridFailed, setGridFailed] = useState(false);
   const fetchingTiersRef = useRef(new Set());
@@ -115,6 +123,7 @@ export default function App() {
       setLoading(true);
       setError(null);
       setCenterData(null);
+      setServerForecast(null);
       setGridTiers({});
       fetchingTiersRef.current.clear();
       setGridFailed(false);
@@ -133,21 +142,7 @@ export default function App() {
         writeLocationToURL(location.lat, location.lon, location.label);
       }
 
-      // Measured truth anchor — additive; null keeps the app model-only.
       setSensorNow(null);
-      fetchSensorsNear(location.lat, location.lon).then((s) => {
-        if (!cancelled) setSensorNow(s);
-      });
-
-      // Measured history for the past-day boxes: the last 3 local dates.
-      setMeasuredDays(new Map());
-      {
-        const keyFmt = new Intl.DateTimeFormat('en-CA', { timeZone: TIMEZONE });
-        const dates = [3, 2, 1].map((d) => keyFmt.format(new Date(Date.now() - d * 86_400_000)));
-        fetchMeasuredDays(location.lat, location.lon, dates).then((m) => {
-          if (!cancelled) setMeasuredDays(m);
-        });
-      }
 
       try {
         const fetchedAtMs = Date.now();
@@ -157,15 +152,45 @@ export default function App() {
         );
         const centerPoint = points.find((p) => p.isCenter);
 
-        // Stage 1 — one point, fast: verdict paints before the map exists.
-        const [center] = await fetchGridPM25([centerPoint]);
+        // Stage 1 — the verdict, before the map exists. /api/forecast returns
+        // it fully derived (level, clear-time, trend, days, sky) so this
+        // client renders exactly what iOS and Android will render. It carries
+        // the measured rows too, so no separate sensor round-trip is needed.
+        const server = await fetchServerForecast(location.lat, location.lon, {
+          source: aqiSource,
+        });
         if (cancelled) return;
 
-        const nIdx = findNowIndex(center.timesUTC);
-        setNowIndex(nIdx);
-        setSelectedIndex(nIdx);
-        setCenterData({ ...center, fetchedAtMs });
-        setLoading(false);
+        if (server) {
+          setServerForecast(server);
+          setSensorNow(server.measured);
+          setNowIndex(server.nowIndex);
+          setSelectedIndex(server.nowIndex);
+          // The map and the agreement band read the un-anchored model series,
+          // same as before — a sensor correction at one point doesn't
+          // generalise spatially, and the band exists to compare models.
+          setCenterData({
+            ...centerPoint,
+            timesUTC: server.timesUTC,
+            pm25: server.pm25Model,
+            fetchedAtMs,
+          });
+          setLoading(false);
+        } else {
+          // Endpoint unavailable (bad deploy, dev server, offline): compute
+          // the same answer here from the same modules.
+          fetchSensorsNear(location.lat, location.lon).then((s) => {
+            if (!cancelled) setSensorNow(s);
+          });
+          const [center] = await fetchGridPM25([centerPoint]);
+          if (cancelled) return;
+
+          const nIdx = findNowIndex(center.timesUTC);
+          setNowIndex(nIdx);
+          setSelectedIndex(nIdx);
+          setCenterData({ ...center, fetchedAtMs });
+          setLoading(false);
+        }
 
         // Stage 2 — default-zoom grid hydrates the map; failure here never
         // takes down the verdict. Wider tiers fetch lazily on zoom-out.
@@ -187,6 +212,52 @@ export default function App() {
       cancelled = true;
     };
   }, [location]);
+
+  // Labels follow the location's zone once the endpoint reports it — the
+  // headline, the strip, and the scrubber then all read the same clock, and
+  // it's the same clock the native clients will show.
+  const tz = serverForecast?.timezone ?? TIMEZONE;
+
+  // Measured history for the past-day boxes: the last 3 local dates. Keyed on
+  // `tz`, because the date keys have to match the ones the strip builds.
+  useEffect(() => {
+    if (!location?.granted) return;
+    let cancelled = false;
+    setMeasuredDays(new Map());
+    const keyFmt = new Intl.DateTimeFormat('en-CA', { timeZone: tz });
+    const dates = [3, 2, 1].map((d) => keyFmt.format(new Date(Date.now() - d * 86_400_000)));
+    fetchMeasuredDays(location.lat, location.lon, dates).then((m) => {
+      if (!cancelled) setMeasuredDays(m);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [location, tz]);
+
+  // Switching the measured source re-asks the server, because the verdict is
+  // computed on the anchored series — the clear-time genuinely differs
+  // between the official monitor and the local sensor median, and deciding
+  // that here would put a second implementation of the answer in the browser.
+  // If the refetch fails, drop to the client-side path rather than showing a
+  // verdict anchored to the row the user just switched away from.
+  useEffect(() => {
+    if (!location?.granted || !serverForecast) return;
+    if (serverForecast.requestedSource === aqiSource) return;
+    let cancelled = false;
+    fetchServerForecast(location.lat, location.lon, { source: aqiSource }).then((next) => {
+      if (cancelled) return;
+      if (next) {
+        setServerForecast(next);
+        setSensorNow(next.measured);
+        setNowIndex(next.nowIndex);
+      } else {
+        setServerForecast(null);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [aqiSource, location, serverForecast]);
 
   // Home-screen app pattern: returning to a backgrounded app with stale
   // data should feel like opening it fresh — reload if the forecast is
@@ -270,13 +341,14 @@ export default function App() {
   // Experience surfaces (chip, verdict, strip) read the sensor-anchored
   // series; the agreement band and map stay pure model — comparing models
   // to each other with sensor corrections baked in would muddy exactly the
-  // signal the band exists to show.
+  // signal the band exists to show. When the endpoint answered it already ran
+  // this same applySensorAnchor() call, so take its result rather than
+  // running a second copy of the computation over the same numbers.
   const anchoredPm25 = useMemo(
     () =>
-      centerData
-        ? applySensorAnchor(centerData.pm25, nowIndex, activeSensor?.ug ?? null)
-        : null,
-    [centerData, nowIndex, activeSensor],
+      serverForecast?.pm25 ??
+      (centerData ? applySensorAnchor(centerData.pm25, nowIndex, activeSensor?.ug ?? null) : null),
+    [serverForecast, centerData, nowIndex, activeSensor],
   );
 
   function handleSourceChange(source) {
@@ -294,28 +366,35 @@ export default function App() {
     setSensitive(next);
   }
 
+  // The product's one promise — "when does it clear" — is answered once, on
+  // the server, so a phone and a laptop cannot disagree about it. These three
+  // fall back to the identical local computation when the endpoint is down.
   const verdict = useMemo(
-    () => (anchoredPm25 ? computeVerdict({ pm25: anchoredPm25, nowIndex }) : null),
-    [anchoredPm25, nowIndex],
+    () =>
+      serverForecast?.verdict ??
+      (anchoredPm25 ? computeVerdict({ pm25: anchoredPm25, nowIndex }) : null),
+    [serverForecast, anchoredPm25, nowIndex],
   );
   const headline = useMemo(
     () =>
-      verdict && centerData
-        ? verdictHeadline(verdict, (i) => formatVerdictTime(centerData.timesUTC[i], TIMEZONE))
-        : null,
-    [verdict, centerData],
+      serverForecast?.headline ??
+      (verdict && centerData
+        ? verdictHeadline(verdict, (i) => formatVerdictTime(centerData.timesUTC[i], tz))
+        : null),
+    [serverForecast, verdict, centerData, tz],
   );
   const days = useMemo(
     () =>
-      centerData && anchoredPm25
+      serverForecast?.days ??
+      (centerData && anchoredPm25
         ? buildDaySummaries({
             timesUTC: centerData.timesUTC,
             pm25: anchoredPm25,
             nowIndex,
-            timezone: TIMEZONE,
+            timezone: tz,
           })
-        : [],
-    [centerData, anchoredPm25, nowIndex],
+        : []),
+    [serverForecast, centerData, anchoredPm25, nowIndex, tz],
   );
   // "Update location" opens a chooser: search any city, or re-use the GPS.
   function handleUpdateLocation() {
@@ -472,7 +551,7 @@ export default function App() {
         level={selectedLevel}
         pm25={selectedPM25}
         isNow={selectedIndex === nowIndex}
-        timeLabel={formatLocalTime(centerData.timesUTC[selectedIndex], TIMEZONE)}
+        timeLabel={formatLocalTime(centerData.timesUTC[selectedIndex], tz)}
         headline={selectedIndex === nowIndex ? headline : null}
         sensor={selectedIndex === nowIndex ? activeSensor : null}
         sources={sensorNow}
@@ -487,7 +566,7 @@ export default function App() {
         level={nowLevel}
         aqi={ugm3ToAqi(anchoredPm25[nowIndex])}
         placeName={placeName}
-        timeLabel={formatLocalTime(centerData.timesUTC[nowIndex], TIMEZONE)}
+        timeLabel={formatLocalTime(centerData.timesUTC[nowIndex], tz)}
         headline={headline}
         days={days}
         diverged={agreement?.some((a) => a.status === 'diverge') ?? false}
@@ -538,7 +617,7 @@ export default function App() {
               onScrub={setSelectedIndex}
               playing={playing}
               onTogglePlay={() => setPlaying((p) => !p)}
-              timezone={TIMEZONE}
+              timezone={tz}
             />
             <AgreementBand
               agreement={agreement}
@@ -555,7 +634,7 @@ export default function App() {
         timesUTC={centerData.timesUTC}
         pm25={anchoredPm25}
         nowIndex={nowIndex}
-        timezone={TIMEZONE}
+        timezone={tz}
         measuredDays={measuredDays}
       />
       {/* SLOT: cta */}
@@ -570,7 +649,7 @@ export default function App() {
         headline={headline}
         level={selectedLevel}
         placeName={placeName}
-        timezone={TIMEZONE}
+        timezone={tz}
       />
       <InstallNudge levelIndex={nowLevel?.index ?? 0} headline={headline} />
     </div>

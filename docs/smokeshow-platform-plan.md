@@ -71,6 +71,11 @@ hours in one call — not a point. `/api/forecast` is exactly that call.
 Keep the client-side path in the web app as a fallback so a bad deploy of the
 endpoint degrades instead of breaking.
 
+**Shipped.** The contract is `docs/forecast-api-contract.md`, its machine-
+readable form is `design/forecast-api-v1.schema.json`, and the implementation
+is `api/forecast.js` over `src/lib/forecast.js`. Native clients build against
+the schema; the web keeps its client-side path as the fallback.
+
 ---
 
 ## 3. Widgets
