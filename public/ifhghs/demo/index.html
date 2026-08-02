@@ -30,6 +30,34 @@
     position:absolute;top:13px;left:50%;transform:translateX(-50%);
     width:104px;height:30px;border-radius:17px;background:#0B0906;z-index:6;
   }
+  /* ---------- platform frames: same app, four skins ---------- */
+  .mac-bar,.web-bar{display:none;align-items:center;gap:8px;padding:10px 14px;background:#242A2E}
+  .mac-bar i{width:11px;height:11px;border-radius:50%;flex:0 0 auto}
+  .mac-bar i:nth-child(1){background:#EC6A5E}
+  .mac-bar i:nth-child(2){background:#F4BE4F}
+  .mac-bar i:nth-child(3){background:#61C454}
+  .mac-bar span{flex:1;text-align:center;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:10.5px;color:#8B948F;margin-right:33px}
+  .web-bar .dots{display:flex;gap:5px}
+  .web-bar .dots i{width:9px;height:9px;border-radius:50%;background:#3A4247}
+  .web-bar .addr{flex:1;background:#1B2024;border-radius:7px;padding:5px 10px;
+    font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:10.5px;color:#8B948F;text-align:center}
+  .android-nav{display:none;justify-content:center;padding:10px 0 3px}
+  .android-nav i{width:100px;height:4px;border-radius:2px;background:rgba(232,228,218,.5)}
+
+  .phone.plat-web{border-radius:16px;padding:0}
+  .phone.plat-web .web-bar{display:flex;border-radius:16px 16px 0 0}
+  .phone.plat-web .screen{border-radius:0 0 16px 16px}
+  .phone.plat-web .island{display:none}
+
+  .phone.plat-macos{border-radius:13px;padding:0}
+  .phone.plat-macos .mac-bar{display:flex;border-radius:13px 13px 0 0}
+  .phone.plat-macos .screen{border-radius:0 0 13px 13px}
+  .phone.plat-macos .island{display:none}
+
+  .phone.plat-android{border-radius:30px}
+  .phone.plat-android .island{width:16px;height:16px;border-radius:50%;top:15px}
+  .phone.plat-android .android-nav{display:flex}
+
   .sky-el{position:absolute;inset:0;z-index:1;pointer-events:none}
   .sun-b{position:absolute;width:150px;height:150px;border-radius:50%;transform:translate(-50%,-50%);transition:opacity .3s linear}
   .stars{position:absolute;inset:0;opacity:0;transition:opacity .4s linear}
@@ -107,7 +135,6 @@
     -webkit-appearance:none;appearance:none;width:3px;height:58px;border-radius:2px;background:currentColor;
   }
   .curve-wrap input[type=range]:focus-visible{outline:2px solid #BC5A1E;outline-offset:3px}
-  .screen.puppet .curve-wrap{opacity:.35;pointer-events:none}
   .days{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:13px}
   .day{
     text-align:center;font-family:ui-monospace,"SF Mono",Menlo,monospace;
@@ -265,7 +292,47 @@
   .slider-row label{display:flex;justify-content:space-between;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:10.5px;letter-spacing:.08em;color:#8B948F}
   .slider-row label b{color:#C9C4B6}
   .rig input[type=range]{width:100%;accent-color:#C96F2E}
+  .rig select{
+    width:100%;padding:9px 12px;border-radius:10px;border:1px solid #333B3F;
+    background:#20262A;color:#E8E4DA;font:inherit;font-size:12.5px;outline:none;
+  }
+  .rig select:focus{border-color:#C96F2E}
+  .rig-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .rig-row .lbl{font-size:12.5px;font-weight:600}
+  .rig-row .lbl small{display:block;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:9.5px;color:#8B948F;font-weight:500;margin-top:2px;letter-spacing:.04em}
+  .rig-flexwrap{display:flex;flex-wrap:wrap;gap:6px}
+  .pill-btn{
+    text-align:left;padding:8px 11px;border-radius:9px;border:1px solid #2C3438;
+    background:#20262A;color:#D8D4C8;font:inherit;font-size:11.5px;cursor:pointer;flex:0 0 auto;
+  }
+  .pill-btn:hover{border-color:#C96F2E}
+  .pill-btn.wide{flex:1 1 100%;text-align:center;font-weight:650}
+  /* rig-level toggle: same pill-switch as the phone's settings sheet, restyled for the dark rig */
+  .rtgl{width:42px;height:25px;border-radius:13px;background:#333B3F;border:0;cursor:pointer;position:relative;flex:0 0 auto;transition:background .2s}
+  .rtgl::after{content:"";position:absolute;top:3px;left:3px;width:19px;height:19px;border-radius:50%;background:#C9C4B6;transition:transform .2s}
+  .rtgl.on{background:#3F9B52}
+  .rtgl.on::after{transform:translateX(17px);background:#0D1210}
   .foot{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:9.5px;color:#5E6864;letter-spacing:.06em;line-height:1.7}
+
+  /* ---------- share card / OG preview: the two surfaces most likely to drift ---------- */
+  .cp-label{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:9.5px;letter-spacing:.14em;color:#8B948F;margin:10px 0 6px;text-transform:uppercase}
+  .cp-label:first-child{margin-top:0}
+  .cp-box{
+    border-radius:14px;padding:16px 16px 14px;color:#F4E9D6;position:relative;overflow:hidden;
+    background:linear-gradient(160deg,#332A22 0%,#171310 75%);
+    display:flex;flex-direction:column;
+  }
+  .cp-og{aspect-ratio:1200/630;justify-content:center}
+  .cp-share{aspect-ratio:9/14}
+  .cp-word{font-size:21px;font-weight:800;letter-spacing:-.01em;line-height:1.08}
+  .cp-word.top{text-transform:uppercase;letter-spacing:.02em}
+  .cp-og .cp-word{font-size:25px}
+  .cp-place{margin-top:7px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:10px;letter-spacing:.08em;opacity:.65;text-transform:uppercase}
+  .cp-clear{margin-top:9px;font-weight:650;font-size:12.5px;color:#F0A468}
+  .cp-strip{display:flex;gap:5px;margin-top:13px}
+  .cp-strip span{flex:1;height:5px;border-radius:3px;background:#3A332B}
+  .cp-agree{margin-top:9px;font-size:10px;opacity:.62;font-style:italic}
+  .cp-mark{margin-top:auto;padding-top:12px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:9px;letter-spacing:.16em;opacity:.5}
 
   /* ---------- widgets column ---------- */
   .wcolm{width:340px;display:flex;flex-direction:column;gap:16px}
@@ -310,6 +377,26 @@
     display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.85}
   .w-days .pip{width:7px;height:7px;border-radius:50%}
 
+  /* ---------- Android: widgets are dp-responsive and user-resizable, not fixed families ---------- */
+  #wAndroid{display:none;min-width:110px;min-height:110px;max-width:340px;max-height:340px}
+  .w-flex .wcurve{height:42px}
+  .w-flex .overlay{padding-bottom:46px}
+  .w-flex .ridge{bottom:38px;height:24px}
+  .resize-handle{
+    position:absolute;right:0;bottom:0;width:26px;height:26px;z-index:5;
+    cursor:nwse-resize;touch-action:none;border:0;background:none;padding:0;
+  }
+  .resize-handle::after{
+    content:"";position:absolute;right:6px;bottom:6px;width:11px;height:11px;
+    border-right:2px solid currentColor;border-bottom:2px solid currentColor;opacity:.5;
+  }
+  .resize-handle:focus-visible{outline:2px solid #BC5A1E;outline-offset:-2px}
+  .wcolm.plat-android #homeCard{display:none}
+  .wcolm.plat-android .lock-mock{display:none}
+  .wcolm.plat-android #wAndroid{display:block}
+  .wcolm.plat-macos .lock-mock{display:none}
+  .wcolm.plat-web{display:none}
+
   .lock-mock{
     border-radius:24px;padding:26px 22px 24px;color:#EFE9DC;text-align:center;
     background:linear-gradient(180deg,#33302B 0%,#211E19 55%,#141210 100%);
@@ -340,11 +427,14 @@
 
   @media (max-width:760px){ body{gap:28px} .rig{width:370px} .wcolm{width:370px} }
   @media (prefers-reduced-motion: reduce){ *{transition:none !important} }
+  body.force-reduced-motion *{transition:none !important}
 </style>
 </head>
 <body>
 
-<div class="phone">
+<div class="phone plat-ios" id="phoneFrame">
+  <div class="mac-bar"><i></i><i></i><i></i><span>smokeshow.earth</span></div>
+  <div class="web-bar"><div class="dots"><i></i><i></i><i></i></div><div class="addr">smokeshow.earth</div></div>
   <div class="screen" id="screen">
     <div class="island"></div>
     <div class="sky-el"><div class="stars" id="stars"></div><div class="sun-b" id="sun"></div></div>
@@ -404,10 +494,11 @@
       </div>
     </div>
   </div>
+  <div class="android-nav"><i></i></div>
 </div>
 
-<div class="wcolm">
-  <div class="home-card">
+<div class="wcolm plat-ios" id="wcolm">
+  <div class="home-card" id="homeCard">
     <div class="widget w-small" id="wSmall">
       <div class="wsun"></div><div class="wgrain"></div>
       <div class="ridge" id="ridgeSmall"></div>
@@ -430,6 +521,19 @@
         <div class="w-sub">—</div>
       </div>
     </div>
+  </div>
+  <div class="widget w-flex" id="wAndroid" style="width:180px;height:180px">
+    <div class="wsun"></div><div class="wgrain"></div>
+    <div class="ridge" id="ridgeAndroid"></div>
+    <svg class="wcurve" id="curveAndroid" aria-hidden="true"></svg>
+    <div class="w-loc" id="wLoc3">—</div>
+    <div class="w-loc" id="androidSizeLabel" style="left:auto;right:15px">—</div>
+    <div class="overlay">
+      <div class="w-word">—</div>
+      <div class="w-sub">—</div>
+    </div>
+    <div class="resize-handle" id="androidResize" tabindex="0" role="slider"
+         aria-label="Resize widget" aria-valuemin="110" aria-valuemax="340" aria-valuenow="180"></div>
   </div>
   <div class="lock-mock">
     <div class="lk-date" id="lkDate">—</div>
@@ -466,7 +570,7 @@
 <aside class="rig">
   <div>
     <h1>SMOKESHOW<span>.</span></h1>
-    <div class="rig-cap" style="margin-top:8px">iOS demo rig · concept B</div>
+    <div class="rig-cap" style="margin-top:8px">Cross-platform design QA rig</div>
   </div>
   <div class="seg" role="tablist">
     <button id="tabLive" class="on">Live</button>
@@ -482,12 +586,90 @@
     <div class="rig-cap">Force a state</div>
     <div class="levels" id="levelBtns"></div>
     <div class="slider-row">
-      <label>PM2.5 <b id="pmVal">45 µg/m³</b></label>
+      <label>PM2.5 · amplitude <b id="pmVal">45 µg/m³</b></label>
       <input type="range" id="pmSlider" min="2" max="250" step="1" value="45">
     </div>
     <div class="slider-row">
-      <label>Time of day <b id="hrVal">2 PM</b></label>
+      <label>Shape · the time axis</label>
+      <select id="shapeSelect">
+        <option value="flat">Flat</option>
+        <option value="rising">Rising</option>
+        <option value="peaking" selected>Peaking</option>
+        <option value="clearing">Clearing</option>
+        <option value="stuck">Stuck all week</option>
+      </select>
+    </div>
+    <div class="slider-row">
+      <label>Time of day (now) <b id="hrVal">2 PM</b></label>
       <input type="range" id="hrSlider" min="0" max="23.5" step="0.5" value="14">
+    </div>
+
+    <div class="rig-cap" style="margin-top:4px">Place name</div>
+    <input type="text" id="placeField" value="Bend" placeholder="Place name…" maxlength="40">
+    <div class="rig-flexwrap" id="placePresets">
+      <button type="button" class="pill-btn" data-place="Bend">Bend · short</button>
+      <button type="button" class="pill-btn" data-place="Colorado Springs">Colorado Springs · long</button>
+    </div>
+
+    <div class="rig-cap" style="margin-top:4px">Sensors</div>
+    <div class="seg" id="sensorsSeg" role="tablist">
+      <button type="button" data-sensors="none" class="on">None</button>
+      <button type="button" data-sensors="official">Official</button>
+      <button type="button" data-sensors="local">Local</button>
+      <button type="button" data-sensors="both">Both</button>
+    </div>
+    <div class="slider-row">
+      <label>Sensor divergence <b id="divVal">25%</b></label>
+      <input type="range" id="divSlider" min="0" max="80" step="5" value="25">
+    </div>
+
+    <button type="button" class="pill-btn wide" id="pinInk" style="margin-top:2px">Pin the ink crossover ›</button>
+  </div>
+
+  <div class="pane" id="paneShared">
+    <div class="rig-cap">Platform frame</div>
+    <div class="seg" id="platformSeg" role="tablist">
+      <button type="button" data-platform="web">Web</button>
+      <button type="button" data-platform="ios" class="on">iOS</button>
+      <button type="button" data-platform="android">Android</button>
+      <button type="button" data-platform="macos">macOS</button>
+    </div>
+
+    <div class="rig-row">
+      <div class="lbl">Units<small>Numbers shown as</small></div>
+      <div class="seg2" id="rigUnitsSeg">
+        <button type="button" data-u="ug">µg/m³</button>
+        <button type="button" data-u="aqi">AQI</button>
+      </div>
+    </div>
+    <div class="rig-row">
+      <div class="lbl">Sensitive household<small>EPA sensitive-groups guidance</small></div>
+      <button type="button" class="rtgl" id="rigSensitiveTgl"></button>
+    </div>
+    <div class="rig-row">
+      <div class="lbl">Reduced motion<small>Force no-animation, regardless of OS</small></div>
+      <button type="button" class="rtgl" id="rigMotionTgl"></button>
+    </div>
+
+    <div class="rig-cap" style="margin-top:6px">Share &amp; OG preview</div>
+    <div id="cardPreviews">
+      <div class="cp-label">Share card</div>
+      <div class="cp-box cp-share">
+        <div class="cp-word" id="scWord">—</div>
+        <div class="cp-place" id="scPlace">—</div>
+        <div class="cp-clear" id="scClear">—</div>
+        <div class="cp-strip" id="scStrip"></div>
+        <div class="cp-agree" id="scAgree" hidden></div>
+        <div class="cp-mark">smokeshow.earth</div>
+      </div>
+      <div class="cp-label">OG link preview</div>
+      <div class="cp-box cp-og">
+        <div class="cp-word" id="ogWord">—</div>
+        <div class="cp-place" id="ogPlace">—</div>
+        <div class="cp-clear" id="ogClear">—</div>
+        <div class="cp-strip" id="ogStrip"></div>
+        <div class="cp-mark">smokeshow.earth</div>
+      </div>
     </div>
   </div>
 
@@ -541,13 +723,6 @@
     "avoid prolonged exertion. Keep inhalers close; indoors with filtration is the good call.",
     "stay inside, windows closed, filtration on. This level is for no one."
   ];
-  const PUPPET_CLEARS = [
-    "Stays clear all week",
-    "Thins out by evening",
-    "Clears Thursday 6 AM",
-    "Peaks tonight · clears Thursday 6 AM",
-    "Peaks tonight · clears Friday morning"
-  ];
 
   /* ---------- prefs ---------- */
   const PREFS_KEY = 'ss_prefs';
@@ -563,10 +738,19 @@
   /* ---------- state ---------- */
   const S = {
     mode: 'live',
-    puppet: { pm: 45, hour: 14 },
+    puppet: {
+      pm: 45, hour: 14, shape: 'peaking',
+      place: 'Bend',
+      sensors: 'none', divergence: 25
+    },
+    puppetSeries: null, // built by buildPuppetSeries(): same shape as `live`
     live: null,   // {name, times[], pm[], offset, nowT, nowIdx, days[], fetchedAt, bestDayName, clearH, peakH, peakPM}
+    platform: 'ios',
+    forceReducedMotion: false,
     h: 0
   };
+  /* the data both modes must agree on: whichever one is active, in the same shape */
+  function curL(){ return S.mode === 'puppet' ? S.puppetSeries : S.live; }
 
   /* ---------- sky (concept B) ---------- */
   const DAY_ZEN=[139,169,196], DAY_HOR=[226,222,206];
@@ -643,16 +827,10 @@
       .finally(() => clearTimeout(timer));
   }
 
-  async function loadPlace(name, lat, lon){
-    setStatus(`Fetching ${name}…`);
-    const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}`+
-      `&hourly=pm2_5&past_days=1&forecast_days=5&timezone=auto&timeformat=unixtime`;
-    const r = await fetch(url);
-    if(!r.ok) throw new Error('air quality fetch failed');
-    const j = await r.json();
-    const times = j.hourly.time, pm = j.hourly.pm2_5.map(v => v==null ? 0 : v);
-    const offset = j.utc_offset_seconds;
-    const nowT = Date.now()/1000;
+  /* the shared spine: turn a raw (times, pm) series into everything the phone reads —
+     days strip, peak, clear-time (6h hold). Live fetches feed it; the puppet synthesizes
+     its own series and feeds it the same way, so nothing downstream can tell them apart. */
+  function deriveSeriesMeta(times, pm, offset, nowT){
     let nowIdx = times.findIndex(t => t > nowT) - 1;
     if(nowIdx < 0) nowIdx = 0;
 
@@ -693,19 +871,82 @@
     let bestIdx = days.length > 1 ? 1 : 0;
     for(let i=1;i<days.length;i++) if(days[i].max < days[bestIdx].max) bestIdx = i;
 
-    S.live = {
-      name, lat, lon, times, pm, offset, nowT, nowIdx, days, peakPM, peakH, clearH,
-      bestDayName: days.length ? localDate(days[bestIdx].t + 14*3600, offset).wdLong : "later this week",
-      fetchedAt: new Date()
+    return {
+      times, pm, offset, nowT, nowIdx, days, peakPM, peakH, clearH,
+      bestDayName: days.length ? localDate(days[bestIdx].t + 14*3600, offset).wdLong : "later this week"
     };
+  }
+
+  function applyPlaceLabels(name, nowT, offset){
     $('locName').textContent = name.split(',')[0];
     const shortName = name.split(',')[0].toUpperCase();
     $('wLoc1').textContent = shortName; $('wLoc2').textContent = shortName;
     $('lkDate').textContent = new Date((nowT + offset)*1000).toLocaleDateString('en-US',
       {weekday:'long', month:'long', day:'numeric', timeZone:'UTC'});
+  }
+
+  /* ---------- puppet: a synthetic series, not a scalar ----------
+     PM slider is amplitude; the shape selector is the missing time axis.
+     Padded to +72h (not just +48h) so clearH's 6-hour hold check always has
+     real lookahead data instead of clamping into a repeated last value. */
+  const PUP_BACK = 12, PUP_FWD = 72;
+  function puppetShapeValue(shape, amp, h){
+    switch(shape){
+      case 'rising': {
+        const frac = clamp01((h + PUP_BACK) / 60);
+        return Math.max(2, amp * (0.22 + 1.0*frac));
+      }
+      case 'peaking': {
+        const peakH = 14, sigma = 9;
+        const g = Math.exp(-((h-peakH)*(h-peakH)) / (2*sigma*sigma));
+        return Math.max(2, amp * (0.10 + 1.1*g));
+      }
+      case 'clearing': {
+        const K = 16, base = Math.min(6, amp*0.06);
+        return Math.max(2, base + (amp-base) * Math.exp(-Math.max(0, h+PUP_BACK)/K));
+      }
+      case 'stuck':
+        return Math.max(2, amp * (0.94 + 0.06*Math.sin(h*Math.PI/12)));
+      case 'flat':
+      default:
+        return Math.max(2, amp);
+    }
+  }
+  function buildPuppetSeries(){
+    const p = S.puppet;
+    const now = new Date();
+    const dayStart = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) / 1000;
+    const nowT = dayStart + p.hour*3600, offset = 0;
+    const times = [], pm = [];
+    for(let h = -PUP_BACK; h <= PUP_FWD; h++){
+      times.push(nowT + h*3600);
+      pm.push(puppetShapeValue(p.shape, p.pm, h));
+    }
+    S.puppetSeries = { name: p.place || 'Bend', ...deriveSeriesMeta(times, pm, offset, nowT) };
+    applyPlaceLabels(S.puppetSeries.name, nowT, offset);
+    return S.puppetSeries;
+  }
+
+  async function loadPlace(name, lat, lon){
+    setStatus(`Fetching ${name}…`);
+    const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}`+
+      `&hourly=pm2_5&past_days=1&forecast_days=5&timezone=auto&timeformat=unixtime`;
+    const r = await fetch(url);
+    if(!r.ok) throw new Error('air quality fetch failed');
+    const j = await r.json();
+    const times = j.hourly.time, pm = j.hourly.pm2_5.map(v => v==null ? 0 : v);
+    const offset = j.utc_offset_seconds;
+    const nowT = Date.now()/1000;
+
+    S.live = {
+      name, lat, lon,
+      ...deriveSeriesMeta(times, pm, offset, nowT),
+      fetchedAt: new Date()
+    };
+    applyPlaceLabels(name, nowT, offset);
     buildDays();
     buildCurve();
-    setStatus(`<b>${name}</b><br>CAMS model · fetched ${S.live.fetchedAt.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}<br>peak next 48h: ${Math.round(peakPM)} µg/m³`);
+    setStatus(`<b>${name}</b><br>CAMS model · fetched ${S.live.fetchedAt.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}<br>peak next 48h: ${Math.round(S.live.peakPM)} µg/m³`);
     update(0);
     refreshMapForPlace();
     loadMeasured(lat, lon, name);
@@ -724,27 +965,23 @@
 
   /* ---------- phone data plumbing ---------- */
   function pmAt(h){
-    if(S.mode === 'puppet') return S.puppet.pm;
-    const L = S.live; if(!L) return 0;
+    const L = curL(); if(!L) return 0;
     const f = L.nowIdx + h;
     const i = Math.max(0, Math.min(L.times.length-2, Math.floor(f)));
     return lerp(L.pm[i], L.pm[i+1], clamp01(f - i));
   }
   function hourAt(h){
-    if(S.mode === 'puppet') return S.puppet.hour;
-    const L = S.live; if(!L) return 12;
+    const L = curL(); if(!L) return 12;
     return localDate(L.nowT + h*3600, L.offset).hourOfDay;
   }
   function whenAt(h){
-    if(S.mode === 'puppet') return "Puppet";
     if(Math.abs(h) < 0.5) return "Now";
-    const L = S.live; if(!L) return "—";
+    const L = curL(); if(!L) return "—";
     return localDate(L.nowT + h*3600, L.offset).label;
   }
 
   function verdictLine(pm, h){
-    if(S.mode === 'puppet') return PUPPET_CLEARS[levelFor(pm)];
-    const L = S.live; if(!L) return "—";
+    const L = curL(); if(!L) return "—";
     if(pm >= 35){
       if(!L.clearH){
         const dayClear = L.days.find(d => (d.t - L.nowT)/3600 > 40 && d.max < 35);
@@ -775,9 +1012,7 @@
   /* ---------- render ---------- */
   let currentH = 0;
   function widgetSub(pm, h){
-    if(S.mode === 'puppet')
-      return ["Clear all week","Thins by evening","Clears Thu 6 AM","Clears Thu 6 AM","Clears Fri morning"][levelFor(pm)];
-    const L = S.live; if(!L) return "—";
+    const L = curL(); if(!L) return "—";
     const tr = trendAt(h);
     if(pm >= 35){
       if(L.clearH) return `Clears ${localDate(L.nowT + L.clearH*3600, L.offset).label}`;
@@ -793,13 +1028,7 @@
   }
 
   function nextChangeInfo(pm, h){
-    if(S.mode === 'puppet'){
-      const li = levelFor(pm);
-      if(li === 0) return {txt:'5d+', label:'CLEAR', color:'#3F9B52', frac:1};
-      if(li === 1) return {txt:'9h', label:'TO SMOKE', color:'#CE2F1F', frac:9/48};
-      return {txt:'14h', label:'TO CLEAR', color:'#3F9B52', frac:14/48};
-    }
-    const L = S.live; if(!L) return {txt:'—', label:'', color:'#9A9284', frac:0};
+    const L = curL(); if(!L) return {txt:'—', label:'', color:'#9A9284', frac:0};
     if(pm >= 35){
       if(L.clearH){
         const n = Math.max(1, Math.round(L.clearH - h));
@@ -958,6 +1187,31 @@
     $('arSub').textContent = sub;
     drawCurve($('curveRect'), 144, 17, '#F4E9D6', {thin:true});
   }
+  /* Android: Jetpack Glance has no fixed widget families — widgets are dp-responsive
+     and user-resizable, so this one redraws at whatever box size the handle leaves it. */
+  function renderAndroidWidget(pm, t, h){
+    const w = $('wAndroid'); if(!w) return;
+    const r = ratingFor(pm), li = levelFor(pm);
+    const sub = widgetSub(pm, h);
+    const s = skyB(pm, t);
+    w.style.background = `linear-gradient(180deg, ${rgb(s.zen)}, ${rgb(s.mid)} 52%, ${rgb(s.hor)})`;
+    const sun = w.querySelector('.wsun');
+    const dim = clamp01(pm/150);
+    sun.style.left = "76%"; sun.style.top = "24%";
+    sun.style.width = sun.style.height = "64px";
+    sun.style.background = `radial-gradient(circle, ${rgb(mix([255,246,224],[206,110,48],dim))} 0%, transparent ${44-26*dim}%)`;
+    w.classList.toggle('dark-air', lum(s.mid) < 0.42);
+    w.classList.toggle('calm', li === 0);
+    w.querySelector('.w-word').textContent = r.word;
+    w.querySelector('.w-sub').textContent = sub;
+    const ink = w.classList.contains('dark-air') ? '#F4E9D6' : '#26221B';
+    setRidge($('ridgeAndroid'), pm);
+    const rect = w.getBoundingClientRect();
+    drawCurve($('curveAndroid'), Math.max(60, Math.round(rect.width)), 42, ink, {});
+    const L0 = curL();
+    $('wLoc3').textContent = L0 ? L0.name.split(',')[0].toUpperCase() : '—';
+    $('androidSizeLabel').textContent = `${Math.round(rect.width)}×${Math.round(rect.height)}`;
+  }
   function update(h){
     currentH = h; S.h = h;
     const pm = pmAt(h);
@@ -979,10 +1233,12 @@
       $('trendPip').style.background = col;
     }
     $('when').textContent = whenAt(h);
-    $('clock').textContent = S.mode==='puppet' ? "PUPPET" : (Math.abs(h)<0.5 ? "NOW" : (h<0?"":"+")+Math.round(h)+"H");
+    $('clock').textContent = (S.mode==='puppet' ? "PUPPET · " : "") + (Math.abs(h)<0.5 ? "NOW" : (h<0?"":"+")+Math.round(h)+"H");
     $('clearline').textContent = verdictLine(pm, h);
     $('scrub').value = h;
     renderWidgets(pm, hourAt(h), h);
+    if(S.platform === 'android') renderAndroidWidget(pm, hourAt(h), h);
+    renderCardPreviews(pm, h);
     if(screen.classList.contains('map-open')){
       $('mapWhen').textContent = whenAt(h);
       $('mapClock').textContent = $('clock').textContent;
@@ -996,7 +1252,7 @@
   function buildCurve(){
     const wrap = $('curveWrap');
     const old = wrap.querySelector('svg'); if(old) old.remove();
-    const L = S.live; if(!L) return;
+    const L = curL(); if(!L) return;
     const ns = "http://www.w3.org/2000/svg", W=300, H=58;
     const vals = []; for(let h=-12; h<=48; h++) vals.push(pmAt(h));
     const maxPM = Math.max(60, Math.max(...vals)*1.15);
@@ -1026,7 +1282,7 @@
   /* day strip */
   function buildDays(){
     const host = $('days'); host.innerHTML = '';
-    const L = S.live; if(!L) return;
+    const L = curL(); if(!L) return;
     L.days.forEach(d => {
       const el = document.createElement('button');
       el.type='button'; el.className='day';
@@ -1038,7 +1294,6 @@
         <span class="parts">${parts.map(v =>
           `<span${v == null ? '' : ` style="background:${partBucket(v)[1]}"`}></span>`).join('')}</span>`;
       el.addEventListener('click', () => {
-        if(S.mode === 'puppet') return;
         const targetT = d.t + 14*3600;  // 2 PM local-ish
         const h = Math.max(-12, Math.min(48, (targetT - L.nowT)/3600));
         glideTo(h);
@@ -1050,7 +1305,7 @@
   let raf = null;
   function glideTo(target){
     if(raf) cancelAnimationFrame(raf);
-    if(matchMedia('(prefers-reduced-motion: reduce)').matches){ update(target); return; }
+    if(S.forceReducedMotion || matchMedia('(prefers-reduced-motion: reduce)').matches){ update(target); return; }
     const from = currentH, t0 = performance.now(), dur = 650;
     const ease = t => 1 - Math.pow(1-t, 3);
     const step = now => {
@@ -1071,15 +1326,14 @@
     const open = () => {
       const pm = pmAt(currentH);
       const li = levelFor(pm);
-      const best = S.mode==='live' && S.live ? S.live.bestDayName : "Wednesday";
+      const Lb = curL();
+      const best = Lb ? Lb.bestDayName : "later this week";
       const plan = li === 0
         ? `<span class="lead">The plan:</span> it's clear right now. Go.`
         : `<span class="lead">The plan:</span> cleanest upcoming air is <span class="lead">${best}</span>. Don't cancel the lake day; move it.`;
       // measured vs model: two honest answers, never averaged
       let meas = '';
-      const m = S.mode === 'puppet'
-        ? {official:{aqi:pmToAqi(pm*1.15), distanceMi:23}, local:{aqi:pmToAqi(pm*0.88), count:12, medianDistanceMi:8}}
-        : (S.live && S.live.measured);
+      const m = S.mode === 'puppet' ? puppetMeasured(pm) : (S.live && S.live.measured);
       if(m && (m.official || m.local)){
         meas = `<div class="meas">
           <div class="sh-eyebrow mono" style="margin-bottom:4px">Measured right now</div>
@@ -1135,6 +1389,7 @@
           savePrefs();
           t.classList.toggle('on', PREFS[t.dataset.k]);
           t.setAttribute('aria-pressed', PREFS[t.dataset.k]);
+          syncPrefsUI();
         });
       });
       sheet.querySelectorAll('.seg2 button').forEach(b => {
@@ -1143,6 +1398,7 @@
           PREFS.units = b.dataset.u;
           savePrefs();
           sheet.querySelectorAll('.seg2 button').forEach(x => x.classList.toggle('on', PREFS.units === x.dataset.u));
+          syncPrefsUI();
           update(currentH);
         });
       });
@@ -1268,8 +1524,16 @@
     $('paneLive').classList.toggle('hidden', m!=='live');
     $('panePuppet').classList.toggle('hidden', m!=='puppet');
     screen.classList.toggle('puppet', m==='puppet');
-    $('tag').textContent = m==='puppet' ? 'forced state' : '-12h · +48h';
-    update(m==='puppet' ? currentH : 0);
+    $('tag').textContent = m==='puppet' ? 'forced state · scrub still live' : '-12h · +48h';
+    if(m === 'puppet'){
+      buildPuppetSeries();
+      buildDays();
+      buildCurve();
+    } else if(S.live){
+      buildDays();
+      buildCurve();
+    }
+    update(currentH);
   }
 
   /* ---------- in-phone location UI: search, saved, locate ---------- */
@@ -1364,6 +1628,12 @@
 
   /* puppet controls */
   const LVL_PMS = [5, 22, 45, 95, 200];
+  function refreshPuppet(){
+    buildPuppetSeries();
+    buildDays();
+    buildCurve();
+    update(currentH);
+  }
   RATINGS.forEach((r,i) => {
     const b = document.createElement('button');
     b.innerHTML = `<span class="pip" style="background:${PIPS[i]}"></span>${r.word}`;
@@ -1371,21 +1641,35 @@
       S.puppet.pm = LVL_PMS[i];
       $('pmSlider').value = LVL_PMS[i];
       $('pmVal').textContent = LVL_PMS[i]+' µg/m³';
-      if(S.mode!=='puppet') setMode('puppet'); else update(currentH);
+      if(S.mode!=='puppet') setMode('puppet'); else refreshPuppet();
     });
     $('levelBtns').appendChild(b);
   });
   $('pmSlider').addEventListener('input', e => {
     S.puppet.pm = +e.target.value;
     $('pmVal').textContent = e.target.value+' µg/m³';
-    if(S.mode==='puppet') update(currentH);
+    if(S.mode==='puppet') refreshPuppet();
   });
   $('hrSlider').addEventListener('input', e => {
     S.puppet.hour = +e.target.value;
     const hr = Math.floor(S.puppet.hour), mn = S.puppet.hour%1 ? '30' : '00';
     const ap = hr>=12?'PM':'AM';
     $('hrVal').textContent = `${hr%12||12}:${mn} ${ap}`;
-    if(S.mode==='puppet') update(currentH);
+    if(S.mode==='puppet') refreshPuppet();
+  });
+  $('shapeSelect').addEventListener('change', e => {
+    S.puppet.shape = e.target.value;
+    if(S.mode==='puppet') refreshPuppet();
+  });
+  $('placeField').addEventListener('input', e => {
+    S.puppet.place = e.target.value.trim() || 'Bend';
+    if(S.mode==='puppet') refreshPuppet();
+  });
+  $('placePresets').addEventListener('click', e => {
+    const b = e.target.closest('button[data-place]'); if(!b) return;
+    S.puppet.place = b.dataset.place;
+    $('placeField').value = b.dataset.place;
+    if(S.mode==='puppet') refreshPuppet(); else buildPuppetSeries();
   });
 
   /* ---------- iOS 17 tap regions: slices of the curve deep-link into the app ---------- */
@@ -1401,12 +1685,168 @@
           ? `Open the app ${Math.abs(centre)} hours ago`
           : `Open the app in ${centre} hours`);
         b.addEventListener('click', () => {
-          if(S.mode === 'puppet') return;
           if(screen.classList.contains('map-open')) screen.classList.remove('map-open');
           glideTo(centre);
         });
         host.appendChild(b);
       }
+    });
+  })();
+
+  /* ---------- share card + OG preview: same three surfaces (word, place, clear-time, strip) getVerdict() feeds ---------- */
+  function renderCardPreviews(pm, h){
+    const L0 = curL();
+    const r = ratingFor(pm), li = levelFor(pm);
+    const place = L0 ? L0.name.split(',')[0] : '—';
+    const when = L0 ? new Date((L0.nowT + (L0.offset || 0)) * 1000).toLocaleDateString('en-US',
+      {weekday:'long', month:'short', day:'numeric', timeZone:'UTC'}) : '—';
+    const clear = verdictLine(pm, h);
+    const days = L0 ? L0.days : [];
+    const agree = (S.mode === 'puppet' && S.puppet.sensors !== 'none' && S.puppet.divergence >= 40)
+      ? 'Measured and modeled disagree · models split on timing' : '';
+    ['sc', 'og'].forEach(pfx => {
+      const wordEl = $(pfx + 'Word');
+      wordEl.textContent = li === 4 ? 'SMOKESHOW' : r.word;
+      wordEl.classList.toggle('top', li === 4);
+      $(pfx + 'Place').textContent = `${place} · ${when}`;
+      $(pfx + 'Clear').textContent = clear;
+      const strip = $(pfx + 'Strip'); strip.innerHTML = '';
+      days.forEach(d => {
+        const s = document.createElement('span');
+        s.style.background = PIPS[levelFor(d.max)];
+        strip.appendChild(s);
+      });
+    });
+    $('scAgree').hidden = !agree;
+    $('scAgree').textContent = agree;
+  }
+
+  /* ---------- measured vs model, for the puppet: none/official/local/both + how far apart ---------- */
+  function puppetMeasured(pm){
+    const mode = S.puppet.sensors;
+    if(mode === 'none') return null;
+    const div = S.puppet.divergence / 100;
+    const out = {};
+    if(mode === 'official' || mode === 'both')
+      out.official = {aqi: pmToAqi(Math.max(0, pm * (1 + div))), area: 'Puppet AirNow site', distanceMi: 14};
+    if(mode === 'local' || mode === 'both')
+      out.local = {aqi: pmToAqi(Math.max(0, pm * (1 - div))), count: 9, medianDistanceMi: 3};
+    return out;
+  }
+  $('sensorsSeg').addEventListener('click', e => {
+    const b = e.target.closest('button[data-sensors]'); if(!b) return;
+    S.puppet.sensors = b.dataset.sensors;
+    $('sensorsSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+  });
+  $('divSlider').addEventListener('input', e => {
+    S.puppet.divergence = +e.target.value;
+    $('divVal').textContent = e.target.value + '%';
+  });
+
+  /* ---------- pin the ink crossover: jump straight to where dark-air flips, instead of dragging for it ---------- */
+  function findInkCrossover(){
+    const L0 = curL(); if(!L0) return null;
+    const pmCur = pmAt(currentH);
+    const evalLum = h => lum(skyB(pmCur, hourAt(h)).mid);
+    let prevH = currentH, prevL = evalLum(currentH);
+    for(let dh = 0.25; dh <= 60; dh += 0.25){
+      const h = Math.min(48, currentH + dh);
+      const l = evalLum(h);
+      if((prevL - 0.42) * (l - 0.42) <= 0 && l !== prevL){
+        const t = clamp01((0.42 - prevL) / (l - prevL));
+        return Math.max(-12, Math.min(48, prevH + (h - prevH) * t));
+      }
+      prevH = h; prevL = l;
+      if(h >= 48) break;
+    }
+    return null;
+  }
+  $('pinInk').addEventListener('click', () => {
+    const target = findInkCrossover();
+    const btn = $('pinInk');
+    if(target == null){
+      const orig = btn.textContent;
+      btn.textContent = 'No crossover in range';
+      setTimeout(() => { btn.textContent = orig; }, 1400);
+      return;
+    }
+    glideTo(target);
+  });
+
+  /* ---------- units + sensitive household, surfaced directly in the rig (not buried in the sheet) ---------- */
+  function syncPrefsUI(){
+    $('rigUnitsSeg').querySelectorAll('button').forEach(b => b.classList.toggle('on', PREFS.units === b.dataset.u));
+    $('rigSensitiveTgl').classList.toggle('on', !!PREFS.sensitive);
+    $('rigSensitiveTgl').setAttribute('aria-pressed', !!PREFS.sensitive);
+  }
+  $('rigUnitsSeg').addEventListener('click', e => {
+    const b = e.target.closest('button[data-u]'); if(!b) return;
+    PREFS.units = b.dataset.u; savePrefs(); syncPrefsUI(); update(currentH);
+  });
+  $('rigSensitiveTgl').addEventListener('click', () => {
+    PREFS.sensitive = !PREFS.sensitive; savePrefs(); syncPrefsUI();
+  });
+  syncPrefsUI();
+
+  /* ---------- reduced motion: force the no-animation state without touching OS settings ---------- */
+  $('rigMotionTgl').addEventListener('click', () => {
+    S.forceReducedMotion = !S.forceReducedMotion;
+    $('rigMotionTgl').classList.toggle('on', S.forceReducedMotion);
+    $('rigMotionTgl').setAttribute('aria-pressed', S.forceReducedMotion);
+    document.body.classList.toggle('force-reduced-motion', S.forceReducedMotion);
+  });
+
+  /* ---------- platform frames: one app, four skins ---------- */
+  function setPlatform(p){
+    S.platform = p;
+    $('platformSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.platform === p));
+    $('phoneFrame').className = 'phone plat-' + p;
+    $('wcolm').className = 'wcolm plat-' + p;
+    if(p === 'android') renderAndroidWidget(pmAt(currentH), hourAt(currentH), currentH);
+  }
+  $('platformSeg').addEventListener('click', e => {
+    const b = e.target.closest('button[data-platform]'); if(!b) return;
+    setPlatform(b.dataset.platform);
+  });
+
+  /* Android resize handle: dp-responsive, user-resizable, no fixed widget families */
+  (function setupAndroidResize(){
+    const handle = $('androidResize'), box = $('wAndroid');
+    const MIN = 110, MAX = 340;
+    let dragging = false, startX, startY, startW, startH;
+    function clampSize(w, h){
+      return [Math.max(MIN, Math.min(MAX, w)), Math.max(MIN, Math.min(MAX, h))];
+    }
+    function apply(w, h){
+      const [cw, ch] = clampSize(w, h);
+      box.style.width = cw + 'px'; box.style.height = ch + 'px';
+      handle.setAttribute('aria-valuenow', Math.round(cw));
+      renderAndroidWidget(pmAt(currentH), hourAt(currentH), currentH);
+    }
+    function onDown(e){
+      dragging = true;
+      const p = e.touches ? e.touches[0] : e;
+      startX = p.clientX; startY = p.clientY;
+      startW = box.offsetWidth; startH = box.offsetHeight;
+      e.preventDefault();
+    }
+    function onMove(e){
+      if(!dragging) return;
+      const p = e.touches ? e.touches[0] : e;
+      apply(startW + (p.clientX - startX), startH + (p.clientY - startY));
+    }
+    function onUp(){ dragging = false; }
+    handle.addEventListener('pointerdown', onDown);
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    handle.addEventListener('keydown', e => {
+      const step = 12;
+      let dw = 0, dh = 0;
+      if(e.key === 'ArrowRight') dw = step; else if(e.key === 'ArrowLeft') dw = -step;
+      else if(e.key === 'ArrowDown') dh = step; else if(e.key === 'ArrowUp') dh = -step;
+      else return;
+      e.preventDefault();
+      apply(box.offsetWidth + dw, box.offsetHeight + dh);
     });
   })();
 
