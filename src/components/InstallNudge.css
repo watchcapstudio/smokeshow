@@ -1,4 +1,8 @@
-/* Install nudge (bottom sheet) */
+/* Install nudge — the demo's bottom sheet, at the size the message needs.
+   Cream 24px-radius sheet with its own fixed ink, a grab handle, and the
+   sheet's shadow rather than a border. It arrives over a live sky, so it does
+   not flip with the air: a prompt that changed colour scheme while you read it
+   would read as a bug. */
 .install-nudge {
   position: fixed;
   left: 50%;
@@ -7,43 +11,66 @@
   width: 100%;
   max-width: 720px;
   box-sizing: border-box;
-  background: var(--bg-panel);
-  border: 1px solid var(--accent);
-  border-bottom: none;
-  border-radius: 1rem 1rem 0 0;
-  padding: 1rem 2.6rem 0.6rem 1.1rem;
-  padding-bottom: calc(0.6rem + env(safe-area-inset-bottom));
+
+  --ink: #26221b;
+  --accent: #8c3e10;
+  --on-accent: #f4e9d6;
+  --text: var(--ink);
+  --text-dim: #8a7c64;
+  --rule: #efe7d8;
+
+  background: rgba(251, 247, 238, 0.97);
+  color: var(--ink);
+  border-radius: 24px 24px 0 0;
+  padding: 0.65rem 2.6rem 0.7rem 1.25rem;
+  padding-bottom: calc(0.7rem + env(safe-area-inset-bottom));
   z-index: 1200;
-  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 -18px 44px -12px rgba(22, 15, 8, 0.45);
+}
+
+.install-nudge::before {
+  content: '';
+  display: block;
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: #c9bfac;
+  margin: 2px auto 12px;
 }
 
 .install-nudge__close {
   position: absolute;
-  top: 0.4rem;
+  top: 0.5rem;
   right: 0.5rem;
   background: none;
   border: none;
   color: var(--text-dim);
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   line-height: 1;
   cursor: pointer;
   padding: 0.3rem 0.5rem;
 }
 
 .install-nudge__pitch {
-  margin: 0 0 0.5rem;
-  font-weight: 600;
+  margin: 0 0 0.45rem;
+  font-weight: 650;
   font-size: 0.95rem;
+  line-height: 1.35;
 }
 
 .install-nudge__how {
   margin: 0;
   color: var(--text-dim);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   display: flex;
   align-items: center;
   gap: 0.35rem;
   flex-wrap: wrap;
+}
+
+.install-nudge__how strong {
+  color: var(--ink);
+  font-weight: 650;
 }
 
 .install-nudge__glyph {
@@ -57,7 +84,7 @@
   text-align: center;
   font-size: 1.3rem;
   color: var(--accent);
-  animation: nudge-bounce 1.2s ease-in-out infinite;
+  animation: nudge-bounce var(--duration-bounce) var(--easing-bounce) infinite;
   line-height: 1;
   margin-top: 0.15rem;
 }
@@ -73,13 +100,20 @@
 }
 
 .install-nudge__install {
-  margin-top: 0.2rem;
+  margin-top: 0.35rem;
   background: var(--accent);
   border: none;
-  color: #16130f;
+  color: var(--on-accent);
+  font: inherit;
   font-weight: 700;
-  border-radius: 999px;
-  padding: 0.5rem 1.2rem;
+  border-radius: var(--radius-pill);
+  padding: 0.55rem 1.3rem;
   cursor: pointer;
   font-size: 0.95rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .install-nudge__arrow {
+    animation: none;
+  }
 }

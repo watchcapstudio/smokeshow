@@ -1,24 +1,42 @@
-/* Location banner */
+/* Location banner — the demo's `.loc-row`: a mono uppercase place name that
+   is itself the control for changing it, with the demo's disclosure chevron. */
 .location-banner {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 0.5rem;
-  font-size: 0.95rem;
-  color: var(--text-dim);
+  gap: 0.6rem;
 }
 
 .location-banner__place {
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 70%;
 }
 
 .location-banner__update {
   background: none;
-  border: 1px solid var(--border);
+  border: 0;
   color: var(--text-dim);
-  border-radius: 999px;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 4px 0;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+}
+
+.location-banner__update::after {
+  content: '›';
+  font-size: 13px;
+  line-height: 1;
 }

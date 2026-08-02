@@ -1,23 +1,39 @@
-/* Shared-link banner */
+/* Shared-link banner — the conversion moment for someone who arrived on
+   somebody else's air. It sits above the verdict on the bare sky, so it is
+   type plus one filled control rather than a card: a mono eyebrow that says
+   whose air this is, and the accent pill that claims their own. */
 .shared-banner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  background: var(--bg-panel);
-  border: 1px solid var(--accent);
-  border-radius: 0.75rem;
-  padding: 0.7rem 1rem;
-  font-size: 0.95rem;
+  flex-wrap: wrap;
+}
+
+.shared-banner__text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  min-width: 0;
+}
+
+.shared-banner__text strong {
+  color: var(--text);
+  font-weight: 700;
 }
 
 .shared-banner__cta {
   background: var(--accent);
   border: none;
-  color: #16130f;
+  color: var(--on-accent);
+  font: inherit;
+  font-size: 0.85rem;
   font-weight: 700;
-  border-radius: 999px;
-  padding: 0.45rem 1rem;
+  border-radius: var(--radius-pill);
+  padding: 0.45rem 1.05rem;
   cursor: pointer;
   white-space: nowrap;
+  flex: 0 0 auto;
 }

@@ -1,20 +1,85 @@
-/* Static SEO bottom section (rendered from index.html, not React) */
+/* The static bottom of the page: the map slot React portals into, then the
+   FAQ, explainer and disclaimer that ship as HTML in the initial payload.
+ *
+ * Both are the demo's bottom sheet used as a page surface — cream
+ * rgba(251,247,238,.97), 24px top radius, its own ink. They deliberately do
+ * NOT flip with the air: this is reference material sitting under a live
+ * answer, and the change of surface is what says so. Fixed colours also mean
+ * fixed ratios — 14.80:1 body, 5.50:1 secondary, 6.99:1 accent.
+ */
+
 .app--bottom {
   padding-top: 0;
+  gap: 0;
 }
 
-.faq h2 {
-  font-size: 1.1rem;
-  margin: 0 0 0.5rem;
+#map-slot:empty {
+  display: none;
+}
+
+#map-slot,
+.seo-sheet {
+  /* Scoped ink: everything inside reads these instead of the live ones. */
+  --ink: #26221b;
+  --accent: #8c3e10;
+  --on-accent: #f4e9d6;
+  --rule: #e3d9c6;
+  --panel-tint: 244, 238, 226;
+  --panel-alpha: 1;
+  /* Re-derived, not inherited: var() substitutes where a property is
+     *declared*, so the :root definitions of these already resolved against
+     the live ink and would carry it down here unchanged. */
+  --text: var(--ink);
+  --text-dim: color-mix(in srgb, var(--ink) 84%, transparent);
+  --border: color-mix(in srgb, var(--ink) 70%, transparent);
+  --bg-panel: rgba(var(--panel-tint), var(--panel-alpha));
+  color: var(--ink);
+  background: rgba(251, 247, 238, 0.97);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 1.25rem 1.25rem 1.5rem;
+  margin: 1rem 0 0;
+}
+
+/* Two sheets stacked read as one surface with a seam, not as two cards. */
+#map-slot + .seo-sheet {
+  border-radius: 0;
+  margin-top: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.seo-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.seo-sheet__grab {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: #c9bfac;
+  margin: -0.35rem auto 0.25rem;
+}
+
+/* FAQ */
+.faq h2,
+.explainer h2 {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a7c64;
+  margin: 0 0 0.6rem;
 }
 
 .faq__item {
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--rule);
 }
 
 .faq__item summary {
   cursor: pointer;
-  padding: 0.75rem 0;
+  padding: 0.8rem 0;
   list-style: none;
   display: flex;
   align-items: baseline;
@@ -31,6 +96,7 @@
   color: var(--accent);
   font-weight: 700;
   font-size: 1.1rem;
+  line-height: 1;
   flex: 0 0 auto;
 }
 
@@ -40,6 +106,7 @@
 
 .faq h3 {
   font-size: 0.95rem;
+  font-weight: 650;
   margin: 0;
   display: inline;
 }
@@ -48,30 +115,40 @@
   padding-bottom: 0.9rem;
 }
 
-.faq p {
-  color: var(--text-dim);
-  line-height: 1.6;
-  font-size: 0.92rem;
-  margin: 0;
-}
-
-/* Explainer */
-.explainer h2 {
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-}
-
+.faq p,
 .explainer p {
   color: var(--text-dim);
   line-height: 1.6;
   font-size: 0.92rem;
+  margin: 0 0 0.7rem;
 }
 
-/* Disclaimer */
+.explainer p:last-child {
+  margin-bottom: 0;
+}
+
+.explainer strong {
+  color: var(--ink);
+}
+
+/* Disclaimer — the one block that should read as fine print and still be
+   comfortably legible. */
 .disclaimer {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--rule);
   padding-top: 1rem;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: var(--text-dim);
-  line-height: 1.5;
+  line-height: 1.55;
+}
+
+.disclaimer p {
+  margin: 0;
+}
+
+@supports not (color: color-mix(in srgb, red 50%, transparent)) {
+  #map-slot,
+  .seo-sheet {
+    --text-dim: #3b352c;
+    --border: #6b6559;
+  }
 }
