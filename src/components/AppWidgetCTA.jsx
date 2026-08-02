@@ -234,7 +234,9 @@ export default function AppWidgetCTA({
         </p>
 
         <div className="cta-widgets__footer">
-          <p className="cta-widgets__price">$2.99/month · iOS, macOS &amp; Android</p>
+          <p className="cta-widgets__price">
+            Coming soon to iOS, macOS &amp; Android. 14-day trial, $2.99/month.
+          </p>
           {STORE_BADGES_ENABLED && (
             <div className="cta-widgets__badges">
               <a href={APP_STORE_URL} className="cta-widgets__badge">
