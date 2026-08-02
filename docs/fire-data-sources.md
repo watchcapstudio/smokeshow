@@ -49,7 +49,7 @@ This is also less work than trying to fuse them.
 
 ---
 
-## 2. NIFC WFIGS — the US source
+## 2. NIFC WFIGS, the US source
 
 This is the real one. It is the same data the interagency fire community uses,
 fed from IRWIN, the system incident commanders report into.
@@ -177,10 +177,10 @@ Do not present it as live. Present it with its timestamp.
 | Region | Named fires | Containment | Source |
 | --- | --- | --- | --- |
 | **US** | yes | yes, a real percent | NIFC WFIGS |
-| **Canada** | yes, province by province | **no percent** — a status word | BC Wildfire Service, CWFIS, provincial agencies |
+| **Canada** | yes, province by province | **no percent**, a status word | BC Wildfire Service, CWFIS, provincial agencies |
 | **Europe** | partial | no, burnt area only | EFFIS |
 | **Australia** | yes, state by state | no percent, a status word | NSW RFS and equivalents |
-| **Everywhere else** | no | no | — |
+| **Everywhere else** | no | no | none |
 
 Canada reports **stage of control**, not a percentage: `Out of Control`,
 `Being Held`, `Under Control`, `Out`. This is arguably more honest than a
@@ -194,7 +194,7 @@ curl "https://openmaps.gov.bc.ca/geo/pub/WHSE_LAND_AND_NATURAL_RESOURCE.PROT_CUR
 
 Returns `INCIDENT_NAME`, `FIRE_STATUS`, `CURRENT_SIZE`, `FIRE_CAUSE`,
 `GEOGRAPHIC_DESCRIPTION`, and a `FIRE_URL` deep link. Note the geometry comes
-back in **BC Albers (EPSG:3005), not WGS84** — there are `LATITUDE` and
+back in **BC Albers (EPSG:3005), not WGS84**. There are `LATITUDE` and
 `LONGITUDE` properties, use those.
 
 There is no single pan-Canadian feed with per-fire containment. Each province
