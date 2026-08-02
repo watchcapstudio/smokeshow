@@ -27,6 +27,18 @@
          Deliberately static HTML (not React-rendered) so crawlers see it in
          the initial payload. The app renders above in #root. -->
     <div class="app app--bottom">
+      <!-- Static heading for the map section: server-delivered so crawlers
+           see it, and it's the only heading the map gets. Sits on the live
+           sky (not the cream sheet below), so it reads the live --text
+           tokens rather than the sheet's scoped, fixed ones. -->
+      <div class="map-heading">
+        <h2>Where the smoke was and might be</h2>
+        <p>
+          Scrub back 12 hours to see where the smoke came from, and forward 48 to see
+          where it's headed. These are model estimates, not measurements.
+        </p>
+      </div>
+
       <!-- React portals the live smoke map here (see App.jsx) — just above
            the FAQ; FAQ copy references "the map above". -->
       <div id="map-slot"></div>

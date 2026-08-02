@@ -17,6 +17,32 @@
   display: none;
 }
 
+/* Map section heading. A sibling *before* #map-slot, not inside it — it sits
+   on the live sky, not the fixed cream sheet, so it deliberately reads the
+   live --text/--text-dim tokens instead of the scoped ink below. Those
+   tokens already carry the sky's contrast scrim (see sky.css / lib/ink.js),
+   so no extra treatment is needed here; verified by contrast-audit.mjs. */
+.map-heading {
+  margin: 0 0 1.25rem;
+}
+
+.map-heading h2 {
+  margin: 0 0 0.35rem;
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.map-heading p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+  max-width: 46ch;
+}
+
 #map-slot,
 .seo-sheet {
   /* Scoped ink: everything inside reads these instead of the live ones. */
