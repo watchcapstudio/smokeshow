@@ -19,12 +19,17 @@ export default function RatingChip({
   sources,
   aqiSource,
   onSourceChange,
+  units,
+  onExplain,
 }) {
   if (!level) return null;
   const aqi = ugm3ToAqi(pm25);
   const category = aqiCategory(aqi);
   const both = !!(sources?.official && sources?.local);
   const disagree = both && Math.abs(sources.official.aqi - sources.local.aqi) >= DISAGREE_AQI_GAP;
+  const primaryValue = units === 'aqi' ? aqi : Math.round(pm25);
+  const secondaryValue =
+    units === 'aqi' ? `${Math.round(pm25)} µg/m³ PM2.5` : `AQI ${aqi} · ${category?.name}`;
 
   // Open by default for the first WHY_TWO_TEACH_VIEWS disagreement views, then
   // collapsed; the toggle lets the user reopen it. Sensor data arrives async,
@@ -64,28 +69,40 @@ export default function RatingChip({
         </div>
       )}
       <div className="rating-chip__aqi-row">
-        <span className="rating-chip__aqi">{aqi}</span>
+        <button type="button" className="rating-chip__aqi" onClick={onExplain}>
+          {primaryValue}
+        </button>
         <span className="rating-chip__aqi-meta">
-          <span className="rating-chip__aqi-label">
+          <button type="button" className="rating-chip__aqi-label" onClick={onExplain}>
             <span className="rating-chip__aqi-dot" style={{ background: category?.color }} />
-            AQI · {category?.name}
-          </span>
+            {secondaryValue}
+          </button>
           <span className="rating-chip__aqi-sub">
-            {Math.round(pm25)} µg/m³ PM2.5
             {sensor
               ? aqiSource === 'local' && sources?.local
-                ? ` · ${sensor.count} local sensor${sensor.count === 1 ? '' : 's'}${
+                ? `${sensor.count} local sensor${sensor.count === 1 ? '' : 's'}${
                     sensor.medianDistanceMi != null ? `, typically ~${sensor.medianDistanceMi} mi away` : ' nearby'
                   }`
-                : ` · official monitor${sensor.distanceMi != null ? ` ~${sensor.distanceMi} mi away` : ' reading'}`
+                : `official monitor${sensor.distanceMi != null ? ` ~${sensor.distanceMi} mi away` : ' reading'}`
               : ''}
           </span>
         </span>
         <span className="rating-chip__time">{isNow ? 'Now' : timeLabel}</span>
       </div>
-      <div className="rating-chip__name">{level.name}</div>
-      {headline && <div className="rating-chip__clear">{headline}</div>}
-      <div className="rating-chip__notice">{level.notice}</div>
+      <button type="button" className="rating-chip__name" onClick={onExplain}>
+        {level.name}
+      </button>
+      {headline && (
+        <button type="button" className="rating-chip__clear" onClick={onExplain}>
+          {headline}
+        </button>
+      )}
+      <button type="button" className="rating-chip__notice" onClick={onExplain}>
+        {level.notice}
+      </button>
+      <button type="button" className="rating-chip__explain" onClick={onExplain}>
+        What this means
+      </button>
       {disagree && isNow && (
         <div className="rating-chip__why-two">
           <button

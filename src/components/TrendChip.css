@@ -1,0 +1,33 @@
+/* Trend chip — hidden entirely when the air is clear and steady */
+.trend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  align-self: flex-start;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.trend-chip__pip {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.trend-chip--rising .trend-chip__pip {
+  background: var(--smokeshow);
+}
+
+.trend-chip--falling .trend-chip__pip {
+  background: var(--all-clear);
+}
+
+.trend-chip--steady .trend-chip__pip {
+  background: var(--text-dim);
+}

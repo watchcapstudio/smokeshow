@@ -58,6 +58,50 @@ export const LEVELS = [
 export const NOSE_CAVEAT =
   'Noses differ, and fine particles can irritate without any smell. The honest test is visibility: how far can you see?';
 
+// Explain-sheet ladder ranges, derived from LEVELS so the printed numbers
+// can't drift from the thresholds that actually gate each level.
+export const RANGES = LEVELS.map((l, i) => {
+  const min = i === 0 ? 0 : LEVELS[i - 1].max;
+  if (l.max === Infinity) return `${min}+`;
+  return i === 0 ? `< ${l.max}` : `${min} – ${l.max}`;
+});
+
+// "What this is not" — one reassurance line per level, read in the explain
+// sheet under the ladder. FLAG FOR HUMAN REVIEW: the "tastes" and
+// "smokeshow" lines lean on cigarette-equivalent framing (backed by
+// cigaretteEquivalent() below) to reassure a reader the air isn't as bad as
+// it sounds — that's still a dose-response claim and may run afoul of the
+// "no invented health dose-response claims" rule even though the ratio
+// itself traces to a published rule of thumb.
+export const NOT_LINES = [
+  'No smoke story today. This is normal, clean air.',
+  'A full day outside in this is nowhere near a cigarette. A faint whiff is the whole event for most people.',
+  'Still well short of one cigarette over a full day outside. Most people notice it, and most plans can carry on.',
+  "Now it adds up: a full day breathing this is on the order of a few cigarettes. Worth moving the run indoors.",
+  'The heaviest level we track. Everyone inside, windows closed, filtration on if you have it.',
+];
+
+// EPA's Air Quality Index exertion guidance, one line per level — general
+// population.
+export const EPA_LINES = [
+  "it's a great day to be active outside.",
+  'unusually sensitive people should consider easing off long, hard exertion. Everyone else, carry on as usual.',
+  'sensitive groups should cut back on long or heavy exertion. Everyone else, your usual outdoor plans are okay.',
+  'sensitive groups should avoid prolonged exertion; everyone else, cut back on it.',
+  'everyone should avoid outdoor exertion.',
+];
+
+// Same guidance, sensitive-household variant: asthma, young kids, older
+// adults, pregnancy, heart or lung conditions — one level earlier than the
+// general population line above.
+export const EPA_SENS = [
+  "it's a great day to be active outside.",
+  'consider easing off long or hard exertion, and watch for symptoms.',
+  'cut back on long or heavy exertion. Move the workout indoors if there is any wheeze.',
+  'avoid prolonged exertion. Keep inhalers close; indoors with filtration is the good call.',
+  'stay inside, windows closed, filtration on. This level is for no one.',
+];
+
 export const ARRIVAL_THRESHOLD = 35; // "Smells like fire" — the forecast-text anchor point
 export const OLFACTORY_FATIGUE_LEVEL_INDEX = 3; // show the nose-fatigue caveat at "Tastes like fire" and above
 
