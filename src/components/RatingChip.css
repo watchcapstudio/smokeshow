@@ -1,0 +1,166 @@
+/* Rating chip */
+.rating-chip {
+  border-radius: 1rem;
+  padding: 1.1rem 1.25rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-left: 6px solid var(--accent);
+}
+
+.rating-chip--all-clear {
+  border-left-color: var(--all-clear);
+}
+.rating-chip--something {
+  border-left-color: var(--something);
+}
+.rating-chip--smells {
+  border-left-color: var(--smells);
+}
+.rating-chip--tastes {
+  border-left-color: var(--tastes);
+}
+.rating-chip--smokeshow {
+  border-left-color: var(--smokeshow);
+}
+
+.rating-chip__sources {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 0.7rem;
+  width: fit-content;
+}
+
+.rating-chip__source {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.35rem 0.9rem;
+  cursor: pointer;
+}
+
+.rating-chip__source--on {
+  background: var(--accent);
+  color: #16130f;
+}
+
+.rating-chip__why-two {
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  background: rgba(232, 130, 58, 0.08);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.7rem;
+}
+
+.rating-chip__why-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.rating-chip__why-caret {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 1rem;
+  margin-left: 0.5rem;
+}
+
+.rating-chip__why-body {
+  margin: 0.45rem 0 0;
+}
+
+.rating-chip__aqi-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.45rem;
+}
+
+.rating-chip__aqi {
+  font-size: 2.6rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.rating-chip__aqi-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.rating-chip__aqi-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.rating-chip__aqi-dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+}
+
+.rating-chip__aqi-sub {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.rating-chip__time {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  align-self: flex-start;
+}
+
+.rating-chip__name {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.rating-chip__notice {
+  margin-top: 0.35rem;
+  color: var(--text-dim);
+  font-size: 0.95rem;
+}
+
+.rating-chip__meta {
+  margin-top: 0.6rem;
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.rating-chip__caveat {
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--text-dim);
+}
+
+.rating-chip__clear {
+  margin-top: 0.3rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--accent);
+}

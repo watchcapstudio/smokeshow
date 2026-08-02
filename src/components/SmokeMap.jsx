@@ -3,6 +3,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { SmokeCanvasLayer } from './SmokeLayer.js';
 import { levelForPM25 } from '../lib/rating.js';
+import './SmokeMap.css';
 
 // Three zoom tiers, each backed by its own grid (fetched lazily by App):
 // tier 1 = 25km spacing (~200km square), tier 2 = 75km (~600km),

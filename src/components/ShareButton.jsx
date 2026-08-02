@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { renderShareCard } from '../lib/shareCard.js';
+import './ShareButton.css';
 
 export default function ShareButton({ level, aqi, placeName, timeLabel, headline, days, diverged, shareUrl }) {
   const [copied, setCopied] = useState(false);

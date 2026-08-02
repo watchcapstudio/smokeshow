@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { searchPlaces } from '../lib/geocoding.js';
+import './LocationSearch.css';
 
 export default function LocationSearch({ onSelect, hint }) {
   const [query, setQuery] = useState('');

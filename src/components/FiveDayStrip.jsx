@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { buildDaySummaries, buildPastDaySummaries, bucketForPM25 } from '../lib/days.js';
 import { levelForPM25 } from '../lib/rating.js';
 import { ugm3ToAqi, aqiToUgm3 } from '../lib/aqi.js';
+import './FiveDayStrip.css';
 
 // Cigarette equivalence only surfaces at "Tastes like fire" and above (brief rule).
 const CIG_THRESHOLD = 55;

@@ -1,3 +1,5 @@
+import './SharedBanner.css';
+
 export default function SharedBanner({ placeName, fromShare, onCheckYourAir }) {
   return (
     <div className="shared-banner">

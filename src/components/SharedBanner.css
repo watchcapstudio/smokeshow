@@ -1,0 +1,23 @@
+/* Shared-link banner */
+.shared-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--accent);
+  border-radius: 0.75rem;
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+}
+
+.shared-banner__cta {
+  background: var(--accent);
+  border: none;
+  color: #16130f;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  white-space: nowrap;
+}

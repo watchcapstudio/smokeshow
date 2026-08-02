@@ -1,0 +1,77 @@
+/* Static SEO bottom section (rendered from index.html, not React) */
+.app--bottom {
+  padding-top: 0;
+}
+
+.faq h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem;
+}
+
+.faq__item {
+  border-bottom: 1px solid var(--border);
+}
+
+.faq__item summary {
+  cursor: pointer;
+  padding: 0.75rem 0;
+  list-style: none;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.faq__item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq__item summary::after {
+  content: '+';
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 1.1rem;
+  flex: 0 0 auto;
+}
+
+.faq__item[open] summary::after {
+  content: '–';
+}
+
+.faq h3 {
+  font-size: 0.95rem;
+  margin: 0;
+  display: inline;
+}
+
+.faq__item p {
+  padding-bottom: 0.9rem;
+}
+
+.faq p {
+  color: var(--text-dim);
+  line-height: 1.6;
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+/* Explainer */
+.explainer h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.explainer p {
+  color: var(--text-dim);
+  line-height: 1.6;
+  font-size: 0.92rem;
+}
+
+/* Disclaimer */
+.disclaimer {
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}

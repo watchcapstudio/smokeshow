@@ -11,6 +11,8 @@ import SharedBanner from './components/SharedBanner.jsx';
 import ShareButton from './components/ShareButton.jsx';
 import InstallNudge from './components/InstallNudge.jsx';
 import PullToRefresh from './components/PullToRefresh.jsx';
+import './styles/tokens.css';
+import './styles/shell.css';
 
 import { requestLocation, setManualLocation, clearLocation } from './lib/geolocation.js';
 import { reverseGeocode } from './lib/geocoding.js';
@@ -374,6 +376,7 @@ export default function App() {
   return (
     <div className="app">
       <PullToRefresh />
+      {/* SLOT: sky */}
       <header className="app-header">
         <h1 className="app-header__wordmark">SMOKESHOW</h1>
         <span className="app-header__tagline">smoky where you are?</span>
@@ -415,7 +418,9 @@ export default function App() {
         aqiSource={aqiSource}
         onSourceChange={handleSourceChange}
       />
+      {/* SLOT: trend-chip */}
       <LakeScene pm25={selectedPM25} />
+      {/* SLOT: ridgeline */}
       <ShareButton
         level={nowLevel}
         aqi={ugm3ToAqi(anchoredPm25[nowIndex])}
@@ -426,6 +431,7 @@ export default function App() {
         diverged={agreement?.some((a) => a.status === 'diverge') ?? false}
         shareUrl={shareUrl}
       />
+      {/* SLOT: explain-sheet */}
       {mapSlot &&
         createPortal(
           <div className="map-section">
@@ -478,6 +484,7 @@ export default function App() {
         timezone={TIMEZONE}
         measuredDays={measuredDays}
       />
+      {/* SLOT: cta */}
       <InstallNudge levelIndex={nowLevel?.index ?? 0} headline={headline} />
     </div>
   );
