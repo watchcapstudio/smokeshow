@@ -43,8 +43,11 @@ export async function fetchGridPM25(points, { pastDays = 3, forecastDays = 5 } =
   });
 }
 
-export function findNowIndex(timesUTC) {
-  const nowMs = Date.now();
+// nowMs is injectable so the edge function (api/forecast.js) and the browser
+// pick "now" with the same code — a second nearest-hour search written
+// server-side is exactly the kind of drift the forecast contract exists to
+// prevent.
+export function findNowIndex(timesUTC, nowMs = Date.now()) {
   let closest = 0;
   let closestDiff = Infinity;
   for (let i = 0; i < timesUTC.length; i++) {
