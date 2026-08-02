@@ -7,6 +7,38 @@ import './FiveDayStrip.css';
 // Cigarette equivalence only surfaces at "Tastes like fire" and above (brief rule).
 const CIG_THRESHOLD = 55;
 
+// Ports glideTo() (demo ~line 1306): 650ms cubic ease-out, straight jump
+// under prefers-reduced-motion. Scrolls the tapped day into view instead of
+// snapping — the measurement below runs once per tap, never per frame.
+function glideScrollTo(container, targetLeft) {
+  if (!container) return;
+  const from = container.scrollLeft;
+  const to = Math.max(0, targetLeft);
+  if (Math.abs(to - from) < 1) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    container.scrollLeft = to;
+    return;
+  }
+  const start = performance.now();
+  const duration = 650;
+  const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+  function step(now) {
+    const t = Math.min(1, (now - start) / duration);
+    container.scrollLeft = from + (to - from) * easeOutCubic(t);
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function glideToElement(container, el) {
+  if (!container || !el) return;
+  const containerRect = container.getBoundingClientRect();
+  const elRect = el.getBoundingClientRect();
+  const target =
+    container.scrollLeft + (elRect.left - containerRect.left) - (containerRect.width - elRect.width) / 2;
+  glideScrollTo(container, target);
+}
+
 function DayBox({ day, measured, selected, onSelect }) {
   return (
     <button
@@ -16,7 +48,7 @@ function DayBox({ day, measured, selected, onSelect }) {
         (day.isPast ? ' five-day-strip__day--past' : '') +
         (selected ? ' five-day-strip__day--selected' : '')
       }
-      onClick={onSelect}
+      onClick={(e) => onSelect(e.currentTarget)}
       aria-pressed={selected}
     >
       <div className="five-day-strip__weekday">{day.weekday}</div>
@@ -179,8 +211,10 @@ export default function FiveDayStrip({ timesUTC, pm25, nowIndex, timezone, measu
     }
   }
 
-  function toggleSelect(key) {
-    setSelectedKey(effectiveKey === key ? null : key);
+  function toggleSelect(key, el) {
+    const next = effectiveKey === key ? null : key;
+    setSelectedKey(next);
+    if (next && el) glideToElement(stripRef.current, el);
   }
 
   return (
@@ -205,7 +239,7 @@ export default function FiveDayStrip({ timesUTC, pm25, nowIndex, timezone, measu
               day={day}
               measured={measuredDays?.get(day.key) ?? null}
               selected={effectiveKey === day.key}
-              onSelect={() => toggleSelect(day.key)}
+              onSelect={(el) => toggleSelect(day.key, el)}
             />
           ))}
         </div>
@@ -215,7 +249,7 @@ export default function FiveDayStrip({ timesUTC, pm25, nowIndex, timezone, measu
               key={day.key}
               day={day}
               selected={effectiveKey === day.key}
-              onSelect={() => toggleSelect(day.key)}
+              onSelect={(el) => toggleSelect(day.key, el)}
             />
           ))}
         </div>
