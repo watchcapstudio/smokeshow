@@ -1,0 +1,7 @@
+{
+  "v": 1,
+  "error": {
+    "code": "upstream-failed",
+    "message": "air quality upstream returned 503"
+  }
+}
