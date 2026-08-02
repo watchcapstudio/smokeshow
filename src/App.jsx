@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import LocationBanner from './components/LocationBanner.jsx';
 import LocationSearch from './components/LocationSearch.jsx';
 import RatingChip from './components/RatingChip.jsx';
-import LakeScene from './components/LakeScene.jsx';
+import SkyBackdrop from './components/SkyBackdrop.jsx';
 import Scrubber from './components/Scrubber.jsx';
 import AgreementBand from './components/AgreementBand.jsx';
 import FiveDayStrip from './components/FiveDayStrip.jsx';
@@ -11,7 +11,10 @@ import SharedBanner from './components/SharedBanner.jsx';
 import ShareButton from './components/ShareButton.jsx';
 import InstallNudge from './components/InstallNudge.jsx';
 import PullToRefresh from './components/PullToRefresh.jsx';
+// Order matters: sky.css re-points the tokens.css palette at the live ink, and
+// shell.css builds the app surfaces on top of the result.
 import './styles/tokens.css';
+import './styles/sky.css';
 import './styles/shell.css';
 
 import { requestLocation, setManualLocation, clearLocation } from './lib/geolocation.js';
@@ -331,10 +334,51 @@ export default function App() {
     setLocation(loc);
   }
 
+  // Re-runs the whole fetch effect for the location we already have.
+  function handleRetry() {
+    setLocation((current) => (current ? { ...current } : current));
+  }
+
+  const header = (
+    <header className="app-header">
+      <h1 className="app-header__wordmark">SMOKESHOW</h1>
+      <span className="app-header__tagline">smoky where you are?</span>
+    </header>
+  );
+
+  const chooser = choosingLocation ? (
+    <div className="location-chooser">
+      <LocationSearch
+        onSelect={handleManualSelect}
+        hint="Search for a city, or use your current location."
+      />
+      <div className="location-chooser__actions">
+        <button type="button" className="btn btn--filled" onClick={handleUseMyLocation}>
+          Use my current location
+        </button>
+        <button type="button" className="btn btn--quiet" onClick={() => setChoosingLocation(false)}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  ) : null;
+
+  // Every state below paints on the same sky, so nothing about the page's
+  // colour changes between "locating" and "here is your air" — the sky just
+  // gains a real PM2.5 reading and a real place to put the sun.
   if (!location || (loading && !centerData)) {
     return (
       <div className="app app--loading">
-        <p>{!location ? 'Requesting your location…' : 'Loading the forecast…'}</p>
+        <SkyBackdrop pm25={null} date={null} lat={location?.lat} lon={location?.lon} />
+        {header}
+        <div className="spacer" />
+        <p className="app-status">
+          <span className="app-status__pip" />
+          {!location ? 'Locating' : 'Reading the air'}
+        </p>
+        <p className="app-status__line">
+          {!location ? 'Finding where you are.' : 'Pulling the forecast over you.'}
+        </p>
       </div>
     );
   }
@@ -342,10 +386,10 @@ export default function App() {
   if (!location.granted) {
     return (
       <div className="app">
-        <header className="app-header">
-          <h1 className="app-header__wordmark">SMOKESHOW</h1>
-          <span className="app-header__tagline">smoky where you are?</span>
-        </header>
+        <SkyBackdrop pm25={null} date={null} lat={null} lon={null} />
+        {header}
+        <p className="eyebrow">No location</p>
+        <p className="app-status__line">Tell us where to look.</p>
         <LocationSearch onSelect={handleManualSelect} />
       </div>
     );
@@ -354,10 +398,23 @@ export default function App() {
   if (error || !centerData) {
     return (
       <div className="app app--error">
-        <p>{error || 'Something went wrong loading the forecast.'}</p>
-        <button type="button" onClick={handleUpdateLocation}>
-          Try again
-        </button>
+        <SkyBackdrop pm25={null} date={null} lat={location.lat} lon={location.lon} />
+        {header}
+        <div className="spacer" />
+        <p className="eyebrow">No forecast</p>
+        <p className="app-status__line">{error || 'Something went wrong loading the forecast.'}</p>
+        <p className="app-status__detail">
+          The forecast is fetched live every time, so a retry often clears it.
+        </p>
+        <div className="app-status__actions">
+          <button type="button" className="btn btn--filled" onClick={handleRetry}>
+            Try again
+          </button>
+          <button type="button" className="btn btn--quiet" onClick={handleUpdateLocation}>
+            Change location
+          </button>
+        </div>
+        {chooser}
       </div>
     );
   }
@@ -376,11 +433,13 @@ export default function App() {
   return (
     <div className="app">
       <PullToRefresh />
-      {/* SLOT: sky */}
-      <header className="app-header">
-        <h1 className="app-header__wordmark">SMOKESHOW</h1>
-        <span className="app-header__tagline">smoky where you are?</span>
-      </header>
+      <SkyBackdrop
+        pm25={selectedPM25}
+        date={new Date(centerData.timesUTC[selectedIndex] + 'Z')}
+        lat={location.lat}
+        lon={location.lon}
+      />
+      {header}
       {isShared ? (
         <SharedBanner
           placeName={placeName || 'a shared location'}
@@ -390,23 +449,7 @@ export default function App() {
       ) : (
         <LocationBanner placeName={placeName} onUpdateLocation={handleUpdateLocation} />
       )}
-      {choosingLocation && (
-        <div className="location-chooser">
-          <LocationSearch onSelect={handleManualSelect} hint="Search for a city, or use your current location." />
-          <div className="location-chooser__actions">
-            <button type="button" className="location-chooser__gps" onClick={handleUseMyLocation}>
-              Use my current location
-            </button>
-            <button
-              type="button"
-              className="location-chooser__cancel"
-              onClick={() => setChoosingLocation(false)}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
+      {chooser}
       <RatingChip
         level={selectedLevel}
         pm25={selectedPM25}
@@ -419,7 +462,6 @@ export default function App() {
         onSourceChange={handleSourceChange}
       />
       {/* SLOT: trend-chip */}
-      <LakeScene pm25={selectedPM25} />
       {/* SLOT: ridgeline */}
       <ShareButton
         level={nowLevel}

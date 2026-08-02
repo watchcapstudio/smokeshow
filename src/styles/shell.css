@@ -1,97 +1,235 @@
+/* The app shell, on the sky. Surfaces the demo has no design for are built
+   from the same three primitives it does have: the mono eyebrow, the
+   translucent panel, and the ink/accent pair. */
+
 * {
   box-sizing: border-box;
+}
+
+html {
+  /* Only ever seen in overscroll, where it should read as more sky. */
+  background: var(--sky-hor);
 }
 
 html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
+}
+
+body {
+  background: transparent; /* the sky paints it — see SkyBackdrop.css */
+  min-height: 100vh;
 }
 
 .app {
   max-width: 720px;
   margin: 0 auto;
-  padding: 1rem 1rem 3rem;
+  padding: 1.5rem 1.25rem 3rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
 }
 
+/* Status screens take the demo's composition: brand at the top, everything
+   that matters sitting low on the screen where the verdict word lives. */
 .app--loading,
 .app--error {
-  min-height: 100vh;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  min-height: 100svh;
+  gap: 0.75rem;
 }
 
-/* Header / branding */
+.spacer {
+  flex: 1;
+}
+
+/* --------------------------------------------------------------- primitives */
+
+/* Mono eyebrow: 11px / 0.16em / uppercase (demo:75). The app's quiet voice —
+   labels, timestamps, status. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+/* Translucent card. Cream on light air, ink on dark air, sky showing through. */
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.1rem;
+}
+
+/* Buttons. The filled one is the accent; the quiet one is an outline that is
+   sized to stay identifiable against whatever the sky is doing. */
+.btn {
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 650;
+  border-radius: var(--radius-pill);
+  padding: 0.5rem 1.1rem;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text);
+  transition: background var(--duration-base) var(--easing-base);
+}
+
+.btn:hover {
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+}
+
+.btn--filled {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+
+.btn--filled:hover {
+  background: color-mix(in srgb, var(--accent) 88%, var(--ink));
+}
+
+/* Quieter label, same outline: --border is what makes it identifiable as a
+   control (3.42:1 on the sky at worst) and dropping it to --rule would put it
+   under 1.5:1. Only the type steps back. */
+.btn--quiet {
+  color: var(--text-dim);
+}
+
+/* One focus ring everywhere, in the demo's burnt orange, which sits on both
+   air states (it is a ring on the outside of the element, not type on the
+   sky, so it only has to be seen — not read). */
+:where(a, button, input, summary, [tabindex]):focus-visible {
+  outline: 2px solid #bc5a1e;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ------------------------------------------------------------------ header */
+
 .app-header {
   display: flex;
   align-items: baseline;
-  gap: 0.7rem;
-  padding-top: 0.25rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .app-header__wordmark {
-  font-size: 1.15rem;
+  font-size: 13px;
   font-weight: 800;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.3em;
   color: var(--text);
   margin: 0;
 }
 
 .app-header__tagline {
-  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
   color: var(--text-dim);
 }
 
-/* Location chooser (switch cities) */
+/* ------------------------------------------------- loading and error states */
+
+/* Both states live on the same sky as the app — a clear midday one until the
+   first PM2.5 value lands — so the page never flashes a different colour
+   scheme on the way in. */
+.app-status {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.app-status__pip {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: 0 0 auto;
+  animation: status-breathe var(--duration-bounce) var(--easing-bounce) infinite;
+}
+
+@keyframes status-breathe {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.app-status__line {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  max-width: 22ch;
+  text-wrap: balance;
+}
+
+.app-status__detail {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+  max-width: 38ch;
+}
+
+.app-status__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+/* --------------------------------------------------------- location chooser */
+
 .location-chooser {
   background: var(--bg-panel);
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  padding: 0.8rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  padding: 0.9rem 1rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.75rem;
 }
 
 .location-chooser__actions {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
-.location-chooser__gps {
-  background: var(--accent);
-  border: none;
-  color: #16130f;
-  font-weight: 700;
-  border-radius: 999px;
-  padding: 0.45rem 1rem;
-  cursor: pointer;
-  font-size: 0.85rem;
-}
+/* ----------------------------------------------------------- forecast text */
 
-.location-chooser__cancel {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text-dim);
-  border-radius: 999px;
-  padding: 0.45rem 1rem;
-  cursor: pointer;
-  font-size: 0.85rem;
-}
-
-/* Forecast text */
 .forecast-text {
   background: var(--bg-panel);
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
   padding: 0.9rem 1rem;
-  font-size: 0.95rem;
+  font-size: var(--font-size-base);
   line-height: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-status__pip {
+    animation: none;
+    opacity: 0.8;
+  }
+  .btn {
+    transition: none;
+  }
 }

@@ -8,7 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "tokens": "node scripts/generate-tokens.mjs"
+    "tokens": "node scripts/generate-tokens.mjs",
+    "contrast": "node scripts/contrast-audit.mjs",
+    "verify:sky": "node scripts/verify-sky.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

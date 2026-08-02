@@ -1,0 +1,155 @@
+/* The ink system.
+ *
+ * Loaded after tokens.css and deliberately overriding it: the page is no
+ * longer a flat dark shell with a light-mode variant, it is a live sky, and
+ * every legacy colour token is re-pointed at the ink that sky is currently
+ * carrying. Components keep reading --text / --text-dim / --bg-panel /
+ * --border / --accent and get re-skinned without being touched.
+ *
+ * SkyBackdrop.jsx writes --sky-*, --ink, --accent, --on-accent and --scrim-*
+ * on <html> and toggles .dark-air. Everything else is derived here in CSS, so
+ * a scrub is one batch of property writes and no React work.
+ *
+ * Contrast: every ratio in this file is measured, not guessed. Run
+ * `node scripts/contrast-audit.mjs` — 7,776 sky states, all five rating
+ * levels, the full 24-hour cycle at six lat/season pairs, 41 vertical samples
+ * of the gradient. The alphas below are the numbers that pass it.
+ */
+
+/* Registered so they interpolate: an unregistered custom property is a token
+   soup to the engine and jumps. With these, the sky and the ink crossfade. */
+@property --sky-zen {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #8ba9c4;
+}
+@property --sky-mid {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #bbc6ca;
+}
+@property --sky-hor {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #e2dece;
+}
+@property --ink {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #26221b;
+}
+@property --ink-inverse {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f4e9d6;
+}
+@property --accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #8c3e10;
+}
+@property --on-accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f4e9d6;
+}
+@property --scrim-zen {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+@property --scrim-mid {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+@property --scrim-hor {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+:root {
+  /* Light air is the default paint, so the first frame — before any PM2.5
+     has arrived — is a clear midday sky rather than a flash of black. */
+  color-scheme: light;
+
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Panels are the demo's bottom sheet used as a card: cream on light air,
+     its ink counterpart on dark air, translucent enough that the sky tints
+     through them. 0.72 is the lowest alpha at which card-borne type clears AA
+     with the scrim taken away entirely — cards do not depend on the scrim, so
+     they still read if it is ever suppressed. Worst measured on a card:
+     11.4:1 body, 7.65:1 secondary, 4.50:1 accent. */
+  --panel-tint: 251, 247, 238;
+  --panel-alpha: 0.72;
+
+  --bg: var(--sky-mid); /* only visible in overscroll */
+  --bg-panel: rgba(var(--panel-tint), var(--panel-alpha));
+
+  --text: var(--ink);
+  /* Secondary type. 0.84, not the demo's 0.72-0.78: dimmer ink needs a
+     heavier scrim to stay at 4.5:1, and past ~0.80 the veil starts reading as
+     an overlay instead of haze. Worst measured: 4.50:1 on sky, 7.65:1 on a
+     panel. */
+  --text-dim: color-mix(in srgb, var(--ink) 84%, transparent);
+  /* --border outlines controls, so it is sized for WCAG 1.4.11 (3:1) rather
+     than for delicacy: 3.42:1 on the sky, 5.05:1 on a panel. --rule is the
+     decorative divider that carries no such duty. */
+  --border: color-mix(in srgb, var(--ink) 70%, transparent);
+  --rule: color-mix(in srgb, var(--ink) 20%, transparent);
+
+  /* Sky and ink crossfade rather than cut, per the demo (0.25s on the sky,
+     0.4s on the ink). Scrubbing rides the same transition. */
+  transition:
+    --sky-zen 0.25s linear,
+    --sky-mid 0.25s linear,
+    --sky-hor 0.25s linear,
+    --scrim-zen 0.25s linear,
+    --scrim-mid 0.25s linear,
+    --scrim-hor 0.25s linear,
+    --ink var(--duration-slow) linear,
+    --ink-inverse var(--duration-slow) linear,
+    --accent var(--duration-slow) linear,
+    --on-accent var(--duration-slow) linear;
+}
+
+/* Set by SkyBackdrop when the sky's perceptual luminance drops under 0.42
+   (demo:805, ported in lib/sky.js as `isDark`). Ink and accent come from JS;
+   this is what the surfaces need on top of that. */
+:root.dark-air {
+  color-scheme: dark;
+  --panel-tint: 28, 24, 19;
+}
+
+/* Fallback for engines without color-mix(): a fixed pair per air state. They
+   land on the same ratios, they just cannot track the ink mid-crossfade. */
+@supports not (color: color-mix(in srgb, red 50%, transparent)) {
+  :root {
+    --text-dim: #3b352c;
+    --border: #6b6559;
+    --rule: #cdc7bc;
+  }
+  :root.dark-air {
+    --text-dim: #dcd2c0;
+    --border: #a9a094;
+    --rule: #4a453c;
+  }
+}
+
+/* Compatibility shim. RatingChip.css:47 and ShareButton.css:10 hard-code a
+   near-black label on a solid var(--accent) fill. --accent is now the on-sky
+   ink accent, which is dark on light air, and that pairing measures 2.48:1.
+   --on-accent is the ink's opposite and measures 6.21:1 / 7.70:1. Those two
+   components belong to another branch; delete this block when they re-skin. */
+.rating-chip__source--on,
+.share-row__share {
+  color: var(--on-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    transition: none;
+  }
+}
