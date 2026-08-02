@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { SmokeCanvasLayer } from './SmokeLayer.js';
+import { FireLayer } from './FireLayer.js';
 import { levelForPM25 } from '../lib/rating.js';
+import { fetchFires } from '../lib/fires.js';
 import './SmokeMap.css';
 
 // Three zoom tiers, each backed by its own grid (fetched lazily by App):
@@ -52,6 +54,7 @@ export default function SmokeMap({
   const mapRef = useRef(null);
   const smokeLayerRef = useRef(null);
   const markerRef = useRef(null);
+  const fireLayerRef = useRef(null);
   const frameRef = useRef(null); // { meta, vA, vB, imgA, imgB, bounds, changedAt, hrrrMode }
   const imageCacheRef = useRef(new Map()); // url -> HTMLImageElement (decoded)
   const [tier, setTier] = useState(1);
@@ -104,6 +107,13 @@ export default function SmokeMap({
       // otherwise print the pair twice.
     }).addTo(map);
 
+    // Fires ride above the labels and below the "you are here" marker. The
+    // layer mounts empty and stays empty until (and unless) fires.json lands:
+    // this feed is additive, and an absent one must cost the map nothing.
+    const fireLayer = new FireLayer();
+    fireLayer.addTo(map);
+    fireLayerRef.current = fireLayer;
+
     const marker = L.marker([center.lat, center.lon], {
       icon: L.divIcon({
         className: 'user-marker',
@@ -130,8 +140,25 @@ export default function SmokeMap({
       // Layers die with the map — a stale ref here would leave the remounted
       // map (StrictMode, location change) updating orphaned layers forever.
       smokeLayerRef.current = null;
+      fireLayerRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Fetched here rather than in App, so it cannot touch first paint: this
+  // component is lazy-loaded and only mounts once the grid has arrived, which
+  // is already well after the verdict has painted. A failure is swallowed —
+  // no fires.json means no icons, never a broken map.
+  useEffect(() => {
+    let cancelled = false;
+    fetchFires()
+      .then((fires) => {
+        if (!cancelled) fireLayerRef.current?.setFires(fires);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
