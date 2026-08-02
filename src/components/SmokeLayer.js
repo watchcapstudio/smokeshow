@@ -1,5 +1,5 @@
 import L from 'leaflet';
-import { smokeRGBA } from '../lib/rating.js';
+import { ASH_GRAIN_FILL, ashSpeckFraction, smokeRGBA, smokeSpeckRGBA } from '../lib/rating.js';
 
 // Sample resolution: one field sample per BLOCK px, scaled up with canvas
 // smoothing. Small enough to look continuous, cheap enough for 60fps.
@@ -55,7 +55,10 @@ export class SmokeCanvasLayer extends L.Layer {
       for (let cx = 0; cx < 32; cx++) {
         const h = ((((cx * 73856093) ^ (cy * 19349663)) >>> 0) % 1000) / 1000;
         if (h < 0.14) {
-          tctx.fillStyle = 'rgba(45, 35, 28, 0.5)';
+          // Pale, not dark: source-atop below keeps each speck's alpha equal to
+          // the plume's own, so a speck reads as denser smoke only if it moves
+          // toward the ramp's bright end. See ASH_GRAIN_FILL in rating.js.
+          tctx.fillStyle = ASH_GRAIN_FILL;
           tctx.fillRect(cx * CELL, cy * CELL, 2, 2);
         }
       }
@@ -166,19 +169,22 @@ export class SmokeCanvasLayer extends L.Layer {
         const edge = Math.min(ci, cj, n - ci, n - cj);
         const fade = Math.min(1, (edge + 0.5) / 1.25);
 
-        // Ash-grain stipple: a deterministic per-cell hash sprinkles darker
+        // Ash-grain stipple: a deterministic per-cell hash sprinkles brighter
         // specks whose density scales with concentration. Density changes
         // read far more strongly than flat tint changes, so the field
         // visibly evolves hour to hour. Hash is position-only — no flicker
         // between frames, specks dissolve in/out as the field moves.
+        // The speck's direction is the ramp's business, not this loop's:
+        // smokeSpeckRGBA() owns it so the two can't drift apart again.
         const a01 = (al / 255) * fade;
         const hash = ((((bx * 73856093) ^ (by * 19349663)) >>> 0) % 1000) / 1000;
         const p = (by * bw + bx) * 4;
-        if (hash < Math.min(0.16, a01 * 0.24)) {
-          data[p] = Math.round(r * 0.78);
-          data[p + 1] = Math.round(g * 0.78);
-          data[p + 2] = Math.round(bl * 0.78);
-          data[p + 3] = Math.min(255, Math.round(al * fade * 1.3 + 18));
+        if (hash < ashSpeckFraction(a01)) {
+          const [sr, sg, sb, sa] = smokeSpeckRGBA(v);
+          data[p] = sr;
+          data[p + 1] = sg;
+          data[p + 2] = sb;
+          data[p + 3] = Math.round(sa * fade);
         } else {
           data[p] = r;
           data[p + 1] = g;

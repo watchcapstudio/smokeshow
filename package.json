@@ -10,7 +10,9 @@
     "test": "vitest run",
     "tokens": "node scripts/generate-tokens.mjs",
     "contrast": "node scripts/contrast-audit.mjs",
-    "verify:sky": "node scripts/verify-sky.mjs"
+    "ramp": "node scripts/smoke-ramp-audit.mjs",
+    "verify:sky": "node scripts/verify-sky.mjs",
+    "verify:map": "node scripts/verify-map.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

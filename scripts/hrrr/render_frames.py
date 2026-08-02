@@ -40,13 +40,15 @@ HRRR_PROJ = (
 )
 HRRR_DX = 3000.0
 
-# Same perceptually-weighted smoke ramp as src/lib/rating.js smokeRGBA —
-# keep in sync.
-STOPS = np.array([0, 3, 8, 12, 20, 35, 55, 150, 300], dtype=float)
-RAMP_R = np.array([205, 198, 192, 186, 176, 160, 126, 64, 20], dtype=float)
-RAMP_G = np.array([207, 200, 190, 180, 165, 140, 100, 50, 16], dtype=float)
-RAMP_B = np.array([210, 204, 188, 170, 146, 114, 78, 42, 15], dtype=float)
-RAMP_A = np.array([0, 0.07, 0.18, 0.27, 0.38, 0.5, 0.62, 0.78, 0.9], dtype=float) * 255
+# Same perceptually-weighted smoke ramp as src/lib/rating.js SMOKE_STOPS —
+# pale on dark, intensity riding brightness because the basemap is CARTO
+# dark_nolabels. Keep in sync: `npm run ramp` parses these four arrays and
+# fails if they disagree with the JS.
+STOPS = np.array([0, 5, 12, 20, 35, 55, 150, 300], dtype=float)
+RAMP_R = np.array([180, 190, 205, 218, 230, 240, 250, 255], dtype=float)
+RAMP_G = np.array([186, 194, 206, 216, 226, 234, 244, 251], dtype=float)
+RAMP_B = np.array([196, 200, 208, 212, 216, 220, 228, 240], dtype=float)
+RAMP_A = np.array([0, 0.10, 0.24, 0.38, 0.52, 0.66, 0.82, 0.92], dtype=float) * 255
 
 
 def merc_y(lat_deg):

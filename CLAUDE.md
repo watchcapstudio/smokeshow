@@ -14,7 +14,9 @@ Wildfire smoke forecast web app for one user question: how bad is the air here, 
 1. Verify Open-Meteo Air Quality API multi-coordinate batching syntax against live docs (the grid-fetch pattern in the brief depends on it — everything hangs off this)
 2. Core data layer: point forecast + grid fetch, `past_days=1`, `timezone=auto`, rating mapper (PM2.5 → five levels), `getVerdict()` (rating, clear-time with 6-hour hold rule, trend)
 3. Page skeleton: geolocation flow, rating chip + clear-time, forecast text — usable before the map exists
-4. Map: Leaflet + canvas smoke layer (gray→brown ramp, not AQI colors), scrubber -12hr/+48hr, night shading, 5-day strip
+4. Map: Leaflet + canvas smoke layer (pale smoke on a dark basemap, not AQI colors), scrubber -12hr/+48hr, night shading, 5-day strip
+   - The ramp was originally specified gray→brown, which assumed a light basemap. The map now runs CARTO `dark_nolabels` → smoke canvas → `dark_only_labels`, so the ramp is inverted: cool gray → warm ivory, intensity riding brightness. A darkening ramp on dark tiles made the worst air on the map invisible. This is how smoke reads in GOES/VIIRS and NOAA's HRRR smoke products, so the "looks like smoke, not a legend" intent is intact. Joe approved the direction.
+   - `SMOKE_STOPS` in `src/lib/rating.js` is hand-mirrored in `scripts/hrrr/render_frames.py`. Change both, then run `npm run ramp` — it proves the composite stays monotonic and fails if the two copies drift.
 5. Agreement band (run-to-run inputs for v1; build the data interface so v2 multi-model plugs in)
 6. Share spec: OG edge function, share card, link handoff (definition of done is in that doc)
 7. Illustration integration (parametric crossfade)
