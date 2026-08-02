@@ -3,23 +3,32 @@
 Copy-paste prompts for each work branch in `docs/smokeshow-platform-plan.md` §8.
 Each is written to be self-contained for a fresh session.
 
-**Order:** start **B0** and **B5** now (B5 is fully independent). When B0 merges,
-start **B1–B4** together. When B1's contract commit lands, start **B7–B9**.
-Start **B6** when B2 merges.
+**Order — the web re-skin ships first, then the platform work.**
+
+| Wave | Branches | Concurrent? | Gate |
+| --- | --- | --- | --- |
+| **1** | B0, B5 | yes | — |
+| **2** | B2, B3, B4 | yes | B0 merged |
+| **3** | B6 | — | B2 merged |
+| — | *web re-skin ships* | | |
+| **4** | B1 | — | re-skin live |
+| **5** | B7, B8, B9 | yes | B1's contract commit |
 
 Every prompt assumes the agent reads `CLAUDE.md`,
 `docs/smokeshow-build-brief.md`, and `docs/smokeshow-share-spec.md` first.
 
 ---
 
-## B0 — Scaffolding for concurrency · Sonnet 5 · `claude/b0-scaffold`
+<a id="b0"></a>
+## B0 — Scaffolding + shared math · Sonnet 5 · `claude/b0-scaffold`
 
 > Read `CLAUDE.md`, `docs/smokeshow-platform-plan.md`, and
 > `docs/smokeshow-demo-implementation-plan.md`.
 >
-> This branch does one job: make it safe for four other branches to work on the
-> UI at the same time. **No visual change may ship from this branch.** The app
-> must look and behave pixel-identically before and after.
+> This branch makes it safe for three other branches to work on the UI at the
+> same time, and lands the shared maths they all need. **No visual change may
+> ship from this branch.** The app must look and behave pixel-identically
+> before and after.
 >
 > 1. Split `src/index.css` (1,040 lines) into co-located per-component files —
 >    `src/components/RatingChip.css` etc. — plus `src/styles/tokens.css`
@@ -39,6 +48,21 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 >    colours, type scale, radii, motion durations — and generate
 >    `src/styles/tokens.css` from it via a script in `scripts/`. The native apps
 >    will consume this same JSON, so it is the parity source, not a convenience.
+> 5. Land the shared maths the re-skin branches all depend on:
+>    - **`src/lib/sky.js`** — port `skyB()`, `mix()`, `lerp()`, `clamp01()`,
+>      `lum()` from `public/ifhghs/demo/index.html` (~line 571). Export
+>      `skyFor(pm25, date, lat, lon)` returning zenith/mid/horizon colours, sun
+>      position and dimming, star opacity, and an `isDark` flag.
+>      **Replace the demo's fixed 6 AM–9 PM solar day** (`sin(π(t-6)/15)`) with
+>      a real NOAA solar-position calculation — the demo's version is visibly
+>      wrong at high latitude in summer.
+>    - **`src/lib/trend.js`** — port `trendAt()` (demo ~line 766): 6-hour
+>      lookahead, ±4 µg/m³ deadband, suppressed below 12. Guard it against
+>      contradicting `computeVerdict()`'s trend, which answers a different
+>      question (threshold crossings, not slope): the chip must never read
+>      "Improving" while the headline reads "No clear air in the 5-day window".
+>    - Tests for both: sky output at the five level anchors × four times of day,
+>      and trend deadband edges.
 >
 > Verify with `npm run build` and by diffing screenshots before/after using the
 > existing `scripts/verify-*.mjs` Puppeteer pattern. Commit and push to
@@ -46,7 +70,9 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 
 ---
 
-## B1 — Forecast API and isomorphic core · **Opus 5** · `claude/b1-forecast-api`
+<a id="b1"></a>
+## B1 — Forecast API and contract · **Opus 5** · `claude/b1-forecast-api`
+*Wave 4 — starts after the web re-skin is live.*
 
 > Read `CLAUDE.md`, `docs/smokeshow-platform-plan.md` §2, and the existing
 > `src/lib/{rating,verdict,days,aqi,agreement,sensors,openMeteo,grid}.js` and
@@ -75,25 +101,21 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 > - Route through the existing `/api/aq` cache proxy and keep the coordinate
 >   snapping in `src/lib/grid.js`; a viral smoke event must not blow the
 >   Open-Meteo free tier.
-> - Add `src/lib/sky.js`: port `skyB()`, `mix()`, `lerp()`, `clamp01()`, `lum()`
->   from `public/ifhghs/demo/index.html` (~line 571). **Replace the demo's fixed
->   6 AM–9 PM solar day** (`sin(π(t-6)/15)`) with a real NOAA solar-position
->   calculation taking lat/lon/date — the demo's version is visibly wrong at
->   high latitude in summer.
-> - Add `src/lib/trend.js`: port `trendAt()` (demo ~line 766) — 6-hour
->   lookahead, ±4 µg/m³ deadband, suppressed below 12. Guard it against
->   contradicting `computeVerdict()`'s trend, which answers a different question
->   (threshold crossings, not slope): the chip must never read "Improving" while
->   the headline reads "No clear air in the 5-day window".
+> - Serve the sky parameters from `src/lib/sky.js` and the trend from
+>   `src/lib/trend.js` (both landed by branch B0) so the native clients get them
+>   without reimplementing the maths.
 > - Switch the web app to the endpoint **with the current client-side path kept
->   as a fallback**, so a bad deploy degrades instead of breaking.
+>   as a fallback**, so a bad deploy degrades instead of breaking. The re-skin
+>   is already live at this point — do not regress it.
 >
-> Tests for sky output at the five level anchors × four times of day, trend
-> deadband edges, and contract-shape conformance. Do not touch any component or
-> CSS file. Commit and push to `claude/b1-forecast-api`. Do not open a PR.
+> Tests for contract-shape conformance and for web-vs-endpoint agreement: the
+> same coordinates must produce the same verdict through both paths. Do not
+> touch any component or CSS file. Commit and push to
+> `claude/b1-forecast-api`. Do not open a PR.
 
 ---
 
+<a id="b2"></a>
 ## B2 — Sky and ink system · **Opus 5** · `claude/b2-sky-shell`
 
 > Branch from `claude/b0-scaffold`. Read `CLAUDE.md`,
@@ -111,8 +133,7 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 >   must **write CSS custom properties on `:root`** (`--sky-zen`, `--sky-mid`,
 >   `--sky-hor`, `--ink`) rather than re-render children — scrubbing has to be a
 >   style write, not a React tree update, or the map will stutter.
-> - Use `src/lib/sky.js` if branch B1 has landed it; otherwise port `skyB()`
->   locally and leave a `TODO` to switch over.
+> - Use `src/lib/sky.js`, landed by branch B0. Do not re-port the sky maths.
 > - Port the `.dark-air` inversion: horizon luminance < 0.42 → cream `#F4E9D6`,
 >   else ink `#26221B`.
 > - **Contrast audit — budget half this branch for it.** The demo's single
@@ -135,6 +156,7 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 
 ---
 
+<a id="b3"></a>
 ## B3 — Ridgeline, curve scrubber, timeline · Sonnet 5 · `claude/b3-timeline`
 
 > Branch from `claude/b0-scaffold`. Read `CLAUDE.md`,
@@ -174,6 +196,7 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 
 ---
 
+<a id="b4"></a>
 ## B4 — Verdict, explain sheet, prefs · Sonnet 5 · `claude/b4-verdict-sheet`
 
 > Branch from `claude/b0-scaffold`. Read `CLAUDE.md`,
@@ -183,8 +206,8 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 > Re-skin the verdict block and build the explain sheet.
 >
 > - New `src/components/TrendChip.jsx` at `{/* SLOT: trend-chip */}` — reads
->   `src/lib/trend.js` (branch B1; port `trendAt()` locally with a `TODO` if it
->   hasn't landed). Hidden entirely when the air is clear and steady.
+>   `src/lib/trend.js`, landed by branch B0. Hidden entirely when the air is
+>   clear and steady.
 > - New `src/components/ExplainSheet.jsx` at `{/* SLOT: explain-sheet */}`,
 >   porting the demo's sheet (~line 1071): eyebrow
 >   (`Level N of 5 · X µg/m³ · model estimate`), the five-level ladder with the
@@ -225,6 +248,7 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 
 ---
 
+<a id="b5"></a>
 ## B5 — Puppet harness v2 · Sonnet 5 · `claude/b5-puppet`
 
 > Read `docs/smokeshow-platform-plan.md` §6 in full, then
@@ -281,6 +305,7 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 
 ---
 
+<a id="b6"></a>
 ## B6 — Web CTA and widget showcase · Sonnet 5 · `claude/b6-marketing`
 
 > Branch from `claude/b2-sky-shell` once it has merged. Read `CLAUDE.md`,
@@ -316,6 +341,7 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 
 ---
 
+<a id="b7"></a>
 ## B7 — Notification backend · **Opus 5** · `claude/b7-notify-backend`
 
 > Read `docs/smokeshow-platform-plan.md` §5 and §4, and
@@ -356,6 +382,7 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 
 ---
 
+<a id="b8"></a>
 ## B8 — Apple app: iOS + macOS · **Opus 5** · `claude/b8-apple`
 
 > Read `docs/smokeshow-platform-plan.md` (all of it),
@@ -382,11 +409,18 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 >   them. macOS gets the `system*` families only; it has no lock screen.
 > - **Respect the WidgetKit reload budget** (~40–70 timeline reloads/day). Fetch
 >   a full timeline in one call and build many entries from it. Do not poll.
-> - **StoreKit 2 via RevenueCat.** $2.99/month. Recommended free tier — confirm
->   with Joe before building the paywall: one small widget and one location free
->   forever; paid unlocks all widget sizes, lock-screen and Watch, multiple
->   locations, and notifications. The conversion moment is getting a widget onto
->   the home screen, so don't block that.
+> - **StoreKit 2 via RevenueCat.** $2.99/month with a **14-day free trial** —
+>   subscribe-to-use, no permanent free tier. Configure the trial as a StoreKit
+>   introductory offer so the store handles eligibility (one trial per Apple ID
+>   per subscription group), and disclose the terms on the paywall as App Review
+>   requires: trial length, price after, and that it auto-renews.
+>   - **Onboard straight into a widget.** The trial's job is to get a widget
+>     onto the home screen in the first session; a trial that never becomes a
+>     glance never converts. Prompt for widget installation on day 0, not later.
+>   - **Instrument day 12–14.** That's the churn cliff — the widget goes away
+>     when the trial lapses, and that moment is either your best conversion
+>     prompt or your worst experience. Design what the widget shows on lapse
+>     rather than letting it fail blank.
 > - Push registration against branch B7's device registry. Anonymous device ID —
 >   no accounts, no email.
 > - Read colours, type scale, and motion from `design/tokens.json` so the apps
@@ -406,6 +440,7 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 
 ---
 
+<a id="b9"></a>
 ## B9 — Android app · **Opus 5** · `claude/b9-android`
 
 > Read `docs/smokeshow-platform-plan.md` (all of it),
@@ -427,8 +462,12 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 > - Cover the Android-specific surfaces the demo doesn't: Material You dynamic
 >   colour (decide whether to adopt it or hold the brand palette — recommend
 >   holding the palette, since the sky *is* the data), and predictive back.
-> - **Google Play Billing via RevenueCat.** $2.99/month, same tier structure as
->   the Apple app. The two must not diverge on what's free.
+> - **Google Play Billing via RevenueCat.** $2.99/month with a **14-day free
+>   trial**, configured as a Play base-plan free-trial offer. Same structure as
+>   the Apple app — the two must not diverge on trial length or price. Mirror
+>   the Apple app's day-0 widget onboarding and its designed lapse state; on
+>   Android the widget stays on the home screen after the trial ends, so what it
+>   renders then is a deliberate decision, not a fallback.
 > - FCM registration against branch B7's device registry. Anonymous device ID.
 > - Read colours, type scale, and motion from `design/tokens.json`.
 > - Every forecast label carries "model estimate"; past hours are never

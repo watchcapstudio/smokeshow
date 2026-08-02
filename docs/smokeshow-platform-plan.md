@@ -127,13 +127,23 @@ stronger pitch than a screenshot.
   password. Keeps the spirit of the no-accounts rule and removes a signup step
   from the funnel.
 
-**Free tier — a recommendation, your call.** $2.99/mo with a hard paywall at
-launch will bounce hard. The conversion moment is *getting the widget onto the
-home screen*, so let that happen for free: **one small widget, one location,
-free forever. Paid unlocks all widget sizes, lock-screen and Watch, multiple
-saved locations, and notifications.** The free tier then acts as permanent
-advertising on the user's home screen, which is worth more than the handful of
-subscriptions a hard paywall would have converted.
+**Free tier — decided: none. Subscribe, with a 14-day free trial.** Standard
+weather-app model. Configure the trial as a store-native introductory offer
+(StoreKit introductory offer / Play base-plan free trial) so eligibility is
+enforced by the store, one per account per subscription group, and RevenueCat
+reports it uniformly across both.
+
+Two consequences worth designing for rather than discovering:
+
+- **The trial's job is to get a widget onto the home screen on day 0.** A trial
+  that never becomes a glance never converts — the product's value is ambient,
+  and it can't be felt from inside the app. Widget installation is the
+  onboarding step, not a settings-screen afterthought.
+- **Day 12–14 is the churn cliff, and the widget is the surface it happens on.**
+  When the trial lapses the widget either disappears (iOS) or keeps rendering
+  something (Android). What it shows at that moment is a deliberate design
+  decision — your best conversion prompt, or a blank tile that reads as broken.
+  Decide it; don't let it fall out of the implementation.
 
 ---
 
@@ -249,32 +259,41 @@ waitlist, that rule needs an explicit exception.
 Nine work branches. `B0` must land first; `W1` runs concurrently; `W2` starts
 once its dependency lands. Prompts for each are in `docs/branch-prompts.md`.
 
-| # | Branch | Wave | Owns | Depends on | Model | Est. |
+**The web re-skin ships first** (waves 1–3), then the platform work
+(waves 4–5).
+
+| Wave | # | Branch | Concurrent with | Owns | Model | Est. |
 | --- | --- | --- | --- | --- | --- | --- |
-| **B0** | `claude/b0-scaffold` | 0 | CSS split, token layer, App.jsx slots, Vitest | — | Sonnet 5 | 0.5d |
-| **B1** | `claude/b1-forecast-api` | 1 | `api/forecast.js`, `src/lib/*`, the JSON contract | B0 | **Opus 5** | 3–4d |
-| **B2** | `claude/b2-sky-shell` | 1 | `SkyBackdrop`, tokens, shell CSS, contrast audit | B0 | **Opus 5** | 1.5–2d |
-| **B3** | `claude/b3-timeline` | 1 | Ridgeline, Scrubber, AgreementBand, FiveDayStrip | B0 | Sonnet 5 | 1–1.5d |
-| **B4** | `claude/b4-verdict-sheet` | 1 | ExplainSheet, TrendChip, prefs, RatingChip | B0 | Sonnet 5 | 1.5d |
-| **B5** | `claude/b5-puppet` | 1 | The demo file only | — | Sonnet 5 | 1–1.5d |
-| **B6** | `claude/b6-marketing` | 2 | Web CTA + widget showcase + store badges | B2 | Sonnet 5 | 1–2d |
-| **B7** | `claude/b7-notify-backend` | 2 | Device registry, entitlement, eval loop, APNs/FCM | B1 *contract* | **Opus 5** | 2–3w |
-| **B8** | `claude/b8-apple` | 2 | SwiftUI app + WidgetKit, iOS + macOS, StoreKit | B1 *contract*, B2 tokens | **Opus 5** | 5–7w |
-| **B9** | `claude/b9-android` | 2 | Kotlin/Compose + Glance, Play Billing | B1 *contract*, B2 tokens | **Opus 5** | 3–5w |
+| **1** | **B0** | `claude/b0-scaffold` | B5 | CSS split, tokens, App.jsx slots, Vitest, `sky.js`, `trend.js` | Sonnet 5 | 1d |
+| **1** | **B5** | `claude/b5-puppet` | B0 | The demo file only | Sonnet 5 | 1–1.5d |
+| **2** | **B2** | `claude/b2-sky-shell` | B3, B4 | `SkyBackdrop`, shell CSS, contrast audit, lake removal | **Opus 5** | 1.5–2d |
+| **2** | **B3** | `claude/b3-timeline` | B2, B4 | Ridgeline, Scrubber, AgreementBand, FiveDayStrip | Sonnet 5 | 1–1.5d |
+| **2** | **B4** | `claude/b4-verdict-sheet` | B2, B3 | ExplainSheet, TrendChip, prefs, RatingChip, ShareButton | Sonnet 5 | 1.5d |
+| **3** | **B6** | `claude/b6-marketing` | — | Web CTA + widget showcase + store badges | Sonnet 5 | 1–2d |
+| | | *— web re-skin ships —* | | | | |
+| **4** | **B1** | `claude/b1-forecast-api` | — | `api/forecast.js` + the JSON contract | **Opus 5** | 3–4d |
+| **5** | **B7** | `claude/b7-notify-backend` | B8, B9 | Device registry, entitlement, eval loop, APNs/FCM | **Opus 5** | 2–3w |
+| **5** | **B8** | `claude/b8-apple` | B7, B9 | SwiftUI app + WidgetKit, iOS + macOS, StoreKit | **Opus 5** | 5–7w |
+| **5** | **B9** | `claude/b9-android` | B7, B8 | Kotlin/Compose + Glance, Play Billing | **Opus 5** | 3–5w |
+
+Web re-skin: ~4–6 days elapsed with the concurrency above (vs. ~8 serial).
 
 ### Sequencing notes
 
+- **B0 exists to make waves 1–2 safe to run in parallel.** `src/index.css` is
+  1,040 lines and three branches want it; B0 splits it per-component and adds
+  named slots in `App.jsx` so B2/B3/B4 fill slots instead of fighting over the
+  tree. It also lands `sky.js` and `trend.js`, which all three depend on.
+- **B5 is fully independent** — it touches only `public/ifhghs/demo/`. Start it
+  the same moment as B0.
 - **B1 must publish the JSON contract as its first commit**, before the
   implementation. That single file unblocks B7, B8, and B9 to start against a
   mock server — turning a serial chain into a parallel one and saving weeks.
-- **B0 exists purely to make concurrency safe.** `src/index.css` is 1,040 lines
-  and four branches want it; B0 splits it per-component and adds named slots in
-  `App.jsx` so B2/B3/B4 fill slots instead of fighting over the tree.
-- **B5 is fully independent** — it touches only `public/ifhghs/demo/`. Start it
-  immediately, in parallel with B0.
-- **B8 before B9.** Apple is one codebase for two platforms, and wildfire smoke
-  skews to regions with high iOS share. Android second, and it goes faster with
-  the Apple app as a reference.
+- **B8 and B9 can run fully concurrently, but a ~2-week stagger is better
+  value.** Apple is one codebase for two platforms and wildfire smoke skews to
+  high-iOS-share regions, so B8 leads; starting B9 once B8's data layer and
+  widget patterns exist buys consistency cheaply. Run them together only if
+  launch date beats consistency.
 
 ### Why these models
 
@@ -297,15 +316,16 @@ once its dependency lands. Prompts for each are in `docs/branch-prompts.md`.
   `assets/gen_smokeshow_art.py` generator stays in the repo as an archive.
 - **Web has no notification settings** — CTA only.
 - **Widgets are marketing on web, UI on native.**
+- **No free tier in the apps.** Subscribe at $2.99/mo with a **14-day free
+  trial**, store-native introductory offer (§4).
+- **The web re-skin ships first**, before any platform work (§8).
 
 ## 10. Still open
 
-1. **Free tier in the apps** — hard paywall, or one free widget + one location?
-   Recommend the latter (§4).
-2. **Copy** — production's level names and notices over the demo's, and a
+1. **Copy** — production's level names and notices over the demo's, and a
    sign-off on `NOT_LINES` against the no-invented-dose-response rule.
-3. **Repo layout for native** — `apple/` and `android/` in this repo, or
+2. **Repo layout for native** — `apple/` and `android/` in this repo, or
    separate repos? Recommend a monorepo so the design tokens and API contract
    have one home and cannot drift.
-4. **Waitlist** — needs an explicit exception to the no-email-capture rule, or
+3. **Waitlist** — needs an explicit exception to the no-email-capture rule, or
    it doesn't happen (§7).
