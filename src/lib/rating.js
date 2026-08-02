@@ -116,23 +116,39 @@ export function cigaretteEquivalent(pm25Over24h) {
   return pm25Over24h / 22;
 }
 
-// Translucent gray -> brown -> near-black ramp, opacity rising with concentration.
+// The tone the ramp is validated against: CARTO dark_nolabels' land fill, the
+// basemap SmokeMap paints under this layer. Every contrast number in
+// scripts/smoke-ramp-audit.mjs is measured against it.
+export const SMOKE_BASEMAP_RGB = [20, 23, 26];
+
+// Translucent cool-gray -> warm ivory ramp, opacity rising with concentration.
 // Not an AQI rainbow: this is meant to look like smoke, not a legend.
+//
+// Intensity rides BRIGHTNESS, because the basemap is dark. The earlier ramp
+// darkened toward near-black as concentration rose, which on dark tiles peaked
+// in contrast around 35 µg/m³ and then collapsed — the worst air on the map
+// composited to rgb(26,21,15) against rgb(20,23,26) and became invisible.
+// Pale-on-dark is also how smoke reads in GOES/VIIRS imagery and NOAA's own
+// HRRR smoke products, so it still looks like smoke rather than a legend.
+//
 // Perceptually weighted: most of the visible ramp is spent below 55 µg/m³,
 // because that's where most days actually live — a linear ramp made light
-// haze invisible and the map looked frozen. Keep in sync with
-// scripts/hrrr/render_frames.py.
+// haze invisible and the map looked frozen.
+//
+// Keep in sync with scripts/hrrr/render_frames.py; `npm run ramp` fails if the
+// two drift, and proves the composite stays monotonic across the full range.
 const SMOKE_STOPS = [
-  { pm25: 0, rgb: [205, 207, 210], alpha: 0 },
-  { pm25: 3, rgb: [198, 200, 204], alpha: 0.07 },
-  { pm25: 8, rgb: [192, 190, 188], alpha: 0.18 },
-  { pm25: 12, rgb: [186, 180, 170], alpha: 0.27 },
-  { pm25: 20, rgb: [176, 165, 146], alpha: 0.38 },
-  { pm25: 35, rgb: [160, 140, 114], alpha: 0.5 },
-  { pm25: 55, rgb: [126, 100, 78], alpha: 0.62 },
-  { pm25: 150, rgb: [64, 50, 42], alpha: 0.78 },
-  { pm25: 300, rgb: [20, 16, 15], alpha: 0.9 },
+  { pm25: 0, rgb: [180, 186, 196], alpha: 0 },
+  { pm25: 5, rgb: [190, 194, 200], alpha: 0.1 },
+  { pm25: 12, rgb: [205, 206, 208], alpha: 0.24 },
+  { pm25: 20, rgb: [218, 216, 212], alpha: 0.38 },
+  { pm25: 35, rgb: [230, 226, 216], alpha: 0.52 },
+  { pm25: 55, rgb: [240, 234, 220], alpha: 0.66 },
+  { pm25: 150, rgb: [250, 244, 228], alpha: 0.82 },
+  { pm25: 300, rgb: [255, 251, 240], alpha: 0.92 },
 ];
+
+export const SMOKE_STOPS_FOR_AUDIT = SMOKE_STOPS;
 
 // Numeric variant for per-pixel field rendering: [r, g, b, alpha 0-255].
 export function smokeRGBA(pm25) {
@@ -163,4 +179,38 @@ export function smokeRGBA(pm25) {
 export function smokeColorForPM25(pm25) {
   const [r, g, b, a] = smokeRGBA(pm25);
   return `rgba(${r}, ${g}, ${b}, ${(a / 255).toFixed(3)})`;
+}
+
+// Ash-grain speck: the stipple SmokeCanvasLayer sprinkles through the field so
+// density changes read as texture rather than as a flat tint shift. It lives
+// here, next to the ramp, because a speck is only "denser smoke" if it moves
+// the SAME direction the ramp does — the old dark ramp got a darker speck, and
+// under a pale ramp that same speck would read as a hole in the plume.
+const ASH_SPECK_RGB = [255, 252, 246]; // the ramp's own bright end, pushed one notch
+const ASH_SPECK_MIX = 0.22; // how far toward it a speck travels
+const ASH_SPECK_ALPHA_GAIN = 1.3;
+const ASH_SPECK_ALPHA_FLOOR = 18; // keeps a speck visible in thin haze
+
+export function smokeSpeckRGBA(pm25) {
+  const [r, g, b, a] = smokeRGBA(pm25);
+  const lift = (c, i) => Math.round(c + (ASH_SPECK_RGB[i] - c) * ASH_SPECK_MIX);
+  return [
+    lift(r, 0),
+    lift(g, 1),
+    lift(b, 2),
+    Math.min(255, Math.round(a * ASH_SPECK_ALPHA_GAIN + ASH_SPECK_ALPHA_FLOOR)),
+  ];
+}
+
+// Screen-space grain colour for the HRRR image path, where the specks are a
+// repeating pattern painted over an already-composited plume rather than
+// per-pixel ramp samples. Same direction as smokeSpeckRGBA: toward the ramp's
+// bright end, never back toward the basemap.
+export const ASH_GRAIN_FILL = `rgba(${ASH_SPECK_RGB.join(', ')}, 0.5)`;
+
+// Fraction of stipple cells that become specks at a given field opacity
+// (0-1). Shared with the audit so the monotonicity proof measures the mix
+// that actually paints, not the ramp in isolation.
+export function ashSpeckFraction(alpha01) {
+  return Math.min(0.16, alpha01 * 0.24);
 }

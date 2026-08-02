@@ -17,13 +17,65 @@
   font-size: 0.9rem;
 }
 
-/* Map */
+/* Map
+ *
+ * The one surface on the page that is pinned, not live. Everything above
+ * flips ink and cream with the sky (see lib/ink.js); the basemap cannot —
+ * CARTO ships one dark tile set, and a container that flipped underneath it
+ * would put cream chrome on black tiles for half the day. So this block
+ * declares its own fixed dark context and every mark drawn over the tiles
+ * reads these, not the live tokens.
+ *
+ * Two backdrops matter, and chrome has to clear both: the bare basemap
+ * rgb(20,23,26), and the heaviest smoke the ramp can paint, which composites
+ * to rgb(236,233,223). Ratios below are measured against that pair.
+ */
 .smoke-map {
+  --map-surface: #14171a;
+  --map-chrome: rgba(14, 16, 18, 0.82);
+  --map-chrome-text: #c7cfcb; /* 13.0:1 on bare tiles, 6.0:1 under heavy smoke */
+  --map-chrome-text-strong: #f4e9d6; /* the marker label: 15.7:1 / 9.9:1 */
+  --map-mark: #d9531e; /* marker core: 4.5:1 on tiles, 3.3:1 on heavy smoke */
+
   width: 100%;
   height: 340px;
   border-radius: 1rem;
   overflow: hidden;
   border: 1px solid var(--border);
+  /* Painted before the first tile lands, so the map fades up out of the dark
+     instead of flashing Leaflet's default gray. */
+  background: var(--map-surface);
+}
+
+.smoke-map .leaflet-container {
+  background: var(--map-surface);
+}
+
+/* Leaflet's controls ship white-on-white and would sit on the dark tiles as
+   two glowing boxes. */
+.smoke-map .leaflet-control-attribution {
+  background: var(--map-chrome);
+  color: var(--map-chrome-text);
+  font-size: 10px;
+}
+
+.smoke-map .leaflet-control-attribution a {
+  color: var(--map-chrome-text-strong);
+}
+
+.smoke-map .leaflet-bar a,
+.smoke-map .leaflet-bar a:hover {
+  background: var(--map-chrome);
+  color: var(--map-chrome-text-strong);
+  border-bottom-color: rgba(199, 207, 203, 0.25);
+}
+
+.smoke-map .leaflet-bar a:hover {
+  background: rgba(32, 36, 40, 0.92);
+}
+
+.smoke-map .leaflet-bar {
+  border-color: rgba(199, 207, 203, 0.25);
 }
 
 .user-marker {
@@ -34,20 +86,31 @@
   pointer-events: none;
 }
 
+/* Two rings, opposite polarity, so the dot survives both backdrops: on bare
+   tiles the pale ring carries it, and once the plume goes near-opaque ivory
+   the dark halo takes over. */
 .user-marker__dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--accent);
-  border: 2px solid white;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.4);
+  background: var(--map-mark);
+  border: 2px solid #f4e9d6;
+  box-shadow: 0 0 0 2px rgba(10, 12, 14, 0.65);
 }
 
+/* A pill, not a drop shadow: a soft dark shadow under white type disappears
+   against heavy smoke, which is exactly the moment this label matters. */
 .user-marker__label {
-  margin-top: 2px;
+  margin-top: 3px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: var(--map-chrome);
   font-size: 0.7rem;
   font-weight: 600;
   white-space: nowrap;
-  color: white;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  color: var(--map-chrome-text-strong);
+}
+
+.user-marker__label:empty {
+  display: none;
 }

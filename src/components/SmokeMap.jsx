@@ -74,14 +74,35 @@ export default function SmokeMap({
       [center.lat, center.lon],
       9,
     );
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // Three-layer sandwich, not dark_all: base tiles, then the smoke canvas,
+    // then the labels on top. Heavy smoke composites to near-opaque ivory, so
+    // labels baked into the basemap would be buried exactly when a reader most
+    // needs to know which city is under the plume. Splitting them is the only
+    // way to keep the place names above the weather.
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
       maxZoom: 12,
-      attribution: '&copy; OpenStreetMap contributors',
+      // CARTO's basemaps are free to use with attribution; both credits are
+      // required and must stay visible.
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors ' +
+        '&copy; <a href="https://carto.com/attributions">CARTO</a>',
     }).addTo(map);
 
     const smokeLayer = new SmokeCanvasLayer();
     smokeLayer.addTo(map);
     smokeLayerRef.current = smokeLayer;
+
+    // Between overlayPane (400, where the smoke canvas lives) and markerPane
+    // (600, where the user's dot lives): labels sit over the smoke, the
+    // "you are here" marker still sits over the labels.
+    map.createPane('labels').style.zIndex = 450;
+    map.getPane('labels').style.pointerEvents = 'none';
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
+      maxZoom: 12,
+      pane: 'labels',
+      // Attribution rides the base layer — same source, and Leaflet would
+      // otherwise print the pair twice.
+    }).addTo(map);
 
     const marker = L.marker([center.lat, center.lon], {
       icon: L.divIcon({
