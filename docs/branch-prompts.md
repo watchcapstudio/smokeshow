@@ -38,6 +38,9 @@ git fetch origin && git ls-tree --name-only origin/main docs/ src/lib/
 | **4** | B1 | — | re-skin live |
 | **5** | B7, B8, B9 | yes | B1's contract commit |
 | **5** | B10 | yes (render layer — no overlap with B1/B7/B8/B9) | B1 merged |
+| **6** | B13 | yes — trivial, ship anytime | — |
+| **6** | B11 | yes | — |
+| **6** | B12 | after B11 (a global fire layer over a CONUS-only smoke field is an odd pairing) | B11 merged |
 
 Every prompt assumes the agent reads `CLAUDE.md`,
 `docs/smokeshow-build-brief.md`, and `docs/smokeshow-share-spec.md` first.
@@ -585,3 +588,158 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 > selector and platform frames, so you can force each level and compare. Deliver
 > before/after captures at all five levels, plus the monotonicity check output.
 > Commit and push to `claude/b10-dark-map`. Do not open a PR.
+
+---
+
+<a id="b11"></a>
+## B11 — Global smoke coverage (CAMS frames) · **Opus 5** · `claude/b11-global-frames`
+*Independent of B7/B8/B9. The largest user-facing gap in the product today.*
+
+> Branch from `main`. Read `CLAUDE.md`, `scripts/hrrr/render_frames.py`,
+> `src/components/SmokeMap.jsx`, `src/lib/hrrr.js`, `src/lib/grid.js`, and
+> `.github/workflows/hrrr.yml`.
+>
+> **The problem.** The pre-rendered smoke field is CONUS-only. `render_frames.py:33`
+> clips to `LON_W, LON_E, LAT_S, LAT_N = -125.0, -66.5, 24.0, 50.0`, and the live
+> manifest on the `data` branch agrees. Outside that box `hrrrMode` goes false
+> (`SmokeMap.jsx:165`) and the map falls back to `buildGrid()` — **81 points, 9
+> across**. That is not a smoke field; it is nine blobs, and nothing tells the
+> user they have left the good coverage.
+>
+> The box cuts in the worst possible place. Toronto, Montreal, Vancouver and
+> Winnipeg fall just inside; Calgary (51°N), Edmonton and the NWT fall outside —
+> so **the northern-Alberta and BC-interior fires that drive most North American
+> smoke events are off the map while their smoke is on it.** Europe has never had
+> coverage at all.
+>
+> **The fix.** Open-Meteo's air-quality API is already CAMS, and CAMS has a
+> global product. Render global frames with the same pipeline and publish them
+> to the `data` branch alongside the HRRR ones. Source the fields from ECMWF's
+> Atmosphere Data Store (free registration, CDS-style API key) the same way the
+> HRRR job sources its GRIB.
+>
+> **`SmokeMap.jsx:163` already prefers a sharp frame when one exists and falls
+> back when it does not** — so this is additive. Generalize the naming from
+> `hrrr*` to a domain concept, and let HRRR keep winning inside CONUS. Do not
+> rewrite the preference logic.
+>
+> **The thing that will bite you: file size.** 61 frames of a global field at a
+> useful resolution is a lot of PNG on a branch served through
+> raw.githubusercontent. Decide this deliberately and write down the reasoning:
+> regional domains (North America / Europe / rest) rather than one world image,
+> a coarser global tier with regional refinement, or restricting latitude to
+> populated bands. Whatever you choose, **state the byte budget per frame and
+> the total, and confirm the map still paints without stalling on cellular.**
+> The verdict-in-under-3-seconds rule is unaffected — the map is deferred — but
+> the map itself still has to be usable.
+>
+> **Constraints:**
+> - **Use `SMOKE_STOPS`.** The ramp is hand-mirrored between `src/lib/rating.js`
+>   and `render_frames.py`; `npm run ramp` proves the composite stays monotonic
+>   and fails if the copies drift. Run it. Do not introduce a third copy.
+> - The manifest currently carries one `bounds` object. Multiple domains changes
+>   that shape — **treat it as a contract change**: version it, update
+>   `src/lib/hrrr.js`, and make the client degrade to the point grid if it meets
+>   a manifest it does not understand.
+> - Copernicus/CAMS requires attribution. Add it next to the CARTO and OSM
+>   credits.
+> - ADS credentials go in GitHub Actions secrets, never on the client.
+> - **Tell the user what they are looking at.** Today the fallback is silent.
+>   Whatever domain is in play, the map should say whether it is showing the
+>   sharp field or the coarse one — honesty about model resolution is the same
+>   rule as "model estimate, never observed."
+>
+> Deliver: captures at the same zoom for Missoula (HRRR), Edmonton (previously
+> uncovered), and Madrid (never covered). Commit and push to
+> `claude/b11-global-frames`. Do not open a PR.
+
+---
+
+<a id="b12"></a>
+## B12 — Active fire layer (NASA FIRMS) · **Opus 5** · `claude/b12-fires`
+*Best done after B11 — a global fire layer over a CONUS-only smoke field is an odd pairing.*
+
+> Branch from `main`. Read `CLAUDE.md`, `.github/workflows/hrrr.yml`,
+> `scripts/hrrr/render_frames.py`, `src/components/SmokeMap.jsx`, and
+> `src/components/SmokeLayer.js`.
+>
+> Put the fires on the map. Source is **NASA FIRMS** — global, free, and the
+> only genuinely worldwide option. VIIRS at 375m (SNPP and NOAA-20) plus MODIS
+> at 1km; near-real-time is roughly 3 hours globally, with a faster tier over
+> the US and Canada. A free `MAP_KEY` comes by email; the area endpoint returns
+> CSV over a bounding box.
+>
+> **Three things about this data that shape the design:**
+>
+> 1. **These are thermal hotspots, not fires.** One fire yields dozens of
+>    detections. Plotted raw you get a swarm of dots, not an icon per fire.
+>    **Cluster them** and size the icon by detection count — cluster size is a
+>    reasonable proxy for scale, so this reads better than the raw data anyway.
+> 2. **False positives are real** — gas flares, industrial heat, volcanoes.
+>    FIRMS ships a confidence field. Filter on it, and say in your summary what
+>    threshold you chose and what it drops.
+> 3. **No names, no perimeters, no acreage.** FIRMS will not tell you this is
+>    the Donnie Creek fire. Named incidents are per-region and fragmented
+>    (WFIGS in the US, CWFIS in Canada, EFFIS in Europe) — **out of scope here.**
+>    Do not half-build it.
+>
+> **Architecture — reuse what exists.** `.github/workflows/hrrr.yml` already
+> runs 4×/day and force-pushes to the `data` branch, and FIRMS NRT refreshes on
+> a similar cadence. Write a `fires.json` from that same job. No new
+> infrastructure, no new key on the hot path, and **the `MAP_KEY` stays a
+> GitHub Actions secret — never shipped to the client.**
+>
+> **Design constraints:**
+> - The basemap is now dark and the smoke ramp is inverted, so heavy smoke is
+>   *bright* (branch B10). A fire icon has to read against both a near-black
+>   basemap and a near-white smoke plume — which is exactly where the fires
+>   will be. Solve for the hard case, not the empty one.
+> - **Fires belong at zoomed-out scales.** That is where the "where is this
+>   coming from" question gets asked, and it is what prompted this work. Make
+>   sure they are legible when zoomed out and do not turn into clutter when
+>   zoomed in.
+> - Do not let the layer block first paint or the map's own load. It is
+>   additive; absent data means no icons, never a broken map.
+> - **Label it honestly.** These are satellite heat detections, not confirmed
+>   fires, and the "no invented claims" rule applies. Say what they are in the
+>   legend or on tap, including the detection age — a 3-hour-old hotspot is not
+>   a live fire front.
+>
+> Deliver: captures zoomed out over a Canadian fire complex and over CONUS, plus
+> the cluster-count and confidence-threshold numbers. Commit and push to
+> `claude/b12-fires`. Do not open a PR.
+
+---
+
+<a id="b13"></a>
+## B13 — Map section headline · Sonnet 5 · `claude/b13-map-headline`
+*Small and independent. Can ship immediately.*
+
+> Branch from `main`. Read `index.html` around line 32 and `src/styles/*`.
+>
+> The map section has no heading at all — `<div id="map-slot"></div>` sits bare
+> between the app and the FAQ. Give it one.
+>
+> **Copy, verbatim — Joe's wording:**
+>
+> > **Where the smoke was and might be**
+>
+> Add a supporting line under it that teaches the scrubber and carries the
+> model-estimate label the hard rules require — something to the effect of
+> scrubbing back 12 hours to see where it came from and forward 48 to see where
+> it is going, and that these are model estimates, not measurements. Match the
+> voice of the surrounding FAQ copy; do not overwrite Joe's headline.
+>
+> **Two details that matter:**
+> - Put it in **static `index.html`**, not React. That block is
+>   server-delivered so crawlers see it in the initial payload, and this is the
+>   only heading the map section will have. The FAQ already refers to "the map
+>   above" — this heading is what that phrase should be pointing at.
+> - **It sits on the live sky, not on the cream sheet.** `#map-slot` is a direct
+>   child of `.app--bottom`; the `.seo-sheet` is a *sibling after it*. So the
+>   heading must read `--ink` and satisfy the same contrast rules branch B2
+>   established. Run `node scripts/contrast-audit.mjs` and confirm it still
+>   passes; if the heading needs the scrim, give it the scrim.
+>
+> Keep it to the heading and its supporting line. Commit and push to
+> `claude/b13-map-headline`. Do not open a PR.

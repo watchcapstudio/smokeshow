@@ -281,6 +281,19 @@ once its dependency lands. Prompts for each are in `docs/branch-prompts.md`.
 | **5** | **B8** | `claude/b8-apple` | B7, B9 | SwiftUI app + WidgetKit, iOS + macOS, StoreKit | **Opus 5** | 5–7w |
 | **5** | **B9** | `claude/b9-android` | B7, B8 | Kotlin/Compose + Glance, Play Billing | **Opus 5** | 3–5w |
 | **5** | **B10** | `claude/b10-dark-map` | B7, B8, B9 | Dark basemap + inverted smoke ramp | **Opus 5** | 1d |
+| **6** | **B11** | `claude/b11-global-frames` | B13, and all of wave 5 | Global CAMS frames — coverage outside CONUS | **Opus 5** | ~1w |
+| **6** | **B12** | `claude/b12-fires` | B13 | NASA FIRMS active-fire layer | **Opus 5** | ~3d |
+| **6** | **B13** | `claude/b13-map-headline` | everything | Map section heading | Sonnet 5 | ~1h |
+
+### Wave 6 — map coverage and context
+
+The pre-rendered smoke field is CONUS-only (`render_frames.py:33` clips to
+24–50°N, −125 to −66.5°W). Outside it the map falls back to an 81-point grid —
+nine samples across — with nothing telling the user they left the good
+coverage. The box excludes Calgary, Edmonton and the NWT, so the
+northern-Alberta and BC-interior fires driving most North American smoke
+events are off the map while their smoke is on it. Europe has never been
+covered. **B11 is the largest user-facing gap in the product.**
 
 Web re-skin: ~4–6 days elapsed with the concurrency above (vs. ~8 serial).
 
