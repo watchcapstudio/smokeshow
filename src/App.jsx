@@ -4,6 +4,7 @@ import LocationBanner from './components/LocationBanner.jsx';
 import LocationSearch from './components/LocationSearch.jsx';
 import RatingChip from './components/RatingChip.jsx';
 import LakeScene from './components/LakeScene.jsx';
+import Ridgeline from './components/Ridgeline.jsx';
 import Scrubber from './components/Scrubber.jsx';
 import AgreementBand from './components/AgreementBand.jsx';
 import FiveDayStrip from './components/FiveDayStrip.jsx';
@@ -420,7 +421,7 @@ export default function App() {
       />
       {/* SLOT: trend-chip */}
       <LakeScene pm25={selectedPM25} />
-      {/* SLOT: ridgeline */}
+      <Ridgeline pm25={selectedPM25} />
       <ShareButton
         level={nowLevel}
         aqi={ugm3ToAqi(anchoredPm25[nowIndex])}
@@ -457,6 +458,7 @@ export default function App() {
             )}
             <Scrubber
               timesUTC={centerData.timesUTC}
+              pm25={anchoredPm25}
               windowStart={windowStart}
               windowEnd={windowEnd}
               selectedIndex={selectedIndex}
