@@ -5,6 +5,8 @@ import LocationSearch from './components/LocationSearch.jsx';
 import RatingChip from './components/RatingChip.jsx';
 import SkyBackdrop from './components/SkyBackdrop.jsx';
 import Ridgeline from './components/Ridgeline.jsx';
+import TrendChip from './components/TrendChip.jsx';
+import ExplainSheet from './components/ExplainSheet.jsx';
 import Scrubber from './components/Scrubber.jsx';
 import AgreementBand from './components/AgreementBand.jsx';
 import FiveDayStrip from './components/FiveDayStrip.jsx';
@@ -31,6 +33,7 @@ import { levelForPM25 } from './lib/rating.js';
 import { ugm3ToAqi } from './lib/aqi.js';
 import { formatLocalTime, formatVerdictTime } from './lib/time.js';
 import { getJSON, setJSON, clearKey } from './lib/storage.js';
+import { getUnits, setUnits, getSensitive, setSensitive } from './lib/prefs.js';
 
 // Map (and Leaflet with it) loads as a separate chunk after the verdict paints —
 // share-spec rule: rating chip + clear-time render first from a single point
@@ -79,6 +82,9 @@ export default function App() {
   const [hrrr, setHrrr] = useState(null);
   const [sensorNow, setSensorNow] = useState(null); // { official, local } | null
   const [aqiSource, setAqiSource] = useState(() => getJSON('aqiSource') || 'official');
+  const [units, setUnitsState] = useState(() => getUnits());
+  const [sensitive, setSensitiveState] = useState(() => getSensitive());
+  const [explainOpen, setExplainOpen] = useState(false);
   const [measuredDays, setMeasuredDays] = useState(new Map());
   const [nowIndex, setNowIndex] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -277,6 +283,16 @@ export default function App() {
     setJSON('aqiSource', source);
   }
 
+  function handleUnitsChange(next) {
+    setUnitsState(next);
+    setUnits(next);
+  }
+
+  function handleSensitiveChange(next) {
+    setSensitiveState(next);
+    setSensitive(next);
+  }
+
   const verdict = useMemo(
     () => (anchoredPm25 ? computeVerdict({ pm25: anchoredPm25, nowIndex }) : null),
     [anchoredPm25, nowIndex],
@@ -461,8 +477,10 @@ export default function App() {
         sources={sensorNow}
         aqiSource={aqiSource}
         onSourceChange={handleSourceChange}
+        units={units}
+        onExplain={() => setExplainOpen(true)}
       />
-      {/* SLOT: trend-chip */}
+      <TrendChip pm25={anchoredPm25} index={selectedIndex} verdict={verdict} />
       <Ridgeline pm25={selectedPM25} />
       <ShareButton
         level={nowLevel}
@@ -474,7 +492,18 @@ export default function App() {
         diverged={agreement?.some((a) => a.status === 'diverge') ?? false}
         shareUrl={shareUrl}
       />
-      {/* SLOT: explain-sheet */}
+      <ExplainSheet
+        open={explainOpen}
+        onClose={() => setExplainOpen(false)}
+        level={selectedLevel}
+        pm25={selectedPM25}
+        units={units}
+        sensitive={sensitive}
+        days={days}
+        sensorNow={selectedIndex === nowIndex ? sensorNow : null}
+        onUnitsChange={handleUnitsChange}
+        onSensitiveChange={handleSensitiveChange}
+      />
       {mapSlot &&
         createPortal(
           <div className="map-section">

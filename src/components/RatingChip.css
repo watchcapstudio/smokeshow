@@ -94,6 +94,13 @@
   font-size: 2.6rem;
   font-weight: 800;
   line-height: 1;
+  background: none;
+  border: none;
+  color: inherit;
+  font-family: inherit;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
 }
 
 .rating-chip__aqi-meta {
@@ -110,6 +117,13 @@
   display: flex;
   align-items: center;
   gap: 0.35rem;
+  background: none;
+  border: none;
+  color: inherit;
+  font-family: inherit;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
 }
 
 .rating-chip__aqi-dot {
@@ -135,12 +149,48 @@
   font-size: 1.6rem;
   font-weight: 700;
   line-height: 1.2;
+  background: none;
+  border: none;
+  color: inherit;
+  font-family: inherit;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  text-align: left;
 }
 
 .rating-chip__notice {
   margin-top: 0.35rem;
   color: var(--text-dim);
   font-size: 0.95rem;
+  background: none;
+  border: none;
+  font-family: inherit;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  display: block;
+}
+
+.rating-chip__explain {
+  margin-top: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: var(--accent);
+  background: none;
+  border: none;
+  font-family: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+
+.rating-chip__explain::after {
+  content: '›';
+  font-size: 1.05rem;
+  line-height: 1;
 }
 
 .rating-chip__meta {
@@ -163,4 +213,11 @@
   font-size: 1.15rem;
   font-weight: 700;
   color: var(--accent);
+  background: none;
+  border: none;
+  font-family: inherit;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  display: block;
 }
