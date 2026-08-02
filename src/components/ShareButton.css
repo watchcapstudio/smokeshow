@@ -1,0 +1,26 @@
+/* Share row */
+.share-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.share-row__share {
+  background: var(--accent);
+  border: none;
+  color: #16130f;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.5rem 1.2rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.share-row__copy {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0.5rem 1.2rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+}

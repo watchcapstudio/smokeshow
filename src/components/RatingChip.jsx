@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { OLFACTORY_FATIGUE_LEVEL_INDEX, NOSE_CAVEAT } from '../lib/rating.js';
 import { ugm3ToAqi, aqiCategory } from '../lib/aqi.js';
 import { getJSON, setJSON } from '../lib/storage.js';
+import './RatingChip.css';
 
 const DISAGREE_AQI_GAP = 25;
 // Teach the two-source explanation on the first few times a user actually

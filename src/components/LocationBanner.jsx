@@ -1,3 +1,5 @@
+import './LocationBanner.css';
+
 export default function LocationBanner({ placeName, onUpdateLocation }) {
   return (
     <div className="location-banner">

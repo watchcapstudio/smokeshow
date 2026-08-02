@@ -1,4 +1,5 @@
 import { formatLocalTime } from '../lib/time.js';
+import './Scrubber.css';
 
 function isNightHour(timeUTCStr, tz) {
   const hour = Number(

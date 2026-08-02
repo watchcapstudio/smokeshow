@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { installNudgeEligibility, markDismissed } from '../lib/installNudge.js';
+import './InstallNudge.css';
 
 const SHOW_DELAY_MS = 6000;
 

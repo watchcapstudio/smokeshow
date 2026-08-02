@@ -1,0 +1,97 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.app--loading,
+.app--error {
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Header / branding */
+.app-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  padding-top: 0.25rem;
+}
+
+.app-header__wordmark {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--text);
+  margin: 0;
+}
+
+.app-header__tagline {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+/* Location chooser (switch cities) */
+.location-chooser {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.location-chooser__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.location-chooser__gps {
+  background: var(--accent);
+  border: none;
+  color: #16130f;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.location-chooser__cancel {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+/* Forecast text */
+.forecast-text {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 0.9rem 1rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}

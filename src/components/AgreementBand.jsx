@@ -1,4 +1,5 @@
 import { summarizeAgreement } from '../lib/agreement.js';
+import './AgreementBand.css';
 
 function AgreementCurves({ timesUTC, windowStart, windowEnd, currentPM25, hrrrSeries }) {
   const width = 320;

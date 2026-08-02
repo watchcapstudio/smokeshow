@@ -1,0 +1,16 @@
+/* Pull to refresh (standalone app only) */
+.ptr {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  background: linear-gradient(to bottom, var(--bg-panel), transparent);
+  z-index: 1300;
+  pointer-events: none;
+}

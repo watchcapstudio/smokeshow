@@ -1,0 +1,53 @@
+.map-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.map-placeholder {
+  width: 100%;
+  height: 340px;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+/* Map */
+.smoke-map {
+  width: 100%;
+  height: 340px;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.user-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.user-marker__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.4);
+}
+
+.user-marker__label {
+  margin-top: 2px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}

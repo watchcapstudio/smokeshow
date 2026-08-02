@@ -1,0 +1,24 @@
+/* Location banner */
+.location-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: var(--text-dim);
+}
+
+.location-banner__place {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.location-banner__update {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}

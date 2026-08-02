@@ -1,0 +1,191 @@
+/* Five day strip */
+.five-day-strip {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  overflow-anchor: none; /* don't shift scrollLeft when the past panel expands */
+  scroll-behavior: smooth;
+  padding-bottom: 0.2rem;
+}
+
+.five-day-strip__toggle {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  color: var(--text-dim);
+  padding: 0.3rem 0.45rem;
+  cursor: pointer;
+}
+
+.five-day-strip__toggle-arrow {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.five-day-strip__toggle-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.five-day-strip__past {
+  display: flex;
+  gap: 0.4rem;
+  flex: 0 0 auto; /* don't let the flex row crush the sliding panel */
+  max-width: 0;
+  overflow: hidden;
+  transition: max-width 0.4s ease;
+}
+
+.five-day-strip__past--open {
+  max-width: 32rem;
+  margin-right: 0.4rem;
+}
+
+.five-day-strip__past .five-day-strip__day {
+  flex: 0 0 6.4rem;
+}
+
+.five-day-strip__days {
+  display: flex;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.five-day-strip__day {
+  flex: 1 0 6.4rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 0.5rem 0.3rem;
+  text-align: center;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.five-day-strip__day--past {
+  opacity: 0.75;
+}
+
+.five-day-strip__day--selected {
+  border-color: var(--accent);
+}
+
+.five-day-strip__range {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  margin-top: 0.25rem;
+}
+
+.five-day-strip__tag {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  font-style: italic;
+  margin-top: 0.35rem;
+}
+
+.day-detail {
+  margin-top: 0.5rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 0.8rem 1rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.day-detail__headline {
+  margin: 0 0 0.4rem;
+}
+
+.day-detail__chart {
+  margin: 0.5rem 0 0.7rem;
+}
+
+.day-detail__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 52px;
+}
+
+.day-detail__readout {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-bottom: 0.35rem;
+  min-height: 1.1em;
+}
+
+.day-detail__bar-slot {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 3px 3px 0 0;
+}
+
+.day-detail__bar-slot--picked {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.day-detail__bar {
+  width: 100%;
+  border-radius: 2px 2px 0 0;
+  min-height: 3px;
+}
+
+.day-detail__hour-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  margin-top: 0.2rem;
+}
+
+.day-detail__notice {
+  margin: 0 0 0.4rem;
+  color: var(--text-dim);
+}
+
+.day-detail__what {
+  margin: 0.6rem 0 0;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 0.8rem;
+}
+
+.five-day-strip__weekday {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.five-day-strip__level {
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+
+.five-day-strip__parts {
+  display: flex;
+  gap: 3px;
+  margin-top: 0.45rem;
+}
+
+.five-day-strip__part {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+}

@@ -1,3 +1,5 @@
+import './LakeScene.css';
+
 // The five-state rating illustration as ONE parametric SVG (per the project
 // CLAUDE.md: no static-file swaps). Geometry is lifted verbatim from
 // assets/gen_smokeshow_art.py output; the STATES table below is that

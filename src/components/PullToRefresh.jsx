@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import './PullToRefresh.css';
 
 // Pull-to-refresh for the installed (standalone) app, where there's no
 // browser chrome and no reload button. Safari-in-browser keeps its native
