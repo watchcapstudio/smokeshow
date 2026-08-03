@@ -71,9 +71,10 @@ final class ParityTests: XCTestCase {
         XCTAssertEqual(Tokens.TypeScale.base, rem(typeScale["base"]), accuracy: 0.01)
 
         let motion = try XCTUnwrap(json["motion"] as? [String: [String: String]])
+        let baseDuration = try XCTUnwrap(motion["base"]?["duration"])
         XCTAssertEqual(
             Tokens.Motion.base.duration,
-            Double(try XCTUnwrap(motion["base"]?["duration"]?.replacingOccurrences(of: "s", with: ""))),
+            try XCTUnwrap(Double(baseDuration.replacingOccurrences(of: "s", with: ""))),
             accuracy: 0.001
         )
     }

@@ -25,6 +25,10 @@ options:
     watchOS: "10.0"
   createIntermediateGroups: true
   generateEmptyDirectories: true
+  # Recent XcodeGen defaults to the Xcode 16 pbxproj format (objectVersion 77),
+  # which Xcode 15 refuses to open. Pin the older format so one generated
+  # project works across both.
+  objectVersion: 56
 
 settings:
   base:
