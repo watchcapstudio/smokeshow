@@ -4,7 +4,8 @@
 Pulls byte-range subsets of NOAA HRRR surface GRIB2 from AWS via Herbie,
 regrids the 3km Lambert-conformal field onto a lat/lon image whose rows are
 spaced linearly in Web-Mercator y (so a Leaflet ImageOverlay lines up with
-map tiles), colors it with SMOKESHOW's smoke ramp, and writes:
+map tiles), colors it with SMOKESHOW's smoke ramp as a paletted PNG, and
+writes:
 
   out/hrrr/frame-<YYYYMMDDTHH>.png   one per valid hour, -12h .. +48h
   out/hrrr/manifest.json             frame index + run metadata
@@ -16,12 +17,15 @@ pushed to the `data` branch and served via raw.githubusercontent.com.
 
 import json
 import os
+import sys
 import warnings
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
-from PIL import Image
 from pyproj import Transformer
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from smokefield.ramp import save_frame, target_grid  # noqa: E402
 
 warnings.filterwarnings("ignore")
 
@@ -40,40 +44,13 @@ HRRR_PROJ = (
 )
 HRRR_DX = 3000.0
 
-# Same perceptually-weighted smoke ramp as src/lib/rating.js SMOKE_STOPS —
-# pale on dark, intensity riding brightness because the basemap is CARTO
-# dark_nolabels. Keep in sync: `npm run ramp` parses these four arrays and
-# fails if they disagree with the JS.
-STOPS = np.array([0, 5, 12, 20, 35, 55, 150, 300], dtype=float)
-RAMP_R = np.array([180, 190, 205, 218, 230, 240, 250, 255], dtype=float)
-RAMP_G = np.array([186, 194, 206, 216, 226, 234, 244, 251], dtype=float)
-RAMP_B = np.array([196, 200, 208, 212, 216, 220, 228, 240], dtype=float)
-RAMP_A = np.array([0, 0.10, 0.24, 0.38, 0.52, 0.66, 0.82, 0.92], dtype=float) * 255
+# The ramp, the Mercator target grid, and the paletted PNG encoder all live in
+# scripts/smokefield/ramp.py — one Python copy, shared with the CAMS global
+# renderer. `npm run ramp` proves that copy still matches SMOKE_STOPS.
 
 
-def merc_y(lat_deg):
-    return np.log(np.tan(np.pi / 4 + np.radians(lat_deg) / 2))
-
-
-def target_grid():
-    y_s, y_n = merc_y(LAT_S), merc_y(LAT_N)
-    height = int(round(WIDTH * (y_n - y_s) / np.radians(LON_E - LON_W)))
-    y_rows = np.linspace(y_n, y_s, height)  # top row = north
-    lats = np.degrees(2 * np.arctan(np.exp(y_rows)) - np.pi / 2)
-    lons = np.linspace(LON_W, LON_E, WIDTH)
-    return lats, lons, height
-
-
-def colorize(ug_m3):
-    # Smooth wash only. The ash-grain stipple is applied CLIENT-side in
-    # screen space (see SmokeCanvasLayer): texture baked into a CONUS-wide
-    # image turns into smudges after 10-20x map upscaling.
-    v = np.clip(np.nan_to_num(ug_m3, nan=0.0), 0, None)
-    r = np.interp(v, STOPS, RAMP_R)
-    g = np.interp(v, STOPS, RAMP_G)
-    b = np.interp(v, STOPS, RAMP_B)
-    a = np.interp(v, STOPS, RAMP_A)
-    return np.dstack([r, g, b, a]).astype(np.uint8)
+def grid():
+    return target_grid(LAT_S, LAT_N, LON_W, LON_E, WIDTH)
 
 
 def latest_cycle(now=None):
@@ -103,7 +80,7 @@ class Regridder:
         lon00 = lon00 - 360 if lon00 > 180 else lon00
         self.x0, self.y0 = to_lcc.transform(lon00, hrrr_lat2d[0, 0])
 
-        lats, lons, height = target_grid()
+        lats, lons, height = grid()
         lon2d, lat2d = np.meshgrid(lons, lats)
         tx, ty = to_lcc.transform(lon2d, lat2d)
         ix = np.round((tx - self.x0) / HRRR_DX).astype(int)
@@ -163,9 +140,8 @@ def main():
         if regridder is None:
             regridder = Regridder(lat2d, lon2d)
 
-        img = colorize(regridder.image(field))
         stamp = valid.strftime("%Y%m%dT%H")
-        Image.fromarray(img, "RGBA").save(f"{OUT}/frame-{stamp}.png", optimize=True)
+        nbytes = save_frame(regridder.image(field), f"{OUT}/frame-{stamp}.png")
 
         time_key = valid.strftime("%Y-%m-%dT%H:00")
         frames.append({"time": time_key, "file": f"frame-{stamp}.png"})
@@ -175,7 +151,7 @@ def main():
                 np.where(np.isnan(sample), -1, np.round(sample, 1)).tolist()
             )
             series_times.append(time_key)
-        print(f"  wrote {time_key}")
+        print(f"  wrote {time_key}  ({nbytes / 1024:.0f} KB)")
 
     if not frames:
         raise SystemExit("no frames rendered — aborting so the data branch keeps the last good run")

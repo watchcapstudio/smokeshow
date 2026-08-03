@@ -15,7 +15,7 @@
 //                  screen-space grain), because a speck moving the wrong way
 //                  would undo the ramp.
 //   2. SEPARATED   each rating threshold lands a visible step above the last.
-//   3. IN SYNC     scripts/hrrr/render_frames.py's hand-copied NumPy ramp
+//   3. IN SYNC     scripts/smokefield/ramp.py's hand-copied NumPy ramp
 //                  still matches SMOKE_STOPS. These two have drifted before.
 //
 // Contrast is WCAG 2.x relative-luminance ratio. It is not an accessibility
@@ -186,11 +186,17 @@ function monotonicity(lum) {
 
 // ------------------------------------------------------------- python in sync
 
+// The ramp used to live in render_frames.py. It now lives in one shared module
+// that every renderer imports (HRRR over CONUS, CAMS globally), so there are
+// still exactly two copies in the repo — this JS one and that Python one — no
+// matter how many domains get rendered.
+const PYTHON_RAMP = join(here, 'smokefield', 'ramp.py');
+
 function pythonRamp() {
-  const src = readFileSync(join(here, 'hrrr', 'render_frames.py'), 'utf8');
+  const src = readFileSync(PYTHON_RAMP, 'utf8');
   const grab = (name) => {
     const m = src.match(new RegExp(`${name}\\s*=\\s*np\\.array\\(\\[([^\\]]*)\\]`));
-    if (!m) throw new Error(`render_frames.py: could not find ${name}`);
+    if (!m) throw new Error(`smokefield/ramp.py: could not find ${name}`);
     return m[1].split(',').map((s) => Number(s.trim()));
   };
   return {
@@ -287,7 +293,7 @@ for (const p of probes) {
   prevName = p.name;
 }
 
-console.log(`\n3. render_frames.py in sync with SMOKE_STOPS`);
+console.log(`\n3. smokefield/ramp.py in sync with SMOKE_STOPS`);
 const drift = syncReport();
 if (drift.length) for (const d of drift) console.log(`   FAIL  ${d}`);
 else console.log(`   PASS  all ${STOPS.length} stops match`);
@@ -305,7 +311,7 @@ console.log(
 const failures = [];
 if (monoFails.length) failures.push(`monotonicity (${monoFails.join(', ')})`);
 if (sepFails) failures.push(`threshold separation (${sepFails})`);
-if (drift.length) failures.push('render_frames.py drift');
+if (drift.length) failures.push('smokefield/ramp.py drift');
 console.log(
   failures.length ? `\nFAIL: ${failures.join('; ')}\n` : `\nPASS: ramp is monotonic, separated, and in sync\n`,
 );
