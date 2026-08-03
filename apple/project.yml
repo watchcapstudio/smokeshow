@@ -60,6 +60,14 @@ targets:
       - path: Sources/SmokeshowKit
     resources:
       - path: Sources/SmokeshowKit/Resources/Fixtures
+    dependencies:
+      # RevenueCatEntitlementProvider lives in this target, so this target has
+      # to link it — attaching the package to the app instead left the kit's
+      # framework with undefined symbols. The watch build deliberately omits
+      # it: the watch reads the cached entitlement snapshot and never talks to
+      # the store, so `#if canImport(RevenueCat)` compiles that file out there.
+      - package: RevenueCat
+        product: RevenueCat
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.kit
@@ -89,8 +97,6 @@ targets:
       - target: SmokeshowKit
       - target: SmokeshowWidgets
         embed: true
-      - package: RevenueCat
-        product: RevenueCat
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.app
