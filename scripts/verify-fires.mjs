@@ -41,6 +41,9 @@ mkdirSync(OUT, { recursive: true });
 // ------------------------------------------------------------- fires fixture
 // Built by the real pipeline, so the cluster counts printed below are the
 // numbers fetch_fires.py actually produces — not numbers invented here.
+// Keep-clear distance from the map's edges when picking an icon to photograph:
+// a padded clip around an edge icon spills onto the page behind the map.
+const ICON_EDGE_MARGIN = 34;
 const FIRES_PATH = `${OUT}/fires.json`;
 if (!existsSync(FIRES_PATH)) {
   console.log('building fires.json via the real clusterer…');
@@ -178,7 +181,7 @@ for (const scene of SCENES) {
     });
     await new Promise((r) => setTimeout(r, 1400)); // tiles + canvas redraw settle
 
-    const measured = await page.evaluate(() => {
+    const measured = await page.evaluate((MARGIN) => {
       const icons = [...document.querySelectorAll('.fire-icon')];
       const sizes = icons.map((el) => Math.round(el.getBoundingClientRect().width));
       // The one to photograph: the biggest icon that sits clear of the map's
@@ -186,7 +189,6 @@ for (const scene of SCENES) {
       // behind the map, and the backdrop reading would be of the page, not
       // the basemap.
       const map = document.querySelector('.smoke-map').getBoundingClientRect();
-      const MARGIN = 34;
       let best = null;
       for (const el of icons) {
         const r = el.getBoundingClientRect();
@@ -230,7 +232,7 @@ for (const scene of SCENES) {
         smokeMean: n ? [r / n, g / n, b / n, a / n / 255] : null,
         smokeZ: paneZ('.leaflet-overlay-pane'),
         labelsZ: paneZ('.leaflet-pane.leaflet-labels-pane'),
-        firesZ: paneZ('.leaflet-pane.leaflet-fires-pane'),
+        hotspotsZ: paneZ('.leaflet-pane.leaflet-hotspots-pane'),
         markerZ: paneZ('.leaflet-marker-pane'),
         // getBoundingClientRect is viewport-relative; page.screenshot's clip is
         // document-relative, and this page is scrolled to the map.
@@ -238,7 +240,7 @@ for (const scene of SCENES) {
           ? { x: best.x + window.scrollX, y: best.y + window.scrollY, w: best.w }
           : null,
       };
-    });
+    }, ICON_EDGE_MARGIN);
 
     // --- read the icon's real pixels back --------------------------------
     // Screenshot a padded box around the largest icon, load it back into the
@@ -371,8 +373,25 @@ console.log(
 );
 console.log('-'.repeat(114));
 let worst = Infinity;
+// A scene we could not sample is a scene we did not verify. Collect them and
+// fail on them: the earlier version `continue`d past these, left `worst` at
+// Infinity, and reported PASS over zero measurements — a check that could not
+// fail, which is worse than no check at all.
+const unmeasured = [];
 for (const r of rows) {
-  if (!r.probe?.backdrop) continue;
+  if (!r.probe?.backdrop) {
+    unmeasured.push({
+      scene: r.scene.name,
+      backdrop: r.backdrop.name,
+      why:
+        r.icons === 0
+          ? 'no icons rendered'
+          : !r.probe
+            ? `none of the ${r.icons} icons sat clear of the map edge (MARGIN=${ICON_EDGE_MARGIN}px)`
+            : 'icon found, but no backdrop pixels outside its bloom radius',
+    });
+    continue;
+  }
   const bg = r.probe.backdrop;
   const cd = contrast(r.probe.dark, bg);
   const cb = contrast(r.probe.bright, bg);
@@ -392,7 +411,7 @@ for (const r of rows) {
 console.log(`\nlayer stack (z-index, read from the DOM):`);
 console.log(`  smoke overlay pane   ${rows[0].smokeZ}`);
 console.log(`  labels pane          ${rows[0].labelsZ ?? '(absent)'}`);
-console.log(`  fires pane           ${rows[0].firesZ ?? '(absent)'}`);
+console.log(`  hotspots pane        ${rows[0].hotspotsZ ?? '(absent)'}`);
 console.log(`  marker pane          ${rows[0].markerZ}`);
 console.log(`\nlegend: ${rows[0].legend ?? '(none)'}`);
 if (popupText) console.log(`\ntap copy:\n${popupText.split('\n').map((l) => '  ' + l).join('\n')}`);
@@ -406,5 +425,27 @@ console.log(`\ncaptures: ${OUT}/fires-${TAG}-<scene>-<backdrop>.png\n`);
 // The whole design claim in one number: on every backdrop, at least one of the
 // two rings clears 3:1 against what is actually behind the icon.
 const PASS = 3.0;
-console.log(worst >= PASS ? `PASS — worst-case ${worst.toFixed(1)}:1` : `FAIL — worst-case ${worst.toFixed(1)}:1`);
+const measured = rows.length - unmeasured.length;
+
+if (unmeasured.length) {
+  console.log(`\ncould not measure ${unmeasured.length} of ${rows.length} scene/backdrop pairs:`);
+  for (const u of unmeasured) console.log(`  ${u.scene} · ${u.backdrop} — ${u.why}`);
+}
+
+if (measured === 0) {
+  console.log(`\nFAIL — nothing was measured. ${rows.length} pairs captured, 0 sampled.`);
+  process.exit(1);
+}
+if (unmeasured.length) {
+  console.log(
+    `\nFAIL — ${measured}/${rows.length} pairs measured (worst ${worst.toFixed(1)}:1). ` +
+      `Every pair must be measurable; an unsampled backdrop is an unverified one.`,
+  );
+  process.exit(1);
+}
+console.log(
+  worst >= PASS
+    ? `PASS — worst-case ${worst.toFixed(1)}:1 across all ${measured} pairs`
+    : `FAIL — worst-case ${worst.toFixed(1)}:1`,
+);
 process.exit(worst >= PASS ? 0 : 1);

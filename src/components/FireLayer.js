@@ -40,13 +40,17 @@ export class FireLayer extends L.Layer {
     // Above the label tiles (450) — a fire icon buried under a place name is
     // a fire icon that failed. Below the marker pane (600), so the reader's
     // own location still wins.
-    if (!map.getPane('fires')) {
-      const pane = map.createPane('fires');
-      pane.style.zIndex = 460;
+    // Its own pane, deliberately NOT 'fires': SmokeMap creates that one for the
+    // NIFC incident dots (an SVG renderer). Leaflet's createPane returns the
+    // existing pane when the name is taken, so sharing it would put this layer's
+    // absolutely-positioned divs inside the other layer's transformed SVG host.
+    if (!map.getPane('hotspots')) {
+      const pane = map.createPane('hotspots');
+      pane.style.zIndex = 465;
     }
     this._container = L.DomUtil.create('div', 'fire-layer');
     this._container.style.position = 'absolute';
-    map.getPane('fires').appendChild(this._container);
+    map.getPane('hotspots').appendChild(this._container);
     // Icons take clicks; the gaps between them stay draggable map.
     L.DomEvent.disableClickPropagation(this._container);
     L.DomEvent.disableScrollPropagation(this._container);
