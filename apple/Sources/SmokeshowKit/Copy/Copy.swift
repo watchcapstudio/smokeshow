@@ -85,9 +85,10 @@ public enum Copy {
 
     public enum Paywall {
         public static let title = "Your air, on your home screen"
-        public static let subtitle =
-            "Widgets on your home and lock screen, and a notification when the smoke arrives, \
-            peaks, or clears. Nothing else."
+        public static let subtitle = """
+            Widgets on your home and lock screen, and a notification when the smoke arrives, \
+            peaks, or clears. Nothing else.
+            """
 
         /// Trial length, price after, and that it auto-renews — the three
         /// disclosures App Review checks for on an introductory offer.
@@ -122,9 +123,10 @@ public enum Copy {
 
     public enum Onboarding {
         public static let widgetTitle = "Put it on your home screen"
-        public static let widgetBody =
-            "The point of Smokeshow is not opening Smokeshow. Add the widget and the answer is \
-            just there, next to the weather."
+        public static let widgetBody = """
+            The point of Smokeshow is not opening Smokeshow. Add the widget and the answer is \
+            just there, next to the weather.
+            """
 
         #if os(macOS)
         public static let widgetSteps = [
@@ -141,9 +143,10 @@ public enum Copy {
         #endif
 
         public static let lockScreenTitle = "And the lock screen"
-        public static let lockScreenBody =
-            "The inline and circular widgets sit under the clock. That's the glance that makes \
-            this worth paying for."
+        public static let lockScreenBody = """
+            The inline and circular widgets sit under the clock. That's the glance that makes \
+            this worth paying for.
+            """
     }
 
     // MARK: - Trial end / lapse (designed, not left to fall out of the code)
@@ -162,8 +165,10 @@ public enum Copy {
         public static let widgetBody = "Tap to keep your air on screen"
         public static let appTitle = "Your trial has ended"
         public static func appBody(price: String) -> String {
-            "The widgets and alerts are off. \(price) a month turns them back on — same air, same \
-            forecast, back where you had it."
+            """
+            The widgets and alerts are off. \(price) a month turns them back on — same air, same \
+            forecast, back where you had it.
+            """
         }
     }
 }

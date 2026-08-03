@@ -6,6 +6,7 @@
 #
 # Targets:
 #   SmokeshowKit          shared framework — contract, design, widget views
+#   SmokeshowKitWatch     the same sources built for watchOS (Apple requires it)
 #   Smokeshow (iOS)       the app
 #   Smokeshow (macOS)     the same SwiftUI sources, second platform
 #   SmokeshowWidgets      WidgetKit extension, both platforms
@@ -43,9 +44,14 @@ packages:
 
 targets:
 
+  # XcodeGen's multiplatform targets (`supportedDestinations`) cannot include
+  # watchOS — Apple requires a separate target for it. So the shared framework
+  # is built twice from one source tree: once for iOS+macOS, once for watchOS,
+  # both with the module name SmokeshowKit so `import SmokeshowKit` is the same
+  # line everywhere.
   SmokeshowKit:
     type: framework
-    supportedDestinations: [iOS, macOS, watchOS]
+    supportedDestinations: [iOS, macOS]
     sources:
       - path: Sources/SmokeshowKit
     resources:
@@ -53,6 +59,21 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.kit
+        SKIP_INSTALL: YES
+
+  SmokeshowKitWatch:
+    type: framework
+    platform: watchOS
+    sources:
+      - path: Sources/SmokeshowKit
+    resources:
+      - path: Sources/SmokeshowKit/Resources/Fixtures
+    settings:
+      base:
+        # Same module name as the iOS/macOS build — the watch sources import
+        # SmokeshowKit, not SmokeshowKitWatch.
+        PRODUCT_NAME: SmokeshowKit
+        PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.kit.watch
         SKIP_INSTALL: YES
 
   Smokeshow:
@@ -95,11 +116,11 @@ targets:
 
   SmokeshowWatch:
     type: application
-    supportedDestinations: [watchOS]
+    platform: watchOS
     sources:
       - path: Sources/SmokeshowWatch
     dependencies:
-      - target: SmokeshowKit
+      - target: SmokeshowKitWatch
       - target: SmokeshowWatchWidgets
         embed: true
     settings:
@@ -110,11 +131,11 @@ targets:
 
   SmokeshowWatchWidgets:
     type: app-extension
-    supportedDestinations: [watchOS]
+    platform: watchOS
     sources:
       - path: Sources/SmokeshowWatchWidgets
     dependencies:
-      - target: SmokeshowKit
+      - target: SmokeshowKitWatch
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.app.watchkitapp.widgets
