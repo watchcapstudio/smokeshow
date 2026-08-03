@@ -229,6 +229,8 @@
   border-radius: 50%;
   background: #c2410c;
   box-shadow: 0 0 0 1.5px #fff3e4;
+}
+
 /* Fire layer — NASA FIRMS heat detections
  *
  * Same two-backdrop problem as the marker above, but worse: fires sit under
