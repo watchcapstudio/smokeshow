@@ -127,12 +127,18 @@ export class SmokeCanvasLayer extends L.Layer {
       this._raster.width = bw;
       this._raster.height = bh;
       this._rasterCtx = this._raster.getContext('2d');
+      // Reused across frames — reallocating these every redraw churned the GC
+      // during scrub/playback (a fresh ImageData + two typed arrays per frame).
+      // Only rebuild on resize; the values below are fully overwritten each pass.
+      this._lats = new Float64Array(bh);
+      this._lons = new Float64Array(bw);
+      this._imageData = this._rasterCtx.createImageData(bw, bh);
     }
 
     // Web Mercator: lon is linear in x, lat depends only on y — one projection
     // call per row/column instead of per sample.
-    const lats = new Float64Array(bh);
-    const lons = new Float64Array(bw);
+    const lats = this._lats;
+    const lons = this._lons;
     for (let by = 0; by < bh; by++) {
       lats[by] = this._map.containerPointToLatLng([0, by * BLOCK + BLOCK / 2]).lat;
     }
@@ -140,8 +146,9 @@ export class SmokeCanvasLayer extends L.Layer {
       lons[bx] = this._map.containerPointToLatLng([bx * BLOCK + BLOCK / 2, 0]).lng;
     }
 
-    const img = this._rasterCtx.createImageData(bw, bh);
+    const img = this._imageData;
     const data = img.data;
+    data.fill(0); // reused buffer: clear last frame so skipped cells stay transparent
     const n = size - 1;
 
     for (let by = 0; by < bh; by++) {

@@ -26,19 +26,25 @@ function h(type, style, ...children) {
 
 // Pure presentation: every string arrives via query params from /s, so this
 // function does no data fetching and caches hard.
+const cap = (v, n) => (v || '').slice(0, n);
+
 export default function handler(req) {
   const { searchParams } = new URL(req.url);
-  const rating = searchParams.get('rating') || 'SMOKESHOW';
-  const key = searchParams.get('key') || 'smells';
-  const aqi = searchParams.get('aqi') || '';
-  const place = searchParams.get('place') || '';
-  const line = searchParams.get('line') || '';
-  const strip = (searchParams.get('strip') || '')
+  // Cap every input: this endpoint is directly reachable, and satori lays out
+  // whatever it's given — an unbounded string or strip would spike CPU/memory
+  // per request. Values are text nodes in a PNG, so this is cost, not XSS.
+  const rating = cap(searchParams.get('rating'), 40) || 'SMOKESHOW';
+  const key = LEVEL_ACCENTS[searchParams.get('key')] ? searchParams.get('key') : 'smells';
+  const aqi = cap(searchParams.get('aqi'), 4);
+  const place = cap(searchParams.get('place'), 80);
+  const line = cap(searchParams.get('line'), 120);
+  const strip = cap(searchParams.get('strip'), 200)
     .split(',')
     .filter(Boolean)
+    .slice(0, 6)
     .map((entry) => {
       const [day, idx] = entry.split(':');
-      return { day, name: LEVEL_NAMES[Number(idx)] || '' };
+      return { day: cap(day, 6), name: LEVEL_NAMES[Number(idx)] || '' };
     });
 
   const accent = LEVEL_ACCENTS[key] || '#e8823a';

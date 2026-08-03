@@ -1,4 +1,5 @@
 import { measuredSources } from '../src/lib/measured.js';
+import { parseSnappedCoord } from '../src/lib/grid.js';
 
 export const config = { runtime: 'edge' };
 
@@ -8,19 +9,20 @@ export const config = { runtime: 'edge' };
 // so the client falls back to model-only exactly as before.
 export default async function handler(req) {
   const { searchParams } = new URL(req.url);
-  const lat = Number.parseFloat(searchParams.get('lat'));
-  const lon = Number.parseFloat(searchParams.get('lon'));
+  // Snap server-side so jittered coords can't bypass the cache and burn the
+  // keyed upstreams (PurpleAir bills per call).
+  const lat = parseSnappedCoord(searchParams.get('lat'), 'lat');
+  const lon = parseSnappedCoord(searchParams.get('lon'), 'lon');
 
   const empty = (reason) =>
     new Response(JSON.stringify({ measured: null, reason }), {
       headers: {
         'content-type': 'application/json',
         'cache-control': 'public, s-maxage=300',
-        'access-control-allow-origin': '*',
       },
     });
 
-  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return empty('bad-coords');
+  if (lat == null || lon == null) return empty('bad-coords');
 
   try {
     const sources = await measuredSources(lat, lon, {
@@ -37,11 +39,13 @@ export default async function handler(req) {
           // Observations update hourly-ish; 10 min freshness keeps us close
           // without burning the keyed APIs (PurpleAir bills per call).
           'cache-control': 'public, s-maxage=600, stale-while-revalidate=1200',
-          'access-control-allow-origin': '*',
         },
       },
     );
-  } catch {
+  } catch (err) {
+    // Log so a throttled/banned AirNow or PurpleAir key is visible during a
+    // traffic spike instead of silently degrading everyone to model-only.
+    console.error('sensors: upstream error', String(err));
     return empty('error');
   }
 }
