@@ -2,6 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- Google tag (gtag.js). Charset stays first so it lands well inside the
+         first 1024 bytes the HTML spec requires; the tag is otherwise as early
+         as it can be. `async` keeps it off the critical path — the verdict must
+         still paint in under 3 seconds on cellular. -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XTJYZ1SJCE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
+
+      gtag('config', 'G-XTJYZ1SJCE');
+    </script>
+
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <!-- Replaced at runtime with the live zenith colour (SkyBackdrop.jsx); this
          is the clear-midday zenith, so the chrome starts where the sky does. -->
@@ -120,7 +136,8 @@
           <p>
             The same forecast, glanceable from a Home Screen or lock-screen widget — no need to open
             anything to check. Plus threshold alerts when smoke arrives, peaks, or clears.
-            <strong>$2.99/month</strong> for iOS, macOS, and Android. Coming this smoke season.
+            <strong>Coming soon to iOS, macOS, and Android.</strong> 14-day trial, then
+            $2.99/month.
           </p>
         </section>
 
