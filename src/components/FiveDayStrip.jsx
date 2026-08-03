@@ -176,14 +176,40 @@ export default function FiveDayStrip({ timesUTC, pm25, nowIndex, timezone, measu
   const [showPast, setShowPast] = useState(false);
   const stripRef = useRef(null);
 
-  // Opening the past panel inserts boxes to the left of the visible anchor;
-  // the browser's scroll anchoring shifts scrollLeft to keep today stable,
-  // which clips the toggle + first past box off the left edge. Snap the
-  // strip back to the start so the freshly-revealed past days are visible.
+  // The past panel slides open (max-width transition), pushing the newest past
+  // day — the rightmost box, adjacent to today — toward the right fold. On a
+  // narrow phone that box clips at the strip's right edge. Chrome/Firefox mask
+  // this with scroll anchoring; iOS Safari has none (and ignores overflow-anchor),
+  // so on iPhone the newest day just hides. Once the panel finishes expanding,
+  // scroll the strip the minimum needed to bring that box fully into view.
+  // scrollBy on the strip keeps it horizontal-only (no page jump) and no-ops
+  // when the row already fits.
   useEffect(() => {
-    if (showPast && stripRef.current) {
-      stripRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-    }
+    const strip = stripRef.current;
+    if (!showPast || !strip) return;
+    const panel = strip.querySelector('.five-day-strip__past');
+    const newest = panel?.lastElementChild;
+    if (!newest) return;
+    let done = false;
+    const reveal = () => {
+      if (done) return;
+      done = true;
+      const s = strip.getBoundingClientRect();
+      const n = newest.getBoundingClientRect();
+      let delta = 0;
+      if (n.right > s.right) delta = n.right - s.right; // clipped at the right fold
+      else if (n.left < s.left) delta = n.left - s.left; // clipped at the left edge
+      if (delta) strip.scrollBy({ left: delta, behavior: 'smooth' });
+    };
+    const onEnd = (e) => {
+      if (e.propertyName === 'max-width') reveal();
+    };
+    panel.addEventListener('transitionend', onEnd);
+    const fallback = setTimeout(reveal, 450); // reduced-motion / no transitionend
+    return () => {
+      panel.removeEventListener('transitionend', onEnd);
+      clearTimeout(fallback);
+    };
   }, [showPast]);
   // undefined = untouched (default to today's panel open); null = user closed it
   const [selectedKey, setSelectedKey] = useState(undefined);

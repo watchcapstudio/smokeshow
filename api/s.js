@@ -3,8 +3,11 @@ import { computeVerdict, verdictHeadline } from '../src/lib/verdict.js';
 import { applySensorAnchor } from '../src/lib/sensors.js';
 import { ugm3ToAqi } from '../src/lib/aqi.js';
 import { measuredSources } from '../src/lib/measured.js';
+import { parseSnappedCoord } from '../src/lib/grid.js';
 
 export const config = { runtime: 'edge' };
+
+const MAX_NAME = 80;
 
 const FALLBACK_TITLE = 'SMOKESHOW';
 const FALLBACK_DESC =
@@ -94,7 +97,12 @@ export default async function handler(req) {
   const { origin, searchParams } = new URL(req.url);
   const lat = Number.parseFloat(searchParams.get('lat'));
   const lon = Number.parseFloat(searchParams.get('lon'));
-  const name = searchParams.get('name') || '';
+  // Snapped copy used only for the (keyed, billed) upstream fetches, so a
+  // crawler hitting many distinct share links shares the cache lattice. The
+  // redirect target below keeps the sender's exact coords.
+  const snapLat = parseSnappedCoord(searchParams.get('lat'), 'lat');
+  const snapLon = parseSnappedCoord(searchParams.get('lon'), 'lon');
+  const name = (searchParams.get('name') || '').slice(0, MAX_NAME);
   const utm = searchParams.get('utm_source');
 
   const targetParams = new URLSearchParams();
@@ -110,9 +118,9 @@ export default async function handler(req) {
   let desc = FALLBACK_DESC;
   let ogImage = null;
 
-  if (Number.isFinite(lat) && Number.isFinite(lon)) {
+  if (snapLat != null && snapLon != null) {
     try {
-      const v = await buildVerdictStrings(lat, lon);
+      const v = await buildVerdictStrings(snapLat, snapLon);
       title = name ? `${name} — AQI ${v.aqi}, ${v.levelName}` : `AQI ${v.aqi} — ${v.levelName}`;
       // Live verdict in the SERP/preview description — when a search engine
       // or messenger shows this instead of rewriting it, it's unbeatable.
@@ -126,8 +134,9 @@ export default async function handler(req) {
         strip: v.strip,
       });
       ogImage = `${origin}/api/og?${imgParams.toString()}`;
-    } catch {
+    } catch (err) {
       // fall back to static tags — never block the redirect on OG generation
+      console.error('s: verdict build failed', String(err));
     }
   }
 

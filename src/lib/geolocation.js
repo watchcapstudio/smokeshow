@@ -2,11 +2,6 @@ import { getJSON, setJSON, clearKey } from './storage.js';
 
 const KEY = 'location';
 
-// Cached grant + coords, so we never re-prompt after the first successful grant.
-export function getCachedLocation() {
-  return getJSON(KEY);
-}
-
 export function requestLocation() {
   const cached = getJSON(KEY);
   if (cached?.granted && cached.lat != null) return Promise.resolve(cached);
