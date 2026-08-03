@@ -10,8 +10,10 @@ permissions:
   contents: write
 
 concurrency:
-  group: hrrr
-  cancel-in-progress: true
+  # Shared with cams-global: both jobs push to the `data` branch, and a
+  # force-push race would drop one renderer's frames entirely.
+  group: data-branch
+  cancel-in-progress: false
 
 jobs:
   render:
@@ -40,11 +42,7 @@ jobs:
         run: python scripts/hrrr/render_frames.py
 
       - name: Publish to data branch
-        run: |
-          cd out
-          git init -b data
-          git config user.name "smokeshow-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add -A
-          git commit -m "hrrr frames $(date -u +%FT%H:%MZ)"
-          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: .github/workflows/publish-data.sh hrrr out/hrrr

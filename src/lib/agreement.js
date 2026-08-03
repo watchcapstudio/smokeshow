@@ -6,7 +6,7 @@ const DIVERGE_ABS_DIFF = 15; // µg/m³
 // Agreement inputs:
 //   1. multi-model: CAMS vs HRRR at the same valid hour (real "models split")
 //   2. lead-time fade: forecasts past +36h are structurally less certain
-// hrrrSeries is a Map(timeUTC -> µg/m³) from lib/hrrr.js, or null when the
+// hrrrSeries is a Map(timeUTC -> µg/m³) from lib/smokeFrames.js, or null when the
 // HRRR feed is unavailable / the location is outside CONUS.
 export function computeAgreement({ timesUTC, pm25, fetchedAtMs, hrrrSeries }) {
   return timesUTC.map((t, idx) => {

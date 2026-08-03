@@ -1,0 +1,65 @@
+name: cams-global
+
+on:
+  schedule:
+    # CAMS global runs 00Z and 12Z and lands ~7-8h later; 10:00/22:00Z is
+    # comfortably clear of that without letting the field go stale.
+    - cron: "0 10,22 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  # Shared with hrrr-smoke: both jobs push to the `data` branch.
+  group: data-branch
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-name: cams
+          create-args: >-
+            python=3.11
+            xarray
+            netcdf4
+            numpy
+            pillow
+            cdsapi
+          cache-environment: true
+          init-shell: bash
+
+      # Geometry is the part most likely to be wrong and the part that cannot be
+      # caught by eye: a frame one row out is a plume in the wrong country. This
+      # needs no network, so it gates the download rather than following it.
+      - name: Self-test the resampler
+        shell: bash -leo pipefail {0}
+        run: python scripts/cams/selftest.py
+
+      - name: Render CAMS global frames
+        shell: bash -leo pipefail {0}
+        env:
+          # cdsapi reads these; ADS_API_KEY is the only secret this job needs
+          # and it never reaches the client.
+          CDSAPI_URL: https://ads.atmosphere.copernicus.eu/api
+          CDSAPI_KEY: ${{ secrets.ADS_API_KEY }}
+        run: |
+          if [ -z "${CDSAPI_KEY}" ]; then
+            echo "ADS_API_KEY is not set — add it in repo Settings > Secrets > Actions." >&2
+            echo "Register free at https://ads.atmosphere.copernicus.eu/ and accept the" >&2
+            echo "CAMS licence for cams-global-atmospheric-composition-forecasts." >&2
+            exit 1
+          fi
+          python scripts/cams/render_global.py
+
+      - name: Publish to data branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: .github/workflows/publish-data.sh cams out/cams

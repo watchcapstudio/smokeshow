@@ -27,7 +27,7 @@ import { buildGrid, snapCoord } from './lib/grid.js';
 import { fetchGridPM25, findNowIndex } from './lib/openMeteo.js';
 import { fetchServerForecast } from './lib/forecastApi.js';
 import { computeAgreement } from './lib/agreement.js';
-import { fetchHRRR, hrrrSeriesAt } from './lib/hrrr.js';
+import { fetchSmokeFrames, hrrrSeriesAt } from './lib/smokeFrames.js';
 import { fetchSensorsNear, fetchMeasuredDays, applySensorAnchor } from './lib/sensors.js';
 import { buildDaySummaries } from './lib/days.js';
 import { computeVerdict, verdictHeadline } from './lib/verdict.js';
@@ -88,7 +88,11 @@ export default function App() {
   const [gridTiers, setGridTiers] = useState({}); // stage 2+: per-zoom-tier grids — hydrate the map
   const [gridFailed, setGridFailed] = useState(false);
   const fetchingTiersRef = useRef(new Set());
-  const [hrrr, setHrrr] = useState(null);
+  const [smokeFrames, setSmokeFrames] = useState(null);
+  // Which pre-rendered field is painting, or null when the coarse point grid
+  // is. The map used to fall back silently; saying which model a reader is
+  // looking at is the same honesty rule as "model estimate, never observed".
+  const [coverage, setCoverage] = useState(null);
   const [sensorNow, setSensorNow] = useState(null); // { official, local } | null
   const [aqiSource, setAqiSource] = useState(() => getJSON('aqiSource') || 'official');
   const [units, setUnitsState] = useState(() => getUnits());
@@ -107,8 +111,9 @@ export default function App() {
     const shared = parseSharedParams();
     if (shared) setLocation(shared);
     else requestLocation().then(setLocation);
-    // HRRR feed is additive — the app is fully functional without it.
-    fetchHRRR().then(setHrrr).catch(() => {});
+    // Pre-rendered smoke fields are additive — the app is fully functional
+    // without them, and falls back to the point grid per hour and per place.
+    fetchSmokeFrames().then(setSmokeFrames).catch(() => {});
     clearKey('previousRun'); // run-to-run comparison retired; drop the stale cache
   }, []);
 
@@ -312,8 +317,11 @@ export default function App() {
   // HRRR series for this location (null outside CONUS or before the feed loads);
   // its arrival upgrades the agreement band from run-to-run to real multi-model.
   const hrrrLocal = useMemo(
-    () => (hrrr?.series && location?.granted ? hrrrSeriesAt(hrrr.series, location.lat, location.lon) : null),
-    [hrrr, location],
+    () =>
+      smokeFrames?.series && location?.granted
+        ? hrrrSeriesAt(smokeFrames.series, location.lat, location.lon)
+        : null,
+    [smokeFrames, location],
   );
 
   const agreement = useMemo(
@@ -595,7 +603,8 @@ export default function App() {
                   onNeedTier={handleNeedTier}
                   playing={playing}
                   frameMs={PLAY_INTERVAL_MS}
-                  hrrr={hrrr}
+                  frames={smokeFrames}
+                  onCoverage={setCoverage}
                   verdictPm25={anchoredPm25}
                 />
               </Suspense>
@@ -605,6 +614,13 @@ export default function App() {
                   ? 'Map unavailable right now — the forecast above still works.'
                   : 'Loading map…'}
               </div>
+            )}
+            {gridTiers[1] && (
+              <p className="map-coverage">
+                {coverage
+                  ? `Smoke field: ${coverage.label}.`
+                  : 'Smoke field: coarse estimate — no high-resolution model covers this area.'}
+              </p>
             )}
             <Scrubber
               timesUTC={centerData.timesUTC}

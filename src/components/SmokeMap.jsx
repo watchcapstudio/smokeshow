@@ -3,6 +3,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { SmokeCanvasLayer } from './SmokeLayer.js';
 import { levelForPM25 } from '../lib/rating.js';
+import { frameAt } from '../lib/smokeFrames.js';
 import './SmokeMap.css';
 
 // Three zoom tiers, each backed by its own grid (fetched lazily by App):
@@ -45,14 +46,15 @@ export default function SmokeMap({
   onNeedTier,
   playing,
   frameMs,
-  hrrr,
+  frames, // pre-rendered smoke domains (HRRR CONUS + CAMS global), or null
+  onCoverage, // reports which field is painting, so the UI can name it
   verdictPm25, // sensor-anchored series — marker must agree with the chip
 }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const smokeLayerRef = useRef(null);
   const markerRef = useRef(null);
-  const frameRef = useRef(null); // { meta, vA, vB, imgA, imgB, bounds, changedAt, hrrrMode }
+  const frameRef = useRef(null); // { meta, vA, vB, imgA, imgB, bounds, changedAt, sharpMode }
   const imageCacheRef = useRef(new Map()); // url -> HTMLImageElement (decoded)
   const [tier, setTier] = useState(1);
 
@@ -83,9 +85,14 @@ export default function SmokeMap({
       maxZoom: 12,
       // CARTO's basemaps are free to use with attribution; both credits are
       // required and must stay visible.
+      // Copernicus/CAMS attribution is required wherever the global field can
+      // paint, which is everywhere — so it ships with the other two credits
+      // rather than appearing and disappearing with the domain.
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors ' +
-        '&copy; <a href="https://carto.com/attributions">CARTO</a>',
+        '&copy; <a href="https://carto.com/attributions">CARTO</a> &middot; ' +
+        'smoke: NOAA HRRR-Smoke &amp; ' +
+        '<a href="https://atmosphere.copernicus.eu/">Copernicus Atmosphere Monitoring Service</a>',
     }).addTo(map);
 
     const smokeLayer = new SmokeCanvasLayer();
@@ -158,28 +165,38 @@ export default function SmokeMap({
     const timeA = data[0].timesUTC[selectedIndex];
     const timeB = data[0].timesUTC[Math.min(selectedIndex + 1, lastIdx)];
 
-    // Prefer the sharp HRRR frame when one exists for this hour; the CAMS
-    // canvas field is the everywhere-else and past-the-run fallback.
-    const urlA = hrrr?.frameByTime.get(timeA) ?? null;
-    const urlB = hrrr?.frameByTime.get(timeB) ?? urlA;
-    const hrrrMode = !!urlA;
+    // Prefer the sharpest pre-rendered field that covers this hour AND this
+    // place; the point-grid canvas is the fallback when neither does. The
+    // place half is what stops a CONUS image being pinned over a reader in
+    // Edmonton with no smoke drawn over them at all.
+    const hitA = frameAt(frames, timeA, center.lat, center.lon);
+    const hitB = frameAt(frames, timeB, center.lat, center.lon);
+    const urlA = hitA?.url ?? null;
+    const urlB = hitB?.url ?? urlA;
+    const sharpMode = !!urlA;
 
     const vA = frameValues(data, meta, selectedIndex);
     const vB = frameValues(data, meta, Math.min(selectedIndex + 1, lastIdx));
-    const bounds = hrrrMode
+    // Bounds come from the domain that actually won, not from a single global
+    // manifest — the two domains cover different boxes.
+    const bounds = sharpMode
       ? [
-          [hrrr.manifest.bounds.latS, hrrr.manifest.bounds.lonW],
-          [hrrr.manifest.bounds.latN, hrrr.manifest.bounds.lonE],
+          [hitA.domain.bounds.latS, hitA.domain.bounds.lonW],
+          [hitA.domain.bounds.latN, hitA.domain.bounds.lonE],
         ]
       : null;
-    const frame = { meta, vA, vB, imgA: null, imgB: null, bounds, changedAt: performance.now(), hrrrMode };
+    const frame = { meta, vA, vB, imgA: null, imgB: null, bounds, changedAt: performance.now(), sharpMode };
     frameRef.current = frame;
+
+    // The old fallback was silent. Naming the field is the same honesty rule
+    // as "model estimate, never observed".
+    onCoverage?.(hitA ? { key: hitA.domain.key, label: hitA.domain.label, resolutionKm: hitA.domain.resolutionKm } : null);
 
     // Always draw the exact hour on step: when playing, the rAF loop below
     // immediately takes over and blends toward the next hour — but if rAF is
     // throttled (hidden tab, low-power mode), this keeps playback stepping
     // instead of freezing the canvas while the clock advances.
-    if (hrrrMode) {
+    if (sharpMode) {
       Promise.all([loadFrame(urlA), urlB ? loadFrame(urlB) : null]).then(([a, b]) => {
         if (frameRef.current !== frame || !smokeLayerRef.current) return; // stale hour
         frame.imgA = a;
@@ -200,7 +217,7 @@ export default function SmokeMap({
     const el = markerRef.current?.getElement();
     const label = el?.querySelector('.user-marker__label');
     if (label && level) label.textContent = level.name;
-  }, [gridTiers, selectedIndex, tier, playing, hrrr, verdictPm25]);
+  }, [gridTiers, selectedIndex, tier, playing, frames, verdictPm25, center.lat, center.lon, onCoverage]);
 
   useEffect(() => {
     if (!playing) return;
@@ -209,7 +226,7 @@ export default function SmokeMap({
       const f = frameRef.current;
       if (f && smokeLayerRef.current) {
         const t = Math.min(1, (performance.now() - f.changedAt) / (frameMs || 600));
-        if (f.hrrrMode) {
+        if (f.sharpMode) {
           if (f.imgA) smokeLayerRef.current.setImageFrames(f.imgA, f.imgB, t, f.bounds);
         } else {
           smokeLayerRef.current.setField(f.meta, f.vA, f.vB, t);

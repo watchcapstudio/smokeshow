@@ -32,6 +32,9 @@ from smokefield.ramp import save_frame, target_grid  # noqa: E402
 warnings.filterwarnings("ignore")
 
 OUT = os.environ.get("OUT_DIR", "out/cams")
+# Downloaded netCDF stays OUT of the published directory: the data branch
+# carries frames and a manifest, not hundreds of megabytes of source GRIB.
+CACHE = os.environ.get("CAMS_CACHE", ".cams-cache")
 
 # The populated world. Beyond 75°N / 60°S Mercator stretches absurdly and
 # essentially nobody lives there; including those bands would roughly double the
@@ -83,7 +86,8 @@ def fetch(run_dt, steps):
     """
     import cdsapi
 
-    path = f"{OUT}/cams-{run_dt:%Y%m%d%H}.nc"
+    os.makedirs(CACHE, exist_ok=True)
+    path = f"{CACHE}/cams-{run_dt:%Y%m%d%H}.nc"
     if os.path.exists(path):
         return path
     cdsapi.Client().retrieve(

@@ -114,3 +114,13 @@
 .user-marker__label:empty {
   display: none;
 }
+
+/* Which model is painting the smoke. The map used to fall back silently, so a
+   reader outside the sharp domain had no way to know the field had gone coarse
+   — the same failure as labelling a model estimate "observed". */
+.map-coverage {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  color: var(--ink-dim, #8b8f96);
+}
