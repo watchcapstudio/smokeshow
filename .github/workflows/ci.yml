@@ -89,7 +89,9 @@ jobs:
   apple-app:
     name: iOS + macOS build
     runs-on: macos-14
-    timeout-minutes: 25
+    # RevenueCat is compiled from source for three platforms on the first run;
+    # the cache below makes later runs cheap, but the cold one is genuinely long.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       # Runner images carry several Xcodes; take the newest so the generated
@@ -100,6 +102,19 @@ jobs:
           xcodebuild -version
       - name: Install XcodeGen
         run: brew install xcodegen
+
+      # Compiling RevenueCat dominates this job. Key the cache on the spec and
+      # the toolchain, so it survives everything except a dependency change.
+      - name: Cache SwiftPM checkouts and DerivedData
+        uses: actions/cache@v4
+        with:
+          path: |
+            apple/.spm
+            ~/Library/Developer/Xcode/DerivedData
+          key: apple-build-${{ runner.os }}-${{ hashFiles('apple/project.yml') }}
+          restore-keys: |
+            apple-build-${{ runner.os }}-
+
       - name: Generate the Xcode project
         working-directory: apple
         run: xcodegen generate --spec project.yml
@@ -110,7 +125,7 @@ jobs:
       - name: Resolve package dependencies
         working-directory: apple
         # macOS has no GNU `timeout`; the step-level bound is the portable one.
-        timeout-minutes: 10
+        timeout-minutes: 15
         run: |
           xcodebuild -resolvePackageDependencies \
             -project Smokeshow.xcodeproj \
@@ -118,7 +133,7 @@ jobs:
 
       - name: Build for iOS Simulator
         working-directory: apple
-        timeout-minutes: 20
+        timeout-minutes: 40
         run: |
           xcodebuild build \
             -project Smokeshow.xcodeproj \
