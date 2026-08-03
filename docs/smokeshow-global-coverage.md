@@ -142,29 +142,48 @@ and the map itself gets faster, not slower.
 
 - `scripts/smokefield/ramp.py` — one shared Python copy of the ramp, the
   Mercator target grid, and the paletted frame encoder. Still exactly two
-  copies of the ramp in the repo (this and `src/lib/rating.js`), no matter how
-  many domains render.
+  copies of the ramp in the repo, no matter how many domains render.
 - `npm run ramp` re-pointed at the shared module and passing.
 - `scripts/hrrr/render_frames.py` refactored onto it — CONUS frames drop
   413 KB → 92 KB with no visible change.
+- `scripts/cams/render_global.py` — the global renderer. CAMS is a regular
+  lat/lon grid, so the resampler is bilinear index math with no projection
+  library.
+- `scripts/cams/selftest.py` — proves the geometry offline, which matters
+  because the render job needs ECMWF and so cannot run in CI on every commit.
+  Edmonton, Missoula, Madrid, Sydney and Anchorage each land within a pixel of
+  where the Mercator math says; no antimeridian bleed; north is up; either
+  latitude ordering resamples identically.
+- `src/lib/smokeFrames.js` (replacing `lib/hrrr.js`) — manifest v2, two
+  domains fetched independently, unknown versions dropped, degradation to the
+  point grid. 23 tests.
+- Coverage disclosure under the map, and Copernicus/CAMS attribution beside
+  the CARTO and OSM credits.
+- Both render jobs publish into their own subdirectory of the `data` branch
+  under a shared concurrency group.
 
-**Next**
+### A bug found on the way
 
-- `scripts/cams/render_global.py` — ADS fetch and global render.
-- Manifest v2: multiple domains in one index, versioned, with the client
-  degrading to the point grid on a manifest shape it does not recognise.
-- Client: generalise `hrrr*` to a domain concept; per-hour domain preference.
-- Coverage disclosure in the UI — say whether the sharp field or the coarse one
-  is in play. The fallback is silent today, and honesty about model resolution
-  is the same rule as "model estimate, never observed."
-- Copernicus/CAMS attribution beside the CARTO and OSM credits.
-- ADS credentials into Actions secrets; workflow to render and publish.
+`hrrrMode` was decided by **time alone** (`SmokeMap.jsx:165`), never by
+location. Outside CONUS the app therefore did *not* fall back to the 81-point
+grid as this brief assumed — it pinned the CONUS image overlay onto a map that
+does not contain the reader and drew **no smoke over them at all**. An Edmonton
+reader saw an empty map with the plume off to the south, which is worse than
+the coarse fallback it was believed to be getting. Selection is now by hour and
+by place, which fixes it independently of the new domain.
 
-**Blocked in this environment**
+## 6. Remaining
 
-- `ads.atmosphere.copernicus.eu` is rejected by the sandbox's network policy,
-  so no real global frame has been rendered here. The renderer is written to
-  run in GitHub Actions, where the ADS key belongs anyway.
-- `basemaps.cartocdn.com` is likewise rejected, so the three required captures
-  (Missoula, Edmonton, Madrid) cannot be produced here. They need either a run
-  outside the sandbox or those two hosts allowed.
+- **One repo secret: `ADS_API_KEY`.** Free registration at
+  <https://ads.atmosphere.copernicus.eu/>, then accept the licence for
+  `cams-global-atmospheric-composition-forecasts`. The workflow fails with that
+  instruction if the secret is missing rather than failing obscurely.
+- **First real render.** `cams-global` is `workflow_dispatch`-able; the first
+  run publishes `data/cams/` and the map picks it up with no client change.
+- **The three captures** (Missoula, Edmonton, Madrid). These need the CARTO
+  basemap, which the build sandbox blocks; running the existing Puppeteer
+  capture in Actions, where the network is open, produces them from the same
+  code.
+- **Byte budget confirmation against a real field.** The 147 KB/frame figure is
+  measured on a deliberately pessimistic synthetic field; the first real run
+  should come in at or under it, and the job prints the total.
