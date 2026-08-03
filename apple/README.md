@@ -10,7 +10,8 @@ apple/
   Package.swift              SmokeshowKit as SwiftPM — `swift test` needs no Xcode project
   project.yml                XcodeGen spec: app, widgets, watch, tests
   Makefile                   generate · test · tokens · fixtures
-  Configuration/             Info.plists, entitlements, Smokeshow.storekit
+  Configuration/             entitlements, Smokeshow.storekit
+                             (Info.plists are generated from project.yml)
   Sources/
     SmokeshowKit/            everything shared
       Contract/              /api/forecast v1 as Swift — a decoder, not a domain model

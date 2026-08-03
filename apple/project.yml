@@ -97,10 +97,34 @@ targets:
       - target: SmokeshowKit
       - target: SmokeshowWidgets
         embed: true
+    # Info.plists are generated rather than hand-written: a hand-rolled plist
+    # missing the standard CFBundle* keys is what broke the AppIntents SSU
+    # training phase ("Unable to parse Info.plist").
+    info:
+      path: Generated/App-Info.plist
+      properties:
+        CFBundleDisplayName: Smokeshow
+        # One-shot, only when the user asks. The app never tracks a location.
+        NSLocationWhenInUseUsageDescription: >-
+          Smokeshow uses your location once to fetch the smoke forecast where
+          you are. It is never stored on a server and never tied to an account.
+        # Silent pushes from the notification backend say "the verdict moved",
+        # which is what makes the widget refresh cheap.
+        UIBackgroundModes: [remote-notification]
+        # The smoke-event countdown in the Dynamic Island.
+        NSSupportsLiveActivities: true
+        NSSupportsLiveActivitiesFrequentUpdates: false
+        CFBundleURLTypes:
+          - CFBundleURLName: earth.smokeshow.deeplink
+            CFBundleURLSchemes: [smokeshow]
+        # Injected at build time; empty in CI, where the stub entitlement
+        # provider takes over so the app still runs.
+        RevenueCatAPIKey: $(REVENUECAT_API_KEY)
+        ITSAppUsesNonExemptEncryption: false
+        UILaunchScreen: {}
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.app
-        INFOPLIST_FILE: Configuration/App-Info.plist
         CODE_SIGN_ENTITLEMENTS: Configuration/App.entitlements
         ENABLE_PREVIEWS: YES
     scheme:
@@ -118,10 +142,15 @@ targets:
       - path: Sources/SmokeshowWidgets
     dependencies:
       - target: SmokeshowKit
+    info:
+      path: Generated/Widgets-Info.plist
+      properties:
+        CFBundleDisplayName: Smokeshow
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.app.widgets
-        INFOPLIST_FILE: Configuration/Widgets-Info.plist
         CODE_SIGN_ENTITLEMENTS: Configuration/Widgets.entitlements
 
   SmokeshowWatch:
@@ -133,10 +162,15 @@ targets:
       - target: SmokeshowKitWatch
       - target: SmokeshowWatchWidgets
         embed: true
+    info:
+      path: Generated/Watch-Info.plist
+      properties:
+        CFBundleDisplayName: Smokeshow
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: earth.smokeshow.app
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.app.watchkitapp
-        INFOPLIST_FILE: Configuration/Watch-Info.plist
         CODE_SIGN_ENTITLEMENTS: Configuration/Watch.entitlements
 
   SmokeshowWatchWidgets:
@@ -146,10 +180,15 @@ targets:
       - path: Sources/SmokeshowWatchWidgets
     dependencies:
       - target: SmokeshowKitWatch
+    info:
+      path: Generated/WatchWidgets-Info.plist
+      properties:
+        CFBundleDisplayName: Smokeshow
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.app.watchkitapp.widgets
-        INFOPLIST_FILE: Configuration/WatchWidgets-Info.plist
         CODE_SIGN_ENTITLEMENTS: Configuration/Watch.entitlements
 
   SmokeshowKitTests:
