@@ -13,8 +13,8 @@
 // the live feed.
 //
 // Each scene is captured twice, against both backdrops the icon has to beat:
-//   clear  — bare CARTO dark tiles, rgb(20,23,26)
-//   plume  — 220 µg/m³ everywhere, which the ramp composites to near-white
+//   clear  — bare CARTO Positron tiles, the light land tone
+//   plume  — 220 µg/m³ everywhere, which the darkening ramp composites to near-black
 // and the second one is the normal case, since fires sit under their own smoke.
 //
 // Measured, by screenshotting the largest icon and reading its pixels back:
@@ -80,15 +80,18 @@ const BACKDROPS = [
 // ------------------------------------------------------------- stubbed tiles
 const svg = (body) =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">${body}</svg>`;
-const DARK_NOLABELS = svg(
-  `<rect width="256" height="256" fill="#14171a"/>` +
-    `<path d="M0 176 C 60 150, 120 200, 256 168 L256 256 L0 256Z" fill="#0e1417"/>` +
-    `<g stroke="#242a2e" stroke-width="2" fill="none">` +
+// CARTO Positron, matching scripts/verify-map.mjs and the tones
+// SMOKE_BASEMAP_BACKDROPS in src/lib/rating.js is audited against.
+const LIGHT_NOLABELS = svg(
+  `<rect width="256" height="256" fill="rgb(242,240,236)"/>` +
+    `<path d="M0 176 C 60 150, 120 200, 256 168 L256 256 L0 256Z" fill="rgb(202,210,211)"/>` +
+    `<rect x="150" y="24" width="86" height="64" rx="4" fill="rgb(176,180,182)"/>` +
+    `<g stroke="#e2e0dc" stroke-width="3" fill="none">` +
     `<path d="M-10 60 L266 92"/><path d="M40 -10 L72 266"/><path d="M-10 210 L266 190"/></g>`,
 );
-const DARK_ONLY_LABELS = svg(
+const LIGHT_ONLY_LABELS = svg(
   `<g font-family="Helvetica,Arial" font-size="11" text-anchor="middle" ` +
-    `paint-order="stroke" stroke="#000" stroke-width="3" stroke-opacity="0.7" fill="#b9c0c4">` +
+    `paint-order="stroke" stroke="#fff" stroke-width="3" stroke-opacity="0.8" fill="#43484b">` +
     `<text x="64" y="48">RIVERTON</text><text x="180" y="120">ASHFIELD</text>` +
     `<text x="96" y="212">LAKE BEND</text></g>`,
 );
@@ -140,19 +143,19 @@ for (const scene of SCENES) {
           body: JSON.stringify(body),
         });
       if (url.includes('fires.json')) return json(FIRES);
-      if (url.includes('dark_only_labels'))
+      if (url.includes('only_labels'))
         return req.respond({
           status: 200,
           contentType: 'image/svg+xml',
           headers: { 'Access-Control-Allow-Origin': '*' },
-          body: DARK_ONLY_LABELS,
+          body: LIGHT_ONLY_LABELS,
         });
       if (url.includes('basemaps.cartocdn.com'))
         return req.respond({
           status: 200,
           contentType: 'image/svg+xml',
           headers: { 'Access-Control-Allow-Origin': '*' },
-          body: DARK_NOLABELS,
+          body: LIGHT_NOLABELS,
         });
       if (url.includes('air-quality')) {
         const n = (new URL(url).searchParams.get('latitude') || '').split(',').length;
