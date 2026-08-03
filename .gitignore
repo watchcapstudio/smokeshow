@@ -13,3 +13,8 @@ apple/.swiftpm/
 apple/DerivedData/
 xcuserdata/
 scratch
+# render + verify working dirs (frames go to the `data` branch, not here)
+out
+scratch
+cams-cache
+__pycache__

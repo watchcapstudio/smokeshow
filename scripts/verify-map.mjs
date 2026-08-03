@@ -178,7 +178,10 @@ for (const level of LEVELS) {
     if (url.includes('geocoding-api')) return json({ results: [{ name: 'Minneapolis' }] });
     if (url.includes('/api/sensors')) return json({});
     if (url.includes('/api/fires')) return json(FIRES);
-    if (url.includes('/hrrr/')) return req.respond({ status: 404, body: '' });
+    // No pre-rendered domains here: this rig is about the ramp and the layer
+    // order, so the map paints the point grid and nothing else. The path moved
+    // from /hrrr/ to /smokeshow/data/ when CAMS joined HRRR as a second domain.
+    if (url.includes('/smokeshow/data/')) return req.respond({ status: 404, body: '' });
     return req.continue();
   });
 

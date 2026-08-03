@@ -81,6 +81,32 @@
   border-color: var(--map-chrome-edge);
 }
 
+/* Coverage badge — which field is on screen and how sharp it is.
+ *
+ * Same chrome tokens as the attribution and the marker label, so it clears
+ * both backdrops the map has to survive: bare tiles at rgb(20,23,26) and the
+ * heaviest smoke the ramp can paint. Top-right, clear of the zoom control
+ * top-left and of the attribution strip, which now carries two mandatory
+ * source credits and wraps to three lines on a phone. */
+.smoke-map .smoke-coverage {
+  margin: 6px 6px 0 0;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--map-chrome);
+  color: var(--map-chrome-text);
+  font-size: 10px;
+  line-height: 1.4;
+  white-space: nowrap;
+  max-width: calc(100vw - 4rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: auto; /* the title attribute is the long version */
+}
+
+.smoke-map .smoke-coverage:empty {
+  display: none;
+}
+
 .user-marker {
   display: flex;
   flex-direction: column;

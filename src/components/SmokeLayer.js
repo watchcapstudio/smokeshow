@@ -25,12 +25,20 @@ export class SmokeCanvasLayer extends L.Layer {
     this._redraw();
   }
 
-  // HRRR mode: crossfade two pre-rendered smooth frames, then lay the
-  // ash-grain on top in SCREEN space — texture baked into a CONUS image
+  // Domain mode: crossfade two pre-rendered smooth frames, then lay the
+  // ash-grain on top in SCREEN space — texture baked into a domain-wide image
   // becomes smudge after 10-20x upscaling, so the frames stay smooth and
   // the art happens here. bounds: [[latS, lonW], [latN, lonE]].
-  setImageFrames(imgA, imgB, t, bounds) {
-    this._image = { imgA, imgB, t, bounds };
+  // wraps: the domain spans the full 360°, so paint it in the neighbouring
+  // world copies too — otherwise the global field ends at the antimeridian
+  // and panning the Pacific walks off the edge of it.
+  // base: an optional coarser { imgA, imgB, bounds, wraps } painted FIRST and
+  // clipped to everything outside `bounds`. A regional field has a hard
+  // rectangular edge, and a hard edge on a smoke map reads as "no smoke here"
+  // when it means "no model here". The two never overlap, so nothing is
+  // blended and the sharp field still wins everywhere it exists.
+  setImageFrames(imgA, imgB, t, bounds, wraps = false, base = null) {
+    this._image = { imgA, imgB, t, bounds, wraps, base };
     this._field = null;
     this._redraw();
   }
@@ -67,7 +75,7 @@ export class SmokeCanvasLayer extends L.Layer {
     return this._pattern;
   }
 
-  // Hidden while the sharper HRRR image frames cover the current hour.
+  // Hidden while a pre-rendered domain frame covers the current hour.
   setVisible(visible) {
     if (this._canvas) this._canvas.style.display = visible ? '' : 'none';
   }
@@ -201,31 +209,60 @@ export class SmokeCanvasLayer extends L.Layer {
     ctx.drawImage(this._raster, 0, 0, w, h);
   }
 
+  // Screen-space rect a domain's bounds occupy right now.
+  _rect(bounds) {
+    const nw = this._map.latLngToContainerPoint([bounds[1][0], bounds[0][1]]);
+    const se = this._map.latLngToContainerPoint([bounds[0][0], bounds[1][1]]);
+    return { x: nw.x, y: nw.y, w: se.x - nw.x, h: se.y - nw.y };
+  }
+
+  _paintPair(ctx, imgA, imgB, t, bounds, wraps) {
+    const r = this._rect(bounds);
+    const cw = this._canvas.width;
+    // A 360°-wide domain is exactly one world wide, so the neighbouring copies
+    // are a straight ±worldWidth shift. Only the copies that intersect the
+    // viewport get drawn.
+    const world = wraps ? this._map.getPixelWorldBounds()?.getSize().x || r.w : 0;
+    const offsets = wraps
+      ? [-world, 0, world].filter((o) => r.x + o < cw && r.x + o + r.w > 0)
+      : [0];
+    for (const o of offsets) {
+      if (imgA) {
+        ctx.globalAlpha = 1 - t;
+        ctx.drawImage(imgA, r.x + o, r.y, r.w, r.h);
+      }
+      if (imgB && t > 0) {
+        ctx.globalAlpha = t;
+        ctx.drawImage(imgB, r.x + o, r.y, r.w, r.h);
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
   _redrawImage() {
-    const { imgA, imgB, t, bounds } = this._image;
+    const { imgA, imgB, t, bounds, wraps, base } = this._image;
     const ctx = this._canvas.getContext('2d');
     const w = this._canvas.width;
     const h = this._canvas.height;
     if (!w || !h) return;
 
-    const nw = this._map.latLngToContainerPoint([bounds[1][0], bounds[0][1]]);
-    const se = this._map.latLngToContainerPoint([bounds[0][0], bounds[1][1]]);
-    const dx = nw.x;
-    const dy = nw.y;
-    const dw = se.x - nw.x;
-    const dh = se.y - nw.y;
-
     ctx.clearRect(0, 0, w, h);
     ctx.imageSmoothingEnabled = true;
-    if (imgA) {
-      ctx.globalAlpha = 1 - t;
-      ctx.drawImage(imgA, dx, dy, dw, dh);
+
+    if (base?.imgA) {
+      // Even-odd fill rule over "the whole canvas" plus "the sharp domain's
+      // rect" leaves exactly the region the sharp field does not reach.
+      const r = this._rect(bounds);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, w, h);
+      ctx.rect(r.x, r.y, r.w, r.h);
+      ctx.clip('evenodd');
+      this._paintPair(ctx, base.imgA, base.imgB, t, base.bounds, base.wraps);
+      ctx.restore();
     }
-    if (imgB && t > 0) {
-      ctx.globalAlpha = t;
-      ctx.drawImage(imgB, dx, dy, dw, dh);
-    }
-    ctx.globalAlpha = 1;
+
+    this._paintPair(ctx, imgA, imgB, t, bounds, wraps);
 
     // Screen-space ash grain, weighted by the smoke's own opacity:
     // source-atop multiplies the pattern by destination alpha, so specks
