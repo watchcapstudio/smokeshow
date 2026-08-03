@@ -233,3 +233,30 @@ body {
     transition: none;
   }
 }
+
+/* Map section heading. Sits on the live sky (it's a sibling *before* the
+   cream .seo-sheet, not inside it), so it reads --text / --text-dim and
+   rides the global scrim like the rest of the shell — same as .app-header. */
+.map-intro {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1rem 0.75rem;
+}
+
+.map-intro__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-wrap: balance;
+  color: var(--text);
+}
+
+.map-intro__sub {
+  margin: 0.5rem 0 0;
+  max-width: 46ch;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
