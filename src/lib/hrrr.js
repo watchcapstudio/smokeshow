@@ -1,7 +1,7 @@
 // Client for the HRRR-Smoke data branch (rendered by .github/workflows/hrrr.yml).
 // Frames are absolute-valid-time keyed, so a stale run simply stops matching
 // recent hours and the map falls back to the CAMS field — no freshness gate.
-const BASE = 'https://raw.githubusercontent.com/josephrueter/smokeshow/data/hrrr';
+const BASE = 'https://raw.githubusercontent.com/watchcapstudio/smokeshow/data/hrrr';
 
 export async function fetchHRRR() {
   const [manifestRes, seriesRes] = await Promise.all([
