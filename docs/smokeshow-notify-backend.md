@@ -210,16 +210,19 @@ hour:
 | 10,000 | 5,500 | 132,000 | 3,960,000 |
 | 100,000 | 18,000 | 432,000 | 12,960,000 |
 
-**Open-Meteo's free tier is 10,000 calls/day. This service exceeds it at
-roughly 400 cells — well before 1,000 subscribers.** A paid Open-Meteo plan (or
-a self-hosted CAMS mirror) is a launch prerequisite, not a scaling problem. Do
-not discover this in production.
+**Open-Meteo's free tier is 10,000 calls/day, which this service exceeds at
+roughly 400 occupied cells — somewhere under 1,000 subscribers.** Below that
+the free tier is genuinely fine and buying a plan early buys nothing: at
+launch scale (tens of subscribers, tens of cells) the run costs a few hundred
+calls a day. Watch the `cells` field in the run's log line; when it approaches
+400, that is the moment to act, and it will arrive with weeks of warning
+because cells grow far slower than signups.
 
 The mitigation is already named in `CLAUDE.md`'s build order: Open-Meteo
 supports **multi-coordinate batching**. Batching 100 cells per upstream call
 turns 13M calls/month at 100k subscribers into 130k. That work belongs behind
-`/api/aq`, benefits the web map's grid fetch identically, and should land
-before the apps ship.
+`/api/aq`, benefits the web map's grid fetch identically, and is the fix when
+the cell count gets there — not before.
 
 ### Bandwidth, and a recommendation for B1
 
@@ -307,7 +310,10 @@ stay negligible through 100,000 subscribers.
 ## 8. Still open
 
 1. **Slim-mode `/api/forecast`** (§6) — needs a small additive change in B1.
+   Not urgent at launch scale; it is the first thing to do if bandwidth ever
+   shows up on a bill.
 2. **Upstream batching** — belongs behind `/api/aq`, benefits the web map too.
+   Triggered by the cell count passing ~400, not by a date.
 3. **Place names in notification titles.** Titles use the label the device
    supplied at registration and fall back to no label at all; `/api/forecast`
    carries no place name. Reverse geocoding is the alternative and it is a
