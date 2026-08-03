@@ -95,13 +95,35 @@ says the verdict moved. `TimelineBuilderTests` asserts the cadences.
 | RevenueCat | **Real integration, compiled conditionally.** All SDK calls are behind `#if canImport(RevenueCat)`; the package is added by the Xcode project, not by `Package.swift`, so `swift test` runs without it. |
 | App Store Connect | Product ID `earth.smokeshow.subscription.monthly`, group `smokeshow`, $2.99/month, 14-day introductory offer — mirrored in `Configuration/Smokeshow.storekit` for local StoreKit testing. |
 
-### Not verified here
+### Verified, and not
 
-This branch was written in a Linux container with **no Swift toolchain and no
-Xcode**, so none of the Swift compiles as part of this work — `swift build`,
-`swift test`, and `xcodebuild` have not been run. What *was* run and does pass:
-the fixture generator (schema-validated, 10 payloads) and the token generator.
-Treat the first `make test` on a Mac as the real compile pass.
+The Swift was written in a Linux container with no toolchain, so the compile
+pass happens in CI on macOS runners (`.github/workflows/ci.yml`). As of the
+latest push, all four jobs are green:
+
+| Check | What it proves |
+| --- | --- |
+| `web tests` | the web suite still passes (145 tests) |
+| `generated artifacts are current` | tokens and fixtures match their sources, and every fixture still validates against the v1 schema |
+| `SmokeshowKit tests` | the shared framework compiles and its 38 tests pass — decoding, the timeline budget, trial/lapse policy, and the parity guards |
+| `iOS + macOS build` | the app, the widget extension, the Live Activity, and the watch app compile and link for iOS Simulator, macOS, and watchOS Simulator |
+
+Seven real defects came out of that loop: line-continuations in non-multiline
+string literals, watchOS inside `supportedDestinations`, an Xcode-16 pbxproj
+format the runner could not open, a `Double?` in `ParityTests`, RevenueCat
+linked to the app instead of the kit that imports it, an iOS-18-only
+`WidgetCenter.currentConfigurations()`, and hand-written Info.plists that broke
+the AppIntents build phase.
+
+**What CI does not prove**, and still needs a Mac and a device:
+
+- that the widgets *look* right — `systemLarge` and `systemExtraLarge` were
+  designed without ever being rendered, place-name truncation at 148pt is
+  untested, and the `isDark` ink inversion needs a contrast audit;
+- that billing works — no App Store Connect product exists yet, so the
+  trial → day 14 → lapse path has never run against a real receipt;
+- that the watch is correct — see `docs/watch-and-live-activity.md` for the
+  one known correctness gap (entitlement transfer over WatchConnectivity).
 
 ## Copy sign-off still open
 
