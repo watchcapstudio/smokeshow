@@ -109,14 +109,16 @@ jobs:
       # loudly instead of eating the job's whole timeout.
       - name: Resolve package dependencies
         working-directory: apple
+        # macOS has no GNU `timeout`; the step-level bound is the portable one.
+        timeout-minutes: 10
         run: |
-          timeout 600 xcodebuild -resolvePackageDependencies \
+          xcodebuild -resolvePackageDependencies \
             -project Smokeshow.xcodeproj \
-            -clonedSourcePackagesDirPath .spm \
-            || { echo "::error::package resolution failed or timed out"; exit 1; }
+            -clonedSourcePackagesDirPath .spm
 
       - name: Build for iOS Simulator
         working-directory: apple
+        timeout-minutes: 20
         run: |
           xcodebuild build \
             -project Smokeshow.xcodeproj \
