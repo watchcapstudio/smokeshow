@@ -27,7 +27,7 @@ import { buildGrid, snapCoord } from './lib/grid.js';
 import { fetchGridPM25, findNowIndex } from './lib/openMeteo.js';
 import { fetchServerForecast } from './lib/forecastApi.js';
 import { computeAgreement } from './lib/agreement.js';
-import { fetchHRRR, hrrrSeriesAt } from './lib/hrrr.js';
+import { fetchFrames, fetchSeries, seriesAt } from './lib/frames.js';
 import { fetchSensorsNear, fetchMeasuredDays, applySensorAnchor } from './lib/sensors.js';
 import { buildDaySummaries } from './lib/days.js';
 import { computeVerdict, verdictHeadline } from './lib/verdict.js';
@@ -88,7 +88,8 @@ export default function App() {
   const [gridTiers, setGridTiers] = useState({}); // stage 2+: per-zoom-tier grids — hydrate the map
   const [gridFailed, setGridFailed] = useState(false);
   const fetchingTiersRef = useRef(new Set());
-  const [hrrr, setHrrr] = useState(null);
+  const [frames, setFrames] = useState(null); // pre-rendered smoke domains — see lib/frames.js
+  const [frameSeries, setFrameSeries] = useState(null); // second model's point series, if one reaches here
   const [sensorNow, setSensorNow] = useState(null); // { official, local } | null
   const [aqiSource, setAqiSource] = useState(() => getJSON('aqiSource') || 'official');
   const [units, setUnitsState] = useState(() => getUnits());
@@ -107,8 +108,10 @@ export default function App() {
     const shared = parseSharedParams();
     if (shared) setLocation(shared);
     else requestLocation().then(setLocation);
-    // HRRR feed is additive — the app is fully functional without it.
-    fetchHRRR().then(setHrrr).catch(() => {});
+    // The pre-rendered frames are additive — the app is fully functional
+    // without them, and fetchFrames() returns null for a manifest version this
+    // build does not understand, which lands in the same place.
+    fetchFrames().then(setFrames).catch(() => {});
     clearKey('previousRun'); // run-to-run comparison retired; drop the stale cache
   }, []);
 
@@ -309,11 +312,28 @@ export default function App() {
     return () => clearInterval(playIntervalRef.current);
   }, [playing, windowStart, windowEnd, centerData]);
 
-  // HRRR series for this location (null outside CONUS or before the feed loads);
-  // its arrival upgrades the agreement band from run-to-run to real multi-model.
+  // The agreement band's second model. Only one domain publishes a point
+  // series (HRRR), and it is a 2 MB file, so it is fetched lazily and only for
+  // readers inside its extent — everyone else stays single-model rather than
+  // paying to learn they are not covered.
+  useEffect(() => {
+    if (!frames || !location?.granted) return undefined;
+    let cancelled = false;
+    fetchSeries(frames, location.lat, location.lon).then((s) => {
+      if (!cancelled) setFrameSeries(s);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [frames, location]);
+
+  // Its arrival upgrades the agreement band from run-to-run to real multi-model.
   const hrrrLocal = useMemo(
-    () => (hrrr?.series && location?.granted ? hrrrSeriesAt(hrrr.series, location.lat, location.lon) : null),
-    [hrrr, location],
+    () =>
+      frameSeries && location?.granted
+        ? seriesAt(frameSeries, location.lat, location.lon)
+        : null,
+    [frameSeries, location],
   );
 
   const agreement = useMemo(
@@ -595,7 +615,7 @@ export default function App() {
                   onNeedTier={handleNeedTier}
                   playing={playing}
                   frameMs={PLAY_INTERVAL_MS}
-                  hrrr={hrrr}
+                  frames={frames}
                   verdictPm25={anchoredPm25}
                 />
               </Suspense>

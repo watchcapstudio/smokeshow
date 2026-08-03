@@ -9,9 +9,12 @@ on:
 permissions:
   contents: write
 
+# Shared with cams.yml: both jobs rewrite the `data` branch, so they queue
+# rather than race. cancel-in-progress must stay false — cancelling here would
+# mean one model's render killing the other's.
 concurrency:
-  group: hrrr
-  cancel-in-progress: true
+  group: data-branch
+  cancel-in-progress: false
 
 jobs:
   render:
@@ -55,11 +58,8 @@ jobs:
         run: python scripts/hrrr/fetch_fires.py
 
       - name: Publish to data branch
-        run: |
-          cd out
-          git init -b data
-          git config user.name "smokeshow-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add -A
-          git commit -m "hrrr frames $(date -u +%FT%H:%MZ)"
-          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" data
+        shell: bash -leo pipefail {0}
+        env:
+          DOMAIN: hrrr
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash scripts/render/publish.sh
