@@ -292,6 +292,24 @@ const drift = syncReport();
 if (drift.length) for (const d of drift) console.log(`   FAIL  ${d}`);
 else console.log(`   PASS  all ${STOPS.length} stops match`);
 
+// The tone above is not hypothetical: SmokeMap.css paints it as the map's own
+// surface, which becomes the ENTIRE basemap when the tile layers fall back.
+// If the two disagree, every number in this report is measured against a
+// backdrop the app never shows.
+console.log(`\n4. --map-surface matches the audited basemap tone`);
+const surfaceHex = readFileSync(join(here, '..', 'src', 'components', 'SmokeMap.css'), 'utf8')
+  .match(/--map-surface:\s*#([0-9a-f]{6})/i)?.[1];
+const surfaceRGB = surfaceHex
+  ? [0, 2, 4].map((i) => parseInt(surfaceHex.slice(i, i + 2), 16))
+  : null;
+const surfaceOk = surfaceRGB && surfaceRGB.every((c, i) => c === BASE[i]);
+console.log(
+  surfaceOk
+    ? `   PASS  --map-surface #${surfaceHex} = rgb(${BASE.join(',')})`
+    : `   FAIL  --map-surface ${surfaceHex ? `#${surfaceHex} = rgb(${surfaceRGB.join(',')})` : '(not found)'}` +
+        ` but the ramp is audited against rgb(${BASE.join(',')})`,
+);
+
 // Not a gate, but the number a reader will ask about: above the top stop the
 // ramp is flat, so the map stops differentiating there. Printed so the ceiling
 // is a decision on the record rather than a surprise during a smoke event.
@@ -306,6 +324,7 @@ const failures = [];
 if (monoFails.length) failures.push(`monotonicity (${monoFails.join(', ')})`);
 if (sepFails) failures.push(`threshold separation (${sepFails})`);
 if (drift.length) failures.push('render_frames.py drift');
+if (!surfaceOk) failures.push('--map-surface drift');
 console.log(
   failures.length ? `\nFAIL: ${failures.join('; ')}\n` : `\nPASS: ramp is monotonic, separated, and in sync\n`,
 );

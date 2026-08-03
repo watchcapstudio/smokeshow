@@ -1,8 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
+import { track } from '@vercel/analytics';
 import 'leaflet/dist/leaflet.css';
 import { SmokeCanvasLayer } from './SmokeLayer.js';
 import { levelForPM25 } from '../lib/rating.js';
+import {
+  CARTO_ATTRIBUTION,
+  CARTO_BASE_URL,
+  CARTO_LABELS_URL,
+  createTileHealth,
+} from '../lib/basemap.js';
 import './SmokeMap.css';
 
 // Three zoom tiers, each backed by its own grid (fetched lazily by App):
@@ -55,6 +62,7 @@ export default function SmokeMap({
   const frameRef = useRef(null); // { meta, vA, vB, imgA, imgB, bounds, changedAt, hrrrMode }
   const imageCacheRef = useRef(new Map()); // url -> HTMLImageElement (decoded)
   const [tier, setTier] = useState(1);
+  const [basemapDown, setBasemapDown] = useState(false);
 
   // Decode-once image cache; crossOrigin so the canvas stays readable.
   function loadFrame(url) {
@@ -79,13 +87,13 @@ export default function SmokeMap({
     // labels baked into the basemap would be buried exactly when a reader most
     // needs to know which city is under the plume. Splitting them is the only
     // way to keep the place names above the weather.
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+    // Both credits are required by CARTO's licence and must stay visible. They
+    // ride this layer, and they leave with it — if the tiles fall back below,
+    // Leaflet drops the attribution too, which is correct: we should not credit
+    // a provider we have stopped using.
+    const baseLayer = L.tileLayer(CARTO_BASE_URL, {
       maxZoom: 12,
-      // CARTO's basemaps are free to use with attribution; both credits are
-      // required and must stay visible.
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors ' +
-        '&copy; <a href="https://carto.com/attributions">CARTO</a>',
+      attribution: CARTO_ATTRIBUTION,
     }).addTo(map);
 
     const smokeLayer = new SmokeCanvasLayer();
@@ -97,12 +105,29 @@ export default function SmokeMap({
     // "you are here" marker still sits over the labels.
     map.createPane('labels').style.zIndex = 450;
     map.getPane('labels').style.pointerEvents = 'none';
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
+    const labelLayer = L.tileLayer(CARTO_LABELS_URL, {
       maxZoom: 12,
       pane: 'labels',
       // Attribution rides the base layer — same source, and Leaflet would
       // otherwise print the pair twice.
     }).addTo(map);
+
+    // The tiles are keyless, so there is no quota to watch approach — the only
+    // warning we get is the tiles themselves failing. When they do, drop to a
+    // bare dark surface (the smoke field and the marker still work, and the
+    // surface is the exact tone the ramp was audited against) and say so, once.
+    const health = createTileHealth(({ errors, loads }) => {
+      map.removeLayer(baseLayer);
+      map.removeLayer(labelLayer);
+      setBasemapDown(true);
+      // No key means no provider-side alerting either, so this event is the
+      // only way anyone finds out. Fires once per session, on trip only.
+      track('basemap_unavailable', { provider: 'carto', errors, loads });
+    });
+    for (const layer of [baseLayer, labelLayer]) {
+      layer.on('tileerror', health.onError);
+      layer.on('tileload', health.onLoad);
+    }
 
     const marker = L.marker([center.lat, center.lon], {
       icon: L.divIcon({
@@ -221,5 +246,15 @@ export default function SmokeMap({
     return () => cancelAnimationFrame(raf);
   }, [playing, frameMs]);
 
-  return <div className="smoke-map" ref={containerRef} />;
+  return (
+    <>
+      <div className="smoke-map" ref={containerRef} />
+      {basemapDown && (
+        <p className="smoke-map__notice">
+          The base map is unavailable right now. The smoke forecast and your location are
+          unaffected.
+        </p>
+      )}
+    </>
+  );
 }

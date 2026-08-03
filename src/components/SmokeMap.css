@@ -47,8 +47,21 @@
   background: var(--map-surface);
 }
 
+/* Also the fallback surface: with the tile layers removed this is the whole
+   basemap, and it is set to the exact tone SMOKE_STOPS was audited against, so
+   the ramp's contrast numbers survive losing the tiles. `npm run ramp` fails if
+   this value and SMOKE_BASEMAP_RGB drift apart. */
 .smoke-map .leaflet-container {
   background: var(--map-surface);
+}
+
+/* Sits below the map, in #map-slot's fixed cream sheet — so it reads with the
+   sheet's ink, not the map's dark context. */
+.smoke-map__notice {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-dim);
 }
 
 /* Leaflet's controls ship white-on-white and would sit on the dark tiles as

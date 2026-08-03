@@ -33,6 +33,10 @@ const OUT = process.env.SCRATCH || 'scratch';
 const arg = (k, d) => process.argv.find((a) => a.startsWith(`--${k}=`))?.slice(k.length + 3) ?? d;
 const TAG = arg('tag', 'after');
 const BASE = arg('base', process.env.BASE_URL || 'http://localhost:5173');
+// --fail-tiles serves 403 for every CARTO request, which is what a referrer
+// block or a revoked entitlement looks like from the browser. Proves the
+// fallback in lib/basemap.js actually fires rather than trusting the unit test.
+const FAIL_TILES = process.argv.includes('--fail-tiles');
 
 mkdirSync(OUT, { recursive: true });
 
@@ -103,6 +107,14 @@ const rows = [];
 for (const level of LEVELS) {
   const page = await browser.newPage();
   await page.setViewport({ width: 430, height: 932, deviceScaleFactor: 2 });
+  // @vercel/analytics has no transport on localhost, so it announces custom
+  // events on the console instead. That is the only place the alert is
+  // observable from here, so it is what we assert against.
+  const analytics = [];
+  page.on('console', (m) => {
+    const t = m.text();
+    if (/Vercel Web Analytics/i.test(t)) analytics.push(t);
+  });
   await page.setRequestInterception(true);
   page.on('request', (req) => {
     const url = req.url();
@@ -121,6 +133,8 @@ for (const level of LEVELS) {
         body,
       });
 
+    if (url.includes('basemaps.cartocdn.com') && FAIL_TILES)
+      return req.respond({ status: 403, contentType: 'text/plain', body: 'forbidden' });
     if (url.includes('dark_only_labels')) return tile(DARK_ONLY_LABELS);
     if (url.includes('basemaps.cartocdn.com')) return tile(DARK_NOLABELS);
     if (url.includes('tile.openstreetmap.org')) return tile(OSM);
@@ -199,6 +213,10 @@ for (const level of LEVELS) {
         ? getComputedStyle(document.querySelector('.leaflet-control-attribution')).color
         : null,
       markerLabel: document.querySelector('.user-marker__label')?.textContent,
+      // Fallback state: did the tile layers get dropped, and did we say so?
+      tilesInDom: document.querySelectorAll('.leaflet-tile').length,
+      notice: document.querySelector('.smoke-map__notice')?.textContent?.trim() ?? null,
+      queuedEvents: (window.vaq || []).map((e) => JSON.stringify(e)),
       chip: document.querySelector('.rating-chip__level, .rating-chip h1, .rating-chip')
         ?.textContent?.slice(0, 40),
     };
@@ -208,7 +226,7 @@ for (const level of LEVELS) {
   await el.screenshot({ path: `${OUT}/map-${TAG}-${level.key}.png` });
   await page.screenshot({ path: `${OUT}/page-${TAG}-${level.key}.png` });
 
-  rows.push({ ...level, ...measured });
+  rows.push({ ...level, ...measured, analytics });
   await page.close();
 }
 
@@ -260,6 +278,35 @@ console.log(`  tile sets loaded     ${first.tileSets.join(', ')}`);
 console.log(`\nattribution: ${first.attribution ?? '(none)'}`);
 console.log(`  colour: ${first.attributionColor}`);
 console.log(`marker label: ${first.markerLabel ?? '(none)'}`);
+
+writeFileSync(`${OUT}/map-${TAG}.json`, JSON.stringify({ tag: TAG, base: BASE, rows }, null, 2));
+
+if (FAIL_TILES) {
+  // Every one of these has to hold, or the "map survives losing CARTO" claim
+  // is just a unit test about a counter.
+  // The event is only observable here through what @vercel/analytics does
+  // without a transport: it queues onto window.vaq and narrates to the
+  // console. Match on either, but report WHICH — an assertion that can pass on
+  // an unrelated console line is not an assertion.
+  const alertOf = (r) =>
+    r.queuedEvents.find((e) => /basemap_unavailable/.test(e)) ??
+    r.analytics.find((a) => /basemap_unavailable/.test(a)) ??
+    null;
+  const checks = [
+    ['tile layers dropped', rows.every((r) => r.tilesInDom === 0)],
+    ['notice shown', rows.every((r) => r.notice)],
+    ['CARTO no longer credited', rows.every((r) => !/CARTO/.test(r.attribution ?? ''))],
+    ['smoke still painting', rows.every((r) => r.cover > 0)],
+    ['alert fired', rows.every((r) => alertOf(r) !== null)],
+  ];
+  console.log(`\nfallback (--fail-tiles: CARTO returning 403):`);
+  for (const [name, ok] of checks) console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${name}`);
+  console.log(`  notice: "${first.notice ?? '(none)'}"`);
+  console.log(`  event:  ${alertOf(first) ?? '(none observed)'}`);
+  const bad = checks.filter(([, ok]) => !ok);
+  console.log(bad.length ? `\nFAIL: ${bad.map(([n]) => n).join(', ')}\n` : `\nPASS: map survives losing CARTO\n`);
+  process.exit(bad.length ? 1 : 0);
+}
 
 // Monotonic against the basemap the tiles actually are, per tag.
 const dark = first.tileSets.some((t) => /dark/.test(t));
