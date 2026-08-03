@@ -89,21 +89,60 @@ jobs:
   apple-app:
     name: iOS + macOS build
     runs-on: macos-14
-    timeout-minutes: 45
+    # RevenueCat is compiled from source for three platforms on the first run;
+    # the cache below makes later runs cheap, but the cold one is genuinely long.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+      # Runner images carry several Xcodes; take the newest so the generated
+      # project format is never ahead of the toolchain reading it.
+      - name: Select the newest Xcode
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+          xcodebuild -version
       - name: Install XcodeGen
         run: brew install xcodegen
+
+      # Compiling RevenueCat dominates this job. Key the cache on the spec and
+      # the toolchain, so it survives everything except a dependency change.
+      - name: Cache SwiftPM checkouts and DerivedData
+        uses: actions/cache@v4
+        with:
+          path: |
+            apple/.spm
+            ~/Library/Developer/Xcode/DerivedData
+          key: apple-build-${{ runner.os }}-${{ hashFiles('apple/project.yml') }}
+          restore-keys: |
+            apple-build-${{ runner.os }}-
+
       - name: Generate the Xcode project
         working-directory: apple
         run: xcodegen generate --spec project.yml
+
+      # Resolving RevenueCat is the one step that touches the network, and a
+      # hang there looks identical to a slow compile. Bound it so it fails
+      # loudly instead of eating the job's whole timeout.
+      - name: Resolve package dependencies
+        working-directory: apple
+        # macOS has no GNU `timeout`; the step-level bound is the portable one.
+        timeout-minutes: 15
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project Smokeshow.xcodeproj \
+            -clonedSourcePackagesDirPath .spm
+
       - name: Build for iOS Simulator
         working-directory: apple
+        timeout-minutes: 40
+        # -quiet drops the driver command echo and keeps the diagnostics, which
+        # is the opposite of what I assumed when I removed it.
         run: |
           xcodebuild build -quiet \
             -project Smokeshow.xcodeproj \
             -scheme Smokeshow \
             -destination 'generic/platform=iOS Simulator' \
+            -clonedSourcePackagesDirPath .spm \
+            -skipPackageUpdates \
             CODE_SIGNING_ALLOWED=NO
 
       - name: Build for macOS
@@ -113,6 +152,8 @@ jobs:
             -project Smokeshow.xcodeproj \
             -scheme Smokeshow \
             -destination 'platform=macOS' \
+            -clonedSourcePackagesDirPath .spm \
+            -skipPackageUpdates \
             CODE_SIGNING_ALLOWED=NO
 
       # The watch targets are not embedded in the iOS app, so nothing else
@@ -124,4 +165,6 @@ jobs:
             -project Smokeshow.xcodeproj \
             -scheme SmokeshowWatch \
             -destination 'generic/platform=watchOS Simulator' \
+            -clonedSourcePackagesDirPath .spm \
+            -skipPackageUpdates \
             CODE_SIGNING_ALLOWED=NO

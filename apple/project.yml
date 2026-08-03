@@ -6,6 +6,7 @@
 #
 # Targets:
 #   SmokeshowKit          shared framework — contract, design, widget views
+#   SmokeshowKitWatch     the same sources built for watchOS (Apple requires it)
 #   Smokeshow (iOS)       the app
 #   Smokeshow (macOS)     the same SwiftUI sources, second platform
 #   SmokeshowWidgets      WidgetKit extension, both platforms
@@ -24,6 +25,10 @@ options:
     watchOS: "10.0"
   createIntermediateGroups: true
   generateEmptyDirectories: true
+  # Recent XcodeGen defaults to the Xcode 16 pbxproj format (objectVersion 77),
+  # which Xcode 15 refuses to open. Pin the older format so one generated
+  # project works across both.
+  objectVersion: 56
 
 settings:
   base:
@@ -43,16 +48,44 @@ packages:
 
 targets:
 
+  # XcodeGen's multiplatform targets (`supportedDestinations`) cannot include
+  # watchOS — Apple requires a separate target for it. So the shared framework
+  # is built twice from one source tree: once for iOS+macOS, once for watchOS,
+  # both with the module name SmokeshowKit so `import SmokeshowKit` is the same
+  # line everywhere.
   SmokeshowKit:
     type: framework
-    supportedDestinations: [iOS, macOS, watchOS]
+    supportedDestinations: [iOS, macOS]
+    sources:
+      - path: Sources/SmokeshowKit
+    resources:
+      - path: Sources/SmokeshowKit/Resources/Fixtures
+    dependencies:
+      # RevenueCatEntitlementProvider lives in this target, so this target has
+      # to link it — attaching the package to the app instead left the kit's
+      # framework with undefined symbols. The watch build deliberately omits
+      # it: the watch reads the cached entitlement snapshot and never talks to
+      # the store, so `#if canImport(RevenueCat)` compiles that file out there.
+      - package: RevenueCat
+        product: RevenueCat
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.kit
+        SKIP_INSTALL: YES
+
+  SmokeshowKitWatch:
+    type: framework
+    platform: watchOS
     sources:
       - path: Sources/SmokeshowKit
     resources:
       - path: Sources/SmokeshowKit/Resources/Fixtures
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.kit
+        # Same module name as the iOS/macOS build — the watch sources import
+        # SmokeshowKit, not SmokeshowKitWatch.
+        PRODUCT_NAME: SmokeshowKit
+        PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.kit.watch
         SKIP_INSTALL: YES
 
   Smokeshow:
@@ -64,12 +97,34 @@ targets:
       - target: SmokeshowKit
       - target: SmokeshowWidgets
         embed: true
-      - package: RevenueCat
-        product: RevenueCat
+    # Info.plists are generated rather than hand-written: a hand-rolled plist
+    # missing the standard CFBundle* keys is what broke the AppIntents SSU
+    # training phase ("Unable to parse Info.plist").
+    info:
+      path: Generated/App-Info.plist
+      properties:
+        CFBundleDisplayName: Smokeshow
+        # One-shot, only when the user asks. The app never tracks a location.
+        NSLocationWhenInUseUsageDescription: >-
+          Smokeshow uses your location once to fetch the smoke forecast where
+          you are. It is never stored on a server and never tied to an account.
+        # Silent pushes from the notification backend say "the verdict moved",
+        # which is what makes the widget refresh cheap.
+        UIBackgroundModes: [remote-notification]
+        # The smoke-event countdown in the Dynamic Island.
+        NSSupportsLiveActivities: true
+        NSSupportsLiveActivitiesFrequentUpdates: false
+        CFBundleURLTypes:
+          - CFBundleURLName: earth.smokeshow.deeplink
+            CFBundleURLSchemes: [smokeshow]
+        # Injected at build time; empty in CI, where the stub entitlement
+        # provider takes over so the app still runs.
+        RevenueCatAPIKey: $(REVENUECAT_API_KEY)
+        ITSAppUsesNonExemptEncryption: false
+        UILaunchScreen: {}
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.app
-        INFOPLIST_FILE: Configuration/App-Info.plist
         CODE_SIGN_ENTITLEMENTS: Configuration/App.entitlements
         ENABLE_PREVIEWS: YES
     scheme:
@@ -87,38 +142,53 @@ targets:
       - path: Sources/SmokeshowWidgets
     dependencies:
       - target: SmokeshowKit
+    info:
+      path: Generated/Widgets-Info.plist
+      properties:
+        CFBundleDisplayName: Smokeshow
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.app.widgets
-        INFOPLIST_FILE: Configuration/Widgets-Info.plist
         CODE_SIGN_ENTITLEMENTS: Configuration/Widgets.entitlements
 
   SmokeshowWatch:
     type: application
-    supportedDestinations: [watchOS]
+    platform: watchOS
     sources:
       - path: Sources/SmokeshowWatch
     dependencies:
-      - target: SmokeshowKit
+      - target: SmokeshowKitWatch
       - target: SmokeshowWatchWidgets
         embed: true
+    info:
+      path: Generated/Watch-Info.plist
+      properties:
+        CFBundleDisplayName: Smokeshow
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: earth.smokeshow.app
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.app.watchkitapp
-        INFOPLIST_FILE: Configuration/Watch-Info.plist
         CODE_SIGN_ENTITLEMENTS: Configuration/Watch.entitlements
 
   SmokeshowWatchWidgets:
     type: app-extension
-    supportedDestinations: [watchOS]
+    platform: watchOS
     sources:
       - path: Sources/SmokeshowWatchWidgets
     dependencies:
-      - target: SmokeshowKit
+      - target: SmokeshowKitWatch
+    info:
+      path: Generated/WatchWidgets-Info.plist
+      properties:
+        CFBundleDisplayName: Smokeshow
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.app.watchkitapp.widgets
-        INFOPLIST_FILE: Configuration/WatchWidgets-Info.plist
         CODE_SIGN_ENTITLEMENTS: Configuration/Watch.entitlements
 
   SmokeshowKitTests:

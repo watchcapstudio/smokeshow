@@ -39,16 +39,19 @@ public final class AppModel: ObservableObject {
     private let entitlementProvider: EntitlementProviding
     private let locationProvider: LocationProviding
 
+    /// `push` defaults to the shared coordinator, but not as a default
+    /// *argument*: `PushCoordinator.shared` is main-actor isolated and a
+    /// default argument is evaluated in the caller's context, which need not be.
     public init(
         repository: ForecastRepository = .shared,
         entitlementProvider: EntitlementProviding,
         locationProvider: LocationProviding = LocationProvider(),
-        push: PushCoordinator = .shared
+        push: PushCoordinator? = nil
     ) {
         self.repository = repository
         self.entitlementProvider = entitlementProvider
         self.locationProvider = locationProvider
-        self.push = push
+        self.push = push ?? PushCoordinator.shared
         preferences = PreferencesStore.shared.current
         entitlement = EntitlementCache.shared.snapshot
         place = PlaceStore.shared.selected
@@ -154,10 +157,19 @@ public final class AppModel: ObservableObject {
 
     /// Has the user actually installed one? WidgetKit will tell us, and it is
     /// the only honest measure of whether onboarding worked.
+    ///
+    /// The async `currentConfigurations()` is iOS 18+; the completion-handler
+    /// form goes back to iOS 14, which is what a deployment target of 17 can use.
     public func installedWidgetCount() async -> Int {
         #if canImport(WidgetKit)
-        let configurations = try? await WidgetCenter.shared.currentConfigurations()
-        return configurations?.count ?? 0
+        return await withCheckedContinuation { continuation in
+            WidgetCenter.shared.getCurrentConfigurations { result in
+                switch result {
+                case .success(let widgets): continuation.resume(returning: widgets.count)
+                case .failure: continuation.resume(returning: 0)
+                }
+            }
+        }
         #else
         return 0
         #endif
