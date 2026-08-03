@@ -1,0 +1,8016 @@
+{
+  "v": 1,
+  "generatedAt": "2026-08-02T17:03:11Z",
+  "location": {
+    "requested": {
+      "lat": 44.9778,
+      "lon": -93.265
+    },
+    "snapped": {
+      "lat": 45,
+      "lon": -93.3
+    },
+    "timezone": "America/Chicago",
+    "utcOffsetSeconds": -18000
+  },
+  "now": {
+    "index": 84,
+    "timeUTC": "2026-08-02T17:00:00Z",
+    "exactUTC": "2026-08-02T17:03:11Z"
+  },
+  "window": {
+    "pastHours": 72,
+    "forecastHours": 120
+  },
+  "source": {
+    "requested": "official",
+    "applied": "official",
+    "model": "cams-global"
+  },
+  "scale": [
+    {
+      "index": 0,
+      "key": "all-clear",
+      "name": "All clear",
+      "rangeUg": "< 12",
+      "maxUg": 12,
+      "visibility": "10+ miles",
+      "notice": "No smoke to notice. Sky looks normal. You can see 10+ miles.",
+      "notLine": "No smoke story today. This is normal, clean air.",
+      "guidance": {
+        "general": "it's a great day to be active outside.",
+        "sensitive": "it's a great day to be active outside."
+      }
+    },
+    {
+      "index": 1,
+      "key": "something",
+      "name": "In the air",
+      "rangeUg": "12 – 35",
+      "maxUg": 35,
+      "visibility": "5–10 miles",
+      "notice": "A faint campfire whiff for sensitive noses. Most people just see distant treelines go soft, roughly 5 to 10 miles of visibility.",
+      "notLine": "A full day outside in this is nowhere near a cigarette. A faint whiff is the whole event for most people.",
+      "guidance": {
+        "general": "unusually sensitive people should consider easing off long, hard exertion. Everyone else, carry on as usual.",
+        "sensitive": "consider easing off long or hard exertion, and watch for symptoms."
+      }
+    },
+    {
+      "index": 2,
+      "key": "smells",
+      "name": "Smells like fire",
+      "rangeUg": "35 – 55",
+      "maxUg": 55,
+      "visibility": "3–5 miles",
+      "notice": "Most people smell smoke outdoors, though not everyone. The sun can look orange at the edges, and visibility drops to roughly 3 to 5 miles. Long stretches outside may leave a scratchy throat.",
+      "notLine": "Still well short of one cigarette over a full day outside. Most people notice it, and most plans can carry on.",
+      "guidance": {
+        "general": "sensitive groups should cut back on long or heavy exertion. Everyone else, your usual outdoor plans are okay.",
+        "sensitive": "cut back on long or heavy exertion. Move the workout indoors if there is any wheeze."
+      }
+    },
+    {
+      "index": 3,
+      "key": "tastes",
+      "name": "Tastes like fire",
+      "rangeUg": "55 – 150",
+      "maxUg": 150,
+      "visibility": "1.5–3 miles",
+      "notice": "Smoke often reaches indoors near windows. Eyes can sting. Visibility runs roughly 1.5 to 3 miles. A full day breathing this is on the order of smoking a few cigarettes.",
+      "notLine": "Now it adds up: a full day breathing this is on the order of a few cigarettes. Worth moving the run indoors.",
+      "guidance": {
+        "general": "sensitive groups should avoid prolonged exertion; everyone else, cut back on it.",
+        "sensitive": "avoid prolonged exertion. Keep inhalers close; indoors with filtration is the good call."
+      }
+    },
+    {
+      "index": 4,
+      "key": "smokeshow",
+      "name": "Smokeshow",
+      "rangeUg": "150+",
+      "maxUg": null,
+      "visibility": "under 1.5 miles",
+      "notice": "Visibility under about 1.5 miles. Everything smells like a doused campfire, and fine ash is possible. Everyone inside, windows closed, run filtration if you have it.",
+      "notLine": "The heaviest level we track. Everyone inside, windows closed, filtration on if you have it.",
+      "guidance": {
+        "general": "everyone should avoid outdoor exertion.",
+        "sensitive": "stay inside, windows closed, filtration on. This level is for no one."
+      }
+    }
+  ],
+  "hours": [
+    {
+      "t": "2026-07-30T05:00:00Z",
+      "pm25": 6.1,
+      "pm25Model": 6.1,
+      "aqi": 34,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          30,
+          35,
+          46
+        ],
+        "horizon": [
+          43,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.863,
+        "smoke": {
+          "s1": 0.041,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -23.96,
+          "azimuthDeg": 200.71,
+          "visible": false,
+          "xFrac": 0.615,
+          "yFrac": 0.52,
+          "dim": 0.041
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T06:00:00Z",
+      "pm25": 6.3,
+      "pm25Model": 6.3,
+      "aqi": 35,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          30,
+          35,
+          46
+        ],
+        "horizon": [
+          43,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.862,
+        "smoke": {
+          "s1": 0.042,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -26.35,
+          "azimuthDeg": 185.21,
+          "visible": false,
+          "xFrac": 0.529,
+          "yFrac": 0.52,
+          "dim": 0.042
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T07:00:00Z",
+      "pm25": 6.6,
+      "pm25Model": 6.6,
+      "aqi": 37,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.86,
+        "smoke": {
+          "s1": 0.044,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -25.86,
+          "azimuthDeg": 169.37,
+          "visible": false,
+          "xFrac": 0.441,
+          "yFrac": 0.52,
+          "dim": 0.044
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T08:00:00Z",
+      "pm25": 6.9,
+      "pm25Model": 6.9,
+      "aqi": 38,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.859,
+        "smoke": {
+          "s1": 0.046,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -22.54,
+          "azimuthDeg": 154.19,
+          "visible": false,
+          "xFrac": 0.357,
+          "yFrac": 0.52,
+          "dim": 0.046
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T09:00:00Z",
+      "pm25": 7.2,
+      "pm25Model": 7.2,
+      "aqi": 40,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.857,
+        "smoke": {
+          "s1": 0.048,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -16.81,
+          "azimuthDeg": 140.36,
+          "visible": false,
+          "xFrac": 0.28,
+          "yFrac": 0.52,
+          "dim": 0.048
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T10:00:00Z",
+      "pm25": 7.5,
+      "pm25Model": 7.5,
+      "aqi": 42,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.855,
+        "smoke": {
+          "s1": 0.05,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -9.22,
+          "azimuthDeg": 128,
+          "visible": false,
+          "xFrac": 0.211,
+          "yFrac": 0.52,
+          "dim": 0.05
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T11:00:00Z",
+      "pm25": 7.8,
+      "pm25Model": 7.8,
+      "aqi": 43,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.853,
+        "smoke": {
+          "s1": 0.052,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -0.28,
+          "azimuthDeg": 116.89,
+          "visible": false,
+          "xFrac": 0.149,
+          "yFrac": 0.52,
+          "dim": 0.052
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T12:00:00Z",
+      "pm25": 8.1,
+      "pm25Model": 8.1,
+      "aqi": 45,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          91,
+          101,
+          123
+        ],
+        "mid": [
+          142,
+          125,
+          115
+        ],
+        "horizon": [
+          184,
+          145,
+          108
+        ],
+        "isDark": false,
+        "starOpacity": 0.625,
+        "smoke": {
+          "s1": 0.054,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 9.56,
+          "azimuthDeg": 106.56,
+          "visible": true,
+          "xFrac": 0.092,
+          "yFrac": 0.427,
+          "dim": 0.054
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T13:00:00Z",
+      "pm25": 8.4,
+      "pm25Model": 8.4,
+      "aqi": 47,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          92,
+          107,
+          127
+        ],
+        "mid": [
+          132,
+          130,
+          129
+        ],
+        "horizon": [
+          165,
+          148,
+          130
+        ],
+        "isDark": false,
+        "starOpacity": 0.386,
+        "smoke": {
+          "s1": 0.056,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 19.93,
+          "azimuthDeg": 96.47,
+          "visible": true,
+          "xFrac": 0.036,
+          "yFrac": 0.329,
+          "dim": 0.056
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T14:00:00Z",
+      "pm25": 8.5,
+      "pm25Model": 8.5,
+      "aqi": 47,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          116,
+          138,
+          159
+        ],
+        "mid": [
+          156,
+          164,
+          167
+        ],
+        "horizon": [
+          189,
+          185,
+          173
+        ],
+        "isDark": false,
+        "starOpacity": 0.159,
+        "smoke": {
+          "s1": 0.057,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 30.51,
+          "azimuthDeg": 85.93,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.236,
+          "dim": 0.057
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T15:00:00Z",
+      "pm25": 8.7,
+      "pm25Model": 8.7,
+      "aqi": 48,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          165,
+          189
+        ],
+        "mid": [
+          185,
+          193,
+          195
+        ],
+        "horizon": [
+          223,
+          216,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.058,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 40.94,
+          "azimuthDeg": 73.95,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.153,
+          "dim": 0.058
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T16:00:00Z",
+      "pm25": 8.7,
+      "pm25Model": 8.7,
+      "aqi": 48,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          165,
+          189
+        ],
+        "mid": [
+          185,
+          193,
+          195
+        ],
+        "horizon": [
+          223,
+          216,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.058,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 50.65,
+          "azimuthDeg": 58.94,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.058
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T17:00:00Z",
+      "pm25": 8.7,
+      "pm25Model": 8.7,
+      "aqi": 48,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          165,
+          189
+        ],
+        "mid": [
+          185,
+          193,
+          195
+        ],
+        "horizon": [
+          223,
+          216,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.058,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 58.64,
+          "azimuthDeg": 38.39,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.058
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T18:00:00Z",
+      "pm25": 8.6,
+      "pm25Model": 8.6,
+      "aqi": 48,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          165,
+          189
+        ],
+        "mid": [
+          185,
+          194,
+          195
+        ],
+        "horizon": [
+          223,
+          217,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.057,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 63.06,
+          "azimuthDeg": 10.34,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.057
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T19:00:00Z",
+      "pm25": 8.4,
+      "pm25Model": 8.4,
+      "aqi": 47,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          165,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          195
+        ],
+        "horizon": [
+          223,
+          217,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.056,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 62.06,
+          "azimuthDeg": 339.22,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.056
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T20:00:00Z",
+      "pm25": 8.3,
+      "pm25Model": 8.3,
+      "aqi": 46,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          165,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          195
+        ],
+        "horizon": [
+          223,
+          217,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.055,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 56.15,
+          "azimuthDeg": 313.75,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.055
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T21:00:00Z",
+      "pm25": 8.1,
+      "pm25Model": 8.1,
+      "aqi": 45,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          166,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          195
+        ],
+        "horizon": [
+          223,
+          217,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.054,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 47.39,
+          "azimuthDeg": 295.46,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.054
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T22:00:00Z",
+      "pm25": 7.9,
+      "pm25Model": 7.9,
+      "aqi": 44,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          134,
+          162,
+          185
+        ],
+        "mid": [
+          180,
+          190,
+          191
+        ],
+        "horizon": [
+          218,
+          212,
+          195
+        ],
+        "isDark": false,
+        "starOpacity": 0.025,
+        "smoke": {
+          "s1": 0.053,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 37.34,
+          "azimuthDeg": 281.74,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.18,
+          "dim": 0.053
+        }
+      }
+    },
+    {
+      "t": "2026-07-30T23:00:00Z",
+      "pm25": 7.8,
+      "pm25Model": 7.8,
+      "aqi": 43,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          104,
+          125,
+          145
+        ],
+        "mid": [
+          143,
+          150,
+          154
+        ],
+        "horizon": [
+          174,
+          170,
+          161
+        ],
+        "isDark": false,
+        "starOpacity": 0.238,
+        "smoke": {
+          "s1": 0.052,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 26.8,
+          "azimuthDeg": 270.41,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.268,
+          "dim": 0.052
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T00:00:00Z",
+      "pm25": 7.7,
+      "pm25Model": 7.7,
+      "aqi": 43,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          91,
+          103,
+          123
+        ],
+        "mid": [
+          134,
+          126,
+          120
+        ],
+        "horizon": [
+          170,
+          144,
+          118
+        ],
+        "isDark": false,
+        "starOpacity": 0.472,
+        "smoke": {
+          "s1": 0.051,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 16.24,
+          "azimuthDeg": 260.13,
+          "visible": true,
+          "xFrac": 0.945,
+          "yFrac": 0.363,
+          "dim": 0.051
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T01:00:00Z",
+      "pm25": 7.6,
+      "pm25Model": 7.6,
+      "aqi": 42,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          74,
+          82,
+          101
+        ],
+        "mid": [
+          117,
+          106,
+          100
+        ],
+        "horizon": [
+          152,
+          125,
+          99
+        ],
+        "isDark": false,
+        "starOpacity": 0.712,
+        "smoke": {
+          "s1": 0.051,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 5.99,
+          "azimuthDeg": 250.03,
+          "visible": true,
+          "xFrac": 0.889,
+          "yFrac": 0.462,
+          "dim": 0.051
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T02:00:00Z",
+      "pm25": 7.7,
+      "pm25Model": 7.7,
+      "aqi": 43,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.854,
+        "smoke": {
+          "s1": 0.051,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -3.6,
+          "azimuthDeg": 239.5,
+          "visible": false,
+          "xFrac": 0.831,
+          "yFrac": 0.52,
+          "dim": 0.051
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T03:00:00Z",
+      "pm25": 7.9,
+      "pm25Model": 7.9,
+      "aqi": 44,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.853,
+        "smoke": {
+          "s1": 0.053,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -12.16,
+          "azimuthDeg": 228,
+          "visible": false,
+          "xFrac": 0.767,
+          "yFrac": 0.52,
+          "dim": 0.053
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T04:00:00Z",
+      "pm25": 8.2,
+      "pm25Model": 8.2,
+      "aqi": 46,
+      "levelIndex": 0,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.851,
+        "smoke": {
+          "s1": 0.055,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -19.21,
+          "azimuthDeg": 215.13,
+          "visible": false,
+          "xFrac": 0.695,
+          "yFrac": 0.52,
+          "dim": 0.055
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T05:00:00Z",
+      "pm25": 8.7,
+      "pm25Model": 8.7,
+      "aqi": 48,
+      "levelIndex": 0,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.848,
+        "smoke": {
+          "s1": 0.058,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -24.19,
+          "azimuthDeg": 200.76,
+          "visible": false,
+          "xFrac": 0.615,
+          "yFrac": 0.52,
+          "dim": 0.058
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T06:00:00Z",
+      "pm25": 9.3,
+      "pm25Model": 9.3,
+      "aqi": 51,
+      "levelIndex": 0,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          60
+        ],
+        "isDark": true,
+        "starOpacity": 0.844,
+        "smoke": {
+          "s1": 0.062,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -26.59,
+          "azimuthDeg": 185.21,
+          "visible": false,
+          "xFrac": 0.529,
+          "yFrac": 0.52,
+          "dim": 0.062
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T07:00:00Z",
+      "pm25": 10,
+      "pm25Model": 10,
+      "aqi": 53,
+      "levelIndex": 0,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          60
+        ],
+        "isDark": true,
+        "starOpacity": 0.84,
+        "smoke": {
+          "s1": 0.067,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -26.1,
+          "azimuthDeg": 169.32,
+          "visible": false,
+          "xFrac": 0.441,
+          "yFrac": 0.52,
+          "dim": 0.067
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T08:00:00Z",
+      "pm25": 10.9,
+      "pm25Model": 10.9,
+      "aqi": 54,
+      "levelIndex": 0,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          36,
+          46
+        ],
+        "horizon": [
+          44,
+          49,
+          60
+        ],
+        "isDark": true,
+        "starOpacity": 0.835,
+        "smoke": {
+          "s1": 0.073,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -22.77,
+          "azimuthDeg": 154.1,
+          "visible": false,
+          "xFrac": 0.356,
+          "yFrac": 0.52,
+          "dim": 0.073
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T09:00:00Z",
+      "pm25": 11.8,
+      "pm25Model": 11.8,
+      "aqi": 56,
+      "levelIndex": 0,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          32,
+          36,
+          46
+        ],
+        "horizon": [
+          45,
+          49,
+          60
+        ],
+        "isDark": true,
+        "starOpacity": 0.829,
+        "smoke": {
+          "s1": 0.079,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -17.02,
+          "azimuthDeg": 140.22,
+          "visible": false,
+          "xFrac": 0.279,
+          "yFrac": 0.52,
+          "dim": 0.079
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T10:00:00Z",
+      "pm25": 12.9,
+      "pm25Model": 12.9,
+      "aqi": 58,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          17,
+          19,
+          28
+        ],
+        "mid": [
+          32,
+          36,
+          46
+        ],
+        "horizon": [
+          45,
+          49,
+          60
+        ],
+        "isDark": true,
+        "starOpacity": 0.823,
+        "smoke": {
+          "s1": 0.086,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -9.41,
+          "azimuthDeg": 127.85,
+          "visible": false,
+          "xFrac": 0.21,
+          "yFrac": 0.52,
+          "dim": 0.086
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T11:00:00Z",
+      "pm25": 14.1,
+      "pm25Model": 14.1,
+      "aqi": 60,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          17,
+          19,
+          28
+        ],
+        "mid": [
+          32,
+          36,
+          46
+        ],
+        "horizon": [
+          45,
+          49,
+          60
+        ],
+        "isDark": true,
+        "starOpacity": 0.815,
+        "smoke": {
+          "s1": 0.094,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -0.45,
+          "azimuthDeg": 116.71,
+          "visible": false,
+          "xFrac": 0.148,
+          "yFrac": 0.52,
+          "dim": 0.094
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T12:00:00Z",
+      "pm25": 15.3,
+      "pm25Model": 15.3,
+      "aqi": 63,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          89,
+          98,
+          118
+        ],
+        "mid": [
+          139,
+          122,
+          111
+        ],
+        "horizon": [
+          179,
+          141,
+          105
+        ],
+        "isDark": false,
+        "starOpacity": 0.597,
+        "smoke": {
+          "s1": 0.102,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 9.4,
+          "azimuthDeg": 106.37,
+          "visible": true,
+          "xFrac": 0.091,
+          "yFrac": 0.429,
+          "dim": 0.102
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T13:00:00Z",
+      "pm25": 16.4,
+      "pm25Model": 16.4,
+      "aqi": 65,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          92,
+          105,
+          122
+        ],
+        "mid": [
+          131,
+          127,
+          124
+        ],
+        "horizon": [
+          163,
+          145,
+          125
+        ],
+        "isDark": false,
+        "starOpacity": 0.368,
+        "smoke": {
+          "s1": 0.109,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 19.78,
+          "azimuthDeg": 96.27,
+          "visible": true,
+          "xFrac": 0.035,
+          "yFrac": 0.331,
+          "dim": 0.109
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T14:00:00Z",
+      "pm25": 17.6,
+      "pm25Model": 17.6,
+      "aqi": 67,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          115,
+          134,
+          153
+        ],
+        "mid": [
+          155,
+          159,
+          160
+        ],
+        "horizon": [
+          187,
+          180,
+          165
+        ],
+        "isDark": false,
+        "starOpacity": 0.152,
+        "smoke": {
+          "s1": 0.117,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 30.36,
+          "azimuthDeg": 85.71,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.237,
+          "dim": 0.117
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T15:00:00Z",
+      "pm25": 18.6,
+      "pm25Model": 18.6,
+      "aqi": 69,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          161,
+          182
+        ],
+        "mid": [
+          183,
+          188,
+          186
+        ],
+        "horizon": [
+          220,
+          210,
+          190
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.124,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 40.77,
+          "azimuthDeg": 73.71,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.154,
+          "dim": 0.124
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T16:00:00Z",
+      "pm25": 19.6,
+      "pm25Model": 19.6,
+      "aqi": 71,
+      "levelIndex": 1,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          137,
+          161,
+          181
+        ],
+        "mid": [
+          182,
+          188,
+          185
+        ],
+        "horizon": [
+          219,
+          210,
+          189
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.131,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 50.47,
+          "azimuthDeg": 58.68,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.131
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T17:00:00Z",
+      "pm25": 20.5,
+      "pm25Model": 20.5,
+      "aqi": 72,
+      "levelIndex": 1,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          137,
+          160,
+          180
+        ],
+        "mid": [
+          182,
+          187,
+          185
+        ],
+        "horizon": [
+          219,
+          209,
+          189
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.137,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 58.42,
+          "azimuthDeg": 38.16,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.137
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T18:00:00Z",
+      "pm25": 21.2,
+      "pm25Model": 21.2,
+      "aqi": 74,
+      "levelIndex": 1,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          137,
+          160,
+          180
+        ],
+        "mid": [
+          182,
+          187,
+          184
+        ],
+        "horizon": [
+          219,
+          209,
+          188
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.141,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 62.81,
+          "azimuthDeg": 10.24,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.141
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T19:00:00Z",
+      "pm25": 21.8,
+      "pm25Model": 21.8,
+      "aqi": 75,
+      "levelIndex": 1,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          137,
+          160,
+          179
+        ],
+        "mid": [
+          182,
+          186,
+          183
+        ],
+        "horizon": [
+          218,
+          208,
+          187
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.145,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 61.82,
+          "azimuthDeg": 339.33,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.145
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T20:00:00Z",
+      "pm25": 22.3,
+      "pm25Model": 22.3,
+      "aqi": 76,
+      "levelIndex": 1,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          137,
+          159,
+          179
+        ],
+        "mid": [
+          182,
+          186,
+          183
+        ],
+        "horizon": [
+          218,
+          208,
+          187
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.149,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 55.93,
+          "azimuthDeg": 313.97,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.149
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T21:00:00Z",
+      "pm25": 22.7,
+      "pm25Model": 22.7,
+      "aqi": 76,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          137,
+          159,
+          179
+        ],
+        "mid": [
+          182,
+          186,
+          183
+        ],
+        "horizon": [
+          218,
+          208,
+          187
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.151,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 47.2,
+          "azimuthDeg": 295.69,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.151
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T22:00:00Z",
+      "pm25": 23,
+      "pm25Model": 23,
+      "aqi": 77,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          133,
+          154,
+          173
+        ],
+        "mid": [
+          176,
+          180,
+          178
+        ],
+        "horizon": [
+          212,
+          202,
+          182
+        ],
+        "isDark": false,
+        "starOpacity": 0.026,
+        "smoke": {
+          "s1": 0.153,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 37.16,
+          "azimuthDeg": 281.96,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.182,
+          "dim": 0.153
+        }
+      }
+    },
+    {
+      "t": "2026-07-31T23:00:00Z",
+      "pm25": 23.4,
+      "pm25Model": 23.4,
+      "aqi": 78,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          104,
+          120,
+          135
+        ],
+        "mid": [
+          140,
+          144,
+          143
+        ],
+        "horizon": [
+          170,
+          163,
+          150
+        ],
+        "isDark": false,
+        "starOpacity": 0.215,
+        "smoke": {
+          "s1": 0.156,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 26.62,
+          "azimuthDeg": 270.61,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.269,
+          "dim": 0.156
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T00:00:00Z",
+      "pm25": 23.9,
+      "pm25Model": 23.9,
+      "aqi": 79,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          89,
+          99,
+          115
+        ],
+        "mid": [
+          130,
+          120,
+          112
+        ],
+        "horizon": [
+          164,
+          138,
+          110
+        ],
+        "isDark": false,
+        "starOpacity": 0.422,
+        "smoke": {
+          "s1": 0.159,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 16.06,
+          "azimuthDeg": 260.31,
+          "visible": true,
+          "xFrac": 0.946,
+          "yFrac": 0.365,
+          "dim": 0.159
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T01:00:00Z",
+      "pm25": 24.6,
+      "pm25Model": 24.6,
+      "aqi": 80,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          71,
+          77,
+          92
+        ],
+        "mid": [
+          112,
+          99,
+          92
+        ],
+        "horizon": [
+          145,
+          117,
+          92
+        ],
+        "isDark": true,
+        "starOpacity": 0.631,
+        "smoke": {
+          "s1": 0.164,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 5.81,
+          "azimuthDeg": 250.2,
+          "visible": true,
+          "xFrac": 0.89,
+          "yFrac": 0.463,
+          "dim": 0.164
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T02:00:00Z",
+      "pm25": 25.6,
+      "pm25Model": 25.6,
+      "aqi": 82,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          19,
+          21,
+          27
+        ],
+        "mid": [
+          35,
+          36,
+          44
+        ],
+        "horizon": [
+          48,
+          49,
+          58
+        ],
+        "isDark": true,
+        "starOpacity": 0.746,
+        "smoke": {
+          "s1": 0.171,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -3.8,
+          "azimuthDeg": 239.65,
+          "visible": false,
+          "xFrac": 0.831,
+          "yFrac": 0.52,
+          "dim": 0.171
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T03:00:00Z",
+      "pm25": 26.9,
+      "pm25Model": 26.9,
+      "aqi": 84,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          19,
+          21,
+          27
+        ],
+        "mid": [
+          35,
+          36,
+          44
+        ],
+        "horizon": [
+          48,
+          49,
+          57
+        ],
+        "isDark": true,
+        "starOpacity": 0.739,
+        "smoke": {
+          "s1": 0.179,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -12.37,
+          "azimuthDeg": 228.13,
+          "visible": false,
+          "xFrac": 0.767,
+          "yFrac": 0.52,
+          "dim": 0.179
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T04:00:00Z",
+      "pm25": 28.6,
+      "pm25Model": 28.6,
+      "aqi": 87,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          20,
+          21,
+          27
+        ],
+        "mid": [
+          36,
+          36,
+          44
+        ],
+        "horizon": [
+          49,
+          49,
+          57
+        ],
+        "isDark": true,
+        "starOpacity": 0.728,
+        "smoke": {
+          "s1": 0.191,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -19.44,
+          "azimuthDeg": 215.23,
+          "visible": false,
+          "xFrac": 0.696,
+          "yFrac": 0.52,
+          "dim": 0.191
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T05:00:00Z",
+      "pm25": 30.7,
+      "pm25Model": 30.7,
+      "aqi": 91,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          20,
+          21,
+          27
+        ],
+        "mid": [
+          36,
+          36,
+          44
+        ],
+        "horizon": [
+          49,
+          49,
+          57
+        ],
+        "isDark": true,
+        "starOpacity": 0.716,
+        "smoke": {
+          "s1": 0.205,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -24.44,
+          "azimuthDeg": 200.82,
+          "visible": false,
+          "xFrac": 0.616,
+          "yFrac": 0.52,
+          "dim": 0.205
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T06:00:00Z",
+      "pm25": 33.4,
+      "pm25Model": 33.4,
+      "aqi": 96,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          21,
+          21,
+          27
+        ],
+        "mid": [
+          37,
+          37,
+          43
+        ],
+        "horizon": [
+          50,
+          50,
+          56
+        ],
+        "isDark": true,
+        "starOpacity": 0.7,
+        "smoke": {
+          "s1": 0.223,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -26.84,
+          "azimuthDeg": 185.22,
+          "visible": false,
+          "xFrac": 0.529,
+          "yFrac": 0.52,
+          "dim": 0.223
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T07:00:00Z",
+      "pm25": 36.5,
+      "pm25Model": 36.5,
+      "aqi": 103,
+      "levelIndex": 2,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          21,
+          22,
+          27
+        ],
+        "mid": [
+          37,
+          37,
+          43
+        ],
+        "horizon": [
+          50,
+          50,
+          56
+        ],
+        "isDark": true,
+        "starOpacity": 0.681,
+        "smoke": {
+          "s1": 0.243,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -26.34,
+          "azimuthDeg": 169.27,
+          "visible": false,
+          "xFrac": 0.44,
+          "yFrac": 0.52,
+          "dim": 0.243
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T08:00:00Z",
+      "pm25": 40,
+      "pm25Model": 40,
+      "aqi": 112,
+      "levelIndex": 2,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          22,
+          22,
+          27
+        ],
+        "mid": [
+          38,
+          37,
+          42
+        ],
+        "horizon": [
+          51,
+          50,
+          55
+        ],
+        "isDark": true,
+        "starOpacity": 0.66,
+        "smoke": {
+          "s1": 0.267,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -23,
+          "azimuthDeg": 153.99,
+          "visible": false,
+          "xFrac": 0.356,
+          "yFrac": 0.52,
+          "dim": 0.267
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T09:00:00Z",
+      "pm25": 43.8,
+      "pm25Model": 43.8,
+      "aqi": 121,
+      "levelIndex": 2,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          23,
+          22,
+          27
+        ],
+        "mid": [
+          39,
+          37,
+          42
+        ],
+        "horizon": [
+          52,
+          50,
+          55
+        ],
+        "isDark": true,
+        "starOpacity": 0.637,
+        "smoke": {
+          "s1": 0.292,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -17.24,
+          "azimuthDeg": 140.09,
+          "visible": false,
+          "xFrac": 0.278,
+          "yFrac": 0.52,
+          "dim": 0.292
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T10:00:00Z",
+      "pm25": 47.9,
+      "pm25Model": 47.9,
+      "aqi": 132,
+      "levelIndex": 2,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          24,
+          23,
+          27
+        ],
+        "mid": [
+          40,
+          38,
+          42
+        ],
+        "horizon": [
+          53,
+          50,
+          54
+        ],
+        "isDark": true,
+        "starOpacity": 0.613,
+        "smoke": {
+          "s1": 0.319,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -9.6,
+          "azimuthDeg": 127.69,
+          "visible": false,
+          "xFrac": 0.209,
+          "yFrac": 0.52,
+          "dim": 0.319
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T11:00:00Z",
+      "pm25": 52,
+      "pm25Model": 52,
+      "aqi": 142,
+      "levelIndex": 2,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          25,
+          23,
+          27
+        ],
+        "mid": [
+          41,
+          38,
+          41
+        ],
+        "horizon": [
+          54,
+          50,
+          53
+        ],
+        "isDark": true,
+        "starOpacity": 0.588,
+        "smoke": {
+          "s1": 0.347,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -0.63,
+          "azimuthDeg": 116.54,
+          "visible": false,
+          "xFrac": 0.147,
+          "yFrac": 0.52,
+          "dim": 0.347
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T12:00:00Z",
+      "pm25": 56,
+      "pm25Model": 56,
+      "aqi": 151,
+      "levelIndex": 3,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          84,
+          86,
+          97
+        ],
+        "mid": [
+          124,
+          106,
+          92
+        ],
+        "horizon": [
+          157,
+          122,
+          88
+        ],
+        "isDark": false,
+        "starOpacity": 0.419,
+        "smoke": {
+          "s1": 0.373,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 9.23,
+          "azimuthDeg": 106.18,
+          "visible": true,
+          "xFrac": 0.09,
+          "yFrac": 0.43,
+          "dim": 0.373
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T13:00:00Z",
+      "pm25": 59.8,
+      "pm25Model": 59.8,
+      "aqi": 154,
+      "levelIndex": 3,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          92,
+          94,
+          101
+        ],
+        "mid": [
+          126,
+          113,
+          102
+        ],
+        "horizon": [
+          153,
+          128,
+          103
+        ],
+        "isDark": false,
+        "starOpacity": 0.25,
+        "smoke": {
+          "s1": 0.399,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 19.62,
+          "azimuthDeg": 96.06,
+          "visible": true,
+          "xFrac": 0.034,
+          "yFrac": 0.332,
+          "dim": 0.399
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T14:00:00Z",
+      "pm25": 63.3,
+      "pm25Model": 63.3,
+      "aqi": 156,
+      "levelIndex": 3,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          113,
+          119,
+          124
+        ],
+        "mid": [
+          147,
+          139,
+          128
+        ],
+        "horizon": [
+          175,
+          156,
+          132
+        ],
+        "isDark": false,
+        "starOpacity": 0.102,
+        "smoke": {
+          "s1": 0.422,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 30.2,
+          "azimuthDeg": 85.49,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.238,
+          "dim": 0.422
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T15:00:00Z",
+      "pm25": 66.1,
+      "pm25Model": 66.1,
+      "aqi": 158,
+      "levelIndex": 3,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          134,
+          140,
+          145
+        ],
+        "mid": [
+          172,
+          162,
+          148
+        ],
+        "horizon": [
+          203,
+          180,
+          150
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.441,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 40.61,
+          "azimuthDeg": 73.46,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.156,
+          "dim": 0.441
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T16:00:00Z",
+      "pm25": 68.4,
+      "pm25Model": 68.4,
+      "aqi": 160,
+      "levelIndex": 3,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          134,
+          139,
+          143
+        ],
+        "mid": [
+          171,
+          160,
+          146
+        ],
+        "horizon": [
+          202,
+          178,
+          148
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.456,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 50.28,
+          "azimuthDeg": 58.41,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.456
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T17:00:00Z",
+      "pm25": 69.9,
+      "pm25Model": 69.9,
+      "aqi": 161,
+      "levelIndex": 3,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          133,
+          139,
+          142
+        ],
+        "mid": [
+          171,
+          160,
+          144
+        ],
+        "horizon": [
+          202,
+          178,
+          146
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.466,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 58.21,
+          "azimuthDeg": 37.91,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.466
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T18:00:00Z",
+      "pm25": 70.8,
+      "pm25Model": 70.8,
+      "aqi": 162,
+      "levelIndex": 3,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          133,
+          138,
+          142
+        ],
+        "mid": [
+          170,
+          159,
+          144
+        ],
+        "horizon": [
+          201,
+          177,
+          146
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.472,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 62.57,
+          "azimuthDeg": 10.13,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.472
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T19:00:00Z",
+      "pm25": 70.9,
+      "pm25Model": 70.9,
+      "aqi": 162,
+      "levelIndex": 3,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          133,
+          138,
+          142
+        ],
+        "mid": [
+          170,
+          159,
+          144
+        ],
+        "horizon": [
+          201,
+          177,
+          146
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.473,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 61.58,
+          "azimuthDeg": 339.44,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.473
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T20:00:00Z",
+      "pm25": 70.6,
+      "pm25Model": 70.6,
+      "aqi": 162,
+      "levelIndex": 3,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          133,
+          139,
+          142
+        ],
+        "mid": [
+          170,
+          160,
+          144
+        ],
+        "horizon": [
+          201,
+          177,
+          146
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.471,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 55.71,
+          "azimuthDeg": 314.19,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.471
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T21:00:00Z",
+      "pm25": 69.7,
+      "pm25Model": 69.7,
+      "aqi": 161,
+      "levelIndex": 3,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          133,
+          139,
+          142
+        ],
+        "mid": [
+          171,
+          160,
+          145
+        ],
+        "horizon": [
+          202,
+          178,
+          147
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.465,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 47,
+          "azimuthDeg": 295.92,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.465
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T22:00:00Z",
+      "pm25": 68.7,
+      "pm25Model": 68.7,
+      "aqi": 160,
+      "levelIndex": 3,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          129,
+          135,
+          139
+        ],
+        "mid": [
+          166,
+          156,
+          142
+        ],
+        "horizon": [
+          197,
+          173,
+          144
+        ],
+        "isDark": false,
+        "starOpacity": 0.018,
+        "smoke": {
+          "s1": 0.458,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 36.98,
+          "azimuthDeg": 282.17,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.183,
+          "dim": 0.458
+        }
+      }
+    },
+    {
+      "t": "2026-08-01T23:00:00Z",
+      "pm25": 67.6,
+      "pm25Model": 67.6,
+      "aqi": 159,
+      "levelIndex": 3,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          103,
+          107,
+          111
+        ],
+        "mid": [
+          135,
+          126,
+          116
+        ],
+        "horizon": [
+          161,
+          142,
+          120
+        ],
+        "isDark": false,
+        "starOpacity": 0.142,
+        "smoke": {
+          "s1": 0.451,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 26.44,
+          "azimuthDeg": 270.8,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.271,
+          "dim": 0.451
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T00:00:00Z",
+      "pm25": 66.7,
+      "pm25Model": 66.7,
+      "aqi": 159,
+      "levelIndex": 3,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          89,
+          89,
+          95
+        ],
+        "mid": [
+          123,
+          107,
+          93
+        ],
+        "horizon": [
+          151,
+          121,
+          91
+        ],
+        "isDark": false,
+        "starOpacity": 0.281,
+        "smoke": {
+          "s1": 0.445,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 15.88,
+          "azimuthDeg": 260.49,
+          "visible": true,
+          "xFrac": 0.947,
+          "yFrac": 0.367,
+          "dim": 0.445
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T01:00:00Z",
+      "pm25": 66.2,
+      "pm25Model": 66.2,
+      "aqi": 159,
+      "levelIndex": 3,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          69,
+          68,
+          75
+        ],
+        "mid": [
+          102,
+          86,
+          76
+        ],
+        "horizon": [
+          129,
+          101,
+          76
+        ],
+        "isDark": true,
+        "starOpacity": 0.424,
+        "smoke": {
+          "s1": 0.441,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 5.62,
+          "azimuthDeg": 250.37,
+          "visible": true,
+          "xFrac": 0.891,
+          "yFrac": 0.465,
+          "dim": 0.441
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T02:00:00Z",
+      "pm25": 66.2,
+      "pm25Model": 66.2,
+      "aqi": 159,
+      "levelIndex": 3,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          27,
+          25,
+          27
+        ],
+        "mid": [
+          44,
+          39,
+          40
+        ],
+        "horizon": [
+          57,
+          51,
+          51
+        ],
+        "isDark": true,
+        "starOpacity": 0.503,
+        "smoke": {
+          "s1": 0.441,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -4,
+          "azimuthDeg": 239.8,
+          "visible": false,
+          "xFrac": 0.832,
+          "yFrac": 0.52,
+          "dim": 0.441
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T03:00:00Z",
+      "pm25": 66.9,
+      "pm25Model": 66.9,
+      "aqi": 159,
+      "levelIndex": 3,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          28,
+          25,
+          27
+        ],
+        "mid": [
+          44,
+          39,
+          40
+        ],
+        "horizon": [
+          57,
+          51,
+          51
+        ],
+        "isDark": true,
+        "starOpacity": 0.499,
+        "smoke": {
+          "s1": 0.446,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -12.59,
+          "azimuthDeg": 228.26,
+          "visible": false,
+          "xFrac": 0.768,
+          "yFrac": 0.52,
+          "dim": 0.446
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T04:00:00Z",
+      "pm25": 68.4,
+      "pm25Model": 68.4,
+      "aqi": 160,
+      "levelIndex": 3,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          28,
+          25,
+          27
+        ],
+        "mid": [
+          45,
+          39,
+          40
+        ],
+        "horizon": [
+          58,
+          51,
+          51
+        ],
+        "isDark": true,
+        "starOpacity": 0.49,
+        "smoke": {
+          "s1": 0.456,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -19.67,
+          "azimuthDeg": 215.33,
+          "visible": false,
+          "xFrac": 0.696,
+          "yFrac": 0.52,
+          "dim": 0.456
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T05:00:00Z",
+      "pm25": 70.6,
+      "pm25Model": 70.6,
+      "aqi": 162,
+      "levelIndex": 3,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          28,
+          25,
+          26
+        ],
+        "mid": [
+          45,
+          39,
+          39
+        ],
+        "horizon": [
+          58,
+          51,
+          50
+        ],
+        "isDark": true,
+        "starOpacity": 0.476,
+        "smoke": {
+          "s1": 0.471,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -24.69,
+          "azimuthDeg": 200.88,
+          "visible": false,
+          "xFrac": 0.616,
+          "yFrac": 0.52,
+          "dim": 0.471
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T06:00:00Z",
+      "pm25": 73.5,
+      "pm25Model": 73.5,
+      "aqi": 164,
+      "levelIndex": 3,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          29,
+          25,
+          26
+        ],
+        "mid": [
+          46,
+          40,
+          39
+        ],
+        "horizon": [
+          59,
+          52,
+          50
+        ],
+        "isDark": true,
+        "starOpacity": 0.459,
+        "smoke": {
+          "s1": 0.49,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -27.1,
+          "azimuthDeg": 185.22,
+          "visible": false,
+          "xFrac": 0.529,
+          "yFrac": 0.52,
+          "dim": 0.49
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T07:00:00Z",
+      "pm25": 76.9,
+      "pm25Model": 76.9,
+      "aqi": 166,
+      "levelIndex": 3,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          30,
+          26,
+          26
+        ],
+        "mid": [
+          47,
+          40,
+          39
+        ],
+        "horizon": [
+          60,
+          52,
+          49
+        ],
+        "isDark": true,
+        "starOpacity": 0.439,
+        "smoke": {
+          "s1": 0.513,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -26.59,
+          "azimuthDeg": 169.21,
+          "visible": false,
+          "xFrac": 0.44,
+          "yFrac": 0.52,
+          "dim": 0.513
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T08:00:00Z",
+      "pm25": 80.7,
+      "pm25Model": 80.7,
+      "aqi": 169,
+      "levelIndex": 3,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          30,
+          26,
+          26
+        ],
+        "mid": [
+          47,
+          40,
+          38
+        ],
+        "horizon": [
+          60,
+          52,
+          48
+        ],
+        "isDark": true,
+        "starOpacity": 0.416,
+        "smoke": {
+          "s1": 0.538,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -23.24,
+          "azimuthDeg": 153.89,
+          "visible": false,
+          "xFrac": 0.355,
+          "yFrac": 0.52,
+          "dim": 0.538
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T09:00:00Z",
+      "pm25": 84.7,
+      "pm25Model": 84.7,
+      "aqi": 171,
+      "levelIndex": 3,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          31,
+          27,
+          26
+        ],
+        "mid": [
+          48,
+          41,
+          38
+        ],
+        "horizon": [
+          61,
+          52,
+          48
+        ],
+        "isDark": true,
+        "starOpacity": 0.392,
+        "smoke": {
+          "s1": 0.565,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -17.45,
+          "azimuthDeg": 139.94,
+          "visible": false,
+          "xFrac": 0.277,
+          "yFrac": 0.52,
+          "dim": 0.565
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T10:00:00Z",
+      "pm25": 88.4,
+      "pm25Model": 88.4,
+      "aqi": 174,
+      "levelIndex": 3,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          32,
+          27,
+          26
+        ],
+        "mid": [
+          49,
+          41,
+          38
+        ],
+        "horizon": [
+          62,
+          52,
+          47
+        ],
+        "isDark": true,
+        "starOpacity": 0.37,
+        "smoke": {
+          "s1": 0.589,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -9.8,
+          "azimuthDeg": 127.52,
+          "visible": false,
+          "xFrac": 0.208,
+          "yFrac": 0.52,
+          "dim": 0.589
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T11:00:00Z",
+      "pm25": 91.8,
+      "pm25Model": 91.8,
+      "aqi": 176,
+      "levelIndex": 3,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          33,
+          27,
+          26
+        ],
+        "mid": [
+          50,
+          41,
+          38
+        ],
+        "horizon": [
+          63,
+          52,
+          47
+        ],
+        "isDark": true,
+        "starOpacity": 0.349,
+        "smoke": {
+          "s1": 0.612,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -0.81,
+          "azimuthDeg": 116.35,
+          "visible": false,
+          "xFrac": 0.146,
+          "yFrac": 0.52,
+          "dim": 0.612
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T12:00:00Z",
+      "pm25": 94.5,
+      "pm25Model": 94.5,
+      "aqi": 178,
+      "levelIndex": 3,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          80,
+          75,
+          77
+        ],
+        "mid": [
+          112,
+          91,
+          74
+        ],
+        "horizon": [
+          138,
+          104,
+          71
+        ],
+        "isDark": true,
+        "starOpacity": 0.249,
+        "smoke": {
+          "s1": 0.63,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 9.06,
+          "azimuthDeg": 105.99,
+          "visible": true,
+          "xFrac": 0.089,
+          "yFrac": 0.432,
+          "dim": 0.63
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T13:00:00Z",
+      "pm25": 96.4,
+      "pm25Model": 96.4,
+      "aqi": 180,
+      "levelIndex": 3,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          91,
+          85,
+          83
+        ],
+        "mid": [
+          120,
+          102,
+          84
+        ],
+        "horizon": [
+          144,
+          115,
+          85
+        ],
+        "isDark": true,
+        "starOpacity": 0.15,
+        "smoke": {
+          "s1": 0.643,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 19.46,
+          "azimuthDeg": 95.85,
+          "visible": true,
+          "xFrac": 0.033,
+          "yFrac": 0.333,
+          "dim": 0.643
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T14:00:00Z",
+      "pm25": 97.2,
+      "pm25Model": 97.2,
+      "aqi": 180,
+      "levelIndex": 3,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          112,
+          107,
+          102
+        ],
+        "mid": [
+          142,
+          125,
+          105
+        ],
+        "horizon": [
+          166,
+          139,
+          108
+        ],
+        "isDark": false,
+        "starOpacity": 0.063,
+        "smoke": {
+          "s1": 0.648,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 30.04,
+          "azimuthDeg": 85.25,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.24,
+          "dim": 0.648
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T15:00:00Z",
+      "pm25": 97,
+      "pm25Model": 97,
+      "aqi": 180,
+      "levelIndex": 3,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          131,
+          127,
+          122
+        ],
+        "mid": [
+          165,
+          145,
+          123
+        ],
+        "horizon": [
+          192,
+          160,
+          123
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.647,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 40.44,
+          "azimuthDeg": 73.2,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.157,
+          "dim": 0.647
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T16:00:00Z",
+      "pm25": 95.7,
+      "pm25Model": 95.7,
+      "aqi": 179,
+      "levelIndex": 3,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          131,
+          128,
+          123
+        ],
+        "mid": [
+          165,
+          146,
+          124
+        ],
+        "horizon": [
+          193,
+          161,
+          124
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.638,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 50.1,
+          "azimuthDeg": 58.14,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.638
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T17:00:00Z",
+      "pm25": 26,
+      "pm25Model": 96.8,
+      "aqi": 82,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          137,
+          158,
+          176
+        ],
+        "mid": [
+          181,
+          184,
+          180
+        ],
+        "horizon": [
+          217,
+          205,
+          184
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.173,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 57.98,
+          "azimuthDeg": 37.66,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.173
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T18:00:00Z",
+      "pm25": 20.6,
+      "pm25Model": 85.5,
+      "aqi": 72,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          137,
+          160,
+          180
+        ],
+        "mid": [
+          182,
+          187,
+          184
+        ],
+        "horizon": [
+          219,
+          209,
+          188
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.137,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 62.31,
+          "azimuthDeg": 10.03,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.137
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T19:00:00Z",
+      "pm25": 16,
+      "pm25Model": 75,
+      "aqi": 64,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          162,
+          184
+        ],
+        "mid": [
+          183,
+          190,
+          188
+        ],
+        "horizon": [
+          220,
+          212,
+          192
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.107,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 61.32,
+          "azimuthDeg": 339.55,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.107
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T20:00:00Z",
+      "pm25": 12.4,
+      "pm25Model": 65.5,
+      "aqi": 57,
+      "levelIndex": 1,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          164,
+          186
+        ],
+        "mid": [
+          184,
+          192,
+          191
+        ],
+        "horizon": [
+          222,
+          214,
+          195
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.083,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 55.48,
+          "azimuthDeg": 314.4,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.083
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T21:00:00Z",
+      "pm25": 9.8,
+      "pm25Model": 57,
+      "aqi": 52,
+      "levelIndex": 0,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          165,
+          188
+        ],
+        "mid": [
+          185,
+          193,
+          194
+        ],
+        "horizon": [
+          223,
+          216,
+          198
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.065,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 46.8,
+          "azimuthDeg": 296.16,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.065
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T22:00:00Z",
+      "pm25": 8.3,
+      "pm25Model": 49.6,
+      "aqi": 46,
+      "levelIndex": 0,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          133,
+          160,
+          183
+        ],
+        "mid": [
+          178,
+          188,
+          189
+        ],
+        "horizon": [
+          215,
+          210,
+          193
+        ],
+        "isDark": false,
+        "starOpacity": 0.036,
+        "smoke": {
+          "s1": 0.055,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 36.79,
+          "azimuthDeg": 282.39,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.185,
+          "dim": 0.055
+        }
+      }
+    },
+    {
+      "t": "2026-08-02T23:00:00Z",
+      "pm25": 7.9,
+      "pm25Model": 43.3,
+      "aqi": 44,
+      "levelIndex": 0,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          102,
+          123,
+          143
+        ],
+        "mid": [
+          140,
+          148,
+          152
+        ],
+        "horizon": [
+          171,
+          168,
+          159
+        ],
+        "isDark": false,
+        "starOpacity": 0.249,
+        "smoke": {
+          "s1": 0.053,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 26.26,
+          "azimuthDeg": 271.01,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.272,
+          "dim": 0.053
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T00:00:00Z",
+      "pm25": 8.5,
+      "pm25Model": 38,
+      "aqi": 47,
+      "levelIndex": 0,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          91,
+          103,
+          123
+        ],
+        "mid": [
+          135,
+          126,
+          119
+        ],
+        "horizon": [
+          171,
+          144,
+          116
+        ],
+        "isDark": false,
+        "starOpacity": 0.482,
+        "smoke": {
+          "s1": 0.057,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 15.69,
+          "azimuthDeg": 260.67,
+          "visible": true,
+          "xFrac": 0.948,
+          "yFrac": 0.369,
+          "dim": 0.057
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T01:00:00Z",
+      "pm25": 10.1,
+      "pm25Model": 33.7,
+      "aqi": 53,
+      "levelIndex": 0,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          70,
+          78,
+          95
+        ],
+        "mid": [
+          112,
+          101,
+          96
+        ],
+        "horizon": [
+          146,
+          119,
+          96
+        ],
+        "isDark": true,
+        "starOpacity": 0.713,
+        "smoke": {
+          "s1": 0.067,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 5.42,
+          "azimuthDeg": 250.53,
+          "visible": true,
+          "xFrac": 0.892,
+          "yFrac": 0.467,
+          "dim": 0.067
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T02:00:00Z",
+      "pm25": 12.5,
+      "pm25Model": 30.2,
+      "aqi": 57,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          17,
+          19,
+          28
+        ],
+        "mid": [
+          32,
+          36,
+          46
+        ],
+        "horizon": [
+          45,
+          49,
+          60
+        ],
+        "isDark": true,
+        "starOpacity": 0.825,
+        "smoke": {
+          "s1": 0.083,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -4.21,
+          "azimuthDeg": 239.95,
+          "visible": false,
+          "xFrac": 0.833,
+          "yFrac": 0.52,
+          "dim": 0.083
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T03:00:00Z",
+      "pm25": 15.6,
+      "pm25Model": 27.4,
+      "aqi": 63,
+      "levelIndex": 1,
+      "trend": "rising",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          17,
+          20,
+          28
+        ],
+        "mid": [
+          33,
+          36,
+          45
+        ],
+        "horizon": [
+          46,
+          49,
+          59
+        ],
+        "isDark": true,
+        "starOpacity": 0.806,
+        "smoke": {
+          "s1": 0.104,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -12.82,
+          "azimuthDeg": 228.39,
+          "visible": false,
+          "xFrac": 0.769,
+          "yFrac": 0.52,
+          "dim": 0.104
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T04:00:00Z",
+      "pm25": 19.4,
+      "pm25Model": 25.3,
+      "aqi": 70,
+      "levelIndex": 1,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          18,
+          20,
+          28
+        ],
+        "mid": [
+          33,
+          36,
+          45
+        ],
+        "horizon": [
+          46,
+          49,
+          59
+        ],
+        "isDark": true,
+        "starOpacity": 0.784,
+        "smoke": {
+          "s1": 0.129,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -19.92,
+          "azimuthDeg": 215.43,
+          "visible": false,
+          "xFrac": 0.697,
+          "yFrac": 0.52,
+          "dim": 0.129
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T05:00:00Z",
+      "pm25": 23.7,
+      "pm25Model": 23.7,
+      "aqi": 78,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          19,
+          20,
+          27
+        ],
+        "mid": [
+          34,
+          36,
+          44
+        ],
+        "horizon": [
+          47,
+          49,
+          58
+        ],
+        "isDark": true,
+        "starOpacity": 0.758,
+        "smoke": {
+          "s1": 0.158,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -24.94,
+          "azimuthDeg": 200.94,
+          "visible": false,
+          "xFrac": 0.616,
+          "yFrac": 0.52,
+          "dim": 0.158
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T06:00:00Z",
+      "pm25": 22.5,
+      "pm25Model": 22.5,
+      "aqi": 76,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          19,
+          20,
+          28
+        ],
+        "mid": [
+          34,
+          36,
+          45
+        ],
+        "horizon": [
+          47,
+          49,
+          58
+        ],
+        "isDark": true,
+        "starOpacity": 0.765,
+        "smoke": {
+          "s1": 0.15,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -27.36,
+          "azimuthDeg": 185.22,
+          "visible": false,
+          "xFrac": 0.529,
+          "yFrac": 0.52,
+          "dim": 0.15
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T07:00:00Z",
+      "pm25": 21.6,
+      "pm25Model": 21.6,
+      "aqi": 74,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          18,
+          20,
+          28
+        ],
+        "mid": [
+          34,
+          36,
+          45
+        ],
+        "horizon": [
+          47,
+          49,
+          58
+        ],
+        "isDark": true,
+        "starOpacity": 0.77,
+        "smoke": {
+          "s1": 0.144,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -26.85,
+          "azimuthDeg": 169.15,
+          "visible": false,
+          "xFrac": 0.44,
+          "yFrac": 0.52,
+          "dim": 0.144
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T08:00:00Z",
+      "pm25": 20.8,
+      "pm25Model": 20.8,
+      "aqi": 73,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          18,
+          20,
+          28
+        ],
+        "mid": [
+          34,
+          36,
+          45
+        ],
+        "horizon": [
+          47,
+          49,
+          59
+        ],
+        "isDark": true,
+        "starOpacity": 0.775,
+        "smoke": {
+          "s1": 0.139,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -23.48,
+          "azimuthDeg": 153.78,
+          "visible": false,
+          "xFrac": 0.354,
+          "yFrac": 0.52,
+          "dim": 0.139
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T09:00:00Z",
+      "pm25": 20.2,
+      "pm25Model": 20.2,
+      "aqi": 72,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          18,
+          20,
+          28
+        ],
+        "mid": [
+          34,
+          36,
+          45
+        ],
+        "horizon": [
+          47,
+          49,
+          59
+        ],
+        "isDark": true,
+        "starOpacity": 0.779,
+        "smoke": {
+          "s1": 0.135,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -17.67,
+          "azimuthDeg": 139.8,
+          "visible": false,
+          "xFrac": 0.277,
+          "yFrac": 0.52,
+          "dim": 0.135
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T10:00:00Z",
+      "pm25": 19.6,
+      "pm25Model": 19.6,
+      "aqi": 71,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          18,
+          20,
+          28
+        ],
+        "mid": [
+          33,
+          36,
+          45
+        ],
+        "horizon": [
+          46,
+          49,
+          59
+        ],
+        "isDark": true,
+        "starOpacity": 0.782,
+        "smoke": {
+          "s1": 0.131,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -10,
+          "azimuthDeg": 127.35,
+          "visible": false,
+          "xFrac": 0.208,
+          "yFrac": 0.52,
+          "dim": 0.131
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T11:00:00Z",
+      "pm25": 19,
+      "pm25Model": 19,
+      "aqi": 69,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          18,
+          20,
+          28
+        ],
+        "mid": [
+          33,
+          36,
+          45
+        ],
+        "horizon": [
+          46,
+          49,
+          59
+        ],
+        "isDark": true,
+        "starOpacity": 0.786,
+        "smoke": {
+          "s1": 0.127,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -0.99,
+          "azimuthDeg": 116.17,
+          "visible": false,
+          "xFrac": 0.145,
+          "yFrac": 0.52,
+          "dim": 0.127
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T12:00:00Z",
+      "pm25": 18.3,
+      "pm25Model": 18.3,
+      "aqi": 68,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          87,
+          95,
+          114
+        ],
+        "mid": [
+          135,
+          119,
+          107
+        ],
+        "horizon": [
+          174,
+          138,
+          102
+        ],
+        "isDark": false,
+        "starOpacity": 0.595,
+        "smoke": {
+          "s1": 0.122,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 8.89,
+          "azimuthDeg": 105.79,
+          "visible": true,
+          "xFrac": 0.088,
+          "yFrac": 0.433,
+          "dim": 0.122
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T13:00:00Z",
+      "pm25": 17.6,
+      "pm25Model": 17.6,
+      "aqi": 67,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          92,
+          104,
+          121
+        ],
+        "mid": [
+          131,
+          125,
+          122
+        ],
+        "horizon": [
+          163,
+          143,
+          122
+        ],
+        "isDark": false,
+        "starOpacity": 0.374,
+        "smoke": {
+          "s1": 0.117,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 19.29,
+          "azimuthDeg": 95.64,
+          "visible": true,
+          "xFrac": 0.031,
+          "yFrac": 0.335,
+          "dim": 0.117
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T14:00:00Z",
+      "pm25": 16.8,
+      "pm25Model": 16.8,
+      "aqi": 65,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          114,
+          133,
+          152
+        ],
+        "mid": [
+          153,
+          158,
+          159
+        ],
+        "horizon": [
+          185,
+          179,
+          165
+        ],
+        "isDark": false,
+        "starOpacity": 0.162,
+        "smoke": {
+          "s1": 0.112,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 29.88,
+          "azimuthDeg": 85.02,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.241,
+          "dim": 0.112
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T15:00:00Z",
+      "pm25": 16,
+      "pm25Model": 16,
+      "aqi": 64,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          162,
+          184
+        ],
+        "mid": [
+          183,
+          190,
+          188
+        ],
+        "horizon": [
+          220,
+          212,
+          192
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.107,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 40.27,
+          "azimuthDeg": 72.94,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.158,
+          "dim": 0.107
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T16:00:00Z",
+      "pm25": 15.1,
+      "pm25Model": 15.1,
+      "aqi": 62,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          162,
+          184
+        ],
+        "mid": [
+          184,
+          190,
+          189
+        ],
+        "horizon": [
+          221,
+          212,
+          193
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.101,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 49.9,
+          "azimuthDeg": 57.86,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.101
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T17:00:00Z",
+      "pm25": 14.1,
+      "pm25Model": 14.1,
+      "aqi": 60,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          163,
+          185
+        ],
+        "mid": [
+          184,
+          191,
+          190
+        ],
+        "horizon": [
+          221,
+          213,
+          194
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.094,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 57.76,
+          "azimuthDeg": 37.41,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.094
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T18:00:00Z",
+      "pm25": 13.2,
+      "pm25Model": 13.2,
+      "aqi": 59,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          163,
+          186
+        ],
+        "mid": [
+          184,
+          191,
+          191
+        ],
+        "horizon": [
+          221,
+          214,
+          195
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.088,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 62.06,
+          "azimuthDeg": 9.91,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.088
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T19:00:00Z",
+      "pm25": 12.2,
+      "pm25Model": 12.2,
+      "aqi": 57,
+      "levelIndex": 1,
+      "trend": "falling",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          164,
+          187
+        ],
+        "mid": [
+          184,
+          192,
+          192
+        ],
+        "horizon": [
+          222,
+          214,
+          196
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.081,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 61.06,
+          "azimuthDeg": 339.65,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.081
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T20:00:00Z",
+      "pm25": 11.3,
+      "pm25Model": 11.3,
+      "aqi": 55,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          164,
+          187
+        ],
+        "mid": [
+          184,
+          192,
+          192
+        ],
+        "horizon": [
+          222,
+          215,
+          196
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.075,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 55.25,
+          "azimuthDeg": 314.62,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.075
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T21:00:00Z",
+      "pm25": 10.5,
+      "pm25Model": 10.5,
+      "aqi": 54,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          138,
+          164,
+          188
+        ],
+        "mid": [
+          184,
+          192,
+          193
+        ],
+        "horizon": [
+          222,
+          215,
+          197
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.07,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 46.59,
+          "azimuthDeg": 296.39,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.07
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T22:00:00Z",
+      "pm25": 9.7,
+      "pm25Model": 9.7,
+      "aqi": 52,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          132,
+          158,
+          181
+        ],
+        "mid": [
+          177,
+          186,
+          187
+        ],
+        "horizon": [
+          214,
+          208,
+          191
+        ],
+        "isDark": false,
+        "starOpacity": 0.039,
+        "smoke": {
+          "s1": 0.065,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 36.59,
+          "azimuthDeg": 282.61,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.186,
+          "dim": 0.065
+        }
+      }
+    },
+    {
+      "t": "2026-08-03T23:00:00Z",
+      "pm25": 9,
+      "pm25Model": 9,
+      "aqi": 50,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          102,
+          122,
+          141
+        ],
+        "mid": [
+          139,
+          146,
+          150
+        ],
+        "horizon": [
+          169,
+          166,
+          157
+        ],
+        "isDark": false,
+        "starOpacity": 0.251,
+        "smoke": {
+          "s1": 0.06,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 26.07,
+          "azimuthDeg": 271.21,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.274,
+          "dim": 0.06
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T00:00:00Z",
+      "pm25": 8.4,
+      "pm25Model": 8.4,
+      "aqi": 47,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          91,
+          103,
+          123
+        ],
+        "mid": [
+          135,
+          126,
+          119
+        ],
+        "horizon": [
+          171,
+          144,
+          116
+        ],
+        "isDark": false,
+        "starOpacity": 0.486,
+        "smoke": {
+          "s1": 0.056,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 15.49,
+          "azimuthDeg": 260.86,
+          "visible": true,
+          "xFrac": 0.949,
+          "yFrac": 0.37,
+          "dim": 0.056
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T01:00:00Z",
+      "pm25": 7.9,
+      "pm25Model": 7.9,
+      "aqi": 44,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          69,
+          78,
+          95
+        ],
+        "mid": [
+          110,
+          101,
+          96
+        ],
+        "horizon": [
+          144,
+          119,
+          96
+        ],
+        "isDark": true,
+        "starOpacity": 0.729,
+        "smoke": {
+          "s1": 0.053,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 5.22,
+          "azimuthDeg": 250.7,
+          "visible": true,
+          "xFrac": 0.893,
+          "yFrac": 0.469,
+          "dim": 0.053
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T02:00:00Z",
+      "pm25": 7.6,
+      "pm25Model": 7.6,
+      "aqi": 42,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.854,
+        "smoke": {
+          "s1": 0.051,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -4.43,
+          "azimuthDeg": 240.1,
+          "visible": false,
+          "xFrac": 0.834,
+          "yFrac": 0.52,
+          "dim": 0.051
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T03:00:00Z",
+      "pm25": 7.4,
+      "pm25Model": 7.4,
+      "aqi": 41,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.856,
+        "smoke": {
+          "s1": 0.049,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -13.05,
+          "azimuthDeg": 228.52,
+          "visible": false,
+          "xFrac": 0.77,
+          "yFrac": 0.52,
+          "dim": 0.049
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T04:00:00Z",
+      "pm25": 7.3,
+      "pm25Model": 7.3,
+      "aqi": 41,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.856,
+        "smoke": {
+          "s1": 0.049,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -20.16,
+          "azimuthDeg": 215.54,
+          "visible": false,
+          "xFrac": 0.697,
+          "yFrac": 0.52,
+          "dim": 0.049
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T05:00:00Z",
+      "pm25": 7.3,
+      "pm25Model": 7.3,
+      "aqi": 41,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "agree",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.856,
+        "smoke": {
+          "s1": 0.049,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -25.2,
+          "azimuthDeg": 200.99,
+          "visible": false,
+          "xFrac": 0.617,
+          "yFrac": 0.52,
+          "dim": 0.049
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T06:00:00Z",
+      "pm25": 7.3,
+      "pm25Model": 7.3,
+      "aqi": 41,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.856,
+        "smoke": {
+          "s1": 0.049,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -27.62,
+          "azimuthDeg": 185.22,
+          "visible": false,
+          "xFrac": 0.529,
+          "yFrac": 0.52,
+          "dim": 0.049
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T07:00:00Z",
+      "pm25": 7.5,
+      "pm25Model": 7.5,
+      "aqi": 42,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.855,
+        "smoke": {
+          "s1": 0.05,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -27.11,
+          "azimuthDeg": 169.08,
+          "visible": false,
+          "xFrac": 0.439,
+          "yFrac": 0.52,
+          "dim": 0.05
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T08:00:00Z",
+      "pm25": 7.7,
+      "pm25Model": 7.7,
+      "aqi": 43,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.854,
+        "smoke": {
+          "s1": 0.051,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -23.72,
+          "azimuthDeg": 153.66,
+          "visible": false,
+          "xFrac": 0.354,
+          "yFrac": 0.52,
+          "dim": 0.051
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T09:00:00Z",
+      "pm25": 7.9,
+      "pm25Model": 7.9,
+      "aqi": 44,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.853,
+        "smoke": {
+          "s1": 0.053,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -17.9,
+          "azimuthDeg": 139.64,
+          "visible": false,
+          "xFrac": 0.276,
+          "yFrac": 0.52,
+          "dim": 0.053
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T10:00:00Z",
+      "pm25": 8.1,
+      "pm25Model": 8.1,
+      "aqi": 45,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.851,
+        "smoke": {
+          "s1": 0.054,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -10.2,
+          "azimuthDeg": 127.17,
+          "visible": false,
+          "xFrac": 0.207,
+          "yFrac": 0.52,
+          "dim": 0.054
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T11:00:00Z",
+      "pm25": 8.4,
+      "pm25Model": 8.4,
+      "aqi": 47,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.85,
+        "smoke": {
+          "s1": 0.056,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -1.18,
+          "azimuthDeg": 115.98,
+          "visible": false,
+          "xFrac": 0.144,
+          "yFrac": 0.52,
+          "dim": 0.056
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T12:00:00Z",
+      "pm25": 8.5,
+      "pm25Model": 8.5,
+      "aqi": 47,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          87,
+          97,
+          118
+        ],
+        "mid": [
+          137,
+          121,
+          111
+        ],
+        "horizon": [
+          177,
+          141,
+          106
+        ],
+        "isDark": false,
+        "starOpacity": 0.643,
+        "smoke": {
+          "s1": 0.057,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 8.72,
+          "azimuthDeg": 105.58,
+          "visible": true,
+          "xFrac": 0.087,
+          "yFrac": 0.435,
+          "dim": 0.057
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T13:00:00Z",
+      "pm25": 8.6,
+      "pm25Model": 8.6,
+      "aqi": 48,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          92,
+          106,
+          125
+        ],
+        "mid": [
+          132,
+          129,
+          126
+        ],
+        "horizon": [
+          165,
+          147,
+          127
+        ],
+        "isDark": false,
+        "starOpacity": 0.404,
+        "smoke": {
+          "s1": 0.057,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 19.13,
+          "azimuthDeg": 95.41,
+          "visible": true,
+          "xFrac": 0.03,
+          "yFrac": 0.336,
+          "dim": 0.057
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T14:00:00Z",
+      "pm25": 8.7,
+      "pm25Model": 8.7,
+      "aqi": 48,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          113,
+          135,
+          156
+        ],
+        "mid": [
+          153,
+          161,
+          164
+        ],
+        "horizon": [
+          186,
+          182,
+          170
+        ],
+        "isDark": false,
+        "starOpacity": 0.175,
+        "smoke": {
+          "s1": 0.058,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 29.72,
+          "azimuthDeg": 84.77,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.242,
+          "dim": 0.058
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T15:00:00Z",
+      "pm25": 8.7,
+      "pm25Model": 8.7,
+      "aqi": 48,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          165,
+          189
+        ],
+        "mid": [
+          185,
+          193,
+          195
+        ],
+        "horizon": [
+          223,
+          216,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.058,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 40.1,
+          "azimuthDeg": 72.68,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.159,
+          "dim": 0.058
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T16:00:00Z",
+      "pm25": 8.6,
+      "pm25Model": 8.6,
+      "aqi": 48,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          165,
+          189
+        ],
+        "mid": [
+          185,
+          194,
+          195
+        ],
+        "horizon": [
+          223,
+          217,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.057,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 49.71,
+          "azimuthDeg": 57.57,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.057
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T17:00:00Z",
+      "pm25": 8.4,
+      "pm25Model": 8.4,
+      "aqi": 47,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          165,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          195
+        ],
+        "horizon": [
+          223,
+          217,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.056,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 57.53,
+          "azimuthDeg": 37.15,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.056
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T18:00:00Z",
+      "pm25": 8.2,
+      "pm25Model": 8.2,
+      "aqi": 46,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          165,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          195
+        ],
+        "horizon": [
+          223,
+          217,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.055,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 61.8,
+          "azimuthDeg": 9.8,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.055
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T19:00:00Z",
+      "pm25": 7.9,
+      "pm25Model": 7.9,
+      "aqi": 44,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          166,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          195
+        ],
+        "horizon": [
+          223,
+          217,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.053,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 60.8,
+          "azimuthDeg": 339.75,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.053
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T20:00:00Z",
+      "pm25": 7.6,
+      "pm25Model": 7.6,
+      "aqi": 42,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          166,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          196
+        ],
+        "horizon": [
+          223,
+          217,
+          200
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.051,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 55.01,
+          "azimuthDeg": 314.83,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.051
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T21:00:00Z",
+      "pm25": 7.2,
+      "pm25Model": 7.2,
+      "aqi": 40,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          166,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          196
+        ],
+        "horizon": [
+          223,
+          217,
+          200
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.048,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 46.38,
+          "azimuthDeg": 296.62,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.048
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T22:00:00Z",
+      "pm25": 6.9,
+      "pm25Model": 6.9,
+      "aqi": 38,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          133,
+          158,
+          182
+        ],
+        "mid": [
+          178,
+          186,
+          188
+        ],
+        "horizon": [
+          215,
+          209,
+          193
+        ],
+        "isDark": false,
+        "starOpacity": 0.044,
+        "smoke": {
+          "s1": 0.046,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 36.39,
+          "azimuthDeg": 282.83,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.188,
+          "dim": 0.046
+        }
+      }
+    },
+    {
+      "t": "2026-08-04T23:00:00Z",
+      "pm25": 6.6,
+      "pm25Model": 6.6,
+      "aqi": 37,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          101,
+          121,
+          141
+        ],
+        "mid": [
+          139,
+          146,
+          151
+        ],
+        "horizon": [
+          170,
+          166,
+          159
+        ],
+        "isDark": false,
+        "starOpacity": 0.26,
+        "smoke": {
+          "s1": 0.044,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 25.87,
+          "azimuthDeg": 271.41,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.276,
+          "dim": 0.044
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T00:00:00Z",
+      "pm25": 6.4,
+      "pm25Model": 6.4,
+      "aqi": 36,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          91,
+          103,
+          124
+        ],
+        "mid": [
+          136,
+          126,
+          120
+        ],
+        "horizon": [
+          173,
+          144,
+          116
+        ],
+        "isDark": false,
+        "starOpacity": 0.498,
+        "smoke": {
+          "s1": 0.043,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 15.29,
+          "azimuthDeg": 261.04,
+          "visible": true,
+          "xFrac": 0.95,
+          "yFrac": 0.372,
+          "dim": 0.043
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T01:00:00Z",
+      "pm25": 6.2,
+      "pm25Model": 6.2,
+      "aqi": 34,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          68,
+          76,
+          94
+        ],
+        "mid": [
+          109,
+          99,
+          95
+        ],
+        "horizon": [
+          143,
+          118,
+          96
+        ],
+        "isDark": true,
+        "starOpacity": 0.742,
+        "smoke": {
+          "s1": 0.041,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 5.01,
+          "azimuthDeg": 250.88,
+          "visible": true,
+          "xFrac": 0.894,
+          "yFrac": 0.471,
+          "dim": 0.041
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T02:00:00Z",
+      "pm25": 6,
+      "pm25Model": 6,
+      "aqi": 33,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          30,
+          35,
+          46
+        ],
+        "horizon": [
+          43,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.864,
+        "smoke": {
+          "s1": 0.04,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -4.65,
+          "azimuthDeg": 240.26,
+          "visible": false,
+          "xFrac": 0.835,
+          "yFrac": 0.52,
+          "dim": 0.04
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T03:00:00Z",
+      "pm25": 6,
+      "pm25Model": 6,
+      "aqi": 33,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          30,
+          35,
+          46
+        ],
+        "horizon": [
+          43,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.864,
+        "smoke": {
+          "s1": 0.04,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -13.28,
+          "azimuthDeg": 228.65,
+          "visible": false,
+          "xFrac": 0.77,
+          "yFrac": 0.52,
+          "dim": 0.04
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T04:00:00Z",
+      "pm25": 6,
+      "pm25Model": 6,
+      "aqi": 33,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          30,
+          35,
+          46
+        ],
+        "horizon": [
+          43,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.864,
+        "smoke": {
+          "s1": 0.04,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -20.41,
+          "azimuthDeg": 215.64,
+          "visible": false,
+          "xFrac": 0.698,
+          "yFrac": 0.52,
+          "dim": 0.04
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T05:00:00Z",
+      "pm25": 6.1,
+      "pm25Model": 6.1,
+      "aqi": 34,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          30,
+          35,
+          46
+        ],
+        "horizon": [
+          43,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.863,
+        "smoke": {
+          "s1": 0.041,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -25.47,
+          "azimuthDeg": 201.05,
+          "visible": false,
+          "xFrac": 0.617,
+          "yFrac": 0.52,
+          "dim": 0.041
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T06:00:00Z",
+      "pm25": 6.3,
+      "pm25Model": 6.3,
+      "aqi": 35,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          30,
+          35,
+          46
+        ],
+        "horizon": [
+          43,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.862,
+        "smoke": {
+          "s1": 0.042,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -27.89,
+          "azimuthDeg": 185.21,
+          "visible": false,
+          "xFrac": 0.529,
+          "yFrac": 0.52,
+          "dim": 0.042
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T07:00:00Z",
+      "pm25": 6.5,
+      "pm25Model": 6.5,
+      "aqi": 36,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          30,
+          35,
+          46
+        ],
+        "horizon": [
+          43,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.861,
+        "smoke": {
+          "s1": 0.043,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -27.37,
+          "azimuthDeg": 169.02,
+          "visible": false,
+          "xFrac": 0.439,
+          "yFrac": 0.52,
+          "dim": 0.043
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T08:00:00Z",
+      "pm25": 6.8,
+      "pm25Model": 6.8,
+      "aqi": 38,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.859,
+        "smoke": {
+          "s1": 0.045,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -23.97,
+          "azimuthDeg": 153.54,
+          "visible": false,
+          "xFrac": 0.353,
+          "yFrac": 0.52,
+          "dim": 0.045
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T09:00:00Z",
+      "pm25": 7.1,
+      "pm25Model": 7.1,
+      "aqi": 39,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.857,
+        "smoke": {
+          "s1": 0.047,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -18.12,
+          "azimuthDeg": 139.49,
+          "visible": false,
+          "xFrac": 0.275,
+          "yFrac": 0.52,
+          "dim": 0.047
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T10:00:00Z",
+      "pm25": 7.3,
+      "pm25Model": 7.3,
+      "aqi": 41,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.856,
+        "smoke": {
+          "s1": 0.049,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -10.4,
+          "azimuthDeg": 126.99,
+          "visible": false,
+          "xFrac": 0.206,
+          "yFrac": 0.52,
+          "dim": 0.049
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T11:00:00Z",
+      "pm25": 7.6,
+      "pm25Model": 7.6,
+      "aqi": 42,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.854,
+        "smoke": {
+          "s1": 0.051,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -1.36,
+          "azimuthDeg": 115.78,
+          "visible": false,
+          "xFrac": 0.143,
+          "yFrac": 0.52,
+          "dim": 0.051
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T12:00:00Z",
+      "pm25": 7.8,
+      "pm25Model": 7.8,
+      "aqi": 43,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          86,
+          96,
+          117
+        ],
+        "mid": [
+          136,
+          121,
+          111
+        ],
+        "horizon": [
+          176,
+          141,
+          106
+        ],
+        "isDark": false,
+        "starOpacity": 0.65,
+        "smoke": {
+          "s1": 0.052,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 8.55,
+          "azimuthDeg": 105.37,
+          "visible": true,
+          "xFrac": 0.085,
+          "yFrac": 0.437,
+          "dim": 0.052
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T13:00:00Z",
+      "pm25": 8,
+      "pm25Model": 8,
+      "aqi": 44,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          91,
+          106,
+          125
+        ],
+        "mid": [
+          132,
+          128,
+          126
+        ],
+        "horizon": [
+          166,
+          146,
+          126
+        ],
+        "isDark": false,
+        "starOpacity": 0.409,
+        "smoke": {
+          "s1": 0.053,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 18.97,
+          "azimuthDeg": 95.19,
+          "visible": true,
+          "xFrac": 0.029,
+          "yFrac": 0.338,
+          "dim": 0.053
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T14:00:00Z",
+      "pm25": 8.1,
+      "pm25Model": 8.1,
+      "aqi": 45,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          113,
+          134,
+          156
+        ],
+        "mid": [
+          153,
+          160,
+          164
+        ],
+        "horizon": [
+          185,
+          181,
+          170
+        ],
+        "isDark": false,
+        "starOpacity": 0.18,
+        "smoke": {
+          "s1": 0.054,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 29.55,
+          "azimuthDeg": 84.53,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.244,
+          "dim": 0.054
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T15:00:00Z",
+      "pm25": 8.2,
+      "pm25Model": 8.2,
+      "aqi": 46,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          165,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          195
+        ],
+        "horizon": [
+          223,
+          217,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.055,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 39.92,
+          "azimuthDeg": 72.41,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.161,
+          "dim": 0.055
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T16:00:00Z",
+      "pm25": 8.1,
+      "pm25Model": 8.1,
+      "aqi": 45,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          166,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          195
+        ],
+        "horizon": [
+          223,
+          217,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.054,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 49.51,
+          "azimuthDeg": 57.29,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.054
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T17:00:00Z",
+      "pm25": 8,
+      "pm25Model": 8,
+      "aqi": 44,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          166,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          195
+        ],
+        "horizon": [
+          223,
+          217,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.053,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 57.3,
+          "azimuthDeg": 36.88,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.053
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T18:00:00Z",
+      "pm25": 7.8,
+      "pm25Model": 7.8,
+      "aqi": 43,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          166,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          195
+        ],
+        "horizon": [
+          223,
+          217,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.052,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 61.53,
+          "azimuthDeg": 9.67,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.052
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T19:00:00Z",
+      "pm25": 7.6,
+      "pm25Model": 7.6,
+      "aqi": 42,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          166,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          196
+        ],
+        "horizon": [
+          223,
+          217,
+          200
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.051,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 60.53,
+          "azimuthDeg": 339.84,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.051
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T20:00:00Z",
+      "pm25": 7.3,
+      "pm25Model": 7.3,
+      "aqi": 41,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          166,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          196
+        ],
+        "horizon": [
+          223,
+          217,
+          200
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.049,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 54.77,
+          "azimuthDeg": 315.04,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.049
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T21:00:00Z",
+      "pm25": 7,
+      "pm25Model": 7,
+      "aqi": 39,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          166,
+          191
+        ],
+        "mid": [
+          185,
+          195,
+          196
+        ],
+        "horizon": [
+          224,
+          218,
+          200
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.047,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 46.16,
+          "azimuthDeg": 296.85,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.047
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T22:00:00Z",
+      "pm25": 6.7,
+      "pm25Model": 6.7,
+      "aqi": 37,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          132,
+          158,
+          182
+        ],
+        "mid": [
+          177,
+          186,
+          188
+        ],
+        "horizon": [
+          214,
+          208,
+          193
+        ],
+        "isDark": false,
+        "starOpacity": 0.048,
+        "smoke": {
+          "s1": 0.045,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 36.18,
+          "azimuthDeg": 283.05,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.189,
+          "dim": 0.045
+        }
+      }
+    },
+    {
+      "t": "2026-08-05T23:00:00Z",
+      "pm25": 6.5,
+      "pm25Model": 6.5,
+      "aqi": 36,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          101,
+          121,
+          140
+        ],
+        "mid": [
+          139,
+          146,
+          149
+        ],
+        "horizon": [
+          170,
+          166,
+          157
+        ],
+        "isDark": false,
+        "starOpacity": 0.264,
+        "smoke": {
+          "s1": 0.043,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 25.67,
+          "azimuthDeg": 271.61,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.277,
+          "dim": 0.043
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T00:00:00Z",
+      "pm25": 6.2,
+      "pm25Model": 6.2,
+      "aqi": 34,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          91,
+          103,
+          124
+        ],
+        "mid": [
+          136,
+          126,
+          120
+        ],
+        "horizon": [
+          173,
+          145,
+          116
+        ],
+        "isDark": false,
+        "starOpacity": 0.503,
+        "smoke": {
+          "s1": 0.041,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 15.09,
+          "azimuthDeg": 261.23,
+          "visible": true,
+          "xFrac": 0.951,
+          "yFrac": 0.374,
+          "dim": 0.041
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T01:00:00Z",
+      "pm25": 6,
+      "pm25Model": 6,
+      "aqi": 33,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          67,
+          75,
+          93
+        ],
+        "mid": [
+          108,
+          98,
+          95
+        ],
+        "horizon": [
+          141,
+          117,
+          96
+        ],
+        "isDark": true,
+        "starOpacity": 0.748,
+        "smoke": {
+          "s1": 0.04,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 4.8,
+          "azimuthDeg": 251.05,
+          "visible": true,
+          "xFrac": 0.895,
+          "yFrac": 0.473,
+          "dim": 0.04
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T02:00:00Z",
+      "pm25": 5.9,
+      "pm25Model": 5.9,
+      "aqi": 33,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          30,
+          35,
+          46
+        ],
+        "horizon": [
+          43,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.865,
+        "smoke": {
+          "s1": 0.039,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -4.87,
+          "azimuthDeg": 240.42,
+          "visible": false,
+          "xFrac": 0.836,
+          "yFrac": 0.52,
+          "dim": 0.039
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T03:00:00Z",
+      "pm25": 5.9,
+      "pm25Model": 5.9,
+      "aqi": 33,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          30,
+          35,
+          46
+        ],
+        "horizon": [
+          43,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.865,
+        "smoke": {
+          "s1": 0.039,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -13.52,
+          "azimuthDeg": 228.79,
+          "visible": false,
+          "xFrac": 0.771,
+          "yFrac": 0.52,
+          "dim": 0.039
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T04:00:00Z",
+      "pm25": 5.9,
+      "pm25Model": 5.9,
+      "aqi": 33,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          30,
+          35,
+          46
+        ],
+        "horizon": [
+          43,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.865,
+        "smoke": {
+          "s1": 0.039,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -20.67,
+          "azimuthDeg": 215.74,
+          "visible": false,
+          "xFrac": 0.699,
+          "yFrac": 0.52,
+          "dim": 0.039
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T05:00:00Z",
+      "pm25": 6,
+      "pm25Model": 6,
+      "aqi": 33,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          30,
+          35,
+          46
+        ],
+        "horizon": [
+          43,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.864,
+        "smoke": {
+          "s1": 0.04,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -25.74,
+          "azimuthDeg": 201.1,
+          "visible": false,
+          "xFrac": 0.617,
+          "yFrac": 0.52,
+          "dim": 0.04
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T06:00:00Z",
+      "pm25": 6.2,
+      "pm25Model": 6.2,
+      "aqi": 34,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          30,
+          35,
+          46
+        ],
+        "horizon": [
+          43,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.863,
+        "smoke": {
+          "s1": 0.041,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -28.17,
+          "azimuthDeg": 185.2,
+          "visible": false,
+          "xFrac": 0.529,
+          "yFrac": 0.52,
+          "dim": 0.041
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T07:00:00Z",
+      "pm25": 6.4,
+      "pm25Model": 6.4,
+      "aqi": 36,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          30,
+          35,
+          46
+        ],
+        "horizon": [
+          43,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.862,
+        "smoke": {
+          "s1": 0.043,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -27.64,
+          "azimuthDeg": 168.94,
+          "visible": false,
+          "xFrac": 0.439,
+          "yFrac": 0.52,
+          "dim": 0.043
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T08:00:00Z",
+      "pm25": 6.7,
+      "pm25Model": 6.7,
+      "aqi": 37,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.86,
+        "smoke": {
+          "s1": 0.045,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -24.22,
+          "azimuthDeg": 153.41,
+          "visible": false,
+          "xFrac": 0.352,
+          "yFrac": 0.52,
+          "dim": 0.045
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T09:00:00Z",
+      "pm25": 7,
+      "pm25Model": 7,
+      "aqi": 39,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.858,
+        "smoke": {
+          "s1": 0.047,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -18.35,
+          "azimuthDeg": 139.33,
+          "visible": false,
+          "xFrac": 0.274,
+          "yFrac": 0.52,
+          "dim": 0.047
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T10:00:00Z",
+      "pm25": 7.3,
+      "pm25Model": 7.3,
+      "aqi": 41,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.856,
+        "smoke": {
+          "s1": 0.049,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -10.61,
+          "azimuthDeg": 126.81,
+          "visible": false,
+          "xFrac": 0.204,
+          "yFrac": 0.52,
+          "dim": 0.049
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T11:00:00Z",
+      "pm25": 7.6,
+      "pm25Model": 7.6,
+      "aqi": 42,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          16,
+          19,
+          28
+        ],
+        "mid": [
+          31,
+          35,
+          46
+        ],
+        "horizon": [
+          44,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.854,
+        "smoke": {
+          "s1": 0.051,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -1.55,
+          "azimuthDeg": 115.58,
+          "visible": false,
+          "xFrac": 0.142,
+          "yFrac": 0.52,
+          "dim": 0.051
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T12:00:00Z",
+      "pm25": 7.8,
+      "pm25Model": 7.8,
+      "aqi": 43,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          85,
+          95,
+          116
+        ],
+        "mid": [
+          134,
+          120,
+          111
+        ],
+        "horizon": [
+          174,
+          140,
+          106
+        ],
+        "isDark": false,
+        "starOpacity": 0.654,
+        "smoke": {
+          "s1": 0.052,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 8.38,
+          "azimuthDeg": 105.15,
+          "visible": true,
+          "xFrac": 0.084,
+          "yFrac": 0.438,
+          "dim": 0.052
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T13:00:00Z",
+      "pm25": 8,
+      "pm25Model": 8,
+      "aqi": 44,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          91,
+          105,
+          125
+        ],
+        "mid": [
+          132,
+          128,
+          125
+        ],
+        "horizon": [
+          166,
+          147,
+          125
+        ],
+        "isDark": false,
+        "starOpacity": 0.413,
+        "smoke": {
+          "s1": 0.053,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 18.8,
+          "azimuthDeg": 94.95,
+          "visible": true,
+          "xFrac": 0.028,
+          "yFrac": 0.34,
+          "dim": 0.053
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T14:00:00Z",
+      "pm25": 8.1,
+      "pm25Model": 8.1,
+      "aqi": 45,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          112,
+          134,
+          155
+        ],
+        "mid": [
+          152,
+          160,
+          163
+        ],
+        "horizon": [
+          184,
+          181,
+          169
+        ],
+        "isDark": false,
+        "starOpacity": 0.183,
+        "smoke": {
+          "s1": 0.054,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 29.38,
+          "azimuthDeg": 84.27,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.245,
+          "dim": 0.054
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T15:00:00Z",
+      "pm25": 8.1,
+      "pm25Model": 8.1,
+      "aqi": 45,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          166,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          195
+        ],
+        "horizon": [
+          223,
+          217,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.054,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 39.75,
+          "azimuthDeg": 72.13,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.162,
+          "dim": 0.054
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T16:00:00Z",
+      "pm25": 8.1,
+      "pm25Model": 8.1,
+      "aqi": 45,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          166,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          195
+        ],
+        "horizon": [
+          223,
+          217,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.054,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 49.31,
+          "azimuthDeg": 56.99,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.054
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T17:00:00Z",
+      "pm25": 8,
+      "pm25Model": 8,
+      "aqi": 44,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          166,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          195
+        ],
+        "horizon": [
+          223,
+          217,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.053,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 57.07,
+          "azimuthDeg": 36.62,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.053
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T18:00:00Z",
+      "pm25": 7.8,
+      "pm25Model": 7.8,
+      "aqi": 43,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          166,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          195
+        ],
+        "horizon": [
+          223,
+          217,
+          199
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.052,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 61.26,
+          "azimuthDeg": 9.55,
+          "visible": true,
+          "xFrac": 0,
+          "yFrac": 0.12,
+          "dim": 0.052
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T19:00:00Z",
+      "pm25": 7.6,
+      "pm25Model": 7.6,
+      "aqi": 42,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          166,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          196
+        ],
+        "horizon": [
+          223,
+          217,
+          200
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.051,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 60.26,
+          "azimuthDeg": 339.93,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.051
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T20:00:00Z",
+      "pm25": 7.3,
+      "pm25Model": 7.3,
+      "aqi": 41,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          166,
+          190
+        ],
+        "mid": [
+          185,
+          194,
+          196
+        ],
+        "horizon": [
+          223,
+          217,
+          200
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.049,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 54.52,
+          "azimuthDeg": 315.25,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.049
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T21:00:00Z",
+      "pm25": 7,
+      "pm25Model": 7,
+      "aqi": 39,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          138,
+          166,
+          191
+        ],
+        "mid": [
+          185,
+          195,
+          196
+        ],
+        "horizon": [
+          224,
+          218,
+          200
+        ],
+        "isDark": false,
+        "starOpacity": 0,
+        "smoke": {
+          "s1": 0.047,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 45.93,
+          "azimuthDeg": 297.08,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.12,
+          "dim": 0.047
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T22:00:00Z",
+      "pm25": 6.7,
+      "pm25Model": 6.7,
+      "aqi": 37,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          131,
+          157,
+          181
+        ],
+        "mid": [
+          176,
+          185,
+          187
+        ],
+        "horizon": [
+          213,
+          208,
+          192
+        ],
+        "isDark": false,
+        "starOpacity": 0.052,
+        "smoke": {
+          "s1": 0.045,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 35.97,
+          "azimuthDeg": 283.28,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.191,
+          "dim": 0.045
+        }
+      }
+    },
+    {
+      "t": "2026-08-06T23:00:00Z",
+      "pm25": 6.4,
+      "pm25Model": 6.4,
+      "aqi": 36,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          101,
+          120,
+          142
+        ],
+        "mid": [
+          139,
+          145,
+          150
+        ],
+        "horizon": [
+          170,
+          165,
+          156
+        ],
+        "isDark": false,
+        "starOpacity": 0.269,
+        "smoke": {
+          "s1": 0.043,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 25.46,
+          "azimuthDeg": 271.82,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.279,
+          "dim": 0.043
+        }
+      }
+    },
+    {
+      "t": "2026-08-07T00:00:00Z",
+      "pm25": 6.2,
+      "pm25Model": 6.2,
+      "aqi": 34,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          91,
+          103,
+          124
+        ],
+        "mid": [
+          137,
+          126,
+          119
+        ],
+        "horizon": [
+          174,
+          145,
+          115
+        ],
+        "isDark": false,
+        "starOpacity": 0.508,
+        "smoke": {
+          "s1": 0.041,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 14.88,
+          "azimuthDeg": 261.42,
+          "visible": true,
+          "xFrac": 0.952,
+          "yFrac": 0.376,
+          "dim": 0.041
+        }
+      }
+    },
+    {
+      "t": "2026-08-07T01:00:00Z",
+      "pm25": 6,
+      "pm25Model": 6,
+      "aqi": 33,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          65,
+          73,
+          91
+        ],
+        "mid": [
+          106,
+          96,
+          93
+        ],
+        "horizon": [
+          139,
+          115,
+          95
+        ],
+        "isDark": true,
+        "starOpacity": 0.754,
+        "smoke": {
+          "s1": 0.04,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": 4.58,
+          "azimuthDeg": 251.22,
+          "visible": true,
+          "xFrac": 0.896,
+          "yFrac": 0.475,
+          "dim": 0.04
+        }
+      }
+    },
+    {
+      "t": "2026-08-07T02:00:00Z",
+      "pm25": 5.9,
+      "pm25Model": 5.9,
+      "aqi": 33,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          30,
+          35,
+          46
+        ],
+        "horizon": [
+          43,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.865,
+        "smoke": {
+          "s1": 0.039,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -5.1,
+          "azimuthDeg": 240.57,
+          "visible": false,
+          "xFrac": 0.837,
+          "yFrac": 0.52,
+          "dim": 0.039
+        }
+      }
+    },
+    {
+      "t": "2026-08-07T03:00:00Z",
+      "pm25": 5.9,
+      "pm25Model": 5.9,
+      "aqi": 33,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          30,
+          35,
+          46
+        ],
+        "horizon": [
+          43,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.865,
+        "smoke": {
+          "s1": 0.039,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -13.77,
+          "azimuthDeg": 228.92,
+          "visible": false,
+          "xFrac": 0.772,
+          "yFrac": 0.52,
+          "dim": 0.039
+        }
+      }
+    },
+    {
+      "t": "2026-08-07T04:00:00Z",
+      "pm25": 5.9,
+      "pm25Model": 5.9,
+      "aqi": 33,
+      "levelIndex": 0,
+      "trend": "steady",
+      "agreement": "fade",
+      "sky": {
+        "zenith": [
+          15,
+          19,
+          28
+        ],
+        "mid": [
+          30,
+          35,
+          46
+        ],
+        "horizon": [
+          43,
+          48,
+          61
+        ],
+        "isDark": true,
+        "starOpacity": 0.865,
+        "smoke": {
+          "s1": 0.039,
+          "s2": 0
+        },
+        "sun": {
+          "altitudeDeg": -20.93,
+          "azimuthDeg": 215.84,
+          "visible": false,
+          "xFrac": 0.699,
+          "yFrac": 0.52,
+          "dim": 0.039
+        }
+      }
+    }
+  ],
+  "verdict": {
+    "above": false,
+    "levelIndex": 1,
+    "trend": "steady",
+    "headline": "Doesn't reach Smells-like-fire in 5 days",
+    "clearIndex": null,
+    "clearAtUTC": null,
+    "clearLabel": null,
+    "arrivalIndex": null,
+    "arrivalAtUTC": null,
+    "arrivalLabel": null,
+    "peakIndex": 84,
+    "peakAtUTC": "2026-08-02T17:00:00Z",
+    "peakPm25": 26
+  },
+  "days": [
+    {
+      "key": "2026-08-02",
+      "weekday": "Sun",
+      "levelIndex": 1,
+      "minPm25": 7.9,
+      "maxPm25": 26,
+      "dayParts": [
+        {
+          "key": "morning",
+          "label": "Morning",
+          "bucket": null
+        },
+        {
+          "key": "afternoon",
+          "label": "Afternoon",
+          "bucket": {
+            "name": "Middle",
+            "color": "#f0c98c"
+          }
+        },
+        {
+          "key": "evening",
+          "label": "Evening",
+          "bucket": {
+            "name": "Middle",
+            "color": "#f0c98c"
+          }
+        }
+      ]
+    },
+    {
+      "key": "2026-08-03",
+      "weekday": "Mon",
+      "levelIndex": 1,
+      "minPm25": 7.3,
+      "maxPm25": 23.7,
+      "dayParts": [
+        {
+          "key": "morning",
+          "label": "Morning",
+          "bucket": {
+            "name": "Middle",
+            "color": "#f0c98c"
+          }
+        },
+        {
+          "key": "afternoon",
+          "label": "Afternoon",
+          "bucket": {
+            "name": "Middle",
+            "color": "#f0c98c"
+          }
+        },
+        {
+          "key": "evening",
+          "label": "Evening",
+          "bucket": {
+            "name": "Clear",
+            "color": "#f1ece3"
+          }
+        }
+      ]
+    },
+    {
+      "key": "2026-08-04",
+      "weekday": "Tue",
+      "levelIndex": 0,
+      "minPm25": 6,
+      "maxPm25": 8.7,
+      "dayParts": [
+        {
+          "key": "morning",
+          "label": "Morning",
+          "bucket": {
+            "name": "Clear",
+            "color": "#f1ece3"
+          }
+        },
+        {
+          "key": "afternoon",
+          "label": "Afternoon",
+          "bucket": {
+            "name": "Clear",
+            "color": "#f1ece3"
+          }
+        },
+        {
+          "key": "evening",
+          "label": "Evening",
+          "bucket": {
+            "name": "Clear",
+            "color": "#f1ece3"
+          }
+        }
+      ]
+    },
+    {
+      "key": "2026-08-05",
+      "weekday": "Wed",
+      "levelIndex": 0,
+      "minPm25": 5.9,
+      "maxPm25": 8.2,
+      "dayParts": [
+        {
+          "key": "morning",
+          "label": "Morning",
+          "bucket": {
+            "name": "Clear",
+            "color": "#f1ece3"
+          }
+        },
+        {
+          "key": "afternoon",
+          "label": "Afternoon",
+          "bucket": {
+            "name": "Clear",
+            "color": "#f1ece3"
+          }
+        },
+        {
+          "key": "evening",
+          "label": "Evening",
+          "bucket": {
+            "name": "Clear",
+            "color": "#f1ece3"
+          }
+        }
+      ]
+    },
+    {
+      "key": "2026-08-06",
+      "weekday": "Thu",
+      "levelIndex": 0,
+      "minPm25": 5.9,
+      "maxPm25": 8.1,
+      "dayParts": [
+        {
+          "key": "morning",
+          "label": "Morning",
+          "bucket": {
+            "name": "Clear",
+            "color": "#f1ece3"
+          }
+        },
+        {
+          "key": "afternoon",
+          "label": "Afternoon",
+          "bucket": {
+            "name": "Clear",
+            "color": "#f1ece3"
+          }
+        },
+        {
+          "key": "evening",
+          "label": "Evening",
+          "bucket": {
+            "name": "Clear",
+            "color": "#f1ece3"
+          }
+        }
+      ]
+    }
+  ],
+  "pastDays": [
+    {
+      "key": "2026-07-30",
+      "weekday": "Thu",
+      "levelIndex": 0,
+      "minPm25": 6.1,
+      "maxPm25": 8.7
+    },
+    {
+      "key": "2026-07-31",
+      "weekday": "Fri",
+      "levelIndex": 1,
+      "minPm25": 8.7,
+      "maxPm25": 28.6
+    },
+    {
+      "key": "2026-08-01",
+      "weekday": "Sat",
+      "levelIndex": 3,
+      "minPm25": 30.7,
+      "maxPm25": 70.9
+    }
+  ],
+  "measured": {
+    "official": {
+      "ug": 26,
+      "aqi": 82,
+      "count": 4,
+      "area": "Minneapolis",
+      "distanceMi": 41,
+      "observedAt": "2026-08-02T16:00"
+    },
+    "local": {
+      "ug": 58.5,
+      "aqi": 153,
+      "count": 31,
+      "medianDistanceMi": 6
+    },
+    "model": {
+      "ug": 96.8,
+      "aqi": 180
+    },
+    "anchor": {
+      "source": "official",
+      "offsetUg": -70.8,
+      "decayHours": 12
+    }
+  },
+  "agreement": {
+    "multiModel": false,
+    "diverged": false,
+    "label": "Single-model forecast. Confidence fades past 36 hours."
+  }
+}

@@ -3,3 +3,12 @@ dist
 .DS_Store
 *.local
 .vercel
+
+# Apple: the Xcode project is generated from apple/project.yml (`make generate`),
+# never committed — a .pbxproj is unreviewable and this repo's premise is that
+# the four clients must not drift silently.
+apple/Smokeshow.xcodeproj/
+apple/.build/
+apple/.swiftpm/
+apple/DerivedData/
+xcuserdata/

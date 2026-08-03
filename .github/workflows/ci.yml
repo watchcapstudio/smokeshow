@@ -1,0 +1,127 @@
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: web tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  # The parity guarantee, enforced.
+  #
+  # Two files in the Apple app are *generated* from sources the web owns:
+  # Tokens.generated.swift from design/tokens.json, and the mock payloads from
+  # src/lib/forecast.js. If either source changes and nobody re-runs the
+  # generator, the apps and the web silently disagree — which is the exact
+  # failure docs/smokeshow-platform-plan.md §2 exists to prevent.
+  #
+  # So: regenerate, then demand the working tree be unchanged.
+  generated:
+    name: generated artifacts are current
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+
+      - name: Regenerate the web's design tokens
+        run: npm run tokens
+
+      - name: Regenerate the Apple design tokens
+        run: npm run tokens:apple
+
+      # Also re-validates every fixture against
+      # design/forecast-api-v1.schema.json — the generator exits non-zero if a
+      # payload stops matching the contract.
+      - name: Regenerate the Apple contract fixtures
+        run: npm run fixtures:apple
+
+      - name: Fail if anything regenerated differently
+        run: |
+          if ! git diff --quiet; then
+            echo "::error::Generated files are out of date. Run 'npm run tokens && npm run tokens:apple && npm run fixtures:apple' and commit the result."
+            git --no-pager diff --stat
+            git --no-pager diff
+            exit 1
+          fi
+          echo "Generated files match their sources."
+
+  # SmokeshowKit compiles and its tests run without an Xcode project, so this
+  # covers the contract decoder, the widget timeline budget, the trial/lapse
+  # policy, and the parity guards (disclaimer verbatim, tokens from the JSON,
+  # no verdict maths in Swift).
+  apple-kit:
+    name: SmokeshowKit tests
+    runs-on: macos-14
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show toolchain
+        run: swift --version
+      - name: swift test
+        working-directory: apple
+        run: swift test
+
+  # The app, the widget extension, and the watch targets need the generated
+  # Xcode project. Code signing is off: this job proves the code compiles and
+  # links, not that it can be shipped.
+  apple-app:
+    name: iOS + macOS build
+    runs-on: macos-14
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate the Xcode project
+        working-directory: apple
+        run: xcodegen generate --spec project.yml
+      - name: Build for iOS Simulator
+        working-directory: apple
+        run: |
+          xcodebuild build -quiet \
+            -project Smokeshow.xcodeproj \
+            -scheme Smokeshow \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Build for macOS
+        working-directory: apple
+        run: |
+          xcodebuild build -quiet \
+            -project Smokeshow.xcodeproj \
+            -scheme Smokeshow \
+            -destination 'platform=macOS' \
+            CODE_SIGNING_ALLOWED=NO
+
+      # The watch targets are not embedded in the iOS app, so nothing else
+      # would ever compile the complications.
+      - name: Build the watch app
+        working-directory: apple
+        run: |
+          xcodebuild build -quiet \
+            -project Smokeshow.xcodeproj \
+            -scheme SmokeshowWatch \
+            -destination 'generic/platform=watchOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO

@@ -1,0 +1,7 @@
+{
+  "v": 1,
+  "error": {
+    "code": "bad-coords",
+    "message": "lat and lon must be finite numbers"
+  }
+}

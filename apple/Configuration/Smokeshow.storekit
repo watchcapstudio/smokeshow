@@ -1,0 +1,48 @@
+{
+  "identifier" : "SMOKESHOW_STOREKIT_CONFIG",
+  "nonRenewingSubscriptions" : [],
+  "products" : [],
+  "settings" : {
+    "_askToBuyEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_storeKitErrors" : []
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "smokeshow",
+      "localizations" : [],
+      "name" : "smokeshow",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "2.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "SMOKESHOW_MONTHLY",
+          "introductoryOffer" : {
+            "internalID" : "SMOKESHOW_TRIAL_14D",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P2W"
+          },
+          "localizations" : [
+            {
+              "description" : "Widgets and alerts for wildfire smoke where you are. 14-day free trial, then $2.99 per month. Renews automatically until cancelled.",
+              "displayName" : "Smokeshow",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "earth.smokeshow.subscription.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Smokeshow Monthly",
+          "subscriptionGroupID" : "smokeshow",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

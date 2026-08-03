@@ -9,6 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "tokens": "node scripts/generate-tokens.mjs",
+    "tokens:apple": "node scripts/generate-apple-tokens.mjs",
+    "fixtures:apple": "node scripts/generate-apple-fixtures.mjs",
     "contrast": "node scripts/contrast-audit.mjs",
     "ramp": "node scripts/smoke-ramp-audit.mjs",
     "verify:sky": "node scripts/verify-sky.mjs",

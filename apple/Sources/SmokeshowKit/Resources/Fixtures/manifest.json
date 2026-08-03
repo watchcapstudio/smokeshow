@@ -1,0 +1,56 @@
+{
+  "generatedFrom": "scripts/generate-apple-fixtures.mjs",
+  "nowMs": 1785690191000,
+  "fixtures": [
+    {
+      "name": "clear-staying-clear",
+      "note": "verdict.above=false, every index null, headline \"Stays clear for the next 5 days\".",
+      "summary": "192h · Stays clear for the next 5 days"
+    },
+    {
+      "name": "smoke-now-clearing",
+      "note": "The headline case: above=true with a sustained clear inside the window.",
+      "summary": "192h · Clears Sunday ~2 PM"
+    },
+    {
+      "name": "smoke-never-clears",
+      "note": "above=true, all clear fields null, headline \"No clear air in the 5-day window\".",
+      "summary": "192h · No clear air in the 5-day window"
+    },
+    {
+      "name": "clean-smoke-arriving",
+      "note": "above=false with arrivalIndex set — the countdown accessory runs the other way.",
+      "summary": "192h · Smoke arrives Monday ~6 AM"
+    },
+    {
+      "name": "no-sensors",
+      "note": "measured.official and measured.local both null, anchor.source \"model\", offsetUg 0.",
+      "summary": "192h · Clears Sunday ~8 PM"
+    },
+    {
+      "name": "sensors-diverge",
+      "note": "Official and local far apart — the case the explainer copy exists to justify.",
+      "summary": "192h · Doesn't reach Smells-like-fire in 5 days"
+    },
+    {
+      "name": "model-gaps",
+      "note": "A run of null pm25 mid-array. Nothing may render 0 µg/m³ for these hours.",
+      "summary": "192h · Clears Sunday ~2 PM"
+    },
+    {
+      "name": "short-window",
+      "note": "hours.length well under 192 and days.length of 3 — never hardcode the window.",
+      "summary": "108h · Clears Sunday ~2 PM"
+    },
+    {
+      "name": "error-upstream-failed",
+      "note": "502 envelope. Clients fall back to cache or an explicit unavailable state.",
+      "summary": "error upstream-failed"
+    },
+    {
+      "name": "error-bad-coords",
+      "note": "400 envelope.",
+      "summary": "error bad-coords"
+    }
+  ]
+}
