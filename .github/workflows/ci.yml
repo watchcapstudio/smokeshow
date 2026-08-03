@@ -134,8 +134,10 @@ jobs:
       - name: Build for iOS Simulator
         working-directory: apple
         timeout-minutes: 40
+        # -quiet drops the driver command echo and keeps the diagnostics, which
+        # is the opposite of what I assumed when I removed it.
         run: |
-          xcodebuild build \
+          xcodebuild build -quiet \
             -project Smokeshow.xcodeproj \
             -scheme Smokeshow \
             -destination 'generic/platform=iOS Simulator' \

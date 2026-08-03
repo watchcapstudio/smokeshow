@@ -39,16 +39,19 @@ public final class AppModel: ObservableObject {
     private let entitlementProvider: EntitlementProviding
     private let locationProvider: LocationProviding
 
+    /// `push` defaults to the shared coordinator, but not as a default
+    /// *argument*: `PushCoordinator.shared` is main-actor isolated and a
+    /// default argument is evaluated in the caller's context, which need not be.
     public init(
         repository: ForecastRepository = .shared,
         entitlementProvider: EntitlementProviding,
         locationProvider: LocationProviding = LocationProvider(),
-        push: PushCoordinator = .shared
+        push: PushCoordinator? = nil
     ) {
         self.repository = repository
         self.entitlementProvider = entitlementProvider
         self.locationProvider = locationProvider
-        self.push = push
+        self.push = push ?? PushCoordinator.shared
         preferences = PreferencesStore.shared.current
         entitlement = EntitlementCache.shared.snapshot
         place = PlaceStore.shared.selected
