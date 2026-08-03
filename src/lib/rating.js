@@ -67,17 +67,22 @@ export const RANGES = LEVELS.map((l, i) => {
 });
 
 // "What this is not" — one reassurance line per level, read in the explain
-// sheet under the ladder. FLAG FOR HUMAN REVIEW: the "tastes" and
-// "smokeshow" lines lean on cigarette-equivalent framing (backed by
-// cigaretteEquivalent() below) to reassure a reader the air isn't as bad as
-// it sounds — that's still a dose-response claim and may run afoul of the
-// "no invented health dose-response claims" rule even though the ratio
-// itself traces to a published rule of thumb.
+// sheet under the ladder.
+//
+// Cigarette framing appears at "Tastes like fire" only, per the rule at
+// cigaretteEquivalent() below. It used to appear at levels 1 and 2 as well,
+// where it was not just off-policy but arithmetically wrong: against the
+// Berkeley Earth ratio a full day at the top of "In the air" is ~1.6
+// cigarettes, and the whole of "Smells like fire" runs 1.6–2.5 — so
+// "nowhere near a cigarette" and "well short of one cigarette" understated
+// the exposure by roughly 2x, in the reassuring direction. Those two lines
+// now reassure without quantifying. If you reintroduce a dose number at any
+// level, check it against cigaretteEquivalent() at BOTH ends of the band.
 export const NOT_LINES = [
   'No smoke story today. This is normal, clean air.',
-  'A full day outside in this is nowhere near a cigarette. A faint whiff is the whole event for most people.',
-  'Still well short of one cigarette over a full day outside. Most people notice it, and most plans can carry on.',
-  "Now it adds up: a full day breathing this is on the order of a few cigarettes. Worth moving the run indoors.",
+  'A faint whiff is the whole event for most people. Nothing here needs a change of plan.',
+  'Most people notice it outdoors, and most plans can carry on. Long stretches outside are where it starts to add up.',
+  'Now it adds up: a full day breathing this is on the order of a few cigarettes. Worth moving the run indoors.',
   'The heaviest level we track. Everyone inside, windows closed, filtration on if you have it.',
 ];
 
