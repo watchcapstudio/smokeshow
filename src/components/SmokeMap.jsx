@@ -2,8 +2,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { SmokeCanvasLayer } from './SmokeLayer.js';
+import { FireLayer } from './FireLayer.js';
 import { levelForPM25 } from '../lib/rating.js';
+// Two fire layers, deliberately separate. fires.js is NIFC WFIGS: named
+// incidents with containment and acreage, US only, drawn as tappable dots with
+// a card. hotspots.js is NASA FIRMS: clustered satellite heat detections,
+// global, and therefore the only one that covers Canada and Europe. They
+// answer different questions and must never be relabelled as each other.
 import { fetchFires, fireCard, fireRadius } from '../lib/fires.js';
+import { fetchHotspots } from '../lib/hotspots.js';
 import { getJSON, setJSON } from '../lib/storage.js';
 import './SmokeMap.css';
 
@@ -66,9 +73,10 @@ export default function SmokeMap({
   const mapRef = useRef(null);
   const smokeLayerRef = useRef(null);
   const markerRef = useRef(null);
+  const hotspotLayerRef = useRef(null); // FIRMS heat detections (global)
   const frameRef = useRef(null); // { meta, vA, vB, imgA, imgB, bounds, changedAt, hrrrMode }
   const imageCacheRef = useRef(new Map()); // url -> HTMLImageElement (decoded)
-  const fireLayerRef = useRef(null);
+  const fireLayerRef = useRef(null); // NIFC named incidents (US)
   const fireRendererRef = useRef(null);
   const [tier, setTier] = useState(1);
   const [fireHint, setFireHint] = useState(false);
@@ -148,6 +156,14 @@ export default function SmokeMap({
     // it visibly lagging behind.
     map.on('click movestart zoomstart', () => setActiveFire(null));
 
+    // The FIRMS hotspot layer is a separate canvas layer with its own pane, so
+    // the two never fight for the same DOM. It mounts empty and stays empty
+    // until (and unless) fires.json lands: the feed is additive, and an absent
+    // one must cost the map nothing.
+    const hotspotLayer = new FireLayer();
+    hotspotLayer.addTo(map);
+    hotspotLayerRef.current = hotspotLayer;
+
     const marker = L.marker([center.lat, center.lon], {
       icon: L.divIcon({
         className: 'user-marker',
@@ -176,8 +192,25 @@ export default function SmokeMap({
       smokeLayerRef.current = null;
       fireLayerRef.current = null;
       fireRendererRef.current = null;
+      hotspotLayerRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Fetched here rather than in App, so it cannot touch first paint: this
+  // component is lazy-loaded and only mounts once the grid has arrived, which
+  // is already well after the verdict has painted. A failure is swallowed —
+  // no fires.json means no icons, never a broken map.
+  useEffect(() => {
+    let cancelled = false;
+    fetchHotspots()
+      .then((hotspots) => {
+        if (!cancelled) hotspotLayerRef.current?.setFires(hotspots);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {

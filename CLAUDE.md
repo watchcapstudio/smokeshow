@@ -19,6 +19,14 @@ Wildfire smoke forecast web app for one user question: how bad is the air here, 
    - The labels ride their own pane above the smoke, because heavy smoke composites to near-opaque and would otherwise bury the city names right when a reader needs them.
    - `SMOKE_STOPS` in `src/lib/rating.js` is hand-mirrored in `scripts/hrrr/render_frames.py`. Change both, then run `npm run ramp` — it proves the composite stays monotonic across the basemap's whole tonal band and fails if the two copies drift. `npm run verify:map` then re-measures the same thing off pixels a real browser painted.
    - Fire layer: `/api/fires` (NIFC WFIGS) → hover/tap card with name, containment, size, discovery date, cause. Facts only, each carrying the date it was reported. It does **not** move with the scrubber — the smoke is a forecast, a fire report is not — and the card says so.
+   - Hotspot layer (separate from the fire cards above): NASA FIRMS heat detections, clustered by
+     `scripts/hrrr/fetch_fires.py` in the same 4x/day Actions job that renders the frames, published as
+     `fires.json` on the `data` branch and read by `src/lib/hotspots.js`. Needs a `FIRMS_MAP_KEY` repo
+     secret (free, by email from NASA) - without it the step no-ops and the layer is simply absent, which
+     is a supported state. These are thermal hotspots, not confirmed fires and not named incidents: never
+     label them otherwise. Global, so it is the layer that covers Canada and Europe; the NIFC cards are
+     US-only. `npm run verify:fires` measures the icon off painted pixels and fails if neither ring
+     clears 3:1 against whatever is actually behind it.
 5. Agreement band (run-to-run inputs for v1; build the data interface so v2 multi-model plugs in)
 6. Share spec: OG edge function, share card, link handoff (definition of done is in that doc)
 7. Illustration integration (parametric crossfade)

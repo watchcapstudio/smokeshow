@@ -39,6 +39,21 @@ jobs:
         shell: bash -leo pipefail {0}
         run: python scripts/hrrr/render_frames.py
 
+      # NASA FIRMS active fire detections. Rides this job because FIRMS NRT
+      # refreshes on roughly the same cadence as the HRRR cycles and this is
+      # already the job that publishes to the `data` branch — no new
+      # infrastructure, and the MAP_KEY never leaves Actions.
+      #
+      # continue-on-error: the fire layer is additive. If FIRMS is down or the
+      # key is missing, out/fires.json is simply not written, the client draws
+      # no icons, and the HRRR frames still publish.
+      - name: Fetch FIRMS fire detections
+        shell: bash -leo pipefail {0}
+        continue-on-error: true
+        env:
+          FIRMS_MAP_KEY: ${{ secrets.FIRMS_MAP_KEY }}
+        run: python scripts/hrrr/fetch_fires.py
+
       - name: Publish to data branch
         run: |
           cd out
