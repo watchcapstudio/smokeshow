@@ -38,6 +38,12 @@ export function tierForZoom(zoom) {
 
 const TIER_SPACING_KM = { 1: 25, 2: 75, 3: 200 };
 
+// The map opens all the way out. Smoke is a continental story — the plume that
+// matters to Missoula started in British Columbia — and a city-level first
+// frame hides the thing the reader came to see. MIN_ZOOM is also Leaflet's
+// floor here, so "wide" and "as wide as it goes" are the same number.
+const MIN_ZOOM = 4;
+
 // What the reader is actually looking at. The fallback used to be silent: a
 // 9-across point grid rendered exactly like a 3 km model field, with nothing
 // saying which one was on screen. Naming the model and its resolution is the
@@ -114,7 +120,10 @@ export default function SmokeMap({
   const imageCacheRef = useRef(new Map()); // url -> HTMLImageElement (decoded)
   const fireLayerRef = useRef(null); // NIFC named incidents (US)
   const fireRendererRef = useRef(null);
-  const [tier, setTier] = useState(1);
+  // Seed from the opening zoom, not from 1: the map now opens wide, so the
+  // very first onNeedTier() must ask for the wide grid. Seeding at 1 requested
+  // the 25 km grid for a continental view and left the fallback stretched.
+  const [tier, setTier] = useState(tierForZoom(MIN_ZOOM));
   const [fireHint, setFireHint] = useState(false);
   // { fire, radius, pinned } — pinned means opened by tap and immune to the
   // mouseout that a pointer device would send.
@@ -146,9 +155,9 @@ export default function SmokeMap({
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-    const map = L.map(containerRef.current, { zoomControl: true, minZoom: 4 }).setView(
+    const map = L.map(containerRef.current, { zoomControl: true, minZoom: MIN_ZOOM }).setView(
       [center.lat, center.lon],
-      9,
+      MIN_ZOOM,
     );
     // Three-layer sandwich, not light_all: base tiles, then the smoke canvas,
     // then the labels on top. Heavy smoke composites to near-opaque black, so
@@ -372,7 +381,10 @@ export default function SmokeMap({
   // location, so follow it explicitly.
   useEffect(() => {
     if (!mapRef.current || !markerRef.current) return;
-    mapRef.current.setView([center.lat, center.lon], 9);
+    // Recentre at whatever zoom the reader is already using. Switching cities
+    // is not a fresh visit: someone who zoomed in to their valley should not be
+    // thrown back out to the continent for having searched.
+    mapRef.current.setView([center.lat, center.lon], mapRef.current.getZoom());
     markerRef.current.setLatLng([center.lat, center.lon]);
     setView({ lat: center.lat, lon: center.lon });
   }, [center.lat, center.lon]);
