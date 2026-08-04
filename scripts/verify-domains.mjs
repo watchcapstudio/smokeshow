@@ -62,7 +62,18 @@ function buildData() {
   const git = (path) => execFileSync('git', ['show', `origin/data:${path}`], { maxBuffer: 1 << 28 });
 
   // Published HRRR, verbatim. Its v1 manifest becomes a v2 domain block.
-  const v1 = JSON.parse(git('hrrr/manifest.json').toString());
+  // The data branch moved to a root manifest.json (v2, domains[]) when CAMS
+  // joined HRRR. Fall back to the old per-domain path so a run against an
+  // un-republished branch still builds instead of crashing.
+  let v1;
+  try {
+    const root = JSON.parse(git('manifest.json').toString());
+    const hrrr = (root.domains || []).find((d) => d.id === 'hrrr');
+    if (!hrrr) throw new Error('no hrrr domain in root manifest.json');
+    v1 = { ...hrrr, frames: hrrr.frames ?? JSON.parse(git('hrrr/domain.json').toString()).frames };
+  } catch {
+    v1 = JSON.parse(git('hrrr/manifest.json').toString());
+  }
   for (const f of v1.frames) writeFileSync(join(DATA, 'hrrr', f.file), git(`hrrr/${f.file}`));
   try {
     writeFileSync(join(DATA, 'hrrr', 'series.json'), git('hrrr/series.json'));
