@@ -30,6 +30,65 @@ jobs:
       - run: npm run lint:css
       - run: npm run build
 
+  # Pixels, in a real browser. These are the only checks that measure what
+  # actually paints — the fire-icon bug that reached production was invisible
+  # to both `npm test` and `npm run build`, and verify:fires is what found it.
+  #
+  # verify:domains is deliberately NOT here. It reads the live `data` branch,
+  # which the render jobs rewrite 4x/day, and its frames are absolute-valid-time
+  # keyed — so an hours-old branch legitimately stops matching the current hour
+  # and every city reports the coarse-grid fallback. That is correct behaviour
+  # in the product and pure flake in CI. Run it by hand when changing domains.
+  browser:
+    name: browser checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # verify:fires builds its fixture with the real clusterer.
+      - run: pip install --quiet numpy pillow
+
+      - run: npm ci
+
+      # puppeteer-core ships no browser. The runner image has Chrome; fail
+      # loudly rather than let a missing binary read as a passing suite.
+      - name: Locate Chrome
+        run: |
+          for p in /usr/bin/google-chrome /usr/bin/chromium /usr/bin/chromium-browser; do
+            if [ -x "$p" ]; then echo "CHROME_PATH=$p" >> "$GITHUB_ENV"; echo "using $p"; exit 0; fi
+          done
+          echo "No Chrome on this runner; the browser checks cannot run." >&2
+          exit 1
+
+      - name: Start the dev server
+        run: |
+          npx vite --port 5173 > /tmp/vite.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -sf -o /dev/null http://localhost:5173/ && exit 0
+            sleep 1
+          done
+          echo "dev server never came up:" >&2; cat /tmp/vite.log >&2; exit 1
+
+      - run: npm run verify:sky
+      - run: npm run verify:map
+      - run: npm run verify:fires
+
+      # The captures are the point when one of these fails.
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-check-captures
+          path: scratch/*.png
+          if-no-files-found: ignore
+
   # The parity guarantee, enforced.
   #
   # Two files in the Apple app are *generated* from sources the web owns:
