@@ -16,7 +16,8 @@
     "verify:sky": "node scripts/verify-sky.mjs",
     "verify:map": "node scripts/verify-map.mjs",
     "verify:fires": "node scripts/verify-fires.mjs",
-    "verify:domains": "node scripts/verify-domains.mjs"
+    "verify:domains": "node scripts/verify-domains.mjs",
+    "lint:css": "node scripts/lint-css.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

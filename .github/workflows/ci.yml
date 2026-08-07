@@ -23,6 +23,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      # Structure, not style. A both-sides merge resolution can split a rule in
+      # half and leave it unclosed, which kills every rule after it — and
+      # neither `npm test` nor `npm run build` notices. One did reach
+      # production; see scripts/lint-css.mjs.
+      - run: npm run lint:css
+      - run: npm run build
 
   # The parity guarantee, enforced.
   #
