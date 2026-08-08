@@ -5,8 +5,11 @@ hand-mirror. `npm run ramp` (scripts/smoke-ramp-audit.mjs) parses THIS file
 and fails if the two disagree, so both renderers import from here rather than
 each carrying their own transcription.
 
-Pale on dark, intensity riding brightness, because the basemap is CARTO
-dark_nolabels. See CLAUDE.md build order §4 for why the ramp inverted.
+The ramp always runs opposite the tiles. The basemap is CARTO Positron
+(`light_nolabels`), so this ramp DARKENS — gray to brown to near-black,
+intensity riding darkness. The direction has flipped twice and each flip was
+the same mistake, so do not adjust these arrays to taste: see CLAUDE.md build
+order §4, change the JS copy in lockstep, and let `npm run ramp` decide.
 """
 
 import numpy as np
