@@ -199,10 +199,14 @@ struct OnboardingFlow: View {
 
     /// Illustration only: a smoke event rising and clearing. Explicitly not a
     /// forecast, and never labelled as one.
+    ///
+    /// The numbers avoid the rating thresholds — `ParityTests` flags any of
+    /// them appearing as a literal, and it is right to: a drawing that happens
+    /// to contain 35 is one careless edit away from being read as one.
     private static let exampleCurve: [CurvePoint] = {
         let shape: [Double] = [
-            6, 6, 7, 7, 8, 9, 11, 14, 19, 26, 35, 46, 58, 70, 80, 87, 91, 92,
-            90, 85, 77, 67, 56, 45, 36, 28, 22, 17, 13, 11, 9, 8, 7, 7, 6, 6
+            6, 6, 7, 7, 8, 9, 11, 14, 19, 26, 34, 46, 58, 70, 80, 87, 91, 92,
+            90, 85, 77, 67, 56, 44, 36, 28, 22, 17, 13, 11, 9, 8, 7, 7, 6, 6
         ]
         let start = Date(timeIntervalSince1970: 0)
         return shape.enumerated().map { index, value in
