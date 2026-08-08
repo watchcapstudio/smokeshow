@@ -23,6 +23,7 @@ struct SmokeMapView: View {
     @State private var domains: [SmokeDomain] = []
     @State private var overlay: SmokeOverlay?
     @State private var status: Status = .loading
+    @State private var isPlaying = false
 
     private enum Status: Equatable {
         case loading
@@ -64,6 +65,7 @@ struct SmokeMapView: View {
         }
         .task { await loadDomains() }
         .task(id: frameKey) { await loadFrame() }
+        .task(id: isPlaying) { await run() }
     }
 
     /// Recomputing the frame is keyed on the hour and the place, not on the
@@ -106,15 +108,34 @@ struct SmokeMapView: View {
                 Text(whenLabel).font(Typography.md)
                 Spacer()
                 if offset != 0 {
-                    Button("Now") { offset = 0 }
-                        .font(Typography.eyebrow)
-                        .buttonStyle(.plain)
-                        .opacity(0.7)
+                    Button("Now") {
+                        isPlaying = false
+                        offset = 0
+                    }
+                    .font(Typography.eyebrow)
+                    .buttonStyle(.plain)
+                    .opacity(0.7)
                 }
             }
 
-            Slider(value: $offset, in: -12...48, step: 1)
-                .tint(Palette.dark.accent)
+            HStack(spacing: 14) {
+                // Watching it move is the answer to "where is this going" in a
+                // way that dragging never quite is: the plume has a direction
+                // and you only see it when the frames run.
+                Button {
+                    if !isPlaying, offset >= 48 { offset = -12 }
+                    isPlaying.toggle()
+                } label: {
+                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                        .font(.system(size: 15, weight: .semibold))
+                        .frame(width: 38, height: 38)
+                        .background(Circle().fill(Palette.dark.accent.opacity(0.22)))
+                }
+                .buttonStyle(.plain)
+
+                Slider(value: $offset, in: -12...48, step: 1)
+                    .tint(Palette.dark.accent)
+            }
 
             HStack {
                 Text("−12h").font(Typography.eyebrow).opacity(0.5)
@@ -172,6 +193,19 @@ struct SmokeMapView: View {
             ?? placemark.country
     }
 
+    /// One hour every 320ms while playing, wrapping at the end of the window.
+    /// The frame load is keyed on the hour, so a hop that lands on an image
+    /// already in the URL cache paints immediately and one that does not
+    /// simply arrives a beat later — no queue, no dropped frames to manage.
+    private func run() async {
+        guard isPlaying else { return }
+        while !Task.isCancelled && isPlaying {
+            try? await Task.sleep(for: .milliseconds(320))
+            guard !Task.isCancelled, isPlaying else { return }
+            offset = offset >= 48 ? -12 : offset + 1
+        }
+    }
+
     private func loadDomains() async {
         do {
             domains = try await SmokeFrames.fetchDomains()
@@ -194,10 +228,18 @@ struct SmokeMapView: View {
         }
         do {
             let image = try await SmokeFrameImage.load(match.frame)
+            guard !Task.isCancelled else { return }
             overlay = SmokeOverlay(image: image, bounds: match.domain.bounds)
             status = .painted(match.domain.model)
         } catch {
-            overlay = nil
+            // Playback supersedes its own loads: every hour that arrives while
+            // an earlier one is still in flight cancels it. A cancelled fetch
+            // is not a broken map, and treating it as one made the whole field
+            // disappear the moment you pressed play.
+            guard !Task.isCancelled, !(error is CancellationError) else { return }
+            if (error as NSError).code == NSURLErrorCancelled { return }
+            // Keep the last good frame rather than blanking: a single missing
+            // hour mid-run is a gap in the run, not a loss of coverage.
             status = .unavailable
         }
     }
@@ -241,10 +283,15 @@ private struct MapCanvas: UIViewRepresentable {
         view.addGestureRecognizer(press)
 
         if let center {
+            // 12° opened on half the west coast: someone in Seattle was
+            // reading Spokane's air to answer a question about their own
+            // street. ~2.2° is roughly 240km — your metro and the country the
+            // smoke is arriving from, which is the scale the question is
+            // actually asked at. Pinch out for the continent.
             view.setRegion(
                 MKCoordinateRegion(
                     center: center,
-                    span: MKCoordinateSpan(latitudeDelta: 12, longitudeDelta: 12)
+                    span: MKCoordinateSpan(latitudeDelta: 2.2, longitudeDelta: 2.2)
                 ),
                 animated: false
             )
