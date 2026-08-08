@@ -10,6 +10,13 @@
 // coverage rule is honest instead: outside a domain, the map says it has none
 // rather than inventing a smooth field out of nothing.
 
+// iOS only for now. The renderer and the frames client are portable — the
+// chrome is not: `UIViewRepresentable`, `UILongPressGestureRecognizer` and
+// `fullScreenCover` are all UIKit. macOS gets the map when someone writes the
+// AppKit half, and until then it says so rather than shipping a dead button.
+
+#if os(iOS)
+
 import SwiftUI
 import MapKit
 import SmokeshowKit
@@ -388,3 +395,5 @@ private struct MapCanvas: UIViewRepresentable {
         }
     }
 }
+
+#endif

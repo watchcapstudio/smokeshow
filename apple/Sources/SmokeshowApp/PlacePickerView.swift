@@ -73,7 +73,9 @@ struct PlacePickerView: View {
                 }
             }
             .navigationTitle("Places")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") { dismiss() }

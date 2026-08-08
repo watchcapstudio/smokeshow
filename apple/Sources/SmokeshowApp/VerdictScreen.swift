@@ -124,10 +124,12 @@ struct VerdictScreen: View {
             PlacePickerView()
                 .environmentObject(model)
         }
+        #if os(iOS)
         .fullScreenCover(isPresented: $showsMap) {
             SmokeMapView()
                 .environmentObject(model)
         }
+        #endif
     }
 
     private var header: some View {
@@ -160,7 +162,13 @@ struct VerdictScreen: View {
     private var locationRow: some View {
         HStack(spacing: 10) {
             Button {
+                #if os(iOS)
                 showsMap = true
+                #else
+                // No map on macOS yet; the place picker is the whole of what
+                // this bar does there.
+                showsPlaces = true
+                #endif
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "map")
@@ -168,9 +176,11 @@ struct VerdictScreen: View {
                     Text((model.place?.shortName ?? "Choose a place").uppercased())
                         .font(Typography.eyebrow)
                     Spacer(minLength: 4)
+                    #if os(iOS)
                     Text("SEE THE SMOKE")
                         .font(Typography.eyebrow)
                         .opacity(0.6)
+                    #endif
                     Image(systemName: "chevron.right")
                         .font(.system(size: 9, weight: .semibold))
                         .opacity(0.6)
