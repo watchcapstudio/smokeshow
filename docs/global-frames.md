@@ -202,9 +202,16 @@ returns `null`, and the map degrades to the point grid with the badge saying
 so. That is the intended failure mode, and it is what
 `src/lib/frames.test.js` pins.
 
-**Rollout order matters.** A client that already understands v2 will degrade to
-the point grid until the first render job publishes a v2 manifest. Deploy the
-client and dispatch both workflows in the same window.
+**Rollout order, for the next version bump.** Both sides degrade gracefully,
+but not symmetrically, so the order is not a coin flip. `publish.sh` swaps a
+domain's whole directory, so the moment a render job runs, the *old* manifest
+path stops existing — an already-deployed old client 404s and silently loses
+its frames. A new client meeting an old manifest degrades to the point grid
+**and says so on the coverage badge**. Same fallback, but only one of them
+tells the reader. So: deploy the client first, then dispatch the render jobs.
+
+v1 → v2 shipped that way. The client landed on `main`, then `hrrr.yml` ran on
+its next scheduled cycle and republished as v2.
 
 ## Publishing
 
