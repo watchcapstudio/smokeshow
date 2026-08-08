@@ -117,21 +117,25 @@
   background: transparent;
 }
 
+/* The playhead. 9px, not the 3px it was: a 3px bar is a hairline to a
+   fingertip — you could see where you were but not get hold of it. The track
+   still takes a tap anywhere along its length; this is about grabbing the
+   handle and dragging it. */
 .scrubber__range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 3px;
+  width: 9px;
   height: 4.5rem;
-  border-radius: 2px;
+  border-radius: 4.5px;
   background: currentColor;
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--bg, #000) 60%, transparent);
 }
 
 .scrubber__range::-moz-range-thumb {
-  width: 3px;
+  width: 9px;
   height: 4.5rem;
   border: none;
-  border-radius: 2px;
+  border-radius: 4.5px;
   background: currentColor;
 }
 
