@@ -36,6 +36,10 @@ struct SmokeMapView: View {
         case unavailable
     }
 
+    /// Whether the basemap can render dark. MapKit's cannot here; see
+    /// `loadDomains`.
+    static let darkBasemapAvailable = false
+
     private var place: Place? { model.place }
 
     private var validTime: Date {
@@ -59,6 +63,12 @@ struct SmokeMapView: View {
                     Task { await move(to: coordinate) }
                 }
             )
+            // Rebuild rather than restyle. `overrideUserInterfaceStyle` set on
+            // a live MKMapView does not reliably repaint the basemap, and the
+            // theme resolves exactly once per session — from the manifest, on
+            // open — so paying for one rebuild is cheaper than carrying a
+            // basemap that disagrees with the frames on top of it.
+            .id(theme)
             .ignoresSafeArea()
 
             topBar
@@ -216,7 +226,19 @@ struct SmokeMapView: View {
     private func loadDomains() async {
         do {
             domains = try await SmokeFrames.fetchDomains()
-            theme = SmokeFrames.hasTheme(.dark, in: domains) ? .dark : .light
+            // Dark frames are published and this picks them up the moment the
+            // basemap can actually go dark. It cannot yet: MKMapView ignores
+            // `overrideUserInterfaceStyle` for its basemap here, so asking for
+            // dark produced the amber ramp on pale tiles — the convergence the
+            // whole two-palette exercise exists to prevent. Frames and basemap
+            // agree or neither moves.
+            //
+            // The fix is a basemap we control. The demo used CARTO
+            // dark_nolabels, which is what Kelly is asking for when he says
+            // "the sexy black map", and MapLibre would draw those tiles on iOS
+            // and Android both. Flip this to `.dark` the day that lands.
+            theme = SmokeMapView.darkBasemapAvailable
+                && SmokeFrames.hasTheme(.dark, in: domains) ? .dark : .light
             if domains.isEmpty { status = .unavailable }
         } catch {
             status = .unavailable
@@ -269,6 +291,7 @@ private struct MapCanvas: UIViewRepresentable {
 
     func makeUIView(context: Context) -> MKMapView {
         let view = MKMapView()
+        view.overrideUserInterfaceStyle = isDark ? .dark : .light
         view.delegate = context.coordinator
         view.pointOfInterestFilter = .excludingAll
         view.showsCompass = false
