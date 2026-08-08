@@ -47,9 +47,9 @@
   <body>
     <div id="root"></div>
 
-    <!-- Server-delivered SEO content: FAQ -> explainer -> disclaimer.
-         Deliberately static HTML (not React-rendered) so crawlers see it in
-         the initial payload. The app renders above in #root. -->
+    <!-- Server-delivered SEO content: app CTA -> FAQ -> explainer ->
+         disclaimer. Deliberately static HTML (not React-rendered) so crawlers
+         see it in the initial payload. The app renders above in #root. -->
     <div class="app app--bottom">
       <!-- Static, not React: this is the map section's only heading and the
            FAQ's "the map above" points at it, so crawlers need it in the
@@ -63,14 +63,26 @@
         </p>
       </header>
 
-      <!-- React portals the live smoke map here (see App.jsx) — just above
-           the FAQ; FAQ copy references "the map above". -->
+      <!-- React portals the live smoke map here (see App.jsx). Its sheet ends
+           here: the reference sheet below starts on its own, with sky between
+           them, so the questions don't read as map chrome. FAQ copy still
+           references "the map above", which is still what it is. -->
       <div id="map-slot"></div>
 
       <!-- The reference material rides on the demo's bottom sheet rather than
            on the live sky: fixed cream, fixed ink, no flip. -->
       <div class="seo-sheet">
         <div class="seo-sheet__grab" aria-hidden="true"></div>
+
+        <section class="app-cta">
+          <h2>SMOKESHOW is also an app.</h2>
+          <p>
+            The same forecast, glanceable from a Home Screen or lock-screen widget — no need to open
+            anything to check. Plus threshold alerts when smoke arrives, peaks, or clears.
+            <strong>Coming soon to iOS, macOS, and Android.</strong> 14-day trial, then
+            $2.99/month.
+          </p>
+        </section>
 
         <section class="faq">
           <h2>Smoke in the air? Common questions.</h2>
@@ -137,16 +149,6 @@
             Smokeshow can't answer that for you, this tool just describes what the air is like, not what your body can handle. Sensitivity varies a lot with age, health, and activity from person to person. For health guidance during wildfire smoke, consider AirNow.gov and your local health authorities, and/or talk to a medical professional about your situation.
           </p>
           </details>
-        </section>
-
-        <section class="app-cta">
-          <h2>SMOKESHOW is also an app.</h2>
-          <p>
-            The same forecast, glanceable from a Home Screen or lock-screen widget — no need to open
-            anything to check. Plus threshold alerts when smoke arrives, peaks, or clears.
-            <strong>Coming soon to iOS, macOS, and Android.</strong> 14-day trial, then
-            $2.99/month.
-          </p>
         </section>
 
         <div class="explainer">
