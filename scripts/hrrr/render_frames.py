@@ -30,6 +30,7 @@ from pyproj import Transformer
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from render.frames import domain_block, save_frame, target_grid, write_domain  # noqa: E402
+from render.ramp import DARK, LIGHT  # noqa: E402
 
 warnings.filterwarnings("ignore")
 
@@ -116,9 +117,14 @@ class Regridder:
         return out
 
 
+DARK_DOMAIN = f"{DOMAIN}-dark"
+
+
 def main():
     out_dir = os.path.join(OUT, DOMAIN)
+    dark_dir = os.path.join(OUT, DARK_DOMAIN)
     os.makedirs(out_dir, exist_ok=True)
+    os.makedirs(dark_dir, exist_ok=True)
     run = latest_cycle()
     print(f"HRRR run: {run:%Y-%m-%d %HZ}")
 
@@ -142,7 +148,12 @@ def main():
             regridder = Regridder(lat2d, lon2d)
 
         stamp = valid.strftime("%Y%m%dT%H")
-        save_frame(f"{out_dir}/frame-{stamp}.png", regridder.image(field))
+        image = regridder.image(field)
+        save_frame(f"{out_dir}/frame-{stamp}.png", image)
+        # Same field, ramp inverted, for clients drawing a dark basemap. One
+        # regrid, two palettes — the expensive half of this loop is the GRIB
+        # read and the interpolation, not the PNG.
+        save_frame(f"{dark_dir}/frame-{stamp}.png", image, theme=DARK)
 
         time_key = valid.strftime("%Y-%m-%dT%H:00")
         frames.append({"time": time_key, "file": f"frame-{stamp}.png"})
@@ -174,6 +185,32 @@ def main():
             run=run.strftime("%Y-%m-%dT%H:00"),
             generated=generated,
             series="series.json",
+            theme=LIGHT,
+        ),
+    )
+
+    # The same domain, painted for a dark basemap. It carries no series: the
+    # series is numbers, not colour, and one copy of it is enough.
+    write_domain(
+        OUT,
+        domain_block(
+            id=DARK_DOMAIN,
+            label="NOAA HRRR-Smoke",
+            model="HRRR-Smoke near-surface (MASSDEN, 8m AGL)",
+            source="NOAA HRRR-Smoke",
+            resolution_km=3,
+            bounds={"latS": LAT_S, "latN": LAT_N, "lonW": LON_W, "lonE": LON_E},
+            width=WIDTH,
+            # Deliberately the lowest priority published. Clients pick the
+            # highest-priority domain covering the point, so a client that has
+            # never heard of `theme` — including the deployed web map — can
+            # never land on the dark frames while the light ones exist.
+            priority=1,
+            height=regridder.height,
+            frames=frames,
+            run=run.strftime("%Y-%m-%dT%H:00"),
+            generated=generated,
+            theme=DARK,
         ),
     )
 
