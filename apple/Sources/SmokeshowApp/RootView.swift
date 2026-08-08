@@ -92,6 +92,13 @@ struct RootView: View {
         switch nudge {
         case .installWidget:
             guard model.entitlement.status.isActive else { return }
+            // Not on arrival. Someone who has not yet seen a forecast has no
+            // reason to want a widget of it, and a sheet between the welcome
+            // and the product reads as a third thing to dismiss. Let them use
+            // the app first; the ask lands better once the answer has proved
+            // useful. Settings has the same flow for anyone who says no.
+            try? await Task.sleep(for: .seconds(20))
+            guard !Task.isCancelled, model.entitlement.status.isActive else { return }
             TrialInstrumentation.record(.widgetPromptShown)
             showsWidgetOnboarding = true
         case .subscribe:

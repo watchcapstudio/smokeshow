@@ -10,6 +10,7 @@ import SmokeshowKit
 struct SettingsView: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.dismiss) private var dismiss
+    @State private var showsWidgetOnboarding = false
 
     var body: some View {
         ZStack {
@@ -20,6 +21,21 @@ struct SettingsView: View {
                         Text("Settings").font(Typography.xl)
                         Spacer()
                         Button("Done") { dismiss() }.font(Typography.sm).opacity(0.6)
+                    }
+
+                    // First, because it is the thing the product is for: the
+                    // widget is the glance, and the app is the place you go
+                    // when the glance is not enough. Anyone who dismissed the
+                    // prompt needs a way back to it that is not reinstalling.
+                    section("Home screen") {
+                        Button("Add a widget") { showsWidgetOnboarding = true }
+                            .font(Typography.md)
+                        Text("""
+                            The point of Smokeshow is not opening Smokeshow. Put the widget \
+                            next to the weather and the answer is just there.
+                            """)
+                            .font(Typography.xs)
+                            .opacity(0.6)
                     }
 
                     section("Units") {
@@ -104,6 +120,9 @@ struct SettingsView: View {
         }
         .foregroundStyle(Palette.dark.text)
         .task { await model.push.refreshAuthorizationStatus() }
+        .sheet(isPresented: $showsWidgetOnboarding) {
+            WidgetOnboardingView()
+        }
     }
 
     private var subscriptionLine: String {

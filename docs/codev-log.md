@@ -66,6 +66,18 @@ reader knows what the app does is a prompt they decline.
 - Rollback: revert the onboarding PR. The acknowledgement flag lives under its
   own defaults key, so nothing else reads it.
 
+### 2026-08-08 — the widget ask waits its turn
+
+The widget sheet opened the moment onboarding finished, so a new user met
+three screens and then a fourth thing to dismiss, before ever seeing a
+forecast. Nobody wants a widget of an answer they have not seen yet.
+
+Now it waits 20 seconds into the first session, and Settings carries "Add a
+widget" at the top for anyone who said no. The nudge policy in
+`TrialInstrumentation` did not change — only when the app acts on it.
+
+- Rollback: revert the PR. The delay is one `Task.sleep` in `RootView`.
+
 ## Open, and whose call
 
 - **Bundle prefix.** The app is `earth.smokeshow.*`; everything else of
@@ -73,5 +85,9 @@ reader knows what the app does is a prompt they decline.
   Joe's call.
 - **Widget previews truncate.** "In t…", "D…" in the onboarding preview. The
   large families were designed without ever being rendered.
+- **A raw Swift error is on screen in Settings.** "Alerts aren't registered:
+  The operation couldn't be completed. (SmokeshowKit.DeviceRegistryClient
+  .RegistryError error 0.)" That is a developer string in a user's face; it
+  wants a written sentence. The B7 registry being provisional is the cause.
 - **Watch entitlement.** An unpaired-launch watch reads an empty snapshot.
   Known, documented in `apple/docs/watch-and-live-activity.md`.
