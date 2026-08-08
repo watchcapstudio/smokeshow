@@ -1,16 +1,8 @@
-# SMOKESHOW platform plan — free web, free apps, paid alerts
+# SMOKESHOW platform plan — free web, paid apps
 
 Product architecture and phased delivery for: a free HTML site that works in
-any browser, plus free iOS, macOS, and Android apps where the widgets and the
-map live, with push notifications as a $2.99/month upgrade. All four surfaces
-must read as one product.
-
-> **Reversed 2026-08-08.** This document previously specified paid apps at
-> $2.99/mo with a 14-day trial and *no permanent free tier* (§4, §9). The apps
-> are now free, the map is in the free tier, and only alerts are paid. The
-> reasoning is in §4 — it turns on smoke being episodic, which a fixed trial
-> window cannot accommodate. Sections 1, 3, 4, 8 and 9 have been rewritten;
-> `docs/branch-prompts.md` B1/B7/B8/B9 follow.
+any browser, plus paid iOS, macOS, and Android apps at $2.99/month where
+notifications and widgets live. All four surfaces must read as one product.
 
 Companion docs:
 - `docs/smokeshow-demo-implementation-plan.md` — the web re-skin (Phase A)
@@ -22,36 +14,21 @@ Companion docs:
 
 | Surface | Price | Has | Does not have |
 | --- | --- | --- | --- |
-| **Web** (smokeshow.earth) | Free | Everything on the site today, re-skinned, incl. the map; store badges + widget showcase | Notification settings, widgets |
-| **iOS** | Free · $2.99/mo for alerts | Everything web has, native, incl. the map; home + lock-screen widgets | Push, until subscribed |
-| **macOS** | Free · included with the iOS subscription | Same, desktop widget families | Lock-screen accessories (no such surface) |
-| **Android** | Free · $2.99/mo for alerts | Same; Glance widgets | Push, until subscribed |
-
-**The paywall sits at one feature: push.** Everything else — verdict, map,
-timeline, widgets, five-day strip — is free on every surface. One line, easy to
-explain, and it never makes someone wonder whether the number they are looking
-at is the real one.
+| **Web** (smokeshow.earth) | Free | Everything on the site today, re-skinned; store badges + widget showcase | Notification settings, widgets |
+| **iOS** | $2.99/mo | Everything web has, native; home + lock-screen widgets; push | — |
+| **macOS** | included | Same, desktop widget families | Lock-screen accessories (no such surface) |
+| **Android** | $2.99/mo | Same; Glance widgets; push | — |
 
 The web keeps its `CLAUDE.md` hard rules intact — static-first, no accounts,
 no email capture. Server state (device tokens, entitlements) lives on the app
 side, which is a different product with different rules. The web's only new
 element is a call to action.
 
-**What you're actually selling.** Glanceability is now free, so the paid
-product is narrower and should be named honestly: **you are selling not having
-to look.** The free app answers "how bad is it right now" whenever someone
-opens it or glances at a widget. The subscription answers it when they *aren't*
-looking — the 4 AM shift in the wind, the plume that arrives while they are at
-work, the all-clear that lands after they have given up checking.
-
-Market the free app on the widget, and the subscription on the one thing a
-widget structurally cannot do: reach someone who isn't looking at it.
-
-**What this costs.** A free tier makes install volume unbounded, and every free
-user consumes basemap tiles and `/api/forecast` calls. Marginal cost per user
-is now the constraint that shapes the architecture, which is why §2's cache
-proxy and the self-hosted basemap (§8, B11) stop being prudent and become
-load-bearing.
+**What you're actually selling.** Not alerts — glanceability. "People want to
+see the data without needing to look it up" is the pitch, and the widget is the
+product. Alerts are the retention mechanic that keeps the subscription alive
+between smoke events. Sequence the marketing accordingly: the widget is the
+hero, notifications are the second bullet.
 
 ---
 
@@ -150,36 +127,23 @@ stronger pitch than a screenshot.
   password. Keeps the spirit of the no-accounts rule and removes a signup step
   from the funnel.
 
-**Free tier — decided: permanent, and it includes the map.** The apps are free
-to download and free to use. A single non-consumable subscription unlocks push
-notifications and nothing else. No trial is needed, because the free tier *is*
-the trial and it never expires.
+**Free tier — decided: none. Subscribe, with a 14-day free trial.** Standard
+weather-app model. Configure the trial as a store-native introductory offer
+(StoreKit introductory offer / Play base-plan free trial) so eligibility is
+enforced by the store, one per account per subscription group, and RevenueCat
+reports it uniformly across both.
 
-**Why this replaced the 14-day trial.** A trial assumes the product can
-demonstrate itself inside a fixed window. Weather can — there is weather every
-day. **Smoke is episodic.** A trial that opens during two clear weeks shows the
-user a calm map, proves nothing, and lapses on day 14 having never once done
-the thing it exists to do. You would be charging at the exact moment of minimum
-demonstrated value, and refunding goodwill you had not yet earned.
+Two consequences worth designing for rather than discovering:
 
-Freemium inverts that timing. The app is already installed and already on the
-home screen when the sky turns orange, and *that* is the moment someone will
-pay to be told when it clears. The conversion event is the smoke event, and you
-cannot schedule a smoke event inside a trial window — but you can be present
-for it.
-
-Three consequences worth designing for rather than discovering:
-
-- **Get a widget onto the home screen on day 0 anyway.** This was the trial's
-  job and it is still the job — the free tier's value is ambient and cannot be
-  felt from inside the app. It just no longer has a deadline attached.
-- **The upgrade prompt belongs at the smoke event, not at a date.** There is no
-  day-12 cliff to instrument any more. The moment to ask is when the verdict
-  crosses a threshold for a location the user watches — "we could have told you
-  this at 4 AM." Ask there, ask rarely, and never during clean air.
-- **Lapsed subscribers keep a working app.** Unlike the trial model, an expired
-  subscription must not degrade the widget or the map — it removes push and
-  nothing else. This is easier to build and much easier to defend in review.
+- **The trial's job is to get a widget onto the home screen on day 0.** A trial
+  that never becomes a glance never converts — the product's value is ambient,
+  and it can't be felt from inside the app. Widget installation is the
+  onboarding step, not a settings-screen afterthought.
+- **Day 12–14 is the churn cliff, and the widget is the surface it happens on.**
+  When the trial lapses the widget either disappears (iOS) or keeps rendering
+  something (Android). What it shows at that moment is a deliberate design
+  decision — your best conversion prompt, or a blank tile that reads as broken.
+  Decide it; don't let it fall out of the implementation.
 
 ---
 
@@ -312,7 +276,6 @@ once its dependency lands. Prompts for each are in `docs/branch-prompts.md`.
 | **5** | **B8** | `claude/b8-apple` | B7, B9 | SwiftUI app + WidgetKit, iOS + macOS, StoreKit | **Opus 5** | 5–7w |
 | **5** | **B9** | `claude/b9-android` | B7, B8 | Kotlin/Compose + Glance, Play Billing | **Opus 5** | 3–5w |
 | **5** | **B10** | `claude/b10-dark-map` | B7, B8, B9 | Dark basemap + inverted smoke ramp | **Opus 5** | 1d |
-| **5** | **B11** | `claude/b11-self-hosted-basemap` | B7 | PMTiles basemap + shared style, replacing CARTO | **Opus 5** | 3–5d |
 
 Web re-skin: ~4–6 days elapsed with the concurrency above (vs. ~8 serial).
 
@@ -332,12 +295,6 @@ Web re-skin: ~4–6 days elapsed with the concurrency above (vs. ~8 serial).
   high-iOS-share regions, so B8 leads; starting B9 once B8's data layer and
   widget patterns exist buys consistency cheaply. Run them together only if
   launch date beats consistency.
-- **B11 must land its style + PMTiles artifact before B8 or B9 renders a map.**
-  Same argument as B1's contract, one layer down: three clients drawing the
-  same basemap from one artifact cannot drift, and three clients each choosing
-  a map SDK will. If a native branch is already choosing between MapKit and
-  MapLibre, that decision is B11's to make, not theirs — MapLibre Native reads
-  the same PMTiles and style JSON the web does, MapKit reads neither.
 
 ### Why these models
 
@@ -360,15 +317,8 @@ Web re-skin: ~4–6 days elapsed with the concurrency above (vs. ~8 serial).
   `assets/gen_smokeshow_art.py` generator stays in the repo as an archive.
 - **Web has no notification settings** — CTA only.
 - **Widgets are marketing on web, UI on native.**
-- ~~**No free tier in the apps.** Subscribe at $2.99/mo with a 14-day free
-  trial.~~ **Reversed 2026-08-08.** The apps are free and permanent; $2.99/mo
-  unlocks push only; the map is in the free tier. A fixed trial cannot
-  demonstrate an episodic product — reasoning in §4.
-- **Basemap must be self-hosted.** Follows directly from the free map: CARTO's
-  hosted tiles are restricted to enterprise customers and non-profit grants
-  (their `basemap-styles` LICENSE.md, changed Oct–Nov 2025), and a free tier
-  makes tile volume unbounded regardless. One PMTiles artifact serves web, iOS
-  and Android (§8, B11).
+- **No free tier in the apps.** Subscribe at $2.99/mo with a **14-day free
+  trial**, store-native introductory offer (§4).
 - **The web re-skin ships first**, before any platform work (§8).
 
 ## 10. Still open

@@ -20,7 +20,6 @@ Before starting any wave, confirm `main` contains the previous wave's output:
 | Wave 3 (B6) | **B2** |
 | Wave 4 (B1) | the shipped re-skin |
 | Wave 5 (B7, B8, B9) | **B1's contract commit** — `docs/forecast-api-contract.md` |
-| Wave 5 (B11) | **B10** — `src/lib/basemap.js`, `scripts/smoke-ramp-audit.mjs`, the `--map-surface` token |
 
 Quick check before dispatching a branch:
 
@@ -38,19 +37,7 @@ git fetch origin && git ls-tree --name-only origin/main docs/ src/lib/
 | — | *web re-skin ships* | | |
 | **4** | B1 | — | re-skin live |
 | **5** | B7, B8, B9 | yes | B1's contract commit |
-| **5** | B10 | yes (render layer — no overlap with B1/B7/B8/B9) | ~~B1 merged~~ — shipped early, see note |
-| **5** | B11 | yes | B10 merged; must land before B8/B9 render a map |
-
-**B10 ran ahead of its gate and that was fine.** It shipped before B1 because
-its scope is the render layer only and B1's prompt forbids touching components
-and CSS, so there was no overlap. The one shared file is `src/lib/rating.js`
-(ramp constants) — merge B10 before dispatching B1 and even that disappears.
-
-**B11 exists because the free tier now includes the map** (`platform-plan.md`
-§1, reversed 2026-08-08). CARTO's hosted tiles are restricted to enterprise
-customers and non-profit grants, and free installs make tile volume unbounded
-regardless of licensing. B11 replaces them with a self-hosted artifact that all
-three clients share.
+| **5** | B10 | yes (render layer — no overlap with B1/B7/B8/B9) | B1 merged |
 
 Every prompt assumes the agent reads `CLAUDE.md`,
 `docs/smokeshow-build-brief.md`, and `docs/smokeshow-share-spec.md` first.
@@ -139,13 +126,6 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 > - Route through the existing `/api/aq` cache proxy and keep the coordinate
 >   snapping in `src/lib/grid.js`; a viral smoke event must not blow the
 >   Open-Meteo free tier.
-> - **Size this for a free tier, not a subscriber base** (changed 2026-08-08).
->   The apps are now free, so this endpoint serves every install plus the web —
->   not a bounded set of paying users. Caching and coordinate snapping are
->   load-bearing here, not prudent: state the cache key, the TTL, and the
->   expected upstream-fetch rate per populated cell, and include a cost estimate
->   at 10k / 100k / 1M daily actives. If the design only works at subscriber
->   volume, it does not work.
 > - Serve the sky parameters from `src/lib/sky.js` and the trend from
 >   `src/lib/trend.js` (both landed by branch B0) so the native clients get them
 >   without reimplementing the maths.
@@ -371,22 +351,12 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 >   first paint — the hard rule is verdict in under 3 seconds on cellular.
 > - Lead with glanceability, not alerts. The pitch is "see it without looking it
 >   up"; notifications are the second bullet.
->   - ⚠️ **Superseded 2026-08-08.** Glanceability is now the *free* tier, so it
->     is no longer what the CTA sells — it is what the CTA gives away. Lead with
->     "free app, free widgets, free map," and make the paid line the one thing a
->     widget cannot do: reach you when you aren't looking. See
->     `platform-plan.md` §1.
 > - App Store and Play Store badges, using each store's official badge assets
 >   and sizing rules. **Build them behind a feature flag, default off** — the
 >   apps don't exist yet and dead links are worse than no CTA.
 > - **No email capture, no waitlist form.** `CLAUDE.md` forbids it and there is
 >   no exception for this branch.
-> - State the price plainly rather than hiding it behind a tap. ⚠️ **Changed
->   2026-08-08:** the price is no longer the headline, because the app is free.
->   The live copy shipped from this branch still reads "$2.99/month for iOS,
->   macOS, and Android" in `AppWidgetCTA.jsx` (lines 134 and 237) and in the
->   static SEO block in `index.html` (line 111). All three are now wrong and
->   need rewriting to "free · $2.99/month for alerts" or similar.
+> - State the price plainly ($2.99/month) rather than hiding it behind a tap.
 > - Must work in both ink and cream states and at every level; check it at
 >   "All clear", where a smoke-forecast CTA has the least natural urgency.
 >
@@ -424,13 +394,7 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 >   send.
 > - **Entitlement gate, server-side**, via the RevenueCat webhook. Lapsed
 >   subscribers must stop costing you compute and delivery, and client-side
->   gating alone won't do that. Note (changed 2026-08-08): the apps are now free
->   and the subscription unlocks push *only*, so this gate governs a feature,
->   not the product — a lapsed device stops receiving notifications and keeps a
->   fully working app. Nothing else in this branch changes, but it does mean
->   **only subscribers ever register here**: a free user has no device record,
->   no token, and costs this service nothing. Design registration as an
->   upgrade-time action, not a first-launch one.
+>   gating alone won't do that.
 > - APNs and FCM fan-out with retry and token-invalidation handling.
 >
 > Ship the demo's stated posture verbatim: *"Threshold alerts only. No digests,
@@ -461,13 +425,6 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 >   Do not reimplement `computeVerdict`, the rating scale, or clear-time logic
 >   in Swift — the whole point of the endpoint is that a user's phone and laptop
 >   can never disagree about when the smoke clears.
-> - **The map is in the free tier** (added 2026-08-08). Do not choose a map SDK
->   here — that is branch B11's call, and it has already been made: MapLibre
->   Native, reading the same PMTiles artifact and style JSON the web reads, so
->   the three clients cannot draw different basemaps. **Do not use MapKit**; it
->   reads neither, and it would put Apple on a different basemap from Android
->   and the web. If B11 hasn't landed, stub the map view behind the same
->   interface and move on — it is not on the critical path for widgets.
 > - **Widgets are the product.** WidgetKit, sharing SwiftUI views with the app.
 >   The demo already designs against the right families:
 >   `.w-small` → `systemSmall`, `.w-med` → `systemMedium`, `.lk-inline` →
@@ -477,25 +434,18 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 >   them. macOS gets the `system*` families only; it has no lock screen.
 > - **Respect the WidgetKit reload budget** (~40–70 timeline reloads/day). Fetch
 >   a full timeline in one call and build many entries from it. Do not poll.
-> - **StoreKit 2 via RevenueCat.** ⚠️ **Changed 2026-08-08 — this section
->   previously specified $2.99/mo subscribe-to-use with a 14-day trial and no
->   permanent free tier. That is reversed.** The app is now **free and
->   permanent**; a $2.99/month subscription unlocks **push notifications only**.
->   The map, widgets, verdict and timeline are free forever. Reasoning is in
->   `platform-plan.md` §4: smoke is episodic, and a fixed trial window that
->   opens during clear air demonstrates nothing.
->   - **No trial to configure.** The free tier is the trial and it does not
->     expire. Disclose price and auto-renewal on the paywall as App Review
->     requires; there is no trial length to disclose.
->   - **Onboard straight into a widget.** Still the job, minus the deadline —
->     the free tier's value is ambient and cannot be felt from inside the app.
->     Prompt for widget installation on day 0.
->   - **No day-12 churn cliff to instrument.** Ask for the upgrade when the
->     verdict crosses a threshold for a watched location — "we could have told
->     you this at 4 AM" — not on a date. Never during clean air.
->   - **A lapsed subscription removes push and nothing else.** The widget and
->     the map keep working. Simpler to build than the old designed-lapse state,
->     and much easier to defend in review.
+> - **StoreKit 2 via RevenueCat.** $2.99/month with a **14-day free trial** —
+>   subscribe-to-use, no permanent free tier. Configure the trial as a StoreKit
+>   introductory offer so the store handles eligibility (one trial per Apple ID
+>   per subscription group), and disclose the terms on the paywall as App Review
+>   requires: trial length, price after, and that it auto-renews.
+>   - **Onboard straight into a widget.** The trial's job is to get a widget
+>     onto the home screen in the first session; a trial that never becomes a
+>     glance never converts. Prompt for widget installation on day 0, not later.
+>   - **Instrument day 12–14.** That's the churn cliff — the widget goes away
+>     when the trial lapses, and that moment is either your best conversion
+>     prompt or your worst experience. Design what the widget shows on lapse
+>     rather than letting it fail blank.
 > - Push registration against branch B7's device registry. Anonymous device ID —
 >   no accounts, no email.
 > - Read colours, type scale, and motion from `design/tokens.json` so the apps
@@ -537,17 +487,12 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 > - Cover the Android-specific surfaces the demo doesn't: Material You dynamic
 >   colour (decide whether to adopt it or hold the brand palette — recommend
 >   holding the palette, since the sky *is* the data), and predictive back.
-> - **Google Play Billing via RevenueCat.** The app is **free and permanent**.
->   A $2.99/month subscription unlocks **push notifications only** — the map,
->   widgets, verdict and timeline are all free, forever, and an expired
->   subscription must leave every one of them working. No trial: the free tier
->   is the trial and it does not expire (see `platform-plan.md` §4). Same
->   structure as the Apple app; the two must not diverge on price or on what
->   sits behind the paywall.
-> - **Ask for the upgrade at the smoke event, not on a schedule.** The prompt
->   belongs where the verdict crosses a threshold for a watched location — the
->   honest pitch is "we could have told you this at 4 AM." Never prompt during
->   clean air, and keep it rare.
+> - **Google Play Billing via RevenueCat.** $2.99/month with a **14-day free
+>   trial**, configured as a Play base-plan free-trial offer. Same structure as
+>   the Apple app — the two must not diverge on trial length or price. Mirror
+>   the Apple app's day-0 widget onboarding and its designed lapse state; on
+>   Android the widget stays on the home screen after the trial ends, so what it
+>   renders then is a deliberate decision, not a fallback.
 > - FCM registration against branch B7's device registry. Anonymous device ID.
 > - Read colours, type scale, and motion from `design/tokens.json`.
 > - Every forecast label carries "model estimate"; past hours are never
@@ -640,63 +585,3 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 > selector and platform frames, so you can force each level and compare. Deliver
 > before/after captures at all five levels, plus the monotonicity check output.
 > Commit and push to `claude/b10-dark-map`. Do not open a PR.
-
----
-
-<a id="b11"></a>
-## B11 — Self-hosted basemap · **Opus 5** · `claude/b11-self-hosted-basemap`
-*Wave 5. Base: B10 merged. Must land its artifact before B8 or B9 renders a map.*
-
-> Read `CLAUDE.md`, `docs/smokeshow-platform-plan.md` §1 and §9, and
-> `src/components/SmokeMap.jsx`, `src/components/SmokeLayer.js`,
-> `src/lib/basemap.js`, `src/lib/rating.js` and `scripts/smoke-ramp-audit.mjs`
-> (all from B10).
->
-> Replace CARTO's hosted tiles with a basemap this project owns.
->
-> **Two independent reasons, either one sufficient.** CARTO's `basemap-styles`
-> LICENSE.md — changed Oct–Nov 2025 — restricts their hosted tile services to
-> enterprise customers and non-profit grants, with no free public tier; the
-> 75,000 mapviews/month figure still quoted in older docs and third-party guides
-> is stale. **Verify this yourself before starting**, because it sets whether
-> this branch is urgent or merely correct. Independently, the apps are now free
-> and the map is in the free tier (§1), so tile volume is unbounded and any
-> per-view-priced provider is the wrong shape regardless of licensing.
->
-> - **PMTiles + MapLibre.** One `.pmtiles` archive plus one style JSON, read by
->   MapLibre GL JS on the web and MapLibre Native on iOS and Android. This is
->   the same argument as B1's contract one layer down: three clients drawing
->   from one artifact cannot drift. Host on object storage with **zero egress**
->   (Cloudflare R2 is the reason to pick R2) — the whole point is that the
->   marginal cost of a free user's map view approaches zero.
-> - **CONUS extent is enough for v1.** HRRR is CONUS-only
->   (`scripts/hrrr/render_frames.py` bounds), so a continental extract matches
->   the data. Note the storage cost and the rebuild cadence; an OSM basemap does
->   not need to be fresh to the week.
-> - **The style must paint land at exactly `rgb(20, 23, 26)`.** `SMOKE_STOPS` is
->   audited against that tone and `npm run ramp` fails if `--map-surface` drifts
->   from it. If the style needs a different land colour, change the constant and
->   re-run the audit — do not let the two disagree.
-> - **Keep the layer sandwich, but take the easier version.** B10 stacks
->   `dark_nolabels` → smoke canvas → `dark_only_labels` in a Leaflet pane at
->   z-index 450 because raster tiles gave no other way to keep place names above
->   heavy smoke. With vector tiles this is just layer ordering inside the style,
->   which is both cleaner and cheaper. Preserve the behaviour: labels must stay
->   legible at Smokeshow-level opacity.
-> - **Decide Leaflet's fate explicitly.** Either keep Leaflet with
->   `protomaps-leaflet` (smaller diff, keeps `SmokeCanvasLayer` untouched) or
->   move to MapLibre GL JS (better long-term parity with the native clients,
->   but `SmokeCanvasLayer` and the HRRR `ImageOverlay` path both need porting).
->   Recommend the second if B8/B9 have not started their map work, the first if
->   they have. State the choice and why in the first commit.
-> - **Keep B10's failure path.** `createTileHealth` in `src/lib/basemap.js` and
->   its `basemap_unavailable` event should survive the swap — a self-hosted
->   basemap can still 404 a bad deploy, and the bare-dark-surface fallback is
->   exactly as valid.
-> - Attribution: OpenStreetMap contributors, plus whatever the tile build's
->   sources require. CARTO's credit comes out with CARTO's tiles.
->
-> `npm run ramp` and `npm run verify:map` must both still pass, including
-> `--fail-tiles`. Deliver a cost estimate at 10k / 100k / 1M daily actives
-> against whatever hosting you pick. Commit and push to
-> `claude/b11-self-hosted-basemap`. Do not open a PR.
