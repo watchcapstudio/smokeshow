@@ -72,8 +72,12 @@ struct VerdictScreen: View {
                     TimelineBlock(
                         forecast: forecast,
                         unit: model.preferences.unit,
-                        scrubbed: $scrubbed
+                        scrubbed: $scrubbed,
+                        ink: sky?.ink ?? Palette.dark.text
                     )
+                    // Clear of the curve. Sitting tight under it, the pills
+                    // read as part of the chart rather than a row of controls.
+                    .padding(.bottom, 26)
 
                     // The days stand on their own at the bottom, off the
                     // curve. Tapping one sends the scrubber there, which is
@@ -83,7 +87,9 @@ struct VerdictScreen: View {
                         selection: $scrubbed,
                         ink: sky?.ink ?? Palette.dark.text
                     )
-                    .padding(.top, 14)
+
+                    locationRow
+                        .padding(.top, 16)
                 }
 
                 if let error = model.loadError {
@@ -121,21 +127,6 @@ struct VerdictScreen: View {
 
     private var header: some View {
         HStack {
-            Button {
-                showsPlaces = true
-            } label: {
-                HStack(spacing: 5) {
-                    Text((model.place?.shortName ?? "Choose a place").uppercased())
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 9, weight: .semibold))
-                }
-                .font(Typography.eyebrow)
-                .opacity(0.6)
-            }
-            .buttonStyle(.plain)
-
-            Spacer()
-
             // The demo's "NOW" — the clock that says which moment the screen
             // is describing. It matters more once the curve can be scrubbed
             // away from the present.
@@ -143,14 +134,39 @@ struct VerdictScreen: View {
                 .font(Typography.eyebrow)
                 .opacity(0.45)
 
+            Spacer()
+
             Button { showsSettings = true } label: {
                 Image(systemName: "slider.horizontal.3")
                     .font(.system(size: 15, weight: .semibold))
                     .opacity(0.6)
             }
             .buttonStyle(.plain)
-            .padding(.leading, 12)
         }
+    }
+
+    /// The place sits at the foot of the screen, under the days, because it is
+    /// the answer to "where" and everything above it is the answer to "how
+    /// bad". It is also where the map will hang off: in the demo the location
+    /// name was the door to it, so the pin is the shape that door takes.
+    private var locationRow: some View {
+        Button {
+            showsPlaces = true
+        } label: {
+            HStack(spacing: 7) {
+                Image(systemName: "mappin.and.ellipse")
+                    .font(.system(size: 12, weight: .medium))
+                Text((model.place?.shortName ?? "Choose a place").uppercased())
+                    .font(Typography.eyebrow)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 8, weight: .semibold))
+                    .opacity(0.7)
+            }
+            .opacity(0.65)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     private var clockLabel: String {
@@ -266,6 +282,10 @@ struct TimelineBlock: View {
     /// reading all follow the scrubbed hour, so the state has to live above
     /// all of them.
     @Binding var scrubbed: Int?
+    /// The ink of the sky currently *behind* the curve, which is the scrubbed
+    /// hour's, not now's. Pinning it to now drew a dark line on a night sky
+    /// the moment a daytime reader scrubbed into the small hours.
+    var ink: Color = Palette.dark.text
 
     private var points: [CurvePoint] {
         TimelineBuilder.curve(around: forecast.now.index, in: forecast)
@@ -273,10 +293,6 @@ struct TimelineBlock: View {
 
     private var nowIndex: Int {
         min(forecast.now.index, TimelineBuilder.curveLookback)
-    }
-
-    private var ink: Color {
-        forecast.nowHour?.sky?.ink ?? Palette.dark.text
     }
 
     var body: some View {
