@@ -45,6 +45,20 @@ struct OnboardingFlow: View {
             .foregroundStyle(Palette.dark.text)
         }
         .animation(.easeInOut(duration: 0.25), value: step)
+        // The edge swipe people already expect from a navigation stack, which
+        // this deliberately is not — it is three states in one view, so the
+        // gesture has to be spelled out.
+        .gesture(
+            DragGesture(minimumDistance: 30)
+                .onEnded { value in
+                    guard abs(value.translation.height) < 60 else { return }
+                    if value.translation.width > 60, step > 0 {
+                        step -= 1
+                    } else if value.translation.width < -60, step < 2 {
+                        step += 1
+                    }
+                }
+        )
     }
 
     /// A calm sky for the first two screens; the third sits under the same one
@@ -52,13 +66,31 @@ struct OnboardingFlow: View {
     private var sky: Forecast.Sky? { model.forecast?.nowHour?.sky }
 
     private var progress: some View {
-        HStack(spacing: 6) {
-            ForEach(0..<3, id: \.self) { index in
-                Capsule()
-                    .fill(Color.white.opacity(index == step ? 0.75 : 0.22))
-                    .frame(width: index == step ? 22 : 8, height: 4)
+        HStack(spacing: 12) {
+            // Three screens with no way back is a hallway, not an
+            // introduction. Someone who skimmed the disclaimer should be able
+            // to return to it without deleting the app.
+            if step > 0 {
+                Button { step -= 1 } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 14, weight: .semibold))
+                        .opacity(0.7)
+                }
+                .buttonStyle(.plain)
+                .transition(.opacity)
             }
+
+            HStack(spacing: 6) {
+                ForEach(0..<3, id: \.self) { index in
+                    Capsule()
+                        .fill(Color.white.opacity(index == step ? 0.75 : 0.22))
+                        .frame(width: index == step ? 22 : 8, height: 4)
+                }
+            }
+
+            Spacer()
         }
+        .frame(height: 20)
     }
 
     // MARK: The three screens
