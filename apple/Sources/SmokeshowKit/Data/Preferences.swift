@@ -63,9 +63,18 @@ public final class PreferencesStore: @unchecked Sendable {
 
     private let defaults: UserDefaults
     private let key = "preferences.v1"
+    private let disclaimerKey = "disclaimer.acknowledged.v1"
 
     public init(defaults: UserDefaults = AppGroup.defaults) {
         self.defaults = defaults
+    }
+
+    /// Kept out of `Preferences` on purpose: that struct is Codable and shared
+    /// with the widget, so a new non-optional field would fail to decode every
+    /// already-stored copy. This is its own key.
+    public var acknowledgedDisclaimer: Bool {
+        get { defaults.bool(forKey: disclaimerKey) }
+        set { defaults.set(newValue, forKey: disclaimerKey) }
     }
 
     public var current: Preferences {

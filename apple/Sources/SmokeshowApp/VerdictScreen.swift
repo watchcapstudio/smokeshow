@@ -56,10 +56,17 @@ struct VerdictScreen: View {
                         .buttonStyle(.plain)
                     }
                     explainButton
-                    Text(Copy.disclaimer)
-                        .font(.system(size: 10.5))
-                        .opacity(0.5)
-                        .padding(.top, 4)
+                    // The full text is acknowledged once on first run and
+                    // lives in the explainer. Repeating all of it under every
+                    // launch trained people to scroll past the paragraph that
+                    // matters; this line keeps the claim honest and the door open.
+                    Button { showsExplain = true } label: {
+                        Text("Model estimates, not health advice. What this means ›")
+                            .font(.system(size: 10.5))
+                            .opacity(0.5)
+                            .padding(.top, 4)
+                    }
+                    .buttonStyle(.plain)
                     Spacer(minLength: 24)
                 }
                 .padding(20)

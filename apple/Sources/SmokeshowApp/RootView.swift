@@ -13,22 +13,33 @@ struct RootView: View {
     @State private var showsSettings = false
     @State private var showsExplain = false
 
+    @State private var acknowledged = PreferencesStore.shared.acknowledgedDisclaimer
+
     var body: some View {
         ZStack {
-            switch model.entitlement.status {
-            case .unknown:
-                // Checking with the store. Not a lock — just not decided yet.
-                LoadingView()
-            case .trial, .subscribed:
-                VerdictScreen(
-                    showsExplain: $showsExplain,
-                    showsSettings: $showsSettings
-                )
-            case .lapsed, .never:
-                PaywallView(isModal: false)
+            if !acknowledged {
+                // Ahead of everything: ahead of the entitlement switch, ahead
+                // of the widget nudge, and ahead of the location prompt. A
+                // consent screen that arrives third is not consent, and the
+                // OS prompt on top of it looks like the app asking twice.
+                OnboardingFlow {
+                    PreferencesStore.shared.acknowledgedDisclaimer = true
+                    acknowledged = true
+                    Task {
+                        await model.refreshEntitlement()
+                        await model.refresh()
+                        await evaluateNudges()
+                    }
+                }
+            } else {
+                content
             }
         }
-        .task { await evaluateNudges() }
+        .task {
+            guard acknowledged else { return }
+            await model.onLaunch()
+            await evaluateNudges()
+        }
         .sheet(isPresented: $showsWidgetOnboarding) {
             WidgetOnboardingView()
         }
@@ -48,6 +59,24 @@ struct RootView: View {
             case .widgetSetup: showsWidgetOnboarding = true
             case .settings: showsSettings = true
             case .verdict: break
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        ZStack {
+            switch model.entitlement.status {
+            case .unknown:
+                // Checking with the store. Not a lock — just not decided yet.
+                LoadingView()
+            case .trial, .subscribed:
+                VerdictScreen(
+                    showsExplain: $showsExplain,
+                    showsSettings: $showsSettings
+                )
+            case .lapsed, .never:
+                PaywallView(isModal: false)
             }
         }
     }
