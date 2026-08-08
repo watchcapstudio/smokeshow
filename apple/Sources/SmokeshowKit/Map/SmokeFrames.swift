@@ -1,3 +1,7 @@
+// `MKMapRect` is unavailable on watchOS, and the watch draws no map.
+
+#if !os(watchOS)
+
 // Client for the pre-rendered smoke domains on the `data` branch.
 //
 // A port of `src/lib/frames.js`, and deliberately a thin one. The web already
@@ -191,3 +195,5 @@ public enum SmokeFrames {
 public enum SmokeFrameError: Error {
     case manifestUnavailable
 }
+
+#endif

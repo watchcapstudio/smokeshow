@@ -1,3 +1,9 @@
+// MapKit's overlay types do not exist on watchOS, and the watch has no map to
+// put them on. The frames client next door stays available everywhere — it is
+// just URLs and bounds — but the renderer is gated.
+
+#if !os(watchOS)
+
 // The smoke field, as one image over one rectangle.
 //
 // The web draws this into a canvas because the browser has no map-overlay
@@ -74,3 +80,5 @@ public enum SmokeFrameImage {
         return image
     }
 }
+
+#endif
