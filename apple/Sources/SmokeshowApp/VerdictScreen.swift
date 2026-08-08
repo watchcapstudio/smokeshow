@@ -15,10 +15,32 @@ struct VerdictScreen: View {
     @Binding var showsExplain: Bool
     @Binding var showsSettings: Bool
     @State private var showsPlaces = false
+    /// Index into the curve, not into `hours`. Nil means "now".
+    @State private var scrubbed: Int?
 
     private var forecast: Forecast? { model.forecast }
     private var nowHour: Forecast.Hour? { forecast?.nowHour }
-    private var sky: Forecast.Sky? { nowHour?.sky }
+
+    /// Where the curve window starts inside `hours`, so a curve index can be
+    /// turned back into the hour it belongs to.
+    private var curveStart: Int {
+        guard let forecast else { return 0 }
+        return max(0, forecast.now.index - TimelineBuilder.curveLookback)
+    }
+
+    /// The hour the screen is currently describing: the scrubbed one while a
+    /// thumb is on the curve, otherwise now.
+    private var shownHour: Forecast.Hour? {
+        guard let forecast, let scrubbed else { return nowHour }
+        let index = curveStart + scrubbed
+        guard forecast.hours.indices.contains(index) else { return nowHour }
+        return forecast.hours[index]
+    }
+
+    /// Dragging the curve moves the sun. Every hour carries its own sky in the
+    /// payload, so scrubbing forward into tonight genuinely sets it — this is
+    /// the thing that made the demo feel like a window rather than a chart.
+    private var sky: Forecast.Sky? { shownHour?.sky }
 
     var body: some View {
         ZStack {
@@ -30,7 +52,7 @@ struct VerdictScreen: View {
 
             VStack {
                 Spacer(minLength: 0)
-                RidgeView(pm25: nowHour?.pm25, strength: 0.55)
+                RidgeView(pm25: shownHour?.pm25, strength: 0.55)
                     .frame(height: 260)
             }
             .ignoresSafeArea()
@@ -47,9 +69,21 @@ struct VerdictScreen: View {
                 Spacer(minLength: 12)
 
                 if let forecast {
-                    TimelineBlock(forecast: forecast, unit: model.preferences.unit)
-                        .padding(.bottom, 10)
-                    FiveDayBlock(forecast: forecast)
+                    TimelineBlock(
+                        forecast: forecast,
+                        unit: model.preferences.unit,
+                        scrubbed: $scrubbed
+                    )
+
+                    // The days stand on their own at the bottom, off the
+                    // curve. Tapping one sends the scrubber there, which is
+                    // how the demo let a day pill drive the whole screen.
+                    FiveDayBlock(
+                        forecast: forecast,
+                        selection: $scrubbed,
+                        ink: sky?.ink ?? Palette.dark.text
+                    )
+                    .padding(.top, 14)
                 }
 
                 if let error = model.loadError {
@@ -134,7 +168,7 @@ struct VerdictScreen: View {
                 .minimumScaleFactor(0.6)
                 .lineLimit(2)
 
-            if let hour = nowHour, let trend = hour.trend {
+            if let hour = shownHour, let trend = hour.trend {
                 TrendChip(trend: trend)
                     .padding(.bottom, 2)
             }
@@ -166,7 +200,7 @@ struct VerdictScreen: View {
     }
 
     private var readingLine: String {
-        guard let hour = nowHour else { return Copy.reading(Copy.noData) }
+        guard let hour = shownHour else { return Copy.reading(Copy.noData) }
         switch model.preferences.unit {
         case .microgramsPerCubicMetre:
             guard let pm = hour.pm25 else { return Copy.reading(Copy.noData) }
@@ -228,9 +262,10 @@ struct TimelineBlock: View {
     let forecast: Forecast
     let unit: MeasurementUnit
 
-    /// Nil means "showing now". Any value means the reader has dragged, and
-    /// the eyebrow becomes a readout for the hour under their thumb.
-    @State private var scrubbed: Int?
+    /// Owned by the screen, not by this block: the sky, the ridge and the
+    /// reading all follow the scrubbed hour, so the state has to live above
+    /// all of them.
+    @Binding var scrubbed: Int?
 
     private var points: [CurvePoint] {
         TimelineBuilder.curve(around: forecast.now.index, in: forecast)
@@ -257,10 +292,9 @@ struct TimelineBlock: View {
                         .buttonStyle(.plain)
                         .opacity(0.6)
                 } else {
-                    Text("−12h · +48h").font(Typography.eyebrow).opacity(0.5)
+                    Text("Now").font(Typography.sm)
                     Spacer()
-                    // Past hours are model reanalysis. Never "observed".
-                    Text(Copy.pastHours).font(Typography.eyebrow).opacity(0.5)
+                    Text("−12h · +48h").font(Typography.eyebrow).opacity(0.5)
                 }
             }
             CurveView(
@@ -269,7 +303,9 @@ struct TimelineBlock: View {
                 ink: ink,
                 selection: $scrubbed
             )
-            .frame(height: 74)
+            // Was 74pt, which made the whole point of the screen — the shape
+            // of the smoke — the smallest thing on it.
+            .frame(height: 150)
         }
         .animation(.none, value: scrubbed)
     }
@@ -296,33 +332,28 @@ struct TimelineBlock: View {
     }
 }
 
+/// The five days, standing on their own under the curve. Each is a tap
+/// target: it sends the scrubber to that day's worst hour, which is the hour
+/// a person means when they point at a day and ask "what about then?".
+///
+/// Days past the curve's +48h window cannot be scrubbed to, so they are dimmed
+/// rather than silently doing nothing.
 struct FiveDayBlock: View {
     let forecast: Forecast
+    var selection: Binding<Int?>?
+    /// The sky's ink. Pills tinted with white vanish the moment the sky goes
+    /// light, which is exactly when scrubbing into daylight makes them matter.
+    var ink: Color = Palette.dark.text
+
+    private var points: [CurvePoint] {
+        TimelineBuilder.curve(around: forecast.now.index, in: forecast)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 10) {
+            HStack(spacing: 8) {
                 ForEach(forecast.days) { day in
-                    VStack(spacing: 5) {
-                        Text(day.weekday.uppercased())
-                            .font(.system(size: 9, weight: .semibold, design: .monospaced))
-                            .opacity(0.7)
-                        Text(forecast.scaleEntry(at: day.levelIndex)?.name ?? Copy.noData)
-                            .font(.system(size: 9.5, weight: .medium))
-                            .lineLimit(2)
-                            .multilineTextAlignment(.center)
-                            .minimumScaleFactor(0.7)
-                            .opacity(0.85)
-                        HStack(spacing: 2) {
-                            ForEach(day.dayParts) { part in
-                                RoundedRectangle(cornerRadius: 1.5)
-                                    .fill(part.bucket.flatMap { Color(serverHex: $0.color) }
-                                        ?? Color.white.opacity(0.12))
-                                    .frame(height: 5)
-                            }
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
+                    dayPill(day)
                 }
             }
 
@@ -332,6 +363,63 @@ struct FiveDayBlock: View {
                     .opacity(0.45)
             }
         }
+    }
+
+    @ViewBuilder
+    private func dayPill(_ day: Forecast.Day) -> some View {
+        let target = curveIndex(for: day)
+        let isSelected = target != nil && target == selection?.wrappedValue
+
+        Button {
+            guard let target else { return }
+            selection?.wrappedValue = (selection?.wrappedValue == target) ? nil : target
+        } label: {
+            VStack(spacing: 5) {
+                Text(day.weekday.uppercased())
+                    .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                    .opacity(0.7)
+                Text(forecast.scaleEntry(at: day.levelIndex)?.name ?? Copy.noData)
+                    .font(.system(size: 9.5, weight: .medium))
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+                    .minimumScaleFactor(0.7)
+                    .opacity(0.85)
+                HStack(spacing: 2) {
+                    ForEach(day.dayParts) { part in
+                        RoundedRectangle(cornerRadius: 1.5)
+                            .fill(part.bucket.flatMap { Color(serverHex: $0.color) }
+                                ?? ink.opacity(0.12))
+                            .frame(height: 5)
+                    }
+                }
+            }
+            .padding(.vertical, 9)
+            .padding(.horizontal, 6)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(ink.opacity(isSelected ? 0.16 : 0.07))
+            )
+            .opacity(target == nil ? 0.45 : 1)
+        }
+        .buttonStyle(.plain)
+        .disabled(target == nil)
+    }
+
+    /// The day's worst hour, expressed as a curve index. Nil when the day
+    /// falls outside the scrubbable window.
+    private func curveIndex(for day: Forecast.Day) -> Int? {
+        var formatter: DateFormatter {
+            let f = DateFormatter()
+            f.timeZone = forecast.location.timeZone
+            f.dateFormat = "yyyy-MM-dd"
+            return f
+        }
+        let key = formatter
+        let matches = points.enumerated().filter { key.string(from: $0.element.t) == day.key }
+        guard !matches.isEmpty else { return nil }
+        let worst = matches.max { ($0.element.value ?? -1) < ($1.element.value ?? -1) }
+        return worst?.offset
     }
 }
 
