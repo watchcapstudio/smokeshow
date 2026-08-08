@@ -210,6 +210,54 @@ branch 50 MB → 36.6 MB. Re-dispatching `feat/smoke-map`'s job regenerates it,
 and it will now be dropped again at publish time until it is named in
 `KNOWN_DOMAINS`.
 
+## Decision 4 — one domain at a time, because they are not the same quantity
+
+This decision reversed once, and the reversal is the point.
+
+The sharp domain has a hard rectangular edge. At wide zoom in Missoula that
+edge sat across southern Canada, so a reader looking north at the fires making
+their smoke saw nothing past 50 N. The first fix was a backfill: paint the next
+domain down in the region *outside* the sharp rectangle, clipped with an
+even-odd path so the two never overlap. Reasonable, and wrong.
+
+It shipped against a synthetic global field. With real CAMS on both sides it
+drew an obvious rectangle across the map, and the cause turned out to be
+substantive rather than cosmetic.
+
+**HRRR-Smoke MASSDEN is smoke. CAMS `particulate_matter_2.5um` is total
+PM2.5** — dust, sea salt, sulfate, traffic, everything. Measured over 21,888
+co-located samples inside CONUS at the same valid hour:
+
+| | mean | p50 | p90 | p99 | frac > 35 |
+| --- | --- | --- | --- | --- | --- |
+| HRRR 3 km | 5.73 | 1.04 | 9.76 | 86.59 | 4.5% |
+| CAMS 40 km | 10.58 | 8.53 | 17.73 | 45.22 | 2.5% |
+
+Where there is smoke they agree almost exactly — **median ratio 1.00** over the
+3,296 cells where both read above 5 µg/m³, correlation 0.614, and across the
+50 N seam the two-degree means are 17.66 against 18.74. There is no unit error
+and no calibration gap. What differs is the floor: CAMS carries roughly
+8.5 µg/m³ of ordinary background aerosol that HRRR, modelling only smoke,
+reports as clean. The ramp's low end is steep by design, so that floor paints
+as a continuous wash while HRRR's clean air stays transparent — and the
+backfill drew the difference as a hard-edged rectangle, inviting the reader to
+compare two quantities that are not the same quantity.
+
+So the backfill is gone, removed rather than feathered: a feather would blur a
+real disagreement between models into an invented gradient. The argument that
+motivated it was also a dark-basemap argument — on Positron, no data reads as
+plain map rather than as a void, which is most of the harm it prevented.
+
+Restoring it needs a global field that means what HRRR means. CAMS carries
+biomass-burning aerosol species, so a smoke-only surface field is likely
+sourceable, and that is the work this waits on. The clipping code is in
+`git log`, not gone.
+
+Worth noting the mismatch reaches past the map: the verdict comes from
+Open-Meteo, which is CAMS **total PM2.5**, while the CONUS map layer is
+smoke-only. A pre-existing product question this branch did not create and does
+not settle.
+
 ## The manifest contract — v2
 
 One `bounds` object could not describe two domains, so this is a versioned
