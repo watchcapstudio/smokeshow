@@ -24,6 +24,10 @@ struct SmokeMapView: View {
     @State private var overlay: SmokeOverlay?
     @State private var status: Status = .loading
     @State private var isPlaying = false
+    /// Dark once the publisher is writing dark-ramp frames. Until then the map
+    /// stays light, because a black basemap under a darkening ramp is the one
+    /// combination this product must never ship.
+    @State private var theme: SmokeDomain.Theme = .light
 
     private enum Status: Equatable {
         case loading
@@ -50,6 +54,7 @@ struct SmokeMapView: View {
                     CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)
                 },
                 overlay: overlay,
+                isDark: theme == .dark,
                 onLongPress: { coordinate in
                     Task { await move(to: coordinate) }
                 }
@@ -209,6 +214,7 @@ struct SmokeMapView: View {
     private func loadDomains() async {
         do {
             domains = try await SmokeFrames.fetchDomains()
+            theme = SmokeFrames.hasTheme(.dark, in: domains) ? .dark : .light
             if domains.isEmpty { status = .unavailable }
         } catch {
             status = .unavailable
@@ -221,7 +227,12 @@ struct SmokeMapView: View {
             latitude: place.latitude,
             longitude: place.longitude
         )
-        guard let match = SmokeFrames.domain(for: coordinate, at: validTime, in: domains) else {
+        guard let match = SmokeFrames.domain(
+            for: coordinate,
+            at: validTime,
+            in: domains,
+            theme: theme
+        ) else {
             overlay = nil
             status = .noCoverage
             return
@@ -251,6 +262,7 @@ struct SmokeMapView: View {
 private struct MapCanvas: UIViewRepresentable {
     let center: CLLocationCoordinate2D?
     let overlay: SmokeOverlay?
+    let isDark: Bool
     let onLongPress: (CLLocationCoordinate2D) -> Void
 
     func makeUIView(context: Context) -> MKMapView {
@@ -262,18 +274,16 @@ private struct MapCanvas: UIViewRepresentable {
         let configuration = MKStandardMapConfiguration(emphasisStyle: .muted)
         view.preferredConfiguration = configuration
 
-        // The basemap is forced light, and this is not a style preference.
+        // The basemap follows the frames, never the other way round.
         //
-        // CLAUDE.md: "the ramp always runs opposite the tiles" — the published
-        // frames are PNG-8 whose palette darkens as smoke thickens, rendered
-        // for a light basemap. The app inherits `.preferredColorScheme(.dark)`
-        // from the root, which would hand MapKit a dark basemap and make the
-        // heaviest air the least visible thing on screen. That flip has been
-        // made twice on the web and was the same mistake both times.
-        //
-        // A dark map is not a toggle here: it needs a second set of frames
-        // published with the ramp inverted.
-        view.overrideUserInterfaceStyle = .light
+        // CLAUDE.md: "the ramp always runs opposite the tiles". The publisher
+        // renders each domain twice — a palette that darkens with
+        // concentration for light tiles, one that lightens for dark ones — and
+        // this view draws whichever basemap matches the frames it actually
+        // has. Until a dark-ramp run has landed there are none, so it stays
+        // light rather than going black with a darkening ramp on it, which is
+        // the flip the web made twice.
+        view.overrideUserInterfaceStyle = isDark ? .dark : .light
 
         let press = UILongPressGestureRecognizer(
             target: context.coordinator,
@@ -303,6 +313,11 @@ private struct MapCanvas: UIViewRepresentable {
     }
 
     func updateUIView(_ view: MKMapView, context: Context) {
+        let wanted: UIUserInterfaceStyle = isDark ? .dark : .light
+        if view.overrideUserInterfaceStyle != wanted {
+            view.overrideUserInterfaceStyle = wanted
+        }
+
         if let center {
             let pins = view.annotations.compactMap { $0 as? MKPointAnnotation }
             if pins.first?.coordinate.latitude != center.latitude

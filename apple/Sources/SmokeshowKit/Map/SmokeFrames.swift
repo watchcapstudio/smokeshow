@@ -19,9 +19,19 @@ import Foundation
 import MapKit
 
 public struct SmokeDomain: Sendable, Identifiable {
+    public enum Theme: String, Sendable {
+        /// Ramp darkens with concentration; for a light basemap.
+        case light
+        /// Ramp lightens with concentration; for a dark one.
+        case dark
+    }
+
     public let id: String
     public let label: String
     public let model: String
+    /// Which basemap this domain's palette was rendered for. Domains published
+    /// before the field existed are light, which is what they are.
+    public let theme: Theme
     public let source: String?
     public let resolutionKm: Double?
     /// Lower is sharper. The map paints the lowest-priority domain that
@@ -84,6 +94,7 @@ public enum SmokeFrames {
                 id: domain.id,
                 label: domain.label ?? domain.id,
                 model: domain.model ?? domain.id,
+                theme: SmokeDomain.Theme(rawValue: domain.theme ?? "light") ?? .light,
                 source: domain.source,
                 resolutionKm: domain.resolutionKm,
                 priority: domain.priority ?? 99,
@@ -114,13 +125,22 @@ public enum SmokeFrames {
     public static func domain(
         for coordinate: CLLocationCoordinate2D,
         at date: Date,
-        in domains: [SmokeDomain]
+        in domains: [SmokeDomain],
+        theme: SmokeDomain.Theme
     ) -> (domain: SmokeDomain, frame: URL)? {
         let key = timeKey(for: date)
-        for domain in domains where domain.bounds.contains(coordinate) {
+        for domain in domains
+        where domain.theme == theme && domain.bounds.contains(coordinate) {
             if let frame = domain.frames[key] { return (domain, frame) }
         }
         return nil
+    }
+
+    /// True once the publisher is writing dark-ramp domains. Until the first
+    /// run after that change lands, there are none, and a map that assumed
+    /// otherwise would go black with nothing painted on it.
+    public static func hasTheme(_ theme: SmokeDomain.Theme, in domains: [SmokeDomain]) -> Bool {
+        domains.contains { $0.theme == theme }
     }
 
     // MARK: Wire types
@@ -134,6 +154,7 @@ public enum SmokeFrames {
         let id: String
         let label: String?
         let model: String?
+        let theme: String?
         let source: String?
         let resolutionKm: Double?
         let priority: Int?
@@ -141,7 +162,7 @@ public enum SmokeFrames {
         let frames: [Frame]?
 
         enum CodingKeys: String, CodingKey {
-            case id, label, model, source, priority, bounds, frames
+            case id, label, model, theme, source, priority, bounds, frames
             case resolutionKm = "resolution_km"
         }
     }
