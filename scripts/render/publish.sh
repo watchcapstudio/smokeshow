@@ -7,12 +7,17 @@
 # the OTHER domains live), swaps in this run's directory, rebuilds the root
 # manifest from every domain.json present, and force-pushes a new orphan.
 #
-# Env: DOMAIN (e.g. hrrr, cams), GITHUB_TOKEN, GITHUB_REPOSITORY.
+# Env: DOMAIN (e.g. hrrr, cams) or DOMAINS (space-separated, when one render
+# writes several — the light and dark palettes of the same field are two
+# directories), GITHUB_TOKEN, GITHUB_REPOSITORY.
 # Both publishers share the `data-branch` concurrency group so they queue
 # instead of overwriting each other's directory with a stale copy.
 set -euo pipefail
 
 : "${DOMAIN:?DOMAIN is required}"
+# One render can produce several published directories; DOMAIN stays the name
+# of the run for the commit message.
+DOMAINS="${DOMAINS:-$DOMAIN}"
 : "${GITHUB_TOKEN:?GITHUB_TOKEN is required}"
 : "${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is required}"
 
@@ -20,10 +25,12 @@ OUT_DIR="${OUT_DIR:-out}"
 REPO="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 WORK="$(mktemp -d)/data"
 
-if [ ! -d "${OUT_DIR}/${DOMAIN}" ]; then
-  echo "no ${OUT_DIR}/${DOMAIN} to publish — the render step produced nothing" >&2
-  exit 1
-fi
+for d in $DOMAINS; do
+  if [ ! -d "${OUT_DIR}/${d}" ]; then
+    echo "no ${OUT_DIR}/${d} to publish — the render step produced nothing" >&2
+    exit 1
+  fi
+done
 
 # Missing branch is the first-run case, not an error.
 if git clone --quiet --depth 1 --branch data "$REPO" "$WORK"; then
@@ -32,8 +39,10 @@ else
   mkdir -p "$WORK"
 fi
 
-rm -rf "${WORK:?}/${DOMAIN}"
-cp -r "${OUT_DIR}/${DOMAIN}" "$WORK/${DOMAIN}"
+for d in $DOMAINS; do
+  rm -rf "${WORK:?}/${d}"
+  cp -r "${OUT_DIR}/${d}" "$WORK/${d}"
+done
 
 python scripts/render/assemble_manifest.py "$WORK"
 
