@@ -20,6 +20,7 @@ Before starting any wave, confirm `main` contains the previous wave's output:
 | Wave 3 (B6) | **B2** |
 | Wave 4 (B1) | the shipped re-skin |
 | Wave 5 (B7, B8, B9) | **B1's contract commit** — `docs/forecast-api-contract.md` |
+| Wave 5 (B11) | **B10** — `src/lib/basemap.js`, `scripts/smoke-ramp-audit.mjs`, the `--map-surface` token |
 
 Quick check before dispatching a branch:
 
@@ -37,7 +38,20 @@ git fetch origin && git ls-tree --name-only origin/main docs/ src/lib/
 | — | *web re-skin ships* | | |
 | **4** | B1 | — | re-skin live |
 | **5** | B7, B8, B9 | yes | B1's contract commit |
-| **5** | B10 | yes (render layer — no overlap with B1/B7/B8/B9) | B1 merged |
+| **5** | B10 | yes (render layer — no overlap with B1/B7/B8/B9) | ~~B1 merged~~ — shipped early, see note |
+| **5** | B11 | yes | B10 merged; must land before B8/B9 render a map |
+
+**B10 ran ahead of its gate and that was fine.** It shipped before B1 because
+its scope is the render layer only and B1's prompt forbids touching components
+and CSS, so there was no overlap. The one shared file is `src/lib/rating.js`
+(ramp constants) — merge B10 before dispatching B1 and even that disappears.
+
+**B11 exists because of the free web, not the app pricing.** smokeshow.earth is
+free, has no rate limit, and carries the map — so basemap tile volume is
+unbounded no matter what the apps charge. Independently, CARTO's hosted tiles
+are restricted to enterprise customers and non-profit grants (their
+`basemap-styles` LICENSE.md, changed Oct–Nov 2025). Either reason alone forces
+a self-hosted basemap; together they make it a launch dependency.
 
 Every prompt assumes the agent reads `CLAUDE.md`,
 `docs/smokeshow-build-brief.md`, and `docs/smokeshow-share-spec.md` first.
@@ -126,6 +140,13 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 > - Route through the existing `/api/aq` cache proxy and keep the coordinate
 >   snapping in `src/lib/grid.js`; a viral smoke event must not blow the
 >   Open-Meteo free tier.
+> - **Size this against the free web, not the subscriber base.** The apps are
+>   paid, but this same endpoint serves smokeshow.earth — free, no rate limit,
+>   and the surface a viral smoke event actually lands on. Caching and snapping
+>   are load-bearing here, not prudent: state the cache key, the TTL, and the
+>   expected upstream-fetch rate per populated cell, and give a cost estimate at
+>   10k / 100k / 1M daily actives. A design that only holds at subscriber volume
+>   does not hold.
 > - Serve the sky parameters from `src/lib/sky.js` and the trend from
 >   `src/lib/trend.js` (both landed by branch B0) so the native clients get them
 >   without reimplementing the maths.
@@ -425,6 +446,14 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 >   Do not reimplement `computeVerdict`, the rating scale, or clear-time logic
 >   in Swift — the whole point of the endpoint is that a user's phone and laptop
 >   can never disagree about when the smoke clears.
+> - **Do not choose a map SDK.** §1 gives the app "everything web has," which
+>   includes the map, but this prompt never said which renderer — that decision
+>   belongs to branch B11 and it has been made: **MapLibre Native**, reading the
+>   same PMTiles archive and style JSON the web reads, so the three clients
+>   cannot draw different basemaps. **Do not use MapKit** — it reads neither,
+>   and it would put Apple on a different basemap from Android and the web. If
+>   B11 hasn't landed, stub the map behind that interface; it is not on the
+>   critical path for widgets.
 > - **Widgets are the product.** WidgetKit, sharing SwiftUI views with the app.
 >   The demo already designs against the right families:
 >   `.w-small` → `systemSmall`, `.w-med` → `systemMedium`, `.lk-inline` →
@@ -585,3 +614,63 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 > selector and platform frames, so you can force each level and compare. Deliver
 > before/after captures at all five levels, plus the monotonicity check output.
 > Commit and push to `claude/b10-dark-map`. Do not open a PR.
+
+---
+
+<a id="b11"></a>
+## B11 — Self-hosted basemap · **Opus 5** · `claude/b11-self-hosted-basemap`
+*Wave 5. Base: B10 merged. Must land its artifact before B8 or B9 renders a map.*
+
+> Read `CLAUDE.md`, `docs/smokeshow-platform-plan.md` §1 and §9, and
+> `src/components/SmokeMap.jsx`, `src/components/SmokeLayer.js`,
+> `src/lib/basemap.js`, `src/lib/rating.js` and `scripts/smoke-ramp-audit.mjs`
+> (all from B10).
+>
+> Replace CARTO's hosted tiles with a basemap this project owns.
+>
+> **Two independent reasons, either one sufficient.** CARTO's `basemap-styles`
+> LICENSE.md — changed Oct–Nov 2025 — restricts their hosted tile services to
+> enterprise customers and non-profit grants, with no free public tier; the
+> 75,000 mapviews/month figure still quoted in older docs and third-party guides
+> is stale. **Verify this yourself before starting**, because it sets whether
+> this branch is urgent or merely correct. Independently of licensing,
+> smokeshow.earth is free and unmetered and carries the map, so tile volume is
+> unbounded regardless of what the apps charge — a per-view-priced provider is
+> the wrong shape for the web surface no matter how the apps are sold.
+>
+> - **PMTiles + MapLibre.** One `.pmtiles` archive plus one style JSON, read by
+>   MapLibre GL JS on the web and MapLibre Native on iOS and Android. Same
+>   argument as B1's contract, one layer down: three clients drawing from one
+>   artifact cannot drift. Host on object storage with **zero egress**
+>   (Cloudflare R2 is the reason to pick R2) — the point is that the marginal
+>   cost of one more map view approaches zero.
+> - **CONUS extent is enough for v1.** HRRR is CONUS-only
+>   (`scripts/hrrr/render_frames.py` bounds), so a continental extract matches
+>   the data. Note the storage cost and the rebuild cadence; an OSM basemap does
+>   not need to be fresh to the week.
+> - **The style must paint land at exactly `rgb(20, 23, 26)`.** `SMOKE_STOPS` is
+>   audited against that tone and `npm run ramp` fails if `--map-surface` drifts
+>   from it. If the style needs a different land colour, change the constant and
+>   re-run the audit — do not let the two disagree.
+> - **Keep the layer sandwich, but take the easier version.** B10 stacks
+>   `dark_nolabels` → smoke canvas → `dark_only_labels` in a Leaflet pane at
+>   z-index 450 because raster tiles gave no other way to keep place names above
+>   heavy smoke. With vector tiles this is layer ordering inside the style,
+>   which is cleaner and cheaper. Preserve the behaviour: labels must stay
+>   legible at Smokeshow-level opacity.
+> - **Decide Leaflet's fate explicitly.** Either keep Leaflet with
+>   `protomaps-leaflet` (smaller diff, leaves `SmokeCanvasLayer` untouched) or
+>   move to MapLibre GL JS (better parity with the native clients, but
+>   `SmokeCanvasLayer` and the HRRR `ImageOverlay` path both need porting).
+>   Recommend the second if B8/B9 have not started map work, the first if they
+>   have. State the choice and the reason in the first commit.
+> - **Keep B10's failure path.** `createTileHealth` in `src/lib/basemap.js` and
+>   its `basemap_unavailable` event should survive the swap — a self-hosted
+>   basemap can still 404 a bad deploy, and the bare-dark-surface fallback is
+>   exactly as valid.
+> - Attribution: OpenStreetMap contributors, plus whatever the tile build's
+>   sources require. CARTO's credit comes out with CARTO's tiles.
+>
+> `npm run ramp` and `npm run verify:map` must both still pass, including
+> `--fail-tiles`. Deliver a hosting cost estimate at 10k / 100k / 1M daily map
+> views. Commit and push to `claude/b11-self-hosted-basemap`. Do not open a PR.

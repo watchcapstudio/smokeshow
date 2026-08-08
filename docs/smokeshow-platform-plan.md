@@ -276,6 +276,7 @@ once its dependency lands. Prompts for each are in `docs/branch-prompts.md`.
 | **5** | **B8** | `claude/b8-apple` | B7, B9 | SwiftUI app + WidgetKit, iOS + macOS, StoreKit | **Opus 5** | 5–7w |
 | **5** | **B9** | `claude/b9-android` | B7, B8 | Kotlin/Compose + Glance, Play Billing | **Opus 5** | 3–5w |
 | **5** | **B10** | `claude/b10-dark-map` | B7, B8, B9 | Dark basemap + inverted smoke ramp | **Opus 5** | 1d |
+| **5** | **B11** | `claude/b11-self-hosted-basemap` | B7 | PMTiles basemap + shared style, replacing CARTO | **Opus 5** | 3–5d |
 
 Web re-skin: ~4–6 days elapsed with the concurrency above (vs. ~8 serial).
 
@@ -295,6 +296,12 @@ Web re-skin: ~4–6 days elapsed with the concurrency above (vs. ~8 serial).
   high-iOS-share regions, so B8 leads; starting B9 once B8's data layer and
   widget patterns exist buys consistency cheaply. Run them together only if
   launch date beats consistency.
+- **B11 must land its style + PMTiles artifact before B8 or B9 renders a map.**
+  Same argument as B1's contract, one layer down: three clients drawing the
+  same basemap from one artifact cannot drift, and three clients each choosing
+  a map SDK will. If a native branch is picking between MapKit and MapLibre,
+  that decision is B11's — MapLibre Native reads the same PMTiles and style
+  JSON the web reads, MapKit reads neither.
 
 ### Why these models
 
@@ -319,6 +326,12 @@ Web re-skin: ~4–6 days elapsed with the concurrency above (vs. ~8 serial).
 - **Widgets are marketing on web, UI on native.**
 - **No free tier in the apps.** Subscribe at $2.99/mo with a **14-day free
   trial**, store-native introductory offer (§4).
+- **Basemap must be self-hosted** (added 2026-08-08). Not an app-pricing
+  consequence — the *web* is free, unmetered and carries the map, so tile volume
+  is unbounded regardless of what the apps charge. Independently, CARTO's hosted
+  tiles are restricted to enterprise customers and non-profit grants (their
+  `basemap-styles` LICENSE.md, changed Oct–Nov 2025). One PMTiles artifact
+  serves web, iOS and Android (§8, B11).
 - **The web re-skin ships first**, before any platform work (§8).
 
 ## 10. Still open
