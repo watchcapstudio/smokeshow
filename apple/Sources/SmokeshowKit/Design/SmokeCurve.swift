@@ -54,25 +54,55 @@ struct SmokeCurveShape: Shape {
     }
 }
 
+/// Drag along the curve to move time.
+///
+/// `minimumDistance: 0` so a tap lands on an hour too, which costs the ability
+/// to start a vertical scroll on the curve itself — the same trade a slider
+/// makes, and the curve is only 74pt tall.
+private struct ScrubGesture: ViewModifier {
+    let enabled: Bool
+    let width: CGFloat
+    let count: Int
+    let onScrub: (Int) -> Void
+
+    func body(content: Content) -> some View {
+        guard enabled, count > 1, width > 0 else { return AnyView(content) }
+        return AnyView(content.gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { value in
+                    let step = width / CGFloat(count - 1)
+                    let raw = Int((value.location.x / step).rounded())
+                    onScrub(min(max(raw, 0), count - 1))
+                }
+        ))
+    }
+}
+
 public struct CurveView: View {
     private let points: [CurvePoint]
     private let nowIndex: Int
     private let ink: Color
     private let thin: Bool
     private let showsNowMark: Bool
+    /// The scrubbed hour, or nil when the reader has not moved off *now*.
+    /// Passing a binding is what turns the curve from a picture into the
+    /// timeline control the demo rig established.
+    private let selection: Binding<Int?>?
 
     public init(
         points: [CurvePoint],
         nowIndex: Int,
         ink: Color,
         thin: Bool = false,
-        showsNowMark: Bool = true
+        showsNowMark: Bool = true,
+        selection: Binding<Int?>? = nil
     ) {
         self.points = points
         self.nowIndex = nowIndex
         self.ink = ink
         self.thin = thin
         self.showsNowMark = showsNowMark
+        self.selection = selection
     }
 
     /// Headroom so the peak never touches the top edge. The 55 floor keeps a
@@ -107,9 +137,47 @@ public struct CurveView: View {
                 }
 
                 gapMarkers(in: geometry.size)
+
+                if let selection, let index = selection.wrappedValue,
+                   points.indices.contains(index) {
+                    scrubMark(at: index, in: geometry.size)
+                }
             }
+            .contentShape(Rectangle())
+            .modifier(ScrubGesture(
+                enabled: selection != nil,
+                width: geometry.size.width,
+                count: points.count,
+                onScrub: { index in
+                    guard selection?.wrappedValue != index else { return }
+                    selection?.wrappedValue = index
+                }
+            ))
         }
         .accessibilityHidden(true)
+    }
+
+    /// The scrubbed hour: a full-height rule and a filled dot, heavier than the
+    /// now mark because it is the thing the reader is currently holding.
+    private func scrubMark(at index: Int, in size: CGSize) -> some View {
+        let step = size.width / CGFloat(max(points.count - 1, 1))
+        let x = CGFloat(index) * step
+        let value = points[index].value
+        return ZStack {
+            Rectangle()
+                .fill(ink.opacity(0.45))
+                .frame(width: 1)
+                .position(x: x, y: size.height / 2)
+            if let value {
+                Circle()
+                    .fill(ink)
+                    .frame(width: 7, height: 7)
+                    .position(
+                        x: x,
+                        y: size.height - CGFloat(min(max(value / maxValue, 0), 1)) * size.height
+                    )
+            }
+        }
     }
 
     private func nowMark(in size: CGSize) -> some View {

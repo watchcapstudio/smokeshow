@@ -203,24 +203,70 @@ struct TimelineBlock: View {
     let forecast: Forecast
     let unit: MeasurementUnit
 
+    /// Nil means "showing now". Any value means the reader has dragged, and
+    /// the eyebrow becomes a readout for the hour under their thumb.
+    @State private var scrubbed: Int?
+
     private var points: [CurvePoint] {
         TimelineBuilder.curve(around: forecast.now.index, in: forecast)
+    }
+
+    private var nowIndex: Int {
+        min(forecast.now.index, TimelineBuilder.curveLookback)
+    }
+
+    private var ink: Color {
+        forecast.nowHour?.sky?.ink ?? Palette.dark.text
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Text("−12h · +48h").font(Typography.eyebrow).opacity(0.5)
-                Spacer()
-                // Past hours are model reanalysis. Never "observed".
-                Text(Copy.pastHours).font(Typography.eyebrow).opacity(0.5)
+                if let scrubbed, points.indices.contains(scrubbed) {
+                    Text(readout(for: points[scrubbed]))
+                        .font(Typography.eyebrow)
+                        .opacity(0.8)
+                    Spacer()
+                    Button("Now") { self.scrubbed = nil }
+                        .font(Typography.eyebrow)
+                        .buttonStyle(.plain)
+                        .opacity(0.6)
+                } else {
+                    Text("−12h · +48h").font(Typography.eyebrow).opacity(0.5)
+                    Spacer()
+                    // Past hours are model reanalysis. Never "observed".
+                    Text(Copy.pastHours).font(Typography.eyebrow).opacity(0.5)
+                }
             }
             CurveView(
                 points: points,
-                nowIndex: min(forecast.now.index, TimelineBuilder.curveLookback),
-                ink: forecast.nowHour?.sky?.ink ?? Palette.dark.text
+                nowIndex: nowIndex,
+                ink: ink,
+                selection: $scrubbed
             )
             .frame(height: 74)
+        }
+        .animation(.none, value: scrubbed)
+    }
+
+    /// "Sat 9 PM · 24 µg/m³". A null hour prints the dash the contract
+    /// requires — scrubbing onto a gap must not invent a number.
+    private func readout(for point: CurvePoint) -> String {
+        let formatter = DateFormatter()
+        formatter.timeZone = forecast.location.timeZone
+        formatter.dateFormat = "EEE h a"
+        let stamp = formatter.string(from: point.t)
+
+        guard let value = point.value else {
+            return "\(stamp) · \(Copy.noData)"
+        }
+        switch unit {
+        case .microgramsPerCubicMetre:
+            return "\(stamp) · \(Int(value.rounded())) µg/m³"
+        case .aqi:
+            let hour = forecast.hours.first { $0.t == point.t }
+            guard let aqi = hour?.aqi else { return "\(stamp) · \(Copy.noData)" }
+            return "\(stamp) · AQI \(aqi) (approx)"
         }
     }
 }
