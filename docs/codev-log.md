@@ -142,10 +142,12 @@ Both fixed.
 The map moved off MapKit and onto MapLibre, on `feat/maplibre-dark-map`. This
 is what unblocks the dark basemap: MapKit would not hand its own tiles a dark
 style that agreed with the frames, so the darkening ramp had no legible
-backdrop. MapLibre draws a basemap we control — CARTO `dark_nolabels` raster,
-with `dark_only_labels` on their own layer above the smoke, matching the web's
-sandwich — and draws it on iOS and Android both, so this is also the engine
-Android will share.
+backdrop. MapLibre draws a basemap we control — CARTO's dark-matter **vector**
+style — and draws it on iOS and Android both, so this is also the engine
+Android will share. (It started as CARTO raster with a separate labels layer;
+raster labels stayed soft on a 3x screen, so it moved to the vector style,
+whose glyph labels are crisp at any density. The smoke is inserted below the
+style's first symbol layer, so the city names still ride above heavy smoke.)
 
 The frames did not change. They are PNG-8 in Web Mercator, which is MapLibre's
 projection too, so an `MLNImageSource` with the domain's corners as its quad
@@ -161,8 +163,11 @@ matters — `platforms: [iOS]` on a package product is silently dropped by
 XcodeGen for a multiplatform target, which leaves the module unresolved;
 `destinationFilters` emits a real `platformFilters = (ios,)` so the macOS app
 still links without MapLibre (which ships no macOS slice). Built and run in the
-iPhone 17 Pro simulator: dark map, amber plume over Missoula, labels legible on
-top, scrubber steps the frames. macOS and the kit tests still build.
+iPhone 17 Pro simulator and on device (Sunrise): dark map, amber plume over
+Missoula, crisp labels on top, scrubber steps the frames. The pre-rendered
+domain is a rectangle, so its edges feather to transparent over a thin margin —
+otherwise HRRR's northern edge draws a hard line across Canada. macOS and the
+kit tests still build.
 
 Coverage is the honest gap. Only `hrrr-dark` is published, so the dark map has
 smoke over CONUS and paints none outside it — where a light basemap would have
