@@ -45,6 +45,16 @@ packages:
     url: https://github.com/RevenueCat/purchases-ios
     minVersion: "5.0.0"
     maxVersion: "6.0.0"
+  # The map engine. MapKit could not render a dark basemap that agreed with the
+  # frames — its own tiles ignore overrideUserInterfaceStyle here — so the dark
+  # smoke ramp had no legible backdrop. MapLibre draws a basemap we control
+  # (CARTO dark), on iOS and Android both, which is the only path to the dark
+  # map and the shared engine Android needs. Binary is iOS-only; the dependency
+  # below is filtered to iOS so the macOS app still links.
+  MapLibre:
+    url: https://github.com/maplibre/maplibre-gl-native-distribution
+    minVersion: "6.28.0"
+    maxVersion: "7.0.0"
 
 targets:
 
@@ -108,6 +118,12 @@ targets:
       - target: SmokeshowKit
       - target: SmokeshowWidgets
         embed: true
+      # iOS-only: the map is iOS-only, and MapLibre ships no macOS slice. The
+      # macOS app builds without it and shows the same "map is iOS-only" state
+      # it already did.
+      - package: MapLibre
+        product: MapLibre
+        destinationFilters: [iOS]
     # Info.plists are generated rather than hand-written: a hand-rolled plist
     # missing the standard CFBundle* keys is what broke the AppIntents SSU
     # training phase ("Unable to parse Info.plist").

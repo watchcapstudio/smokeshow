@@ -18,23 +18,25 @@
 #if os(iOS)
 
 import SwiftUI
-import MapKit
+import CoreLocation
 import SmokeshowKit
 
 struct SmokeMapView: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.dismiss) private var dismiss
 
-    /// Hours from now, matching the curve's window.
-    @State private var offset: Double = 0
+    /// The scrubbed curve index, or nil for now — the same model the home
+    /// screen's curve uses, so the two scrub identically.
+    @State private var selection: Int?
     @State private var domains: [SmokeDomain] = []
-    @State private var overlay: SmokeOverlay?
+    @State private var frame: SmokeFramePayload?
     @State private var status: Status = .loading
     @State private var isPlaying = false
-    /// Dark once the publisher is writing dark-ramp frames. Until then the map
-    /// stays light, because a black basemap under a darkening ramp is the one
+    /// The basemap is CARTO dark, unconditionally, so the frames must be the
+    /// dark (grey→amber) ramp. Where no dark domain covers a place the map
+    /// shows no smoke there rather than a light ramp on dark tiles — the one
     /// combination this product must never ship.
-    @State private var theme: SmokeDomain.Theme = .light
+    private let theme: SmokeDomain.Theme = .dark
 
     private enum Status: Equatable {
         case loading
@@ -43,39 +45,46 @@ struct SmokeMapView: View {
         case unavailable
     }
 
-    /// Whether the basemap can render dark. MapKit's cannot here; see
-    /// `loadDomains`.
-    static let darkBasemapAvailable = false
-
     private var place: Place? { model.place }
 
+    /// The same 61-hour curve the home screen draws (−12h … +48h), so the map
+    /// scrubs the identical shape of the smoke.
+    private var points: [CurvePoint] {
+        guard let forecast = model.forecast else { return [] }
+        return TimelineBuilder.curve(around: forecast.now.index, in: forecast)
+    }
+
+    private var nowIndex: Int {
+        guard let forecast = model.forecast else { return 0 }
+        return min(forecast.now.index, TimelineBuilder.curveLookback)
+    }
+
+    /// The index the map is currently painting: the scrubbed hour, or now.
+    private var currentIndex: Int {
+        let index = selection ?? nowIndex
+        return points.indices.contains(index) ? index : nowIndex
+    }
+
     private var validTime: Date {
-        // Snap to the hour: frames are hourly and a half-hour offset would ask
-        // for a file that was never published.
-        let now = model.forecast?.now.exactUTC ?? Date()
+        // Frames are filed by their exact valid hour; snap to it.
+        let base = points.indices.contains(currentIndex)
+            ? points[currentIndex].t
+            : (model.forecast?.now.exactUTC ?? Date())
         return Calendar(identifier: .gregorian)
-            .date(bySetting: .minute, value: 0, of: now.addingTimeInterval(offset * 3600))
-            ?? now
+            .date(bySetting: .minute, value: 0, of: base) ?? base
     }
 
     var body: some View {
         ZStack(alignment: .top) {
-            MapCanvas(
+            MapLibreCanvas(
                 center: place.map {
                     CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)
                 },
-                overlay: overlay,
-                isDark: theme == .dark,
+                frame: frame,
                 onLongPress: { coordinate in
                     Task { await move(to: coordinate) }
                 }
             )
-            // Rebuild rather than restyle. `overrideUserInterfaceStyle` set on
-            // a live MKMapView does not reliably repaint the basemap, and the
-            // theme resolves exactly once per session — from the manifest, on
-            // open — so paying for one rebuild is cheaper than carrying a
-            // basemap that disagrees with the frames on top of it.
-            .id(theme)
             .ignoresSafeArea()
 
             topBar
@@ -101,22 +110,13 @@ struct SmokeMapView: View {
         "\(SmokeFrames.timeKey(for: validTime))|\(place?.id.uuidString ?? "-")|\(domains.count)|\(theme.rawValue)"
     }
 
+    // The status pill only. Dismiss moved to the scrubber card at the bottom:
+    // a back button in the top-left corner is a long reach on a phone this
+    // size, and the map is a full-screen cover the thumb should be able to
+    // send back down without stretching.
     private var topBar: some View {
         HStack {
-            Button { dismiss() } label: {
-                HStack(spacing: 4) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 12, weight: .semibold))
-                    Text("BACK").font(Typography.eyebrow)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(Capsule().fill(.ultraThinMaterial))
-            }
-            .buttonStyle(.plain)
-
             Spacer()
-
             Text(statusLine)
                 .font(Typography.eyebrow)
                 .padding(.horizontal, 12)
@@ -127,14 +127,31 @@ struct SmokeMapView: View {
     }
 
     private var scrubber: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(whenLabel).font(Typography.md)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                // The reachable way out: a downward chevron on the bottom card
+                // sends the cover back down, no stretch to the far corner.
+                Button { dismiss() } label: {
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 13, weight: .semibold))
+                        .frame(width: 34, height: 34)
+                        .background(Circle().fill(Palette.dark.text.opacity(0.14)))
+                }
+                .buttonStyle(.plain)
+
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(whenLabel).font(Typography.md)
+                    // The whole field is a forecast; past hours included are
+                    // reanalysis, never observation. CLAUDE.md's hard rule.
+                    Text(Copy.modelEstimate).font(Typography.eyebrow).opacity(0.5)
+                }
+
                 Spacer()
-                if offset != 0 {
+
+                if selection != nil {
                     Button("Now") {
                         isPlaying = false
-                        offset = 0
+                        selection = nil
                     }
                     .font(Typography.eyebrow)
                     .buttonStyle(.plain)
@@ -142,44 +159,71 @@ struct SmokeMapView: View {
                 }
             }
 
-            HStack(spacing: 14) {
-                // Watching it move is the answer to "where is this going" in a
-                // way that dragging never quite is: the plume has a direction
-                // and you only see it when the frames run.
-                Button {
-                    if !isPlaying, offset >= 48 { offset = -12 }
-                    isPlaying.toggle()
-                } label: {
-                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                        .font(.system(size: 15, weight: .semibold))
-                        .frame(width: 38, height: 38)
-                        .background(Circle().fill(Palette.dark.accent.opacity(0.22)))
-                }
-                .buttonStyle(.plain)
-
-                Slider(value: $offset, in: -12...48, step: 1)
-                    .tint(Palette.dark.accent)
-            }
+            // The shape of the smoke is the track you scrub — the same curve
+            // the home screen draws, so the two read as one control.
+            CurveView(
+                points: points,
+                nowIndex: nowIndex,
+                ink: Palette.dark.text,
+                selection: $selection
+            )
+            .frame(height: 84)
 
             HStack {
                 Text("−12h").font(Typography.eyebrow).opacity(0.5)
                 Spacer()
-                Text(Copy.modelEstimate).font(Typography.eyebrow).opacity(0.5)
+                // Watching it run is the answer to "where is this going" that
+                // dragging never quite gives: the plume has a direction.
+                Button { togglePlay() } label: {
+                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                        .font(.system(size: 15, weight: .semibold))
+                        .frame(width: 40, height: 40)
+                        .background(Circle().fill(Palette.dark.accent.opacity(0.22)))
+                }
+                .buttonStyle(.plain)
                 Spacer()
                 Text("+48h").font(Typography.eyebrow).opacity(0.5)
             }
         }
+        .foregroundStyle(Palette.dark.text)
         .padding(16)
         .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .padding(16)
     }
 
+    private func togglePlay() {
+        if !isPlaying {
+            // Restart from the window's start if parked at the end or at now,
+            // so play always runs the whole −12h…+48h sweep.
+            let count = points.count
+            let current = selection ?? nowIndex
+            if count > 1, current >= count - 1 { selection = 0 }
+        }
+        isPlaying.toggle()
+    }
+
     private var whenLabel: String {
+        guard selection != nil, points.indices.contains(currentIndex) else { return "Now" }
+        return readout(for: points[currentIndex])
+    }
+
+    /// "Sat 9 PM · 24 µg/m³", matching the home curve's readout. A null hour
+    /// prints the dash the contract requires rather than inventing a number.
+    private func readout(for point: CurvePoint) -> String {
         let formatter = DateFormatter()
         formatter.timeZone = model.forecast?.location.timeZone ?? .current
-        formatter.dateFormat = "EEEE h a"
-        return offset == 0 ? "Now" : formatter.string(from: validTime)
+        formatter.dateFormat = "EEE h a"
+        let stamp = formatter.string(from: point.t)
+        guard let value = point.value else { return "\(stamp) · \(Copy.noData)" }
+        switch model.preferences.unit {
+        case .microgramsPerCubicMetre:
+            return "\(stamp) · \(Int(value.rounded())) µg/m³"
+        case .aqi:
+            let hour = model.forecast?.hours.first { $0.t == point.t }
+            guard let aqi = hour?.aqi else { return "\(stamp) · \(Copy.noData)" }
+            return "\(stamp) · AQI \(aqi) (approx)"
+        }
     }
 
     private var statusLine: String {
@@ -222,30 +266,23 @@ struct SmokeMapView: View {
     /// already in the URL cache paints immediately and one that does not
     /// simply arrives a beat later — no queue, no dropped frames to manage.
     private func run() async {
-        guard isPlaying else { return }
+        guard isPlaying, points.count > 1 else { return }
         while !Task.isCancelled && isPlaying {
             try? await Task.sleep(for: .milliseconds(320))
             guard !Task.isCancelled, isPlaying else { return }
-            offset = offset >= 48 ? -12 : offset + 1
+            let count = points.count
+            let current = selection ?? nowIndex
+            selection = current >= count - 1 ? 0 : current + 1
         }
     }
 
     private func loadDomains() async {
         do {
             domains = try await SmokeFrames.fetchDomains()
-            // Dark frames are published and this picks them up the moment the
-            // basemap can actually go dark. It cannot yet: MKMapView ignores
-            // `overrideUserInterfaceStyle` for its basemap here, so asking for
-            // dark produced the amber ramp on pale tiles — the convergence the
-            // whole two-palette exercise exists to prevent. Frames and basemap
-            // agree or neither moves.
-            //
-            // The fix is a basemap we control. The demo used CARTO
-            // dark_nolabels, which is what Kelly is asking for when he says
-            // "the sexy black map", and MapLibre would draw those tiles on iOS
-            // and Android both. Flip this to `.dark` the day that lands.
-            theme = SmokeMapView.darkBasemapAvailable
-                && SmokeFrames.hasTheme(.dark, in: domains) ? .dark : .light
+            // The basemap we control is here now — CARTO dark on MapLibre — so
+            // the theme is fixed at dark and the map reads the grey→amber
+            // frames. Coverage stays honest: where no dark domain reaches, the
+            // map paints no smoke rather than the wrong ramp.
             if domains.isEmpty { status = .unavailable }
         } catch {
             status = .unavailable
@@ -264,14 +301,14 @@ struct SmokeMapView: View {
             in: domains,
             theme: theme
         ) else {
-            overlay = nil
+            frame = nil
             status = .noCoverage
             return
         }
         do {
             let image = try await SmokeFrameImage.load(match.frame)
             guard !Task.isCancelled else { return }
-            overlay = SmokeOverlay(image: image, bounds: match.domain.bounds)
+            frame = SmokeFramePayload(image: image, bounds: match.domain.bounds)
             status = .painted(match.domain.model)
         } catch {
             // Playback supersedes its own loads: every hour that arrives while
@@ -283,115 +320,6 @@ struct SmokeMapView: View {
             // Keep the last good frame rather than blanking: a single missing
             // hour mid-run is a gap in the run, not a loss of coverage.
             status = .unavailable
-        }
-    }
-}
-
-/// MapKit, muted. The basemap is context, not the subject — the web makes the
-/// same call with CARTO Positron, and the standard configuration's `.muted`
-/// emphasis is the native way to say it.
-private struct MapCanvas: UIViewRepresentable {
-    let center: CLLocationCoordinate2D?
-    let overlay: SmokeOverlay?
-    let isDark: Bool
-    let onLongPress: (CLLocationCoordinate2D) -> Void
-
-    func makeUIView(context: Context) -> MKMapView {
-        let view = MKMapView()
-        view.overrideUserInterfaceStyle = isDark ? .dark : .light
-        view.delegate = context.coordinator
-        view.pointOfInterestFilter = .excludingAll
-        view.showsCompass = false
-
-        let configuration = MKStandardMapConfiguration(emphasisStyle: .muted)
-        view.preferredConfiguration = configuration
-
-        // The basemap follows the frames, never the other way round.
-        //
-        // CLAUDE.md: "the ramp always runs opposite the tiles". The publisher
-        // renders each domain twice — a palette that darkens with
-        // concentration for light tiles, one that lightens for dark ones — and
-        // this view draws whichever basemap matches the frames it actually
-        // has. Until a dark-ramp run has landed there are none, so it stays
-        // light rather than going black with a darkening ramp on it, which is
-        // the flip the web made twice.
-        view.overrideUserInterfaceStyle = isDark ? .dark : .light
-
-        let press = UILongPressGestureRecognizer(
-            target: context.coordinator,
-            action: #selector(Coordinator.handleLongPress(_:))
-        )
-        press.minimumPressDuration = 0.45
-        view.addGestureRecognizer(press)
-
-        if let center {
-            // 12° opened on half the west coast: someone in Seattle was
-            // reading Spokane's air to answer a question about their own
-            // street. ~2.2° is roughly 240km — your metro and the country the
-            // smoke is arriving from, which is the scale the question is
-            // actually asked at. Pinch out for the continent.
-            view.setRegion(
-                MKCoordinateRegion(
-                    center: center,
-                    span: MKCoordinateSpan(latitudeDelta: 2.2, longitudeDelta: 2.2)
-                ),
-                animated: false
-            )
-            let pin = MKPointAnnotation()
-            pin.coordinate = center
-            view.addAnnotation(pin)
-        }
-        return view
-    }
-
-    func updateUIView(_ view: MKMapView, context: Context) {
-        let wanted: UIUserInterfaceStyle = isDark ? .dark : .light
-        if view.overrideUserInterfaceStyle != wanted {
-            view.overrideUserInterfaceStyle = wanted
-        }
-
-        if let center {
-            let pins = view.annotations.compactMap { $0 as? MKPointAnnotation }
-            if pins.first?.coordinate.latitude != center.latitude
-                || pins.first?.coordinate.longitude != center.longitude {
-                view.removeAnnotations(pins)
-                let pin = MKPointAnnotation()
-                pin.coordinate = center
-                view.addAnnotation(pin)
-            }
-        }
-
-        let existing = view.overlays.compactMap { $0 as? SmokeOverlay }
-        guard existing.first !== overlay else { return }
-        view.removeOverlays(existing)
-        if let overlay { view.addOverlay(overlay, level: .aboveRoads) }
-    }
-
-    func makeCoordinator() -> Coordinator { Coordinator(onLongPress: onLongPress) }
-
-    final class Coordinator: NSObject, MKMapViewDelegate {
-        private let onLongPress: (CLLocationCoordinate2D) -> Void
-
-        init(onLongPress: @escaping (CLLocationCoordinate2D) -> Void) {
-            self.onLongPress = onLongPress
-        }
-
-        @objc func handleLongPress(_ recognizer: UILongPressGestureRecognizer) {
-            // `.began`, not `.ended`: the place should change under the finger
-            // that is still down, the way a map pin drops.
-            guard recognizer.state == .began,
-                  let view = recognizer.view as? MKMapView else { return }
-            let point = recognizer.location(in: view)
-            let coordinate = view.convert(point, toCoordinateFrom: view)
-            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-            onLongPress(coordinate)
-        }
-
-        func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-            guard let smoke = overlay as? SmokeOverlay else {
-                return MKOverlayRenderer(overlay: overlay)
-            }
-            return SmokeOverlayRenderer(overlay: smoke)
         }
     }
 }

@@ -137,6 +137,45 @@ and watchOS stopped compiling until it was gated to iOS; and
 clear expired on 2026-08-08, so two assertions started failing on their own.
 Both fixed.
 
+### 2026-08-08 — the map went dark, on MapLibre
+
+The map moved off MapKit and onto MapLibre, on `feat/maplibre-dark-map`. This
+is what unblocks the dark basemap: MapKit would not hand its own tiles a dark
+style that agreed with the frames, so the darkening ramp had no legible
+backdrop. MapLibre draws a basemap we control — CARTO's dark-matter **vector**
+style — and draws it on iOS and Android both, so this is also the engine
+Android will share. (It started as CARTO raster with a separate labels layer;
+raster labels stayed soft on a 3x screen, so it moved to the vector style,
+whose glyph labels are crisp at any density. The smoke is inserted below the
+style's first symbol layer, so the city names still ride above heavy smoke.)
+
+The frames did not change. They are PNG-8 in Web Mercator, which is MapLibre's
+projection too, so an `MLNImageSource` with the domain's corners as its quad
+lands with no resampling — the same free ride MapKit's `MKMapRect` gave. The
+theme is now fixed at dark and reads the published `hrrr-dark` domain (grey
+where the air is barely off, warming to amber as it thickens — smoke lit from
+within, on black). `SmokeMapView`'s old `darkBasemapAvailable` gate is gone;
+`MapCanvas`/`SmokeOverlay`'s MapKit renderer is replaced by `MapLibreCanvas`.
+
+Wiring notes for whoever touches this next: MapLibre is added in `project.yml`
+as a package on the app target with `destinationFilters: [iOS]`. That filter
+matters — `platforms: [iOS]` on a package product is silently dropped by
+XcodeGen for a multiplatform target, which leaves the module unresolved;
+`destinationFilters` emits a real `platformFilters = (ios,)` so the macOS app
+still links without MapLibre (which ships no macOS slice). Built and run in the
+iPhone 17 Pro simulator and on device (Sunrise): dark map, amber plume over
+Missoula, crisp labels on top, scrubber steps the frames. The pre-rendered
+domain is a rectangle, so its edges feather to transparent over a thin margin —
+otherwise HRRR's northern edge draws a hard line across Canada. macOS and the
+kit tests still build.
+
+Coverage is the honest gap. Only `hrrr-dark` is published, so the dark map has
+smoke over CONUS and paints none outside it — where a light basemap would have
+shown CAMS. That is correct for a dark basemap (a light ramp on dark tiles is
+the one thing that must never ship), not a workaround. The real fix is a
+`cams-dark` domain from the same `ramp.py` inversion that produced `hrrr-dark`;
+until then, non-US is dark basemap with no smoke. Matters for Android/global.
+
 ## Open, and whose call
 
 - **Bundle prefix.** The app is `earth.smokeshow.*`; everything else of
@@ -148,11 +187,10 @@ Both fixed.
   The operation couldn't be completed. (SmokeshowKit.DeviceRegistryClient
   .RegistryError error 0.)" That is a developer string in a user's face; it
   wants a written sentence. The B7 registry being provisional is the cause.
-- **The dark basemap.** The dark-ramp frames publish and the app selects them,
-  gated behind `SmokeMapView.darkBasemapAvailable`, which is `false`. MapKit
-  will not render its own tiles dark, so turning it on today puts the amber
-  ramp on pale tiles. The answer is CARTO `dark_nolabels` via MapLibre — the
-  demo's basemap, and one that would serve Android too. Flip the flag when
-  that lands; nothing else has to change.
+- **The dark basemap.** DONE on `feat/maplibre-dark-map` — CARTO dark via
+  MapLibre. See the 2026-08-08 MapLibre entry above.
+- **Global dark coverage.** The dark map is CONUS-only: only `hrrr-dark` is
+  published, so outside the US the map is a dark basemap with no smoke. Needs a
+  `cams-dark` domain from `ramp.py`'s dark inversion. Matters most for Android.
 - **Watch entitlement.** An unpaired-launch watch reads an empty snapshot.
   Known, documented in `apple/docs/watch-and-live-activity.md`.
