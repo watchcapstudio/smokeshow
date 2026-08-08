@@ -18,7 +18,7 @@
 #if os(iOS)
 
 import SwiftUI
-import MapKit
+import CoreLocation
 import SmokeshowKit
 
 struct SmokeMapView: View {
@@ -28,13 +28,14 @@ struct SmokeMapView: View {
     /// Hours from now, matching the curve's window.
     @State private var offset: Double = 0
     @State private var domains: [SmokeDomain] = []
-    @State private var overlay: SmokeOverlay?
+    @State private var frame: SmokeFramePayload?
     @State private var status: Status = .loading
     @State private var isPlaying = false
-    /// Dark once the publisher is writing dark-ramp frames. Until then the map
-    /// stays light, because a black basemap under a darkening ramp is the one
+    /// The basemap is CARTO dark, unconditionally, so the frames must be the
+    /// dark (grey→amber) ramp. Where no dark domain covers a place the map
+    /// shows no smoke there rather than a light ramp on dark tiles — the one
     /// combination this product must never ship.
-    @State private var theme: SmokeDomain.Theme = .light
+    private let theme: SmokeDomain.Theme = .dark
 
     private enum Status: Equatable {
         case loading
@@ -42,10 +43,6 @@ struct SmokeMapView: View {
         case noCoverage
         case unavailable
     }
-
-    /// Whether the basemap can render dark. MapKit's cannot here; see
-    /// `loadDomains`.
-    static let darkBasemapAvailable = false
 
     private var place: Place? { model.place }
 
@@ -60,22 +57,15 @@ struct SmokeMapView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            MapCanvas(
+            MapLibreCanvas(
                 center: place.map {
                     CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)
                 },
-                overlay: overlay,
-                isDark: theme == .dark,
+                frame: frame,
                 onLongPress: { coordinate in
                     Task { await move(to: coordinate) }
                 }
             )
-            // Rebuild rather than restyle. `overrideUserInterfaceStyle` set on
-            // a live MKMapView does not reliably repaint the basemap, and the
-            // theme resolves exactly once per session — from the manifest, on
-            // open — so paying for one rebuild is cheaper than carrying a
-            // basemap that disagrees with the frames on top of it.
-            .id(theme)
             .ignoresSafeArea()
 
             topBar
@@ -233,19 +223,10 @@ struct SmokeMapView: View {
     private func loadDomains() async {
         do {
             domains = try await SmokeFrames.fetchDomains()
-            // Dark frames are published and this picks them up the moment the
-            // basemap can actually go dark. It cannot yet: MKMapView ignores
-            // `overrideUserInterfaceStyle` for its basemap here, so asking for
-            // dark produced the amber ramp on pale tiles — the convergence the
-            // whole two-palette exercise exists to prevent. Frames and basemap
-            // agree or neither moves.
-            //
-            // The fix is a basemap we control. The demo used CARTO
-            // dark_nolabels, which is what Kelly is asking for when he says
-            // "the sexy black map", and MapLibre would draw those tiles on iOS
-            // and Android both. Flip this to `.dark` the day that lands.
-            theme = SmokeMapView.darkBasemapAvailable
-                && SmokeFrames.hasTheme(.dark, in: domains) ? .dark : .light
+            // The basemap we control is here now — CARTO dark on MapLibre — so
+            // the theme is fixed at dark and the map reads the grey→amber
+            // frames. Coverage stays honest: where no dark domain reaches, the
+            // map paints no smoke rather than the wrong ramp.
             if domains.isEmpty { status = .unavailable }
         } catch {
             status = .unavailable
@@ -264,14 +245,14 @@ struct SmokeMapView: View {
             in: domains,
             theme: theme
         ) else {
-            overlay = nil
+            frame = nil
             status = .noCoverage
             return
         }
         do {
             let image = try await SmokeFrameImage.load(match.frame)
             guard !Task.isCancelled else { return }
-            overlay = SmokeOverlay(image: image, bounds: match.domain.bounds)
+            frame = SmokeFramePayload(image: image, bounds: match.domain.bounds)
             status = .painted(match.domain.model)
         } catch {
             // Playback supersedes its own loads: every hour that arrives while
@@ -283,115 +264,6 @@ struct SmokeMapView: View {
             // Keep the last good frame rather than blanking: a single missing
             // hour mid-run is a gap in the run, not a loss of coverage.
             status = .unavailable
-        }
-    }
-}
-
-/// MapKit, muted. The basemap is context, not the subject — the web makes the
-/// same call with CARTO Positron, and the standard configuration's `.muted`
-/// emphasis is the native way to say it.
-private struct MapCanvas: UIViewRepresentable {
-    let center: CLLocationCoordinate2D?
-    let overlay: SmokeOverlay?
-    let isDark: Bool
-    let onLongPress: (CLLocationCoordinate2D) -> Void
-
-    func makeUIView(context: Context) -> MKMapView {
-        let view = MKMapView()
-        view.overrideUserInterfaceStyle = isDark ? .dark : .light
-        view.delegate = context.coordinator
-        view.pointOfInterestFilter = .excludingAll
-        view.showsCompass = false
-
-        let configuration = MKStandardMapConfiguration(emphasisStyle: .muted)
-        view.preferredConfiguration = configuration
-
-        // The basemap follows the frames, never the other way round.
-        //
-        // CLAUDE.md: "the ramp always runs opposite the tiles". The publisher
-        // renders each domain twice — a palette that darkens with
-        // concentration for light tiles, one that lightens for dark ones — and
-        // this view draws whichever basemap matches the frames it actually
-        // has. Until a dark-ramp run has landed there are none, so it stays
-        // light rather than going black with a darkening ramp on it, which is
-        // the flip the web made twice.
-        view.overrideUserInterfaceStyle = isDark ? .dark : .light
-
-        let press = UILongPressGestureRecognizer(
-            target: context.coordinator,
-            action: #selector(Coordinator.handleLongPress(_:))
-        )
-        press.minimumPressDuration = 0.45
-        view.addGestureRecognizer(press)
-
-        if let center {
-            // 12° opened on half the west coast: someone in Seattle was
-            // reading Spokane's air to answer a question about their own
-            // street. ~2.2° is roughly 240km — your metro and the country the
-            // smoke is arriving from, which is the scale the question is
-            // actually asked at. Pinch out for the continent.
-            view.setRegion(
-                MKCoordinateRegion(
-                    center: center,
-                    span: MKCoordinateSpan(latitudeDelta: 2.2, longitudeDelta: 2.2)
-                ),
-                animated: false
-            )
-            let pin = MKPointAnnotation()
-            pin.coordinate = center
-            view.addAnnotation(pin)
-        }
-        return view
-    }
-
-    func updateUIView(_ view: MKMapView, context: Context) {
-        let wanted: UIUserInterfaceStyle = isDark ? .dark : .light
-        if view.overrideUserInterfaceStyle != wanted {
-            view.overrideUserInterfaceStyle = wanted
-        }
-
-        if let center {
-            let pins = view.annotations.compactMap { $0 as? MKPointAnnotation }
-            if pins.first?.coordinate.latitude != center.latitude
-                || pins.first?.coordinate.longitude != center.longitude {
-                view.removeAnnotations(pins)
-                let pin = MKPointAnnotation()
-                pin.coordinate = center
-                view.addAnnotation(pin)
-            }
-        }
-
-        let existing = view.overlays.compactMap { $0 as? SmokeOverlay }
-        guard existing.first !== overlay else { return }
-        view.removeOverlays(existing)
-        if let overlay { view.addOverlay(overlay, level: .aboveRoads) }
-    }
-
-    func makeCoordinator() -> Coordinator { Coordinator(onLongPress: onLongPress) }
-
-    final class Coordinator: NSObject, MKMapViewDelegate {
-        private let onLongPress: (CLLocationCoordinate2D) -> Void
-
-        init(onLongPress: @escaping (CLLocationCoordinate2D) -> Void) {
-            self.onLongPress = onLongPress
-        }
-
-        @objc func handleLongPress(_ recognizer: UILongPressGestureRecognizer) {
-            // `.began`, not `.ended`: the place should change under the finger
-            // that is still down, the way a map pin drops.
-            guard recognizer.state == .began,
-                  let view = recognizer.view as? MKMapView else { return }
-            let point = recognizer.location(in: view)
-            let coordinate = view.convert(point, toCoordinateFrom: view)
-            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-            onLongPress(coordinate)
-        }
-
-        func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-            guard let smoke = overlay as? SmokeOverlay else {
-                return MKOverlayRenderer(overlay: overlay)
-            }
-            return SmokeOverlayRenderer(overlay: smoke)
         }
     }
 }
