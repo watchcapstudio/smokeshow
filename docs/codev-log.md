@@ -78,6 +78,30 @@ widget" at the top for anyone who said no. The nudge policy in
 
 - Rollback: revert the PR. The delay is one `Task.sleep` in `RootView`.
 
+### 2026-08-08 — the main screen back toward the demo (PROPOSAL, Joe's call)
+
+Kelly's read of the shipped screen: "it feels like a web wrapper." Not
+literally — it is native SwiftUI throughout, no WebView in any of the 49 files
+— but it read as a scrolling document. Body copy stacked down the page, a data
+table of instrument readings, nothing to touch.
+
+The demo rig is a window: sky and land, verdict low on the horizon, clear-time
+in the accent, and below it only the curve and the five days. Fixed height,
+`overflow:hidden`, nothing scrolls.
+
+This branch moves the app toward that: the scroll is gone, the ridge is drawn,
+the verdict sits between sky and land, the clear-time headline takes the
+accent, "What this means" becomes a text link rather than a pill, and the
+instrument rows move into the explainer — which is where the demo had them all
+along, and where they already existed in `ExplainSheet`.
+
+**This is a proposal, not a decision.** Joe owns the design. Reject the PR and
+nothing else changes; every edit is in `VerdictScreen.swift`.
+
+Known and unresolved: `RidgeView` paints dark haze, which is invisible against
+a night sky. It reads on a light one. The demo's land is warm and lighter than
+its sky, so these are not the same object, and which one is right is Joe's.
+
 ## Open, and whose call
 
 - **Bundle prefix.** The app is `earth.smokeshow.*`; everything else of

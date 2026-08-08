@@ -22,56 +22,61 @@ struct VerdictScreen: View {
 
     var body: some View {
         ZStack {
+            // The screen is a window. Sky behind, land in front, and the
+            // verdict sitting on the horizon between them — the demo rig's
+            // whole idea, and the reason the app is not a list of readings.
             SkyBackdrop(sky: sky)
                 .ignoresSafeArea()
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    header
-                    verdictBlock
-                    if let forecast {
-                        TimelineBlock(forecast: forecast, unit: model.preferences.unit)
-                        FiveDayBlock(forecast: forecast)
-                        MeasuredBlock(forecast: forecast)
-                        agreement(forecast)
-                    }
-                    if let error = model.loadError {
-                        UnavailableBanner(error: error, generatedAt: forecast?.generatedAt)
-                    }
-                    // Without a place there is no product, so the first screen
-                    // has to carry the way out of that state itself — the
-                    // eyebrow in the corner is too quiet to be the only one.
-                    if model.place == nil {
-                        Button { showsPlaces = true } label: {
-                            Text("Choose a place")
-                                .font(Typography.md)
-                                .padding(.horizontal, 18)
-                                .padding(.vertical, 12)
-                                .frame(maxWidth: .infinity)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                        .fill(.white.opacity(0.14))
-                                )
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    explainButton
-                    // The full text is acknowledged once on first run and
-                    // lives in the explainer. Repeating all of it under every
-                    // launch trained people to scroll past the paragraph that
-                    // matters; this line keeps the claim honest and the door open.
-                    Button { showsExplain = true } label: {
-                        Text("Model estimates, not health advice. What this means ›")
-                            .font(.system(size: 10.5))
-                            .opacity(0.5)
-                            .padding(.top, 4)
+            VStack {
+                Spacer(minLength: 0)
+                RidgeView(pm25: nowHour?.pm25, strength: 0.55)
+                    .frame(height: 260)
+            }
+            .ignoresSafeArea()
+
+            VStack(alignment: .leading, spacing: 0) {
+                header
+
+                // Everything above the word is empty sky. That space is the
+                // product doing its job: on a clear day you see a lot of it.
+                Spacer(minLength: 12)
+
+                verdictBlock
+
+                Spacer(minLength: 12)
+
+                if let forecast {
+                    TimelineBlock(forecast: forecast, unit: model.preferences.unit)
+                        .padding(.bottom, 10)
+                    FiveDayBlock(forecast: forecast)
+                }
+
+                if let error = model.loadError {
+                    UnavailableBanner(error: error, generatedAt: forecast?.generatedAt)
+                        .padding(.top, 12)
+                }
+
+                // Without a place there is no product, so the first screen
+                // has to carry the way out of that state itself — the
+                // eyebrow in the corner is too quiet to be the only one.
+                if model.place == nil {
+                    Button { showsPlaces = true } label: {
+                        Text("Choose a place")
+                            .font(Typography.md)
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 12)
+                            .frame(maxWidth: .infinity)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .fill(.white.opacity(0.14))
+                            )
                     }
                     .buttonStyle(.plain)
-                    Spacer(minLength: 24)
+                    .padding(.top, 12)
                 }
-                .padding(20)
             }
-            .refreshable { await model.refresh(force: true) }
+            .padding(20)
         }
         .foregroundStyle(sky?.ink ?? Palette.dark.text)
         .sheet(isPresented: $showsPlaces) {
@@ -97,13 +102,29 @@ struct VerdictScreen: View {
 
             Spacer()
 
+            // The demo's "NOW" — the clock that says which moment the screen
+            // is describing. It matters more once the curve can be scrubbed
+            // away from the present.
+            Text(clockLabel)
+                .font(Typography.eyebrow)
+                .opacity(0.45)
+
             Button { showsSettings = true } label: {
                 Image(systemName: "slider.horizontal.3")
                     .font(.system(size: 15, weight: .semibold))
                     .opacity(0.6)
             }
             .buttonStyle(.plain)
+            .padding(.leading, 12)
         }
+    }
+
+    private var clockLabel: String {
+        guard let forecast else { return "NOW" }
+        let formatter = DateFormatter()
+        formatter.timeZone = forecast.location.timeZone
+        formatter.dateFormat = "h:mm a"
+        return formatter.string(from: forecast.now.exactUTC).uppercased()
     }
 
     private var verdictBlock: some View {
@@ -115,21 +136,26 @@ struct VerdictScreen: View {
 
             if let hour = nowHour, let trend = hour.trend {
                 TrendChip(trend: trend)
+                    .padding(.bottom, 2)
             }
 
             // The one sentence guaranteed identical on the phone and the
-            // laptop. Rendered verbatim, never re-derived.
+            // laptop. Rendered verbatim, never re-derived — and given the
+            // accent, because "when does it clear" is the whole question.
             Text(forecast?.verdict.headline ?? "")
                 .font(Typography.md)
-                .opacity(0.85)
+                .foregroundStyle(Palette.dark.accent)
 
             Text(forecast?.nowScaleEntry?.notice ?? "")
                 .font(Typography.base)
-                .opacity(0.72)
+                .opacity(0.78)
 
             Text(readingLine)
                 .font(Typography.eyebrow)
                 .opacity(0.55)
+
+            explainButton
+                .padding(.top, 6)
 
             if model.isStale, let generatedAt = forecast?.generatedAt {
                 Text(Copy.asOf(generatedAt))
@@ -151,22 +177,14 @@ struct VerdictScreen: View {
         }
     }
 
-    private func agreement(_ forecast: Forecast) -> some View {
-        Text(forecast.agreement.label)
-            .font(Typography.sm)
-            .italic()
-            .opacity(0.55)
-    }
-
+    /// A text link, not a pill. On a screen that is meant to read as a window,
+    /// a bordered control is the one thing that looks pasted on — and this is
+    /// also where the instrument rows and the disclaimer now live.
     private var explainButton: some View {
         Button { showsExplain = true } label: {
-            Text("What this means")
+            Text("What this means ›")
                 .font(Typography.sm)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 9)
-                .background(
-                    Capsule().stroke((sky?.ink ?? Palette.dark.text).opacity(0.35), lineWidth: 1)
-                )
+                .opacity(0.75)
         }
         .buttonStyle(.plain)
     }
@@ -313,51 +331,6 @@ struct FiveDayBlock: View {
                     .font(Typography.eyebrow)
                     .opacity(0.45)
             }
-        }
-    }
-}
-
-/// Official, local, model — three answers, never averaged. When they disagree
-/// that *is* the information, and the explainer exists to say why.
-struct MeasuredBlock: View {
-    let forecast: Forecast
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            if let official = forecast.measured.official {
-                row(
-                    title: Copy.officialRowTitle,
-                    detail: [official.area, official.distanceMi.map { "\(Int($0)) mi" }]
-                        .compactMap { $0 }.joined(separator: " · "),
-                    value: "\(Int(official.ug.rounded())) µg/m³"
-                )
-            }
-            if let local = forecast.measured.local {
-                row(
-                    title: Copy.localRowTitle,
-                    detail: "\(local.count) sensors"
-                        + (local.medianDistanceMi.map { " · \(Int($0)) mi" } ?? ""),
-                    value: "\(Int(local.ug.rounded())) µg/m³"
-                )
-            }
-            if let modelUg = forecast.measured.model.ug {
-                row(
-                    title: Copy.modelRowTitle,
-                    detail: forecast.source.model,
-                    value: "\(Int(modelUg.rounded())) µg/m³"
-                )
-            }
-        }
-        .font(Typography.sm)
-        .opacity(0.75)
-    }
-
-    private func row(title: String, detail: String, value: String) -> some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(title).fontWeight(.semibold)
-            Text(detail).opacity(0.6).font(Typography.xs)
-            Spacer()
-            Text(value).monospacedDigit()
         }
     }
 }
