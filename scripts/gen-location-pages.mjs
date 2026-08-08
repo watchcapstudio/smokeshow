@@ -209,21 +209,16 @@ function page(loc) {
 
       <div id="map-slot"></div>
 
-      <!-- Section order tracks index.html since #25: the app CTA opens the
-           reference sheet, the questions follow. The city-specific blocks sit
-           after them, where the root page keeps its explainer. -->
+      <!-- Section order tracks index.html: map, then the live app CTA React
+           portals in here, then the reference sheet. The slot has to exist on
+           this template too — without it App.jsx has nowhere to put the CTA
+           and a location page simply loses it. -->
+      <div id="cta-slot"></div>
+
+      <!-- The city-specific blocks sit after the questions, where the root
+           page keeps its explainer. -->
       <div class="seo-sheet">
         <div class="seo-sheet__grab" aria-hidden="true"></div>
-
-        <section class="app-cta">
-          <h2>SMOKESHOW is also an app.</h2>
-          <p>
-            The same forecast, glanceable from a Home Screen or lock-screen widget — no need to open
-            anything to check. Plus threshold alerts when smoke arrives, peaks, or clears.
-            <strong>Coming soon to iOS, macOS, and Android.</strong> 14-day trial, then
-            $2.99/month.
-          </p>
-        </section>
 
         <section class="faq">
           <h2>Smoke in ${esc(loc.name)}? Common questions.</h2>${faqItems(loc)}
