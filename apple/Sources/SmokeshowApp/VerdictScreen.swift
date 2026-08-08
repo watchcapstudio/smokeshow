@@ -14,6 +14,7 @@ struct VerdictScreen: View {
     @EnvironmentObject private var model: AppModel
     @Binding var showsExplain: Bool
     @Binding var showsSettings: Bool
+    @State private var showsPlaces = false
 
     private var forecast: Forecast? { model.forecast }
     private var nowHour: Forecast.Hour? { forecast?.nowHour }
@@ -37,6 +38,23 @@ struct VerdictScreen: View {
                     if let error = model.loadError {
                         UnavailableBanner(error: error, generatedAt: forecast?.generatedAt)
                     }
+                    // Without a place there is no product, so the first screen
+                    // has to carry the way out of that state itself — the
+                    // eyebrow in the corner is too quiet to be the only one.
+                    if model.place == nil {
+                        Button { showsPlaces = true } label: {
+                            Text("Choose a place")
+                                .font(Typography.md)
+                                .padding(.horizontal, 18)
+                                .padding(.vertical, 12)
+                                .frame(maxWidth: .infinity)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                        .fill(.white.opacity(0.14))
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
                     explainButton
                     Text(Copy.disclaimer)
                         .font(.system(size: 10.5))
@@ -49,16 +67,24 @@ struct VerdictScreen: View {
             .refreshable { await model.refresh(force: true) }
         }
         .foregroundStyle(sky?.ink ?? Palette.dark.text)
+        .sheet(isPresented: $showsPlaces) {
+            PlacePickerView()
+                .environmentObject(model)
+        }
     }
 
     private var header: some View {
         HStack {
             Button {
-                Task { await model.useCurrentLocation() }
+                showsPlaces = true
             } label: {
-                Text((model.place?.shortName ?? "Choose a place").uppercased())
-                    .font(Typography.eyebrow)
-                    .opacity(0.6)
+                HStack(spacing: 5) {
+                    Text((model.place?.shortName ?? "Choose a place").uppercased())
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 9, weight: .semibold))
+                }
+                .font(Typography.eyebrow)
+                .opacity(0.6)
             }
             .buttonStyle(.plain)
 
