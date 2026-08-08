@@ -90,38 +90,15 @@ struct MapLibreCanvas: UIViewRepresentable {
 
     // MARK: - Style
 
-    /// CARTO dark raster, written once to a local file MapLibre loads as its
-    /// style. Raster rather than CARTO's vector style on purpose: rasters let
-    /// the labels sit in their own layer ABOVE the smoke, which the vector
-    /// style bakes together. Both credits are carried on the source so the
-    /// info button shows them wherever the tiles are.
+    /// CARTO dark-matter, the vector style. Raster tiles softened the city
+    /// names on a 3x screen no matter the @Nx — a raster label is pixels, and
+    /// pixels upscale. Vector labels are glyphs and stay crisp at any density.
+    /// The smoke is inserted below the style's first symbol layer (see
+    /// `render`), so the names still ride above the weather the way the raster
+    /// sandwich did. Glyphs, sprite and the CARTO/OSM attribution all travel
+    /// with the style.
     private static func darkStyleURL() -> URL {
-        let attribution = "© OpenStreetMap contributors © CARTO"
-        func rasterSource(_ slug: String) -> String {
-            // @2x tiles: on a 2x/3x phone the 1x rasters upscale and the city
-            // labels go soft. The 512px retina tiles stay declared at tileSize
-            // 256 so the footprint is unchanged — only the pixel density rises.
-            let tiles = ["a", "b", "c", "d"].map {
-                "\"https://\($0).basemaps.cartocdn.com/\(slug)/{z}/{x}/{y}@2x.png\""
-            }.joined(separator: ",")
-            return """
-            {"type":"raster","tiles":[\(tiles)],"tileSize":256,"maxzoom":20,\
-            "attribution":"\(attribution)"}
-            """
-        }
-        let json = """
-        {"version":8,"sources":{\
-        "carto-dark":\(rasterSource("dark_nolabels")),\
-        "carto-labels":\(rasterSource("dark_only_labels"))},\
-        "layers":[\
-        {"id":"bg","type":"background","paint":{"background-color":"#0a0c10"}},\
-        {"id":"carto-dark","type":"raster","source":"carto-dark"},\
-        {"id":"carto-labels","type":"raster","source":"carto-labels"}]}
-        """
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("smokeshow-dark-style.json")
-        try? json.data(using: .utf8)?.write(to: url)
-        return url
+        URL(string: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json")!
     }
 
     // MARK: - Coordinator
@@ -140,7 +117,6 @@ struct MapLibreCanvas: UIViewRepresentable {
         // here" dot rides above everything.
         private let smokeSourceID = "smoke"
         private let smokeLayerID = "smoke"
-        private let labelsLayerID = "carto-labels"
 
         init(onLongPress: @escaping (CLLocationCoordinate2D) -> Void) {
             self.onLongPress = onLongPress
@@ -199,8 +175,10 @@ struct MapLibreCanvas: UIViewRepresentable {
                 // never quite disappears, matching the MapKit renderer's 0.92.
                 layer.rasterOpacity = NSExpression(forConstantValue: 0.92)
                 layer.rasterResamplingMode = NSExpression(forConstantValue: "linear")
-                if let labels = style.layer(withIdentifier: labelsLayerID) {
-                    style.insertLayer(layer, below: labels)
+                // Below the first symbol (label) layer, so every city name
+                // stays legible on top of heavy smoke.
+                if let firstSymbol = style.layers.first(where: { $0 is MLNSymbolStyleLayer }) {
+                    style.insertLayer(layer, below: firstSymbol)
                 } else {
                     style.addLayer(layer)
                 }
