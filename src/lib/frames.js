@@ -3,9 +3,10 @@
 // A DOMAIN is one rectangular pre-rendered field: a model, an extent, a pixel
 // size, and hourly PNG frames keyed by absolute valid time. Today there are
 // two — NOAA HRRR-Smoke at 3 km over CONUS, and Copernicus CAMS at 40 km over
-// most of the populated world. The map paints the sharpest domain that
-// contains the view centre and has a frame for the hour; where none does, the
-// caller falls back to the 81-point CAMS grid.
+// most of the populated world. The map paints the sharpest domain that FILLS
+// the viewport (see pickForView) — never two at once, never one running out
+// mid-screen. Where no domain has the hour, the caller falls back to the
+// 81-point CAMS grid and the badge says so.
 //
 // Frames are absolute-valid-time keyed, so a stale run simply stops matching
 // recent hours and the map falls back on its own — no freshness gate.
@@ -97,6 +98,34 @@ export function pickDomains(frames, timeUTC, lat, lon) {
     if (url) out.push({ domain, url });
   }
   return out;
+}
+
+// Does `domain` contain the WHOLE viewport? `view` is {south,north,west,east}.
+export function domainCoversView(domain, view) {
+  if (!domain || !view) return false;
+  const b = domain.bounds;
+  if (view.south < b.latS || view.north > b.latN) return false;
+  if (domain.wraps) return true;
+  if (view.west > view.east) return false; // panned across the antimeridian
+  return view.west >= b.lonW && view.east <= b.lonE;
+}
+
+// What the map should paint: the sharpest domain that FILLS the viewport, and
+// failing that the widest one available.
+//
+// Not "the sharpest domain containing the centre" — that draws the sharp
+// domain's rectangular edge across the map whenever you can see past it, and a
+// straight line through Montana reads as geography, not as a model boundary.
+// Nothing fills the gap either, because the domains measure different things
+// (see docs/global-frames.md). So the map never shows two at once and never
+// shows one running out: below the threshold you get 3 km smoke, above it a
+// single consistent global field, and the badge names whichever it is.
+export function pickForView(frames, timeUTC, view) {
+  if (!view) return null;
+  const lat = (view.south + view.north) / 2;
+  const lon = (view.west + view.east) / 2;
+  const picks = pickDomains(frames, timeUTC, lat, lon);
+  return picks.find((p) => domainCoversView(p.domain, view)) ?? picks[picks.length - 1] ?? null;
 }
 
 // The sharpest domain that covers (lat, lon) AND has a frame for this hour.

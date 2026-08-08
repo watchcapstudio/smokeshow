@@ -49,10 +49,17 @@ const DATA = arg('data', join(OUT, 'data'));
 const ZOOMS = (arg('zooms', '9,4')).split(',').map(Number);
 
 // One city per coverage story, each captured at every zoom in ZOOMS.
+//
+// `expect` is per zoom, because that is the rule now: the map paints the
+// sharpest domain that FILLS the viewport. Missoula gets HRRR's 3 km field
+// zoomed in and the global field zoomed out, where its view runs past 50 N —
+// one consistent field either way, and never a domain edge drawn across the
+// map. Border, at 48.6 N, is the case that used to show the line at any zoom.
 const PLACES = [
-  { key: 'missoula', name: 'Missoula', lat: 46.87, lon: -113.99, expect: 'hrrr' },
-  { key: 'edmonton', name: 'Edmonton', lat: 53.55, lon: -113.49, expect: 'cams' },
-  { key: 'madrid', name: 'Madrid', lat: 40.42, lon: -3.7, expect: 'cams' },
+  { key: 'missoula', name: 'Missoula', lat: 46.87, lon: -113.99, expect: { 9: 'hrrr', 4: 'cams' } },
+  { key: 'border', name: 'Border MT/AB', lat: 48.6, lon: -110.0, expect: { 9: 'hrrr', 4: 'cams' } },
+  { key: 'edmonton', name: 'Edmonton', lat: 53.55, lon: -113.49, expect: { 9: 'cams', 4: 'cams' } },
+  { key: 'madrid', name: 'Madrid', lat: 40.42, lon: -3.7, expect: { 9: 'cams', 4: 'cams' } },
 ];
 
 const PM = 45; // "Smells like fire" — mid-scale, so the ramp is clearly painting
@@ -310,16 +317,17 @@ for (const d of manifest.domains) {
 }
 
 console.log(
-  `\n${pad('place', 12)}${pad('zoom', 6)}${pad('domain', 9)}${pad('backfill', 10)}${pad('cover', 8)}badge`,
+  `\n${pad('place', 15)}${pad('zoom', 6)}${pad('domain', 9)}${pad('want', 8)}${pad('cover', 8)}badge`,
 );
 console.log('-'.repeat(104));
 let mismatches = 0;
 for (const r of rows) {
-  const ok = r.domain === r.expect;
+  const want = r.expect[r.zoom] ?? r.expect[String(r.zoom)];
+  const ok = r.domain === want;
   if (!ok) mismatches++;
   console.log(
-    `${ok ? ' ' : '!'}${pad(r.name, 11)}${pad(r.zoom, 6)}${pad(r.domain ?? '—', 9)}` +
-      `${pad(r.base ?? '—', 10)}${pad(`${(r.cover * 100).toFixed(0)}%`, 8)}${r.badge ?? '(none)'}`,
+    `${ok ? ' ' : '!'}${pad(r.name, 14)}${pad(r.zoom, 6)}${pad(r.domain ?? '—', 9)}` +
+      `${pad(want ?? '—', 8)}${pad(`${(r.cover * 100).toFixed(0)}%`, 8)}${r.badge ?? '(none)'}`,
   );
 }
 

@@ -33,9 +33,11 @@ the same CAMS product Open-Meteo already serves the app as point forecasts,
 taken as a gridded field. Credentials live in the `ADS_API_KEY` Actions secret
 and never reach the client.
 
-The client picks the sharpest domain that contains the map centre and has a
-frame for the selected hour. HRRR keeps winning inside CONUS. Where nothing
-covers, the 81-point grid still carries the map — and now says so.
+The client picks the sharpest domain that **fills the viewport** and has a
+frame for the selected hour — so HRRR wins inside CONUS at the zooms where its
+3 km actually resolves, and a domain edge is never drawn across the map. See
+decision 4. Where no domain has the hour, the 81-point grid still carries the
+map — and now says so.
 
 ## Decision 1 — one global image, not regional domains
 
@@ -210,48 +212,74 @@ branch 50 MB → 36.6 MB. Re-dispatching `feat/smoke-map`'s job regenerates it,
 and it will now be dropped again at publish time until it is named in
 `KNOWN_DOMAINS`.
 
-## Decision 4 — one domain at a time, because they are not the same quantity
+## Decision 4 — the sharpest domain that FILLS the viewport
 
-This decision reversed once, and the reversal is the point.
+This decision moved twice. Both earlier versions drew a line across Montana,
+and the line is the thing to design against.
 
-The sharp domain has a hard rectangular edge. At wide zoom in Missoula that
-edge sat across southern Canada, so a reader looking north at the fires making
-their smoke saw nothing past 50 N. The first fix was a backfill: paint the next
-domain down in the region *outside* the sharp rectangle, clipped with an
-even-odd path so the two never overlap. Reasonable, and wrong.
+**First attempt — sharpest domain containing the map centre.** HRRR inside
+CONUS, CAMS outside. Zoom out anywhere near the border and HRRR's rectangle
+ends at 50 N with the plume cut off mid-flow, nothing beyond it.
 
-It shipped against a synthetic global field. With real CAMS on both sides it
-drew an obvious rectangle across the map, and the cause turned out to be
-substantive rather than cosmetic.
+**Second attempt — backfill.** Paint the next domain down *outside* the sharp
+rectangle, clipped even-odd so the two never overlap. This made the line worse,
+not better, and measuring showed why it could never work:
 
 **HRRR-Smoke MASSDEN is smoke. CAMS `particulate_matter_2.5um` is total
-PM2.5** — dust, sea salt, sulfate, traffic, everything. Measured over 21,888
-co-located samples inside CONUS at the same valid hour:
+PM2.5** — dust, sea salt, sulfate, traffic. Over 21,888 co-located samples
+inside CONUS at the same valid hour:
 
 | | mean | p50 | p90 | p99 | frac > 35 |
 | --- | --- | --- | --- | --- | --- |
 | HRRR 3 km | 5.73 | 1.04 | 9.76 | 86.59 | 4.5% |
 | CAMS 40 km | 10.58 | 8.53 | 17.73 | 45.22 | 2.5% |
 
-Where there is smoke they agree almost exactly — **median ratio 1.00** over the
-3,296 cells where both read above 5 µg/m³, correlation 0.614, and across the
-50 N seam the two-degree means are 17.66 against 18.74. There is no unit error
-and no calibration gap. What differs is the floor: CAMS carries roughly
+Where there is smoke they agree almost exactly — **median ratio 1.00** across
+the 3,296 cells where both read above 5 µg/m³, correlation 0.614, and the
+two-degree means either side of the 50 N seam are 17.66 against 18.74. No unit
+error, no calibration gap. What differs is the floor: CAMS carries roughly
 8.5 µg/m³ of ordinary background aerosol that HRRR, modelling only smoke,
-reports as clean. The ramp's low end is steep by design, so that floor paints
-as a continuous wash while HRRR's clean air stays transparent — and the
-backfill drew the difference as a hard-edged rectangle, inviting the reader to
-compare two quantities that are not the same quantity.
+reports as clean (p50 8.53 against 1.04). The ramp's low end is steep by
+design, so that floor paints as a continuous wash while HRRR's clean air stays
+transparent, and the two butted together drew the difference as a hard-edged
+rectangle — inviting the reader to compare quantities that are not comparable.
 
-So the backfill is gone, removed rather than feathered: a feather would blur a
-real disagreement between models into an invented gradient. The argument that
-motivated it was also a dark-basemap argument — on Positron, no data reads as
-plain map rather than as a void, which is most of the harm it prevented.
+**What ships — `pickForView()`.** The map paints the sharpest domain whose
+bounds contain the *entire viewport*, and failing that the widest domain
+available. Never two at once, never one running out mid-screen.
 
-Restoring it needs a global field that means what HRRR means. CAMS carries
-biomass-burning aerosol species, so a smoke-only surface field is likely
-sourceable, and that is the work this waits on. The clipping code is in
-`git log`, not gone.
+| view | domain |
+| --- | --- |
+| Missoula, zoom 9 | `hrrr` — 3 km, its box fills the screen |
+| Missoula, zoom 4 | `cams` — the view runs past 50 N |
+| MT/AB border, zoom 9 | `hrrr` |
+| MT/AB border, zoom 4 | `cams` |
+| Edmonton or Madrid, any zoom | `cams` |
+
+The seam cannot be drawn, because a domain is only used when it covers
+everything on screen. What replaces it is a *transition*: zoom out past the
+threshold and the field changes character. That is disclosed — the badge names
+the model and its resolution, and it changes at the same moment the field does.
+A zoom transition the reader caused is honest in a way a fixed line through
+Montana is not, because the line reads as geography.
+
+The cost is real and worth stating: zoomed out over the US you get 40 km total
+PM2.5 instead of 3 km smoke, so plume filaments soften and background haze
+appears. The gain is that during a Canadian-fire smoke event — the scenario the
+brief is built around — zooming out finally shows the source region instead of
+blank space above the border.
+
+Neither seam was feathered at any point. A feather between two models is an
+invented gradient across a real disagreement.
+
+**What would let the sharp field win at every zoom** is a global field that
+means what HRRR means. CAMS models seven aerosol types including organic matter
+and black carbon, with biomass-burning emissions from GFAS, but does not expose
+a fire-only surface tracer — organic matter and black carbon include fossil and
+biofuel sources too. Swapping `particulate_matter_2.5um` for OM+BC would drop
+Saharan dust and sea salt and probably most of the floor, at the price of an
+approximation. It has not been measured, so it is not a plan yet. The even-odd
+clipping code is in `git log` for whenever it is.
 
 Worth noting the mismatch reaches past the map: the verdict comes from
 Open-Meteo, which is CAMS **total PM2.5**, while the CONUS map layer is

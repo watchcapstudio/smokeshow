@@ -11,7 +11,7 @@ import { levelForPM25 } from '../lib/rating.js';
 // answer different questions and must never be relabelled as each other.
 import { fetchFires, fireCard, fireRadius } from '../lib/fires.js';
 import { fetchHotspots } from '../lib/hotspots.js';
-import { domainFrameURL, pickDomains } from '../lib/frames.js';
+import { domainFrameURL, pickForView } from '../lib/frames.js';
 import { getJSON, setJSON } from '../lib/storage.js';
 import './SmokeMap.css';
 
@@ -127,9 +127,9 @@ export default function SmokeMap({
     setJSON('fireHintSeen', true);
   }, []);
 
-  // Which domain covers the view, not which covers the user: pan from Missoula
-  // to Edmonton and the field under the cursor has to be the one that reaches
-  // there. Seeded from the location so the first paint needs no map events.
+  // Bumped on every moveend so the frame effect re-reads the map's bounds:
+  // which domain to paint depends on what is on screen, not on where the user
+  // lives. Seeded from the location so the first paint needs no map events.
   const [view, setView] = useState({ lat: center.lat, lon: center.lon });
 
   // Decode-once image cache; crossOrigin so the canvas stays readable.
@@ -395,26 +395,19 @@ export default function SmokeMap({
     // Prefer the sharpest pre-rendered domain that reaches this view and has
     // this hour — HRRR inside CONUS, CAMS global everywhere else. The 81-point
     // canvas field stays the fallback for hours and places neither covers.
-    const picks = pickDomains(frames, timeA, view.lat, view.lon);
-    const pick = picks[0] ?? null;
+    const mapBounds = mapRef.current.getBounds();
+    const viewBox = {
+      south: mapBounds.getSouth(),
+      north: mapBounds.getNorth(),
+      west: mapBounds.getWest(),
+      east: mapBounds.getEast(),
+    };
+    const pick = pickForView(frames, timeA, viewBox);
     const urlA = pick?.url ?? null;
     // Frame B comes from the SAME domain, so a crossfade never dissolves one
     // model's plume into another's.
     const urlB = (pick && domainFrameURL(pick.domain, timeB)) ?? urlA;
     const sharpMode = !!urlA;
-
-    // No backfill. A coarser domain used to paint outside the sharp one's
-    // rectangle, to stop a reader in Missoula looking north at the Canadian
-    // fires and seeing nothing. Two things killed it. HRRR-Smoke MASSDEN is
-    // SMOKE, and CAMS particulate_matter_2.5um is TOTAL PM2.5 including dust,
-    // sea salt and traffic — measured over their CONUS overlap, they agree
-    // where there is smoke (median ratio 1.00) and disagree everywhere else,
-    // because CAMS carries an ~8.5 µg/m³ aerosol floor that HRRR reports as
-    // clean. Butting them together drew that difference as a hard rectangle
-    // and invited the reader to compare two different quantities. And the
-    // "seeing nothing" argument was a dark-basemap argument: on Positron, no
-    // data reads as plain map, not as a void. Restore this once a
-    // smoke-comparable global field exists — see docs/global-frames.md.
 
     const vA = frameValues(data, meta, selectedIndex);
     const vB = frameValues(data, meta, Math.min(selectedIndex + 1, lastIdx));
