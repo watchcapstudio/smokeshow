@@ -64,7 +64,8 @@
 /* FAQ */
 .faq h2,
 .explainer h2,
-.app-cta h2 {
+.app-cta h2,
+.landmarks h2 {
   font-family: var(--font-mono);
   font-size: 10.5px;
   font-weight: 600;
@@ -118,11 +119,55 @@
 
 .faq p,
 .explainer p,
-.app-cta p {
+.app-cta p,
+.landmarks > p {
   color: var(--text-dim);
   line-height: 1.6;
   font-size: 0.92rem;
   margin: 0 0 0.7rem;
+}
+
+/* Landmarks — location pages only. The visibility ladder rendered as local
+   sightlines, one row per level in lib/rating.js order. The level name and its
+   distance band share a baseline so the eye can run down either column; the
+   sightline itself is the body copy under them. */
+.landmarks__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.landmarks__item {
+  border-bottom: 1px solid var(--rule);
+  padding: 0.7rem 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.15rem 0.6rem;
+}
+
+.landmarks__item:last-child {
+  border-bottom: 0;
+}
+
+.landmarks__level {
+  font-weight: 650;
+  font-size: 0.95rem;
+}
+
+.landmarks__vis {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--accent);
+  justify-self: end;
+  align-self: baseline;
+}
+
+.landmarks__sight {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--text-dim);
+  line-height: 1.55;
+  font-size: 0.9rem;
 }
 
 .explainer p:last-child,

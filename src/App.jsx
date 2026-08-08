@@ -54,6 +54,24 @@ const TIER_SPACING_KM = { 1: 25, 2: 75, 3: 200 };
 // cache (api/aq.js). Coarser tiers snap coarser — the cells are bigger.
 const TIER_SNAP_DEG = { 1: 0.1, 2: 0.25, 3: 0.25 };
 
+// A location page (scripts/gen-location-pages.mjs) stamps the place it is about
+// into the document. Reading it here is what makes /smoke-forecast/chicago-il/
+// paint Chicago's verdict without a geolocation prompt — the reader already
+// told us where they meant by landing on that URL, and asking again would be
+// both rude and slow. Query params still win, so a shared link pointed at a
+// different place keeps working from a city page.
+function presetPlace() {
+  const preset = window.__SMOKESHOW_PLACE__;
+  if (!preset || !Number.isFinite(preset.lat) || !Number.isFinite(preset.lon)) return null;
+  return {
+    granted: true,
+    lat: preset.lat,
+    lon: preset.lon,
+    label: preset.label || null,
+    source: 'page',
+  };
+}
+
 function parseSharedParams() {
   const params = new URLSearchParams(window.location.search);
   const lat = Number.parseFloat(params.get('lat'));
@@ -105,7 +123,7 @@ export default function App() {
   const playIntervalRef = useRef(null);
 
   useEffect(() => {
-    const shared = parseSharedParams();
+    const shared = parseSharedParams() ?? presetPlace();
     if (shared) setLocation(shared);
     else requestLocation().then(setLocation);
     // The pre-rendered frames are additive — the app is fully functional
@@ -456,9 +474,16 @@ export default function App() {
     setLocation((current) => (current ? { ...current } : current));
   }
 
+  // On a location page the wordmark steps down to a plain banner, because that
+  // page already has an h1 and it names the city — which is the heading that
+  // should carry, since the page is about Chicago's air and not about us. On
+  // every other page the wordmark stays the h1: the root page's only static
+  // heading is an h2, so demoting this everywhere would leave it with none.
+  const onLocationPage = location?.source === 'page';
+  const Wordmark = onLocationPage ? 'p' : 'h1';
   const header = (
     <header className="app-header">
-      <h1 className="app-header__wordmark">SMOKESHOW</h1>
+      <Wordmark className="app-header__wordmark">SMOKESHOW</Wordmark>
       <span className="app-header__tagline">smoky where you are?</span>
     </header>
   );

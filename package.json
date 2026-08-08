@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run pages && vite build",
+    "pages": "node scripts/gen-location-pages.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "tokens": "node scripts/generate-tokens.mjs",
