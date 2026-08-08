@@ -33,7 +33,7 @@ options:
 settings:
   base:
     MARKETING_VERSION: "1.0"
-    CURRENT_PROJECT_VERSION: "1"
+    CURRENT_PROJECT_VERSION: "2"
     SWIFT_VERSION: "5.9"
     DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM}
     CODE_SIGN_STYLE: Automatic
@@ -154,6 +154,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.app
         CODE_SIGN_ENTITLEMENTS: Configuration/App.entitlements
         ENABLE_PREVIEWS: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     scheme:
       testTargets:
         - SmokeshowKitTests
