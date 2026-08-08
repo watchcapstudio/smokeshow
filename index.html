@@ -47,9 +47,10 @@
   <body>
     <div id="root"></div>
 
-    <!-- Server-delivered SEO content: app CTA -> FAQ -> explainer ->
-         disclaimer. Deliberately static HTML (not React-rendered) so crawlers
-         see it in the initial payload. The app renders above in #root. -->
+    <!-- Server-delivered SEO content: FAQ -> explainer -> disclaimer.
+         Deliberately static HTML (not React-rendered) so crawlers see it in
+         the initial payload. The app renders above in #root, and portals the
+         map and the app CTA into the slots below. -->
     <div class="app app--bottom">
       <!-- Static, not React: this is the map section's only heading and the
            FAQ's "the map above" points at it, so crawlers need it in the
@@ -69,20 +70,17 @@
            references "the map above", which is still what it is. -->
       <div id="map-slot"></div>
 
+      <!-- React portals AppWidgetCTA here — between the map and the reference
+           sheet. It has to live below the scrubber: its lead copy promises the
+           widget mocks follow "the timeline above", and above is where the
+           timeline now is. On the live sky like .map-intro, not on either
+           cream sheet, so the widget faces keep showing the reader's own sky. -->
+      <div id="cta-slot"></div>
+
       <!-- The reference material rides on the demo's bottom sheet rather than
            on the live sky: fixed cream, fixed ink, no flip. -->
       <div class="seo-sheet">
         <div class="seo-sheet__grab" aria-hidden="true"></div>
-
-        <section class="app-cta">
-          <h2>SMOKESHOW is also an app.</h2>
-          <p>
-            The same forecast, glanceable from a Home Screen or lock-screen widget — no need to open
-            anything to check. Plus threshold alerts when smoke arrives, peaks, or clears.
-            <strong>Coming soon to iOS, macOS, and Android.</strong> 14-day trial, then
-            $2.99/month.
-          </p>
-        </section>
 
         <section class="faq">
           <h2>Smoke in the air? Common questions.</h2>

@@ -563,9 +563,10 @@ export default function App() {
 
   const selectedPM25 = anchoredPm25[selectedIndex];
   const selectedLevel = levelForPM25(selectedPM25);
-  // Static slot in index.html between the FAQ and the explainer — the map
-  // renders down there (portal) while its state stays wired up here.
+  // Static slots in index.html below the verdict — the map and the app CTA
+  // render down there (portal) while their state stays wired up here.
   const mapSlot = document.getElementById('map-slot');
+  const ctaSlot = document.getElementById('cta-slot');
   const nowLevel = levelForPM25(anchoredPm25[nowIndex]);
   const isShared = location.source === 'shared';
   const shareUrl =
@@ -681,20 +682,24 @@ export default function App() {
         timezone={tz}
         measuredDays={measuredDays}
       />
-      {/* SLOT: cta */}
-      <AppWidgetCTA
-        pm25={anchoredPm25}
-        timesUTC={centerData.timesUTC}
-        selectedIndex={selectedIndex}
-        nowIndex={nowIndex}
-        windowStart={windowStart}
-        windowEnd={windowEnd}
-        verdict={verdict}
-        headline={headline}
-        level={selectedLevel}
-        placeName={placeName}
-        timezone={tz}
-      />
+      {/* SLOT: cta — portaled below the map (see #cta-slot in index.html) */}
+      {ctaSlot &&
+        createPortal(
+          <AppWidgetCTA
+            pm25={anchoredPm25}
+            timesUTC={centerData.timesUTC}
+            selectedIndex={selectedIndex}
+            nowIndex={nowIndex}
+            windowStart={windowStart}
+            windowEnd={windowEnd}
+            verdict={verdict}
+            headline={headline}
+            level={selectedLevel}
+            placeName={placeName}
+            timezone={tz}
+          />,
+          ctaSlot,
+        )}
       <InstallNudge levelIndex={nowLevel?.index ?? 0} headline={headline} />
     </div>
   );

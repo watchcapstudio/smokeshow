@@ -19,8 +19,16 @@
   gap: 0;
 }
 
-#map-slot:empty {
+#map-slot:empty,
+#cta-slot:empty {
   display: none;
+}
+
+/* The app CTA rides between the two sheets, on the live sky — deliberately
+   not in the ink-scoping group below, because its widget mocks paint the
+   reader's own sky and a cream scope would fight them. */
+#cta-slot {
+  margin-top: 2.5rem;
 }
 
 #map-slot,
@@ -68,7 +76,6 @@
 /* FAQ */
 .faq h2,
 .explainer h2,
-.app-cta h2,
 .landmarks h2 {
   font-family: var(--font-mono);
   font-size: 10.5px;
@@ -123,7 +130,6 @@
 
 .faq p,
 .explainer p,
-.app-cta p,
 .landmarks > p {
   color: var(--text-dim);
   line-height: 1.6;
@@ -174,13 +180,11 @@
   font-size: 0.9rem;
 }
 
-.explainer p:last-child,
-.app-cta p:last-child {
+.explainer p:last-child {
   margin-bottom: 0;
 }
 
-.explainer strong,
-.app-cta strong {
+.explainer strong {
   color: var(--ink);
 }
 
