@@ -15,6 +15,7 @@ struct VerdictScreen: View {
     @Binding var showsExplain: Bool
     @Binding var showsSettings: Bool
     @State private var showsPlaces = false
+    @State private var showsMap = false
     /// Index into the curve, not into `hours`. Nil means "now".
     @State private var scrubbed: Int?
 
@@ -123,6 +124,10 @@ struct VerdictScreen: View {
             PlacePickerView()
                 .environmentObject(model)
         }
+        .fullScreenCover(isPresented: $showsMap) {
+            SmokeMapView()
+                .environmentObject(model)
+        }
     }
 
     private var header: some View {
@@ -147,26 +152,54 @@ struct VerdictScreen: View {
 
     /// The place sits at the foot of the screen, under the days, because it is
     /// the answer to "where" and everything above it is the answer to "how
-    /// bad". It is also where the map will hang off: in the demo the location
-    /// name was the door to it, so the pin is the shape that door takes.
+    /// bad". It is also the door to the map, exactly as the location name was
+    /// in the demo — so it is a bar you can hit, not an eyebrow you can miss.
+    ///
+    /// A long-press changes the place; the tap goes to the map. The map is the
+    /// thing people come back for, so it gets the primary gesture.
     private var locationRow: some View {
-        Button {
-            showsPlaces = true
-        } label: {
-            HStack(spacing: 7) {
-                Image(systemName: "mappin.and.ellipse")
-                    .font(.system(size: 12, weight: .medium))
-                Text((model.place?.shortName ?? "Choose a place").uppercased())
-                    .font(Typography.eyebrow)
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 8, weight: .semibold))
-                    .opacity(0.7)
+        HStack(spacing: 10) {
+            Button {
+                showsMap = true
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "map")
+                        .font(.system(size: 13, weight: .medium))
+                    Text((model.place?.shortName ?? "Choose a place").uppercased())
+                        .font(Typography.eyebrow)
+                    Spacer(minLength: 4)
+                    Text("SEE THE SMOKE")
+                        .font(Typography.eyebrow)
+                        .opacity(0.6)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 9, weight: .semibold))
+                        .opacity(0.6)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 13)
+                .frame(maxWidth: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill((sky?.ink ?? Palette.dark.text).opacity(0.09))
+                )
+                .contentShape(Rectangle())
             }
-            .opacity(0.65)
-            .frame(maxWidth: .infinity, alignment: .center)
-            .contentShape(Rectangle())
+            .buttonStyle(.plain)
+            .disabled(model.place == nil)
+            .simultaneousGesture(LongPressGesture().onEnded { _ in showsPlaces = true })
+
+            Button { showsPlaces = true } label: {
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.system(size: 12, weight: .semibold))
+                    .opacity(0.55)
+                    .padding(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill((sky?.ink ?? Palette.dark.text).opacity(0.09))
+                    )
+            }
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
     }
 
     private var clockLabel: String {

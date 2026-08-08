@@ -102,6 +102,29 @@ Known and unresolved: `RidgeView` paints dark haze, which is invisible against
 a night sky. It reads on a light one. The demo's land is warm and lighter than
 its sky, so these are not the same object, and which one is right is Joe's.
 
+### 2026-08-08 — the map, ported to MapKit
+
+The web map is ~2,200 lines and none of it was in the app; the Apple build
+never scoped one. Two things the publisher already does made the port small:
+the frames are PNG-8 whose palette **is** the smoke ramp, and their rows are
+spaced in Web-Mercator y — which is what `MKMapRect` draws in. So the whole
+render is "put this PNG on that rect", not a canvas rasteriser.
+
+Brought over: the manifest v2 client and its degrade rule (unknown version →
+paint nothing), sharpest-domain-containing-the-centre selection, the −12/+48
+scrubber, and naming the model on screen. Not brought over: NIFC fire cards
+and FIRMS hotspots, the screen-space ash stipple, saved-place chips.
+
+**The basemap is forced light and that is not a style choice.** The published
+ramp darkens as smoke thickens because CLAUDE.md's rule is that the ramp runs
+opposite the tiles. The app's root sets `.preferredColorScheme(.dark)`, which
+would hand MapKit a dark basemap and make the heaviest air the least visible
+thing on screen — the exact flip the web made twice.
+
+A dark map is therefore not a UI toggle. It needs a second set of frames
+published with the ramp inverted, which is a change in `scripts/render/ramp.py`
+and the Actions job, not in the app.
+
 ## Open, and whose call
 
 - **Bundle prefix.** The app is `earth.smokeshow.*`; everything else of
