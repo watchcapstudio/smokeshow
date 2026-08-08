@@ -8,8 +8,9 @@
 //
 // Same rig shape as verify-map.mjs, and the same bargain about what is real:
 //
-//   TILES ARE SYNTHETIC — flat rgb(20,23,26) land plus vector furniture, so
-//   the composite arithmetic is real while the cartography is not.
+//   TILES ARE SYNTHETIC — Positron's tones, taken from SMOKE_BASEMAP_BACKDROPS
+//   so they track the real basemap, plus vector furniture. The composite
+//   arithmetic is real; the cartography is not.
 //
 //   HRRR FRAMES ARE REAL — pulled out of the `data` branch (origin/data) as
 //   published. That is genuine 3 km NOAA smoke.
@@ -29,6 +30,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ugm3ToAqi } from '../src/lib/aqi.js';
+import { SMOKE_BASEMAP_BACKDROPS } from '../src/lib/rating.js';
 
 const CHROME =
   process.env.CHROME_PATH ||
@@ -130,34 +132,56 @@ mkdirSync(OUT, { recursive: true });
 if (!existsSync(join(DATA, 'manifest.json'))) buildData();
 const manifest = JSON.parse(readFileSync(join(DATA, 'manifest.json'), 'utf8'));
 
-// The stubbed forecast has to span the hours the frames cover, or the app's
-// clock lands on a time no domain has and everything falls back.
-const HOURS = 24 * 3 + 24;
+// The stubbed forecast spans the hours the FRAMES cover, not the hours around
+// wall-clock now. Anchoring to the clock only works on a day when the checked
+// -out `data` branch happens to carry today's run; once it is a few days old,
+// every domain misses every hour and this rig reports a clean sweep of
+// coarse-grid fallbacks that looks like a product regression and is really a
+// stale checkout. It fooled the author of the rig. findNowIndex() clamps to
+// the nearest time, so anchoring to the manifest puts the initial paint on a
+// covered hour whatever the date is.
+const FRAME_TIMES = [
+  ...new Set(manifest.domains.flatMap((d) => d.frames.map((f) => f.time))),
+].sort();
+if (!FRAME_TIMES.length) throw new Error('manifest has no frames — nothing to verify');
+
 function series() {
-  const start = new Date();
-  start.setUTCMinutes(0, 0, 0);
-  start.setUTCHours(start.getUTCHours() - 72);
+  const first = new Date(`${FRAME_TIMES[0]}Z`).getTime();
+  const last = new Date(`${FRAME_TIMES[FRAME_TIMES.length - 1]}Z`).getTime();
   const time = [];
-  for (let i = 0; i < HOURS; i++) {
-    time.push(new Date(start.getTime() + i * 3_600_000).toISOString().slice(0, 16));
+  for (let t = first; t <= last; t += 3_600_000) {
+    time.push(new Date(t).toISOString().slice(0, 16));
   }
   return { time, pm2_5: time.map(() => PM) };
 }
 
 // ------------------------------------------------------------- stubbed tiles
 
+// Tones come from SMOKE_BASEMAP_BACKDROPS, not from literals here, for the
+// same reason verify-map.mjs does it: this rig shipped with hard-coded dark
+// tiles and kept using them after the map moved to Positron, so it was reading
+// a darkening ramp against a near-black stub and judging chrome legibility
+// against a backdrop the product no longer has. Derived, it cannot drift again.
 const svg = (body) =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">${body}</svg>`;
-const DARK_NOLABELS = svg(
-  `<rect width="256" height="256" fill="#14171a"/>` +
-    `<path d="M0 176 C 60 150, 120 200, 256 168 L256 256 L0 256Z" fill="#0e1417"/>` +
-    `<g stroke="#242a2e" stroke-width="2" fill="none">` +
+const [LAND, WATER, DARKEST] = SMOKE_BASEMAP_BACKDROPS.map((b) => b.rgb);
+const rgbCss = (c) => `rgb(${c.join(',')})`;
+
+// CARTO light_nolabels (Positron): pale land, a water body, and a patch at the
+// darkest tone the ramp is audited against. Everything here is below the smoke.
+const BASE_NOLABELS = svg(
+  `<rect width="256" height="256" fill="${rgbCss(LAND)}"/>` +
+    `<path d="M0 176 C 60 150, 120 200, 256 168 L256 256 L0 256Z" fill="${rgbCss(WATER)}"/>` +
+    `<rect x="150" y="24" width="86" height="64" rx="4" fill="${rgbCss(DARKEST)}"/>` +
+    `<g stroke="#e2e0dc" stroke-width="3" fill="none">` +
     `<path d="M-10 60 L266 92"/><path d="M40 -10 L72 266"/><path d="M-10 210 L266 190"/>` +
     `</g>`,
 );
-const DARK_ONLY_LABELS = svg(
+// CARTO light_only_labels: dark place names with a pale halo, transparent
+// elsewhere. Drawn ABOVE the smoke, which is the point of the sandwich.
+const BASE_ONLY_LABELS = svg(
   `<g font-family="Helvetica,Arial" font-size="11" text-anchor="middle" ` +
-    `paint-order="stroke" stroke="#000" stroke-width="3" stroke-opacity="0.7" fill="#b9c0c4">` +
+    `paint-order="stroke" stroke="#fff" stroke-width="3" stroke-opacity="0.8" fill="#43484b">` +
     `<text x="64" y="48">RIVERTON</text><text x="180" y="120">ASHFIELD</text>` +
     `<text x="96" y="212">LAKE BEND</text></g>`,
 );
@@ -207,8 +231,8 @@ for (const place of PLACES) {
       });
     }
 
-    if (url.includes('dark_only_labels')) return tile(DARK_ONLY_LABELS);
-    if (url.includes('basemaps.cartocdn.com')) return tile(DARK_NOLABELS);
+    if (url.includes('only_labels')) return tile(BASE_ONLY_LABELS);
+    if (url.includes('basemaps.cartocdn.com')) return tile(BASE_NOLABELS);
     if (url.includes('air-quality')) {
       const n = (new URL(url).searchParams.get('latitude') || '').split(',').length;
       const one = { hourly: series() };
