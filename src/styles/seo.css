@@ -1,11 +1,17 @@
 /* The static bottom of the page: the map slot React portals into, then the
-   FAQ, explainer and disclaimer that ship as HTML in the initial payload.
+   app CTA, FAQ, explainer and disclaimer that ship as HTML in the initial
+   payload.
  *
  * Both are the demo's bottom sheet used as a page surface — cream
- * rgba(251,247,238,.97), 24px top radius, its own ink. They deliberately do
+ * rgba(251,247,238,.97), 24px radius, its own ink. They deliberately do
  * NOT flip with the air: this is reference material sitting under a live
  * answer, and the change of surface is what says so. Fixed colours also mean
  * fixed ratios — 14.80:1 body, 5.50:1 secondary, 6.99:1 accent.
+ *
+ * They are two separate sheets, not one seamed surface. The map is a live
+ * instrument and the reference material is not, so the sky runs between them
+ * and each sheet closes its own corners — the questions stand on their own
+ * rather than reading as the map's footer.
  */
 
 .app--bottom {
@@ -35,22 +41,20 @@
   --bg-panel: rgba(var(--panel-tint), var(--panel-alpha));
   color: var(--ink);
   background: rgba(251, 247, 238, 0.97);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  /* Closed on all four corners: each is a card that ends, not a surface the
+     page continues on. */
+  border-radius: var(--radius-lg);
   padding: 1.25rem 1.25rem 1.5rem;
   margin: 1rem 0 0;
-}
-
-/* Two sheets stacked read as one surface with a seam, not as two cards. */
-#map-slot + .seo-sheet {
-  border-radius: 0;
-  margin-top: 0;
-  border-top: 1px solid var(--rule);
 }
 
 .seo-sheet {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  /* Sky between the two sheets. This is the break: the reference material
+     starts here, and it starts on its own. */
+  margin-top: 2.5rem;
 }
 
 .seo-sheet__grab {
