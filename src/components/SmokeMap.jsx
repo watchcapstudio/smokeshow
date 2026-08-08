@@ -11,7 +11,7 @@ import { levelForPM25 } from '../lib/rating.js';
 // answer different questions and must never be relabelled as each other.
 import { fetchFires, fireCard, fireRadius } from '../lib/fires.js';
 import { fetchHotspots } from '../lib/hotspots.js';
-import { domainCoversView, domainFrameURL, pickDomains } from '../lib/frames.js';
+import { domainFrameURL, pickDomains } from '../lib/frames.js';
 import { getJSON, setJSON } from '../lib/storage.js';
 import './SmokeMap.css';
 
@@ -49,16 +49,7 @@ const MIN_ZOOM = 4;
 // saying which one was on screen. Naming the model and its resolution is the
 // same rule as "model estimate, never observed" — the map should not imply
 // detail the data does not have.
-export function coverageLabel(domain, tier, base = null) {
-  if (domain && base) {
-    return {
-      text: `${domain.resolutionKm} km here, ${base.resolutionKm} km beyond · model estimate`,
-      title:
-        `${domain.model} at about ${domain.resolutionKm} km inside its box, ` +
-        `${base.model} at about ${base.resolutionKm} km outside it. The seam is a ` +
-        `change of model, not of air. Model estimate, not an observation.`,
-    };
-  }
+export function coverageLabel(domain, tier) {
   if (domain) {
     return {
       text: `${domain.label} · ${domain.resolutionKm} km model estimate`,
@@ -412,19 +403,18 @@ export default function SmokeMap({
     const urlB = (pick && domainFrameURL(pick.domain, timeB)) ?? urlA;
     const sharpMode = !!urlA;
 
-    // When the sharp domain's rectangle does not fill the viewport, the next
-    // domain down backfills the rest. Looking north from Missoula at the fires
-    // that are making the smoke and seeing black was the CONUS-only bug in its
-    // purest form. Only fetched when it is actually going to paint.
-    const mapBounds = mapRef.current.getBounds();
-    const viewBox = {
-      south: mapBounds.getSouth(),
-      north: mapBounds.getNorth(),
-      west: mapBounds.getWest(),
-      east: mapBounds.getEast(),
-    };
-    const backfill =
-      pick && !domainCoversView(pick.domain, viewBox) ? picks[1] ?? null : null;
+    // No backfill. A coarser domain used to paint outside the sharp one's
+    // rectangle, to stop a reader in Missoula looking north at the Canadian
+    // fires and seeing nothing. Two things killed it. HRRR-Smoke MASSDEN is
+    // SMOKE, and CAMS particulate_matter_2.5um is TOTAL PM2.5 including dust,
+    // sea salt and traffic — measured over their CONUS overlap, they agree
+    // where there is smoke (median ratio 1.00) and disagree everywhere else,
+    // because CAMS carries an ~8.5 µg/m³ aerosol floor that HRRR reports as
+    // clean. Butting them together drew that difference as a hard rectangle
+    // and invited the reader to compare two different quantities. And the
+    // "seeing nothing" argument was a dark-basemap argument: on Positron, no
+    // data reads as plain map, not as a void. Restore this once a
+    // smoke-comparable global field exists — see docs/global-frames.md.
 
     const vA = frameValues(data, meta, selectedIndex);
     const vB = frameValues(data, meta, Math.min(selectedIndex + 1, lastIdx));
@@ -441,7 +431,6 @@ export default function SmokeMap({
       vB,
       imgA: null,
       imgB: null,
-      base: null,
       bounds,
       wraps,
       changedAt: performance.now(),
@@ -450,13 +439,13 @@ export default function SmokeMap({
     frameRef.current = frame;
 
     if (coverageRef.current) {
-      const { text, title } = coverageLabel(pick?.domain, tier, backfill?.domain);
+      const { text, title } = coverageLabel(pick?.domain, tier);
       coverageRef.current.textContent = text;
       coverageRef.current.title = title;
       // Machine-readable for scripts/verify-domains.mjs — the badge's own
       // wording is a product decision and should stay free to change.
       coverageRef.current.dataset.domain = pick?.domain.id ?? '';
-      coverageRef.current.dataset.base = backfill?.domain.id ?? '';
+      coverageRef.current.dataset.base = '';
     }
 
     // Always draw the exact hour on step: when playing, the rAF loop below
@@ -464,29 +453,11 @@ export default function SmokeMap({
     // throttled (hidden tab, low-power mode), this keeps playback stepping
     // instead of freezing the canvas while the clock advances.
     if (sharpMode) {
-      const baseA = backfill?.url ?? null;
-      const baseB = (backfill && domainFrameURL(backfill.domain, timeB)) ?? baseA;
-      Promise.all([
-        loadFrame(urlA),
-        urlB ? loadFrame(urlB) : null,
-        baseA ? loadFrame(baseA) : null,
-        baseB ? loadFrame(baseB) : null,
-      ]).then(([a, b, ba, bb]) => {
+      Promise.all([loadFrame(urlA), urlB ? loadFrame(urlB) : null]).then(([a, b]) => {
         if (frameRef.current !== frame || !smokeLayerRef.current) return; // stale hour
         frame.imgA = a;
         frame.imgB = b || a;
-        frame.base = ba
-          ? {
-              imgA: ba,
-              imgB: bb || ba,
-              wraps: !!backfill.domain.wraps,
-              bounds: [
-                [backfill.domain.bounds.latS, backfill.domain.bounds.lonW],
-                [backfill.domain.bounds.latN, backfill.domain.bounds.lonE],
-              ],
-            }
-          : null;
-        smokeLayerRef.current.setImageFrames(a, b || a, 0, bounds, wraps, frame.base);
+        smokeLayerRef.current.setImageFrames(a, b || a, 0, bounds, wraps);
       });
     } else {
       smokeLayerRef.current.setField(meta, vA, vA, 0);
@@ -513,7 +484,7 @@ export default function SmokeMap({
         const t = Math.min(1, (performance.now() - f.changedAt) / (frameMs || 600));
         if (f.sharpMode) {
           if (f.imgA)
-            smokeLayerRef.current.setImageFrames(f.imgA, f.imgB, t, f.bounds, f.wraps, f.base);
+            smokeLayerRef.current.setImageFrames(f.imgA, f.imgB, t, f.bounds, f.wraps);
         } else {
           smokeLayerRef.current.setField(f.meta, f.vA, f.vB, t);
         }

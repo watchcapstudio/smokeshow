@@ -106,17 +106,6 @@ export function pickDomain(frames, timeUTC, lat, lon) {
   return pickDomains(frames, timeUTC, lat, lon)[0] ?? null;
 }
 
-// Does `domain` contain the whole viewport? When it does not, the map is
-// showing the edge of a regional field and something has to fill the rest —
-// otherwise Missoula looks north at the Canadian fires and sees black.
-export function domainCoversView(domain, view) {
-  if (!domain || !view) return false;
-  const b = domain.bounds;
-  if (view.south < b.latS || view.north > b.latN) return false;
-  if (domain.wraps) return true;
-  return view.west >= b.lonW && view.east <= b.lonE;
-}
-
 // A second hour from the SAME domain, for the crossfade. Swapping domains
 // mid-blend would dissolve one model's plume into another's.
 export function domainFrameURL(domain, timeUTC) {
