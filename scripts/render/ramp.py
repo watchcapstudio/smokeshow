@@ -28,9 +28,12 @@ RAMP_A = np.array([0, 0.07, 0.18, 0.27, 0.38, 0.5, 0.62, 0.78, 0.9], dtype=float
 # opposite direction. Luminance and alpha both rise across the whole range, so
 # composited contrast against a dark backdrop rises with concentration — the
 # same property the light ramp has against a light one.
-DARK_RAMP_R = np.array([90, 110, 138, 160, 182, 204, 222, 240, 252], dtype=float)
-DARK_RAMP_G = np.array([92, 110, 134, 152, 170, 188, 206, 228, 244], dtype=float)
-DARK_RAMP_B = np.array([96, 112, 128, 140, 150, 160, 176, 204, 230], dtype=float)
+# Neutral grey where the air is only slightly off, warming to a light amber as
+# it thickens: on black, a warm high end reads as smoke lit from somewhere,
+# where a neutral one reads as fog.
+DARK_RAMP_R = np.array([96, 122, 150, 172, 196, 216, 232, 244, 252], dtype=float)
+DARK_RAMP_G = np.array([98, 122, 148, 166, 182, 196, 206, 220, 234], dtype=float)
+DARK_RAMP_B = np.array([102, 124, 144, 152, 152, 148, 140, 150, 176], dtype=float)
 DARK_RAMP_A = np.array([0, 0.08, 0.2, 0.3, 0.42, 0.55, 0.68, 0.82, 0.92], dtype=float) * 255
 
 LIGHT = "light"

@@ -199,9 +199,13 @@ def main():
             model="HRRR-Smoke near-surface (MASSDEN, 8m AGL)",
             source="NOAA HRRR-Smoke",
             resolution_km=3,
-            priority=PRIORITY,
             bounds={"latS": LAT_S, "latN": LAT_N, "lonW": LON_W, "lonE": LON_E},
             width=WIDTH,
+            # Deliberately the lowest priority published. Clients pick the
+            # highest-priority domain covering the point, so a client that has
+            # never heard of `theme` — including the deployed web map — can
+            # never land on the dark frames while the light ones exist.
+            priority=1,
             height=regridder.height,
             frames=frames,
             run=run.strftime("%Y-%m-%dT%H:00"),
