@@ -175,46 +175,40 @@ One unrelated saving fell out of the same measurement. `hrrr/series.json` is
 It is now fetched lazily and only for readers inside the publishing domain's
 extent.
 
-### A published domain is immortal, and that is a bug
+### A published domain is immortal, and that was a bug
 
 The first two-domain manifest came back with **three** domains. A
 `workflow_dispatch` of `hrrr-smoke` from the `feat/smoke-map` branch published
 an `hrrr-dark` domain — a full 61-frame duplicate of CONUS, 14.8 MB, carrying
 the superseded *pale-on-dark* palette — straight into the live `data` branch.
 
-Nothing here is defective in isolation. `publish.sh` deliberately preserves
-directories it does not own, because that is what lets HRRR and CAMS coexist.
-`assemble_manifest.py` merges every `domain.json` it finds, because that is what
-lets a workflow stay ignorant of the others. Together they mean **an abandoned
-domain is never removed**, and any branch that can dispatch a render job can add
-one to production.
+Nothing was defective in isolation. `publish.sh` deliberately preserves
+directories it does not own, because that is what lets HRRR and CAMS coexist
+without either workflow knowing about the other. `assemble_manifest.py` merged
+every `domain.json` it found, for the same reason. Together they meant **an
+abandoned domain was never removed**, and any branch that could dispatch a
+render job could add one to production. At `priority: 1` it never got selected,
+so it was inert — but it was dead weight, it inflated the manifest every client
+parses, and its frames paint the ramp backwards for Positron. Had it ever been
+selected the smoke would have been near-invisible, the exact failure CLAUDE.md
+records happening twice already.
 
-It is currently inert: at `priority: 1` the client picks `hrrr` as primary and
-`cams` as backfill, and never reaches it — `verify-domains.mjs` mirrors all
-three domains and confirms the selection. But it is 14.8 MB of dead weight, it
-inflates the manifest every client parses to 12.5 KB, and its frames paint the
-ramp backwards for the current basemap. If it were ever selected the smoke would
-be near-invisible, which is the exact failure CLAUDE.md records happening twice
-already.
+The fix is `KNOWN_DOMAINS` in `assemble_manifest.py`: a directory on the data
+branch is not a domain unless it is named there. Unknown directories carrying a
+`domain.json` are **removed**, not merely skipped — skipping keeps them off the
+manifest but leaves the frames on the branch forever, and this is the one step
+in the pipeline that sees the whole tree. Directories with no `domain.json` are
+left alone; they are not domains and not this step's business.
 
-Unresolved. The cheap fix is deleting the directory; the durable one is for the
-manifest to carry an explicit domain allow-list, so an unrecognised directory is
-ignored rather than published.
+Note what the fix is *not*. It does not make publishers distrust each other's
+directories, because that mutual trust is the feature. It says out loud what a
+domain is. Adding one means writing a renderer anyway, so a line here costs
+nothing and nothing reaches readers by accident.
 
-## Decision 4 — the sharp domain's edge gets backfilled, not blended
-
-At wide zoom in Missoula, the old behaviour drew HRRR's rectangle and left
-everything past 50 N black — a reader looking north at the fires making their
-smoke saw nothing. When the sharp domain does not fill the viewport, the next
-domain down now paints the region *outside* the sharp rectangle, clipped with
-an even-odd path so the two never overlap and nothing is blended. The sharp
-field still wins everywhere it exists.
-
-The seam is a visible step wherever the two models disagree. It is not
-feathered. A feather would be an invented gradient between two model outputs,
-and this product does not invent gradients; the badge says `3 km here, 40 km
-beyond · model estimate` and its tooltip says the seam is a change of model,
-not of air.
+`hrrr-dark` has been pruned from the live branch: manifest 12.5 KB → 8.3 KB,
+branch 50 MB → 36.6 MB. Re-dispatching `feat/smoke-map`'s job regenerates it,
+and it will now be dropped again at publish time until it is named in
+`KNOWN_DOMAINS`.
 
 ## The manifest contract — v2
 

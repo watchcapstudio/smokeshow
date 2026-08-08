@@ -16,17 +16,48 @@ and the map degrades to the point grid, which is the intended failure mode.
 
 import json
 import os
+import shutil
 import sys
 from datetime import datetime, timezone
 
 MANIFEST_VERSION = 2
 
+# The domains this project publishes. THE allow-list — a directory on the data
+# branch is not a domain unless it is named here.
+#
+# It exists because "merge whatever is present" plus publish.sh's "preserve
+# directories I do not own" made an abandoned domain immortal, and a
+# workflow_dispatch from any branch could add one to production. That happened:
+# an experiment on a feature branch published `hrrr-dark`, a 14.8 MB duplicate
+# of CONUS carrying a superseded palette, into the live manifest. Each half of
+# that behaviour is correct alone — it is what lets HRRR and CAMS coexist
+# without either workflow knowing about the other — so the fix is not to make
+# publishers less trusting of each other, it is to say out loud what a domain
+# is. See docs/global-frames.md.
+#
+# Adding a domain means writing a renderer anyway, so the cost of also adding a
+# line here is nil and the benefit is that nothing reaches readers by accident.
+KNOWN_DOMAINS = ("hrrr", "cams")
+
 
 def main(root):
     domains = []
     for name in sorted(os.listdir(root)):
-        block = os.path.join(root, name, "domain.json")
+        path = os.path.join(root, name)
+        block = os.path.join(path, "domain.json")
         if not os.path.isfile(block):
+            continue
+        if name not in KNOWN_DOMAINS:
+            # Removed, not merely skipped. Skipping would keep it off the
+            # manifest but leave the frames on the branch forever, and this is
+            # the one step in the pipeline that sees the whole tree.
+            size = sum(
+                os.path.getsize(os.path.join(dirpath, f))
+                for dirpath, _, files in os.walk(path)
+                for f in files
+            )
+            print(f"  DROP {name}: not in KNOWN_DOMAINS — removing {size / 1048576:.1f} MB")
+            shutil.rmtree(path)
             continue
         with open(block) as f:
             domains.append(json.load(f))
