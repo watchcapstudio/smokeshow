@@ -98,8 +98,11 @@ struct MapLibreCanvas: UIViewRepresentable {
     private static func darkStyleURL() -> URL {
         let attribution = "© OpenStreetMap contributors © CARTO"
         func rasterSource(_ slug: String) -> String {
+            // @2x tiles: on a 2x/3x phone the 1x rasters upscale and the city
+            // labels go soft. The 512px retina tiles stay declared at tileSize
+            // 256 so the footprint is unchanged — only the pixel density rises.
             let tiles = ["a", "b", "c", "d"].map {
-                "\"https://\($0).basemaps.cartocdn.com/\(slug)/{z}/{x}/{y}.png\""
+                "\"https://\($0).basemaps.cartocdn.com/\(slug)/{z}/{x}/{y}@2x.png\""
             }.joined(separator: ",")
             return """
             {"type":"raster","tiles":[\(tiles)],"tileSize":256,"maxzoom":20,\
@@ -176,7 +179,7 @@ struct MapLibreCanvas: UIViewRepresentable {
             }
 
             let quad = Self.quad(for: frame.bounds)
-            let image = UIImage(cgImage: frame.image)
+            let image = Self.feathered(frame.image)
 
             if let source = imageSource {
                 source.coordinates = quad
@@ -219,6 +222,53 @@ struct MapLibreCanvas: UIViewRepresentable {
             dot.circleStrokeWidth = NSExpression(forConstantValue: 2)
             dot.circleStrokeColor = NSExpression(forConstantValue: UIColor(white: 0.04, alpha: 1))
             style.addLayer(dot)
+        }
+
+        /// Fade the frame to transparent at its four edges. A pre-rendered
+        /// domain is a rectangle, and its border is a hard line — most visibly
+        /// HRRR's northern edge cutting straight across Canada — which reads as
+        /// "no smoke past here" when it means "no model past here". The web
+        /// hides that seam by painting a coarser global field underneath; there
+        /// is no dark global field yet, so instead the box dissolves. Only a
+        /// thin margin fades, so real smoke in the interior is untouched.
+        private static func feathered(_ cgImage: CGImage) -> UIImage {
+            let size = CGSize(width: cgImage.width, height: cgImage.height)
+            let margin = min(size.width, size.height) * 0.06
+            let format = UIGraphicsImageRendererFormat.default()
+            format.scale = 1
+            format.opaque = false
+            return UIGraphicsImageRenderer(size: size, format: format).image { context in
+                let cg = context.cgContext
+                UIImage(cgImage: cgImage).draw(in: CGRect(origin: .zero, size: size))
+
+                // destinationOut: the gradient's alpha erases the frame — fully
+                // at the very edge, fading to untouched at `margin` inward.
+                cg.setBlendMode(.destinationOut)
+                let gradient = CGGradient(
+                    colorsSpace: CGColorSpaceCreateDeviceRGB(),
+                    colors: [
+                        UIColor(white: 0, alpha: 1).cgColor,
+                        UIColor(white: 0, alpha: 0).cgColor,
+                    ] as CFArray,
+                    locations: [0, 1]
+                )!
+                let edges: [(clip: CGRect, from: CGPoint, to: CGPoint)] = [
+                    (CGRect(x: 0, y: 0, width: margin, height: size.height),
+                     CGPoint(x: 0, y: 0), CGPoint(x: margin, y: 0)),
+                    (CGRect(x: size.width - margin, y: 0, width: margin, height: size.height),
+                     CGPoint(x: size.width, y: 0), CGPoint(x: size.width - margin, y: 0)),
+                    (CGRect(x: 0, y: 0, width: size.width, height: margin),
+                     CGPoint(x: 0, y: 0), CGPoint(x: 0, y: margin)),
+                    (CGRect(x: 0, y: size.height - margin, width: size.width, height: margin),
+                     CGPoint(x: 0, y: size.height), CGPoint(x: 0, y: size.height - margin)),
+                ]
+                for edge in edges {
+                    cg.saveGState()
+                    cg.clip(to: edge.clip)
+                    cg.drawLinearGradient(gradient, start: edge.from, end: edge.to, options: [])
+                    cg.restoreGState()
+                }
+            }
         }
 
         private static func quad(for bounds: SmokeDomain.Bounds) -> MLNCoordinateQuad {
