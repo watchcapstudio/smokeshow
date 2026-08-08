@@ -125,6 +125,18 @@ A dark map is therefore not a UI toggle. It needs a second set of frames
 published with the ramp inverted, which is a change in `scripts/render/ramp.py`
 and the Actions job, not in the app.
 
+### 2026-08-08 — merged to main
+
+Everything above is on `main` (7c24e24 and the follow-ups). CI is green across
+web tests, kit tests, generated artifacts, browser checks, and the iOS/macOS/
+watchOS builds.
+
+Two things CI caught that a simulator never would: the map is UIKit, so macOS
+and watchOS stopped compiling until it was gated to iOS; and
+`forecastEndpoint.test.js` pinned its series to a calendar date whose sustained
+clear expired on 2026-08-08, so two assertions started failing on their own.
+Both fixed.
+
 ## Open, and whose call
 
 - **Bundle prefix.** The app is `earth.smokeshow.*`; everything else of
@@ -136,5 +148,11 @@ and the Actions job, not in the app.
   The operation couldn't be completed. (SmokeshowKit.DeviceRegistryClient
   .RegistryError error 0.)" That is a developer string in a user's face; it
   wants a written sentence. The B7 registry being provisional is the cause.
+- **The dark basemap.** The dark-ramp frames publish and the app selects them,
+  gated behind `SmokeMapView.darkBasemapAvailable`, which is `false`. MapKit
+  will not render its own tiles dark, so turning it on today puts the amber
+  ramp on pale tiles. The answer is CARTO `dark_nolabels` via MapLibre — the
+  demo's basemap, and one that would serve Android too. Flip the flag when
+  that lands; nothing else has to change.
 - **Watch entitlement.** An unpaired-launch watch reads an empty snapshot.
   Known, documented in `apple/docs/watch-and-live-activity.md`.
