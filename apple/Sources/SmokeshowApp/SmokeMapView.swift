@@ -76,10 +76,12 @@ struct SmokeMapView: View {
     /// Recomputing the frame is keyed on the hour and the place, not on the
     /// raw slider value — a drag emits hundreds of values and 61 frames exist.
     ///
-    /// The domain count is in the key because the manifest lands *after* the
-    /// first frame task runs; without it the first paint waits for a scrub.
+    /// The domain count and theme are in the key because both are resolved
+    /// *after* the first frame task runs — the manifest lands late, and the
+    /// theme is decided from it. Without them the first paint waits for a
+    /// scrub, and a map that switched to dark kept the light frames on it.
     private var frameKey: String {
-        "\(SmokeFrames.timeKey(for: validTime))|\(place?.id.uuidString ?? "-")|\(domains.count)"
+        "\(SmokeFrames.timeKey(for: validTime))|\(place?.id.uuidString ?? "-")|\(domains.count)|\(theme.rawValue)"
     }
 
     private var topBar: some View {

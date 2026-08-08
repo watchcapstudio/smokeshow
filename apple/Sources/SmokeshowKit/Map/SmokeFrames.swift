@@ -34,7 +34,7 @@ public struct SmokeDomain: Sendable, Identifiable {
     public let theme: Theme
     public let source: String?
     public let resolutionKm: Double?
-    /// Lower is sharper. The map paints the lowest-priority domain that
+    /// Higher is sharper. The map paints the highest-priority domain that
     /// contains the centre and has a frame for the hour.
     public let priority: Int
     public let bounds: Bounds
@@ -73,7 +73,14 @@ public enum SmokeFrames {
     static let base = URL(string: "https://raw.githubusercontent.com/watchcapstudio/smokeshow/data")!
 
     public static func fetchDomains(session: URLSession = .shared) async throws -> [SmokeDomain] {
-        let (data, response) = try await session.data(from: base.appendingPathComponent("manifest.json"))
+        // Revalidate rather than trust the cache. The manifest is a few kB and
+        // changes four times a day, but `raw.githubusercontent.com` sends a
+        // five-minute max-age — long enough that a run which has just landed is
+        // invisible to someone opening the map, including the run that first
+        // publishes a new domain.
+        var request = URLRequest(url: base.appendingPathComponent("manifest.json"))
+        request.cachePolicy = .reloadRevalidatingCacheData
+        let (data, response) = try await session.data(for: request)
         guard (response as? HTTPURLResponse).map({ (200...299).contains($0.statusCode) }) ?? false else {
             throw SmokeFrameError.manifestUnavailable
         }
@@ -107,7 +114,11 @@ public enum SmokeFrames {
                 frames: frames
             )
         }
-        .sorted { $0.priority < $1.priority }
+        // Highest priority first, matching `assemble_manifest.py` and
+        // `frames.js`: the sharpest domain covering the point wins, and the
+        // caller takes the first match without sorting again. Ascending was
+        // backwards — harmless only because the themes never compete.
+        .sorted { $0.priority > $1.priority }
     }
 
     /// The key a frame is filed under: the valid hour in UTC, to the hour.
