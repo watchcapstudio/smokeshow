@@ -59,10 +59,10 @@ struct MapLibreCanvas: UIViewRepresentable {
 
         // The info button carries the CARTO + OSM attribution, a licence
         // condition, so it stays — but out of the bottom-right corner, where the
-        // scrubber card clipped it in half. Under the status pill it is small,
-        // dim, and fully on screen.
+        // scrubber card clipped it in half. Top-left, below the clock, dimmed:
+        // small, out of the way, and fully on screen.
         mapView.attributionButton.tintColor = UIColor(white: 1, alpha: 0.45)
-        mapView.attributionButtonPosition = .topRight
+        mapView.attributionButtonPosition = .topLeft
         mapView.attributionButtonMargins = CGPoint(x: 14, y: 112)
 
         if let center {
