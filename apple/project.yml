@@ -33,7 +33,7 @@ options:
 settings:
   base:
     MARKETING_VERSION: "1.0"
-    CURRENT_PROJECT_VERSION: "2"
+    CURRENT_PROJECT_VERSION: "3"
     SWIFT_VERSION: "5.9"
     DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM}
     CODE_SIGN_STYLE: Automatic
@@ -155,6 +155,11 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Configuration/App.entitlements
         ENABLE_PREVIEWS: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # iPhone-only. The screen is a portrait window/map; universal would drag
+        # in iPad multitasking, which demands all orientations we do not design
+        # for. (This is what the upload's 90474 rejection was, wrapped in a
+        # -19241 "server error".)
+        TARGETED_DEVICE_FAMILY: "1"
     scheme:
       testTargets:
         - SmokeshowKitTests
