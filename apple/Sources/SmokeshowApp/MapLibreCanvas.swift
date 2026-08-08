@@ -57,6 +57,14 @@ struct MapLibreCanvas: UIViewRepresentable {
         mapView.showsUserLocation = false
         mapView.logoView.isHidden = true // CARTO + OSM credit rides the info button
 
+        // The info button carries the CARTO + OSM attribution, a licence
+        // condition, so it stays — but out of the bottom-right corner, where the
+        // scrubber card clipped it in half. Under the status pill it is small,
+        // dim, and fully on screen.
+        mapView.attributionButton.tintColor = UIColor(white: 1, alpha: 0.45)
+        mapView.attributionButtonPosition = .topRight
+        mapView.attributionButtonMargins = CGPoint(x: 14, y: 112)
+
         if let center {
             mapView.setCenter(center, zoomLevel: Self.openingZoom, animated: false)
             context.coordinator.lastCenter = center
@@ -75,13 +83,12 @@ struct MapLibreCanvas: UIViewRepresentable {
     }
 
     func updateUIView(_ mapView: MLNMapView, context: Context) {
-        if let center, context.coordinator.lastCenter.map({
-            $0.latitude != center.latitude || $0.longitude != center.longitude
-        }) ?? true {
-            // Recentre at whatever zoom the reader is already using — switching
-            // cities is not a fresh visit.
-            mapView.setCenter(center, animated: true)
-            context.coordinator.lastCenter = center
+        // Move the dot to the current place; do NOT recentre. While the map is
+        // open the only thing that changes the place is a long-press drop, and
+        // the dot should jump to under the finger, not yank the map out from
+        // under it.
+        if let center {
+            context.coordinator.moveMarker(to: center)
         }
         context.coordinator.apply(frame: frame)
     }
@@ -112,6 +119,7 @@ struct MapLibreCanvas: UIViewRepresentable {
         private var pendingFrame: SmokeFramePayload?
         private var appliedFrame: SmokeFramePayload?
         private var imageSource: MLNImageSource?
+        private var meSource: MLNShapeSource?
 
         // The smoke rides between the base tiles and the labels; the "you are
         // here" dot rides above everything.
@@ -194,12 +202,27 @@ struct MapLibreCanvas: UIViewRepresentable {
             feature.coordinate = center
             let source = MLNShapeSource(identifier: "me", shape: feature, options: nil)
             style.addSource(source)
+            meSource = source
             let dot = MLNCircleStyleLayer(identifier: "me-dot", source: source)
             dot.circleRadius = NSExpression(forConstantValue: 6)
             dot.circleColor = NSExpression(forConstantValue: UIColor.white)
             dot.circleStrokeWidth = NSExpression(forConstantValue: 2)
             dot.circleStrokeColor = NSExpression(forConstantValue: UIColor(white: 0.04, alpha: 1))
             style.addLayer(dot)
+        }
+
+        /// Follow the place. A long-press drops a new forecast point; the dot
+        /// has to move to it, or the map disagrees with the verdict. Before the
+        /// style loads there is no source yet — `lastCenter` carries the
+        /// position forward and `installMarker` places the dot there on load.
+        func moveMarker(to coordinate: CLLocationCoordinate2D) {
+            guard lastCenter?.latitude != coordinate.latitude
+                || lastCenter?.longitude != coordinate.longitude else { return }
+            lastCenter = coordinate
+            guard let meSource else { return }
+            let feature = MLNPointFeature()
+            feature.coordinate = coordinate
+            meSource.shape = feature
         }
 
         /// Fade the frame to transparent at its four edges. A pre-rendered
