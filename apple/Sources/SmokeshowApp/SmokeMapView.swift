@@ -48,7 +48,10 @@ struct SmokeMapView: View {
                 center: place.map {
                     CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)
                 },
-                overlay: overlay
+                overlay: overlay,
+                onLongPress: { coordinate in
+                    Task { await move(to: coordinate) }
+                }
             )
             .ignoresSafeArea()
 
@@ -145,6 +148,30 @@ struct SmokeMapView: View {
         }
     }
 
+    /// Press and hold anywhere to move the forecast there. On a map, pointing
+    /// at a spot *is* the gesture for "what about here?" — making people go
+    /// back out to a search field to ask it wastes the map.
+    private func move(to coordinate: CLLocationCoordinate2D) async {
+        let name = await Self.name(for: coordinate) ?? "Dropped pin"
+        await model.select(
+            Place(
+                name: name,
+                latitude: coordinate.latitude,
+                longitude: coordinate.longitude
+            )
+        )
+    }
+
+    private static func name(for coordinate: CLLocationCoordinate2D) async -> String? {
+        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        let placemarks = try? await CLGeocoder().reverseGeocodeLocation(location)
+        guard let placemark = placemarks?.first else { return nil }
+        return placemark.locality
+            ?? placemark.subAdministrativeArea
+            ?? placemark.administrativeArea
+            ?? placemark.country
+    }
+
     private func loadDomains() async {
         do {
             domains = try await SmokeFrames.fetchDomains()
@@ -182,6 +209,7 @@ struct SmokeMapView: View {
 private struct MapCanvas: UIViewRepresentable {
     let center: CLLocationCoordinate2D?
     let overlay: SmokeOverlay?
+    let onLongPress: (CLLocationCoordinate2D) -> Void
 
     func makeUIView(context: Context) -> MKMapView {
         let view = MKMapView()
@@ -205,6 +233,13 @@ private struct MapCanvas: UIViewRepresentable {
         // published with the ramp inverted.
         view.overrideUserInterfaceStyle = .light
 
+        let press = UILongPressGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.handleLongPress(_:))
+        )
+        press.minimumPressDuration = 0.45
+        view.addGestureRecognizer(press)
+
         if let center {
             view.setRegion(
                 MKCoordinateRegion(
@@ -221,15 +256,43 @@ private struct MapCanvas: UIViewRepresentable {
     }
 
     func updateUIView(_ view: MKMapView, context: Context) {
+        if let center {
+            let pins = view.annotations.compactMap { $0 as? MKPointAnnotation }
+            if pins.first?.coordinate.latitude != center.latitude
+                || pins.first?.coordinate.longitude != center.longitude {
+                view.removeAnnotations(pins)
+                let pin = MKPointAnnotation()
+                pin.coordinate = center
+                view.addAnnotation(pin)
+            }
+        }
+
         let existing = view.overlays.compactMap { $0 as? SmokeOverlay }
         guard existing.first !== overlay else { return }
         view.removeOverlays(existing)
         if let overlay { view.addOverlay(overlay, level: .aboveRoads) }
     }
 
-    func makeCoordinator() -> Coordinator { Coordinator() }
+    func makeCoordinator() -> Coordinator { Coordinator(onLongPress: onLongPress) }
 
     final class Coordinator: NSObject, MKMapViewDelegate {
+        private let onLongPress: (CLLocationCoordinate2D) -> Void
+
+        init(onLongPress: @escaping (CLLocationCoordinate2D) -> Void) {
+            self.onLongPress = onLongPress
+        }
+
+        @objc func handleLongPress(_ recognizer: UILongPressGestureRecognizer) {
+            // `.began`, not `.ended`: the place should change under the finger
+            // that is still down, the way a map pin drops.
+            guard recognizer.state == .began,
+                  let view = recognizer.view as? MKMapView else { return }
+            let point = recognizer.location(in: view)
+            let coordinate = view.convert(point, toCoordinateFrom: view)
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            onLongPress(coordinate)
+        }
+
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             guard let smoke = overlay as? SmokeOverlay else {
                 return MKOverlayRenderer(overlay: overlay)
