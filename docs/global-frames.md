@@ -108,49 +108,98 @@ KB mean, ~24 MB → ~12 MB for a full 61-frame scrub.
 
 ## The byte budget
 
-**Per frame: ≤ 360 KB. Full 61-frame window: ≤ 19 MB. Initial map paint: ≤ 2
-frames.**
+**Per frame: ≤ 360 KB. Full 61-frame window: ≤ 22 MB. Initial map paint: 2
+frames.** Both domains now measured on real published data — see below.
 
-That ceiling is a *measured pessimistic bound*, not an estimate. Method: take
-the real published HRRR fields off the `data` branch, recover PM2.5 (alpha is a
-strictly increasing function of concentration, so the ramp inverts), resample
-CONUS to the global domain's cell size, and tile that patch across a full
-1200×639 canvas with a different flip and roll per tile so deflate cannot
-back-reference. Two variants bracket how much structure survives the trip to
-40 km:
+The estimate was made before ADS credentials existed. Method: take the real
+published HRRR fields off the `data` branch, recover PM2.5 (alpha is a strictly
+increasing function of concentration, so the ramp inverts), resample CONUS to
+the global domain's cell size, and tile that patch across a full 1200×639
+canvas with a different flip and roll per tile so deflate cannot back-reference.
+Two variants bracketed how much structure survives the trip to 40 km:
 
 - **busy** — area-average 3 km straight to the target cell. Keeps HRRR's sharp
-  gradients as sub-cell noise a 40 km model does not resolve. Upper bound:
-  **358 KB**.
+  gradients as sub-cell noise a 40 km model does not resolve: **358 KB**.
 - **smooth** — gaussian blur to a 40 km effective footprint first, then
   average. What a 40 km model actually resolves: **311 KB**.
 
-Both assume every ocean, desert and ice sheet on earth is as busy as CONUS in
-fire season, which never happens. Real frames will land well under this; the
-synthetic-field render (`--source synthetic`) comes out at 31 KB mean, which is
-the other, too-optimistic end of the bracket. Truth is in between and bounded
-above by 358 KB.
+### What the real frames weigh
+
+First CAMS publish, 2026-08-08 00Z run, and the CONUS domain beside it:
+
+```
+domain      frames   mean      max      total
+hrrr        61       248 KB    266 KB   14.8 MB
+cams        61       349 KB    361 KB   20.8 MB
+```
+
+**The per-frame bracket held: 349 KB sits inside 311–358.** Two corrections
+worth recording, though.
+
+The first is mine. The headline above originally read "≤ 19 MB" for the window,
+which was 311 KB × 61 — the *smooth* end — while the per-frame ceiling beside it
+was the *busy* end. Mixing the optimistic total with the pessimistic per-frame
+number is not a bracket, it is a summary that cannot be true of any single
+world. The pessimistic total was always 21.3 MB; the real one is 20.8 MB.
+
+The second is about the world. Real CAMS lands at the **busy** end of the
+bracket, not the middle, and the reasoning that called that end conservative
+was wrong: "every ocean and desert as busy as CONUS in fire season" was
+supposed to be an absurd worst case, but CAMS reports non-zero surface PM2.5
+almost everywhere — Saharan dust, sea salt, Indo-Gangetic haze, biomass burning
+across the tropics. There is very little of the cheap all-index-0 area the
+optimistic proxy assumed. The synthetic-field render (`--source synthetic`)
+comes out at 31 KB mean precisely because invented plumes over an empty planet
+compress like nothing real does. **A clean planet is the thing that never
+happens, not a busy one.**
 
 **Does the map paint without stalling?** The reader downloads the hours they
 look at, not the window. `scripts/verify-domains.mjs` measures what the browser
-actually pulls per capture:
+actually pulls, against the live branch:
 
 ```
-Missoula (HRRR)   7 requests, 4 frames, 1948 KB   (largest frame 385 KB)
-Edmonton (CAMS)   4 requests, 2 frames,   73 KB   (largest frame  28 KB)
-Madrid   (CAMS)   4 requests, 2 frames,   73 KB   (largest frame  28 KB)
+Missoula (HRRR + CAMS backfill)   7 requests, 4 frames, 2290 KB
+Edmonton (CAMS)                   4 requests, 2 frames,  718 KB
+Madrid   (CAMS)                   4 requests, 2 frames,  718 KB
 ```
 
-Missoula's figure is the *old* RGBA HRRR frames as currently published; the new
-encoding halves it. At the 358 KB pessimistic ceiling, an initial two-frame
-paint is 716 KB — roughly 3 s on a 2 Mbps cellular link, for a component that
-is lazily mounted below the fold. **The verdict-in-under-3-seconds rule is
-untouched: the map is deferred and the verdict never waits on it.**
+718 KB for a two-frame initial paint outside CONUS — roughly 3 s on a 2 Mbps
+cellular link, for a component that is lazily mounted below the fold. Missoula
+is the expensive case at 2290 KB, because a view that spills past the sharp
+domain's edge loads four frames: two HRRR and two CAMS. **The
+verdict-in-under-3-seconds rule is untouched: the map is deferred and the
+verdict never waits on it.**
 
 One unrelated saving fell out of the same measurement. `hrrr/series.json` is
 2.2 MB and every reader was pulling it, including readers nowhere near CONUS.
 It is now fetched lazily and only for readers inside the publishing domain's
-extent — Edmonton and Madrid dropped from 2.3 MB to 73 KB.
+extent.
+
+### A published domain is immortal, and that is a bug
+
+The first two-domain manifest came back with **three** domains. A
+`workflow_dispatch` of `hrrr-smoke` from the `feat/smoke-map` branch published
+an `hrrr-dark` domain — a full 61-frame duplicate of CONUS, 14.8 MB, carrying
+the superseded *pale-on-dark* palette — straight into the live `data` branch.
+
+Nothing here is defective in isolation. `publish.sh` deliberately preserves
+directories it does not own, because that is what lets HRRR and CAMS coexist.
+`assemble_manifest.py` merges every `domain.json` it finds, because that is what
+lets a workflow stay ignorant of the others. Together they mean **an abandoned
+domain is never removed**, and any branch that can dispatch a render job can add
+one to production.
+
+It is currently inert: at `priority: 1` the client picks `hrrr` as primary and
+`cams` as backfill, and never reaches it — `verify-domains.mjs` mirrors all
+three domains and confirms the selection. But it is 14.8 MB of dead weight, it
+inflates the manifest every client parses to 12.5 KB, and its frames paint the
+ramp backwards for the current basemap. If it were ever selected the smoke would
+be near-invisible, which is the exact failure CLAUDE.md records happening twice
+already.
+
+Unresolved. The cheap fix is deleting the directory; the durable one is for the
+manifest to carry an explicit domain allow-list, so an unrecognised directory is
+ignored rather than published.
 
 ## Decision 4 — the sharp domain's edge gets backfilled, not blended
 
@@ -242,9 +291,9 @@ npx vite --port 5173 &
 npm run verify:domains
 ```
 
-`scripts/verify-domains.mjs` builds its data tree from the *real* published
-HRRR frames (`git show origin/data:hrrr/...`) plus synthetic CAMS frames, and
-says so in its header. The pipeline, palette, resolution, manifest and byte
-sizes in those captures are exactly what ships; the CAMS meteorology is
-invented, because ADS credentials live in an Actions secret and never touch a
-workstation.
+`scripts/verify-domains.mjs` mirrors every domain the `data` branch publishes,
+verbatim, so the smoke in those captures is genuine NOAA and Copernicus output
+at its published resolution and byte size. Only the basemap tiles are stubbed —
+Positron's tones taken from `SMOKE_BASEMAP_BACKDROPS` so the composite
+arithmetic is real while the cartography is not. If the branch has no `cams`
+domain yet the rig falls back to the synthetic field and says so on stdout.

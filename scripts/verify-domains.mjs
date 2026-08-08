@@ -12,17 +12,19 @@
 //   so they track the real basemap, plus vector furniture. The composite
 //   arithmetic is real; the cartography is not.
 //
-//   HRRR FRAMES ARE REAL — pulled out of the `data` branch (origin/data) as
-//   published. That is genuine 3 km NOAA smoke.
+//   THE FRAMES ARE REAL — every domain the `data` branch publishes is mirrored
+//   verbatim out of origin/data, so the smoke is genuine NOAA and Copernicus
+//   output at its published resolution and its published byte size.
 //
-//   CAMS FRAMES ARE SYNTHETIC — rendered by scripts/cams/render_frames.py
-//   --source synthetic, because ADS credentials live in a GitHub Actions
-//   secret and never touch a workstation. The pipeline, the palette, the
-//   resolution, the manifest and the byte sizes are exactly what ships; the
-//   meteorology is invented. See scripts/cams/synthetic_field.py.
+//   The one exception: if the branch has not published a `cams` domain yet,
+//   the rig falls back to scripts/cams/render_frames.py --source synthetic and
+//   says so on stdout. That path existed because ADS credentials live in an
+//   Actions secret and never touch a workstation; it is now a fallback, not
+//   the normal case. When it runs, the meteorology is invented and only the
+//   pipeline, palette, resolution and manifest are real.
 //
-// Judge coverage, domain selection, the badge and the byte budget here. Judge
-// the plumes themselves against the live site once the ADS job has run.
+// Judge coverage, domain selection, the badge, the seam and the byte budget
+// here. Judge the cartography against the live site.
 //
 // Run:  npx vite --port 5173 &  node scripts/verify-domains.mjs
 import puppeteer from 'puppeteer-core';
@@ -60,60 +62,47 @@ const PM = 45; // "Smells like fire" — mid-scale, so the ramp is clearly paint
 // Built once into `scratch/data`, shaped exactly like the `data` branch.
 
 function buildData() {
-  mkdirSync(join(DATA, 'hrrr'), { recursive: true });
   const git = (path) => execFileSync('git', ['show', `origin/data:${path}`], { maxBuffer: 1 << 28 });
 
-  // Published HRRR, verbatim. Its v1 manifest becomes a v2 domain block.
-  // The data branch moved to a root manifest.json (v2, domains[]) when CAMS
-  // joined HRRR. Fall back to the old per-domain path so a run against an
-  // un-republished branch still builds instead of crashing.
-  let v1;
-  try {
-    const root = JSON.parse(git('manifest.json').toString());
-    const hrrr = (root.domains || []).find((d) => d.id === 'hrrr');
-    if (!hrrr) throw new Error('no hrrr domain in root manifest.json');
-    v1 = { ...hrrr, frames: hrrr.frames ?? JSON.parse(git('hrrr/domain.json').toString()).frames };
-  } catch {
-    v1 = JSON.parse(git('hrrr/manifest.json').toString());
-  }
-  for (const f of v1.frames) writeFileSync(join(DATA, 'hrrr', f.file), git(`hrrr/${f.file}`));
-  try {
-    writeFileSync(join(DATA, 'hrrr', 'series.json'), git('hrrr/series.json'));
-  } catch {
-    /* the band is additive */
-  }
-  writeFileSync(
-    join(DATA, 'hrrr', 'domain.json'),
-    JSON.stringify({
-      id: 'hrrr',
-      label: 'NOAA HRRR-Smoke',
-      model: 'HRRR-Smoke near-surface (MASSDEN, 8m AGL)',
-      source: 'NOAA HRRR-Smoke',
-      resolutionKm: 3,
-      priority: 100,
-      bounds: v1.bounds,
-      width: v1.width,
-      height: v1.height,
-      wraps: false,
-      run: v1.run,
-      generated: v1.generated,
-      series: 'series.json',
-      frames: v1.frames,
-    }),
-  );
+  // Mirror EVERY domain the branch publishes, not a chosen two. What the
+  // client sees is the whole manifest, so a rig that copies only the domains
+  // it expects cannot catch an unexpected one — and one showed up (see the
+  // hrrr-dark note in docs/global-frames.md). Copying them all means the
+  // captures exercise the real priority ordering.
+  const root = JSON.parse(git('manifest.json').toString());
+  if (root.version !== 2) throw new Error(`data branch manifest is v${root.version}, expected 2`);
 
-  // Global domain, from the synthetic source. Pinned to the same cycle the
-  // published HRRR run covers so both domains span the same hours.
-  const run = v1.run.slice(0, 13).replace(':', '');
-  const r = spawnSync(
-    'python3',
-    ['scripts/cams/render_frames.py', '--source', 'synthetic', '--run', run],
-    { env: { ...process.env, OUT_DIR: DATA }, encoding: 'utf8' },
-  );
-  if (r.status !== 0) throw new Error(`cams render failed:\n${r.stderr}`);
+  for (const d of root.domains) {
+    mkdirSync(join(DATA, d.id), { recursive: true });
+    const block = JSON.parse(git(`${d.id}/domain.json`).toString());
+    writeFileSync(join(DATA, d.id, 'domain.json'), JSON.stringify(block));
+    for (const f of block.frames) writeFileSync(join(DATA, d.id, f.file), git(`${d.id}/${f.file}`));
+    if (block.series) {
+      try {
+        writeFileSync(join(DATA, d.id, block.series), git(`${d.id}/${block.series}`));
+      } catch {
+        /* the agreement band is additive */
+      }
+    }
+    console.log(`  mirrored ${d.id}: ${block.frames.length} frames`);
+  }
+
+  // Only synthesise the global domain if the branch has not published one.
+  // Before the ADS credentials landed this was the only way to exercise a
+  // second domain at all; now it is a fallback, and the header's warning
+  // about invented meteorology applies only when this branch runs.
+  if (!root.domains.some((d) => d.id === 'cams')) {
+    const hrrr = root.domains.find((d) => d.id === 'hrrr');
+    console.log('  no cams domain published — falling back to the synthetic field');
+    const r = spawnSync(
+      'python3',
+      ['scripts/cams/render_frames.py', '--source', 'synthetic', '--run', hrrr.run.slice(0, 13).replace(':', '')],
+      { env: { ...process.env, OUT_DIR: DATA }, encoding: 'utf8' },
+    );
+    if (r.status !== 0) throw new Error(`cams render failed:\n${r.stderr}`);
+  }
 
   spawnSync('python3', ['scripts/render/assemble_manifest.py', DATA], { stdio: 'inherit' });
-  return v1;
 }
 
 function domainBytes(id) {
