@@ -61,5 +61,8 @@ jobs:
         shell: bash -leo pipefail {0}
         env:
           DOMAIN: hrrr
+          # One regrid, two palettes: the light field the web map draws and the
+          # dark-ramp copy the app draws on a black basemap.
+          DOMAINS: hrrr hrrr-dark
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: bash scripts/render/publish.sh

@@ -22,7 +22,8 @@ struct SmokeshowApp: App {
         WindowGroup {
             RootView()
                 .environmentObject(model)
-                .task { await model.onLaunch() }
+                // `onLaunch` asks for location, so RootView owns when it runs:
+                // not until the disclaimer has been acknowledged.
                 .onOpenURL { url in
                     if let destination = DeepLink.destination(for: url) {
                         NotificationCenter.default.post(

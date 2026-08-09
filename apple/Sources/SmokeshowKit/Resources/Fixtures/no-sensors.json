@@ -50,7 +50,7 @@
       "maxUg": 35,
       "visibility": "5–10 miles",
       "notice": "A faint campfire whiff for sensitive noses. Most people just see distant treelines go soft, roughly 5 to 10 miles of visibility.",
-      "notLine": "A full day outside in this is nowhere near a cigarette. A faint whiff is the whole event for most people.",
+      "notLine": "A faint whiff is the whole event for most people. Nothing here needs a change of plan.",
       "guidance": {
         "general": "unusually sensitive people should consider easing off long, hard exertion. Everyone else, carry on as usual.",
         "sensitive": "consider easing off long or hard exertion, and watch for symptoms."
@@ -64,7 +64,7 @@
       "maxUg": 55,
       "visibility": "3–5 miles",
       "notice": "Most people smell smoke outdoors, though not everyone. The sun can look orange at the edges, and visibility drops to roughly 3 to 5 miles. Long stretches outside may leave a scratchy throat.",
-      "notLine": "Still well short of one cigarette over a full day outside. Most people notice it, and most plans can carry on.",
+      "notLine": "Most people notice it outdoors, and most plans can carry on. Long stretches outside are where it starts to add up.",
       "guidance": {
         "general": "sensitive groups should cut back on long or heavy exertion. Everyone else, your usual outdoor plans are okay.",
         "sensitive": "cut back on long or heavy exertion. Move the workout indoors if there is any wheeze."

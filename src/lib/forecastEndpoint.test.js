@@ -12,7 +12,12 @@ import { fetchServerForecast, isForecastPayload, adaptForecast } from './forecas
 
 const TZ = 'America/Chicago';
 const OFFSET = -5 * 3600;
-const START_UTC = Date.parse('2026-08-01T00:00:00Z');
+// Anchored to now, not to a calendar date. This was `2026-08-01T00:00:00Z`,
+// which put "now" inside the window when it was written and walked off the end
+// of it on 2026-08-08 — the sustained clear at hour 96 fell into the past and
+// the verdict stopped saying "Clears". A fixture that expires is a test that
+// fails on a Tuesday for no reason anyone can see.
+const START_UTC = Math.floor(Date.now() / 3_600_000) * 3_600_000 - 12 * 3_600_000;
 const HOURS = 192;
 const ORIGIN = 'https://smokeshow.earth';
 
@@ -191,7 +196,7 @@ describe('fetchServerForecast — degrade, never crash', () => {
     expect(f).not.toBeNull();
     expect(f.timezone).toBe(TZ);
     // naive-UTC strings: every component parses `t + 'Z'`
-    expect(f.timesUTC[0]).toBe('2026-08-01T00:00');
+    expect(f.timesUTC[0]).toBe(naive(START_UTC));
     expect(f.timesUTC).toHaveLength(f.pm25.length);
     // computeVerdict()'s field names, which TrendChip and AppWidgetCTA read
     expect(f.verdict).toEqual({

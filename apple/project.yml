@@ -68,6 +68,13 @@ targets:
       # the store, so `#if canImport(RevenueCat)` compiles that file out there.
       - package: RevenueCat
         product: RevenueCat
+    # A framework is a bundle, and an embedded bundle without an Info.plist
+    # fails the app's Validate phase at package time. CI never caught it
+    # because `generic/platform=iOS Simulator` builds skip validation.
+    info:
+      path: Generated/Kit-Info.plist
+      properties:
+        CFBundleName: SmokeshowKit
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.kit
@@ -80,6 +87,10 @@ targets:
       - path: Sources/SmokeshowKit
     resources:
       - path: Sources/SmokeshowKit/Resources/Fixtures
+    info:
+      path: Generated/KitWatch-Info.plist
+      properties:
+        CFBundleName: SmokeshowKit
     settings:
       base:
         # Same module name as the iOS/macOS build — the watch sources import

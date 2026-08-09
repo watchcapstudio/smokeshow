@@ -18,12 +18,20 @@ Europe never had coverage at all.
 
 ## What ships
 
-Two **domains**, published side by side on the `data` branch:
+Three **domains**, published side by side on the `data` branch:
 
-| id | model | resolution | extent | px | priority |
-| --- | --- | --- | --- | --- | --- |
-| `hrrr` | NOAA HRRR-Smoke (MASSDEN, 8 m AGL) | 3 km | CONUS, `-125..-66.5 E`, `24..50 N` | 1200×680 | 100 |
-| `cams` | Copernicus CAMS global forecast, surface PM2.5 | 40 km | `-180..180 E`, `-60..75 N` | 1200×639 | 10 |
+| id | model | theme | resolution | extent | px | priority |
+| --- | --- | --- | --- | --- | --- | --- |
+| `hrrr` | NOAA HRRR-Smoke (MASSDEN, 8 m AGL) | light | 3 km | CONUS, `-125..-66.5 E`, `24..50 N` | 1200×680 | 100 |
+| `cams` | Copernicus CAMS global forecast, surface PM2.5 | — | 40 km | `-180..180 E`, `-60..75 N` | 1200×639 | 10 |
+| `hrrr-dark` | the `hrrr` field, dark-basemap ramp | dark | 3 km | as `hrrr` | 1200×680 | 1 |
+
+`hrrr-dark` is one regrid, two palettes: the same HRRR field written with the
+inverted ramp for clients drawing a dark basemap. It sits at the lowest
+priority on the branch so a client that has never heard of `theme` cannot
+select it, and `usable()` in `src/lib/frames.js` filters it out of the web
+map, which draws Positron. A domain with no `theme` predates the field and is
+light by definition, which is why `cams` has none.
 
 Both come off the same plumbing in `scripts/render/`: the same Mercator target
 grid, the same ramp, the same PNG encoder, the same manifest block. The CAMS
@@ -177,40 +185,45 @@ One unrelated saving fell out of the same measurement. `hrrr/series.json` is
 It is now fetched lazily and only for readers inside the publishing domain's
 extent.
 
-### A published domain is immortal, and that was a bug
+### A published domain is immortal, and the allow-list that fixed it
 
-The first two-domain manifest came back with **three** domains. A
-`workflow_dispatch` of `hrrr-smoke` from the `feat/smoke-map` branch published
-an `hrrr-dark` domain — a full 61-frame duplicate of CONUS, 14.8 MB, carrying
-the superseded *pale-on-dark* palette — straight into the live `data` branch.
+A published directory on the `data` branch never goes away on its own.
+`publish.sh` deliberately preserves directories it does not own — that mutual
+trust is what lets the HRRR and CAMS jobs run on independent schedules without
+either knowing the other exists — and `assemble_manifest.py` merges every
+`domain.json` it finds, for the same reason. Together they mean anything
+published stays published, and a `workflow_dispatch` from any branch can add a
+domain to production.
 
-Nothing was defective in isolation. `publish.sh` deliberately preserves
-directories it does not own, because that is what lets HRRR and CAMS coexist
-without either workflow knowing about the other. `assemble_manifest.py` merged
-every `domain.json` it found, for the same reason. Together they meant **an
-abandoned domain was never removed**, and any branch that could dispatch a
-render job could add one to production. At `priority: 1` it never got selected,
-so it was inert — but it was dead weight, it inflated the manifest every client
-parses, and its frames paint the ramp backwards for Positron. Had it ever been
-selected the smoke would have been near-invisible, the exact failure CLAUDE.md
-records happening twice already.
+`KNOWN_DOMAINS` in `assemble_manifest.py` closes that: a directory is not a
+domain unless it is named there. Unknown directories carrying a `domain.json`
+are **removed**, not merely skipped — skipping keeps them off the manifest but
+leaves the frames on the branch forever, and this is the one step in the
+pipeline that sees the whole tree. Directories with no `domain.json` are left
+alone; they are not domains and not this step's business.
 
-The fix is `KNOWN_DOMAINS` in `assemble_manifest.py`: a directory on the data
-branch is not a domain unless it is named there. Unknown directories carrying a
-`domain.json` are **removed**, not merely skipped — skipping keeps them off the
-manifest but leaves the frames on the branch forever, and this is the one step
-in the pipeline that sees the whole tree. Directories with no `domain.json` are
-left alone; they are not domains and not this step's business.
+The fix is deliberately *not* to make publishers distrust each other's
+directories. It is to say out loud what a domain is.
 
-Note what the fix is *not*. It does not make publishers distrust each other's
-directories, because that mutual trust is the feature. It says out loud what a
-domain is. Adding one means writing a renderer anyway, so a line here costs
-nothing and nothing reaches readers by accident.
+**How this went wrong first, which is the part worth keeping.** `hrrr-dark`
+appeared on the branch as an unfamiliar third domain, was read as an accidental
+dispatch, and was pruned — 14.8 MB deleted from the live branch. It was not an
+accident. It is the deliberate dark-basemap render of the HRRR field, added to
+`hrrr.yml` twenty-five minutes earlier, published at `priority: 1` and
+`theme: dark` precisely so that no client which has never heard of `theme` can
+select it. The evidence read as abandonment (low priority, an inverted palette,
+never selected) was in fact the safety design working exactly as intended.
 
-`hrrr-dark` has been pruned from the live branch: manifest 12.5 KB → 8.3 KB,
-branch 50 MB → 36.6 MB. Re-dispatching `feat/smoke-map`'s job regenerates it,
-and it will now be dropped again at publish time until it is named in
-`KNOWN_DOMAINS`.
+The next scheduled HRRR publish restored it, because `publish.sh` copies every
+name in `DOMAINS`. The allow-list would have deleted it again on every run.
+
+So the allow-list is not a judgement about what looks unfamiliar — that
+judgement was wrong the first time it was made. It is a statement of what this
+project publishes, and it has to be updated in the same change that adds a
+renderer. `scripts/render/domains.test.js` enforces that in both directions: it
+fails if a workflow publishes a domain the allow-list omits, and if the
+allow-list names one nothing writes. The two lists live in different languages
+in different directories, so nothing else keeps them in step.
 
 ## Decision 4 — the sharpest domain that FILLS the viewport
 

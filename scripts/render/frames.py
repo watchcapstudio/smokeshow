@@ -21,9 +21,8 @@ import os
 import numpy as np
 from PIL import Image
 
-from .ramp import palette, pm25_to_index
+from .ramp import DARK, LIGHT, palette, pm25_to_index
 
-_PAL_RGB, _PAL_ALPHA = palette()
 
 
 def merc_y(lat_deg):
@@ -45,7 +44,7 @@ def target_grid(lon_w, lon_e, lat_s, lat_n, width):
     return lats, lons, height
 
 
-def save_frame(path, ug_m3):
+def save_frame(path, ug_m3, theme=LIGHT):
     """Write one frame as PNG-8 whose palette IS the smoke ramp.
 
     Smooth wash only. The ash-grain stipple is applied CLIENT-side in screen
@@ -53,9 +52,10 @@ def save_frame(path, ug_m3):
     into smudges after 10-20x map upscaling.
     """
     idx = pm25_to_index(ug_m3)
+    rgb, alpha = palette(theme)
     img = Image.fromarray(idx, mode="P")
-    img.putpalette(_PAL_RGB)
-    img.save(path, optimize=True, transparency=_PAL_ALPHA)
+    img.putpalette(rgb)
+    img.save(path, optimize=True, transparency=alpha)
 
 
 def write_domain(out_root, domain):
@@ -83,6 +83,7 @@ def domain_block(
     generated,
     wraps=False,
     series=None,
+    theme=LIGHT,
 ):
     """One entry in the v2 manifest's `domains` array.
 
@@ -102,6 +103,11 @@ def domain_block(
         "width": width,
         "height": height,
         "wraps": wraps,
+        # Which basemap this domain's palette was rendered for. Clients paint
+        # the one matching the tiles they are actually drawing; a client that
+        # has never heard of the field gets "light", which is what every
+        # already-published domain is.
+        "theme": theme,
         "run": run,
         "generated": generated,
         "frames": frames,

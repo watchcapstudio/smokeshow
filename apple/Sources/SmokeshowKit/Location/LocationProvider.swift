@@ -17,6 +17,7 @@ public final class LocationProvider: NSObject, LocationProviding, CLLocationMana
 
     private let manager = CLLocationManager()
     private var continuation: CheckedContinuation<CLLocation?, Never>?
+    private var authorizationContinuation: CheckedContinuation<Bool, Never>?
 
     public override init() {
         super.init()
@@ -36,14 +37,30 @@ public final class LocationProvider: NSObject, LocationProviding, CLLocationMana
     }
 
     private func requestLocation() async -> CLLocation? {
-        #if os(macOS)
-        manager.requestWhenInUseAuthorization()
-        #else
-        manager.requestWhenInUseAuthorization()
-        #endif
+        // `requestWhenInUseAuthorization` returns immediately and the prompt is
+        // answered later, so asking for a fix in the next line is a request
+        // made while still `.notDetermined` — CoreLocation drops it and the
+        // first run never resolves a place. Wait for the status callback, then
+        // ask.
+        switch manager.authorizationStatus {
+        case .notDetermined:
+            guard await requestAuthorization() else { return nil }
+        case .denied, .restricted:
+            return nil
+        default:
+            break
+        }
+
         return await withCheckedContinuation { continuation in
             self.continuation = continuation
             manager.requestLocation()
+        }
+    }
+
+    private func requestAuthorization() async -> Bool {
+        await withCheckedContinuation { continuation in
+            self.authorizationContinuation = continuation
+            manager.requestWhenInUseAuthorization()
         }
     }
 
@@ -63,6 +80,18 @@ public final class LocationProvider: NSObject, LocationProviding, CLLocationMana
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         continuation?.resume(returning: nil)
         continuation = nil
+    }
+
+    public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        guard manager.authorizationStatus != .notDetermined,
+              let pending = authorizationContinuation else { return }
+        authorizationContinuation = nil
+        switch manager.authorizationStatus {
+        case .denied, .restricted:
+            pending.resume(returning: false)
+        default:
+            pending.resume(returning: true)
+        }
     }
 }
 

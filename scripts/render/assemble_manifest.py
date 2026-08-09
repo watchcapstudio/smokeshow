@@ -26,18 +26,20 @@ MANIFEST_VERSION = 2
 # branch is not a domain unless it is named here.
 #
 # It exists because "merge whatever is present" plus publish.sh's "preserve
-# directories I do not own" made an abandoned domain immortal, and a
-# workflow_dispatch from any branch could add one to production. That happened:
-# an experiment on a feature branch published `hrrr-dark`, a 14.8 MB duplicate
-# of CONUS carrying a superseded palette, into the live manifest. Each half of
-# that behaviour is correct alone — it is what lets HRRR and CAMS coexist
-# without either workflow knowing about the other — so the fix is not to make
-# publishers less trusting of each other, it is to say out loud what a domain
-# is. See docs/global-frames.md.
+# directories I do not own" makes any published directory immortal, and a
+# workflow_dispatch from any branch can add one to production.
 #
-# Adding a domain means writing a renderer anyway, so the cost of also adding a
-# line here is nil and the benefit is that nothing reaches readers by accident.
-KNOWN_DOMAINS = ("hrrr", "cams")
+# It nearly did the opposite kind of damage first. `hrrr-dark` was read as an
+# accident and pruned; it is the deliberate dark-basemap render of the HRRR
+# field, published at priority 1 so no older client can select it. Which is the
+# real lesson: this list is not a guess about what looks unfamiliar, it is a
+# statement of what the project publishes, and it has to be updated in the same
+# change that adds a renderer. Adding a domain means writing one anyway, so a
+# line here costs nothing.
+#
+# Keep in step with DOMAINS in .github/workflows/*.yml — those say what gets
+# copied onto the branch, this says what is allowed to stay.
+KNOWN_DOMAINS = ("hrrr", "hrrr-dark", "cams")
 
 
 def main(root):

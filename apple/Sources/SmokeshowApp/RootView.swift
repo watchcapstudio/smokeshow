@@ -13,22 +13,33 @@ struct RootView: View {
     @State private var showsSettings = false
     @State private var showsExplain = false
 
+    @State private var acknowledged = PreferencesStore.shared.acknowledgedDisclaimer
+
     var body: some View {
         ZStack {
-            switch model.entitlement.status {
-            case .unknown:
-                // Checking with the store. Not a lock — just not decided yet.
-                LoadingView()
-            case .trial, .subscribed:
-                VerdictScreen(
-                    showsExplain: $showsExplain,
-                    showsSettings: $showsSettings
-                )
-            case .lapsed, .never:
-                PaywallView(isModal: false)
+            if !acknowledged {
+                // Ahead of everything: ahead of the entitlement switch, ahead
+                // of the widget nudge, and ahead of the location prompt. A
+                // consent screen that arrives third is not consent, and the
+                // OS prompt on top of it looks like the app asking twice.
+                OnboardingFlow {
+                    PreferencesStore.shared.acknowledgedDisclaimer = true
+                    acknowledged = true
+                    Task {
+                        await model.refreshEntitlement()
+                        await model.refresh()
+                        await evaluateNudges()
+                    }
+                }
+            } else {
+                content
             }
         }
-        .task { await evaluateNudges() }
+        .task {
+            guard acknowledged else { return }
+            await model.onLaunch()
+            await evaluateNudges()
+        }
         .sheet(isPresented: $showsWidgetOnboarding) {
             WidgetOnboardingView()
         }
@@ -52,6 +63,24 @@ struct RootView: View {
         }
     }
 
+    @ViewBuilder
+    private var content: some View {
+        ZStack {
+            switch model.entitlement.status {
+            case .unknown:
+                // Checking with the store. Not a lock — just not decided yet.
+                LoadingView()
+            case .trial, .subscribed:
+                VerdictScreen(
+                    showsExplain: $showsExplain,
+                    showsSettings: $showsSettings
+                )
+            case .lapsed, .never:
+                PaywallView(isModal: false)
+            }
+        }
+    }
+
     /// Day 0 asks for a widget; day 12–14 asks again, or asks for the money.
     /// Both come out of `TrialInstrumentation`, which is local-only.
     private func evaluateNudges() async {
@@ -63,6 +92,13 @@ struct RootView: View {
         switch nudge {
         case .installWidget:
             guard model.entitlement.status.isActive else { return }
+            // Not on arrival. Someone who has not yet seen a forecast has no
+            // reason to want a widget of it, and a sheet between the welcome
+            // and the product reads as a third thing to dismiss. Let them use
+            // the app first; the ask lands better once the answer has proved
+            // useful. Settings has the same flow for anyone who says no.
+            try? await Task.sleep(for: .seconds(20))
+            guard !Task.isCancelled, model.entitlement.status.isActive else { return }
             TrialInstrumentation.record(.widgetPromptShown)
             showsWidgetOnboarding = true
         case .subscribe:
