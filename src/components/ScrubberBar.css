@@ -6,9 +6,9 @@
   z-index: 30;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 14px 14px 12px;
-  border-radius: 22px;
+  gap: 7px;
+  padding: 10px 12px 9px;
+  border-radius: 20px;
   color: var(--ink);
   background: color-mix(in srgb, var(--ink-inverse, #fff) 24%, transparent);
   backdrop-filter: blur(20px) saturate(1.1);
@@ -162,7 +162,7 @@
 
 .sbar__track {
   position: relative;
-  height: 72px;
+  height: 52px;
 }
 .sbar__curve {
   width: 100%;
@@ -226,8 +226,8 @@
 }
 .sbar__play {
   border: 0;
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: color-mix(in srgb, var(--accent, var(--ink)) 22%, transparent);
   color: var(--ink);

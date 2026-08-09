@@ -275,11 +275,22 @@ body {
   gap: 0;
 }
 
+/* The stage is an app-width column, centred on any screen. On a wide window the
+   sky continues as a flat horizon tone to the edges (html background), and the
+   phone-shaped app sits in the middle — not stretched across the viewport. */
 .stage {
   position: relative;
   width: 100%;
+  max-width: 460px;
   height: 100dvh;
+  margin: 0 auto;
   overflow: hidden;
+}
+
+/* Inside the stage the sky fills the column, not the whole viewport, so the sun
+   and moon stay with the app instead of drifting off to the far edge. */
+.app--stage .sky {
+  position: absolute;
 }
 
 /* The sky window: a centred column laid over the full-bleed backdrop. */
@@ -292,7 +303,9 @@ body {
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
-  padding: max(14px, env(safe-area-inset-top)) 20px 232px;
+  /* Bottom clears the pinned scrubber (~200px) plus its bottom offset and a
+     gap, so the day pills never tuck under it. */
+  padding: max(14px, env(safe-area-inset-top)) 20px 260px;
   color: var(--ink);
 }
 .window[hidden] {
@@ -450,6 +463,6 @@ body {
   position: absolute;
   left: 12px;
   right: 12px;
-  bottom: 236px;
+  bottom: 210px;
   z-index: 3;
 }
