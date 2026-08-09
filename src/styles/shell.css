@@ -307,8 +307,10 @@ body {
   width: 100%;
   max-width: min(94vw, 760px);
   margin: 0 auto;
-  /* Bottom clears the pinned scrubber with a small gap — no more. */
-  padding: max(14px, env(safe-area-inset-top)) clamp(20px, 3cqw, 40px) 200px;
+  /* Bottom clears the pinned scrubber plus the home-indicator safe area it
+     rides above, so the day pills never jam under it on a real phone. */
+  padding: max(14px, env(safe-area-inset-top)) clamp(20px, 3cqw, 40px)
+    calc(212px + env(safe-area-inset-bottom));
   color: var(--ink);
 }
 .window[hidden] {
