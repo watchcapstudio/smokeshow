@@ -135,4 +135,12 @@ describe('the gate, end to end', () => {
     // webhook is needed for the gate to close — the timestamp does it.
     expect(await store.listOccupiedCells(NOW + 2 * HOUR_MS)).toEqual([]);
   });
+
+  it('can be explicitly disabled before RevenueCat is connected', async () => {
+    const store = createMemoryStore({ now: () => NOW, requireEntitlement: false });
+    await seedDevice(store, { id: 'dev_abc', entitled: false, nowMs: NOW });
+
+    expect(await store.listOccupiedCells(NOW)).toHaveLength(1);
+    expect(await store.isDeviceEntitled('dev_abc', NOW)).toBe(true);
+  });
 });

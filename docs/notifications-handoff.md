@@ -38,7 +38,8 @@ Target: the SmokeShow project in Vercel scope `joseph-6007s-projects`.
 | --- | --- |
 | `NOTIFY_DATABASE_URL` | Supabase **Transaction pooler** connection string, port `6543`; insert the database password Kelly saved at project creation |
 | `CRON_SECRET` | A new random hex secret, e.g. `openssl rand -hex 32` |
-| `REVENUECAT_WEBHOOK_SECRET` | A second new random hex secret; use the identical value in RevenueCat's Authorization header |
+| `NOTIFY_REQUIRE_ENTITLEMENT` | `false` for the initial ungated launch; change to `true` after RevenueCat is connected and its entitlement table is populated |
+| `REVENUECAT_WEBHOOK_SECRET` | Add later with RevenueCat; use the identical value in its Authorization header |
 | `REVENUECAT_ENTITLEMENT_ID` | `smokeshow_pro` |
 | `APNS_KEY_ID` | Apple APNs authentication key ID |
 | `APNS_TEAM_ID` | Apple Developer Team ID |
@@ -54,7 +55,7 @@ Apply environment variables to **Production**, then redeploy. Vercel does not
 retroactively add new variables to an existing deployment. The hourly cron
 requires a Vercel plan that permits more than one run per day.
 
-## 2. Configure RevenueCat
+## 2. Configure RevenueCat later
 
 Create a webhook with:
 
@@ -67,6 +68,10 @@ Create a webhook with:
 RevenueCat can send all event types; the service ignores irrelevant ones and
 handles purchase, renewal, cancellation, billing issue, expiration, refund,
 alias, and transfer events.
+
+Keep `NOTIFY_REQUIRE_ENTITLEMENT=false` until webhook tests have populated and
+verified subscriber entitlements. Turning it on earlier would correctly—but
+silently—exclude every device that does not yet have an entitlement row.
 
 ## 3. Confirm Apple capabilities
 

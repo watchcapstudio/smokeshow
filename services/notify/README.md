@@ -80,9 +80,10 @@ pooling.
 | `NOTIFY_DATABASE_POOL_MAX` | `5` | Per-instance Postgres client pool limit |
 | `NOTIFY_CELL_CONCURRENCY` | `8` | Parallel cell fetches. Raise with the cell count — see the load estimate |
 | `NOTIFY_MIN_GAP_MS` | `10800000` | Minimum gap between non-urgent alerts for one place (3 h) |
+| `NOTIFY_REQUIRE_ENTITLEMENT` | `true` | Set `false` to notify every registered device before RevenueCat is connected |
 | `NOTIFY_LOG_LEVEL` | `info` | `debug` logs every request |
 | `CRON_SECRET` | — | **Required on Vercel.** Authorizes the hourly evaluator |
-| `REVENUECAT_WEBHOOK_SECRET` | — | **Required.** Unset means the webhook rejects everything |
+| `REVENUECAT_WEBHOOK_SECRET` | — | Required only when entitlement gating is enabled. Unset means the webhook rejects everything |
 | `REVENUECAT_ENTITLEMENT_ID` | `smokeshow_pro` | Which entitlement gates notifications; must match the app and RevenueCat dashboard |
 | `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_KEY_P8` | — | Apple provider token (ES256 `.p8`) |
 | `APNS_TOPIC`, `APNS_TOPIC_IOS`, `APNS_TOPIC_MACOS` | — | Bundle IDs; the per-platform ones win |

@@ -13,7 +13,7 @@ import { createForecastClient } from './forecastClient.js';
 export async function openStore(config, logger) {
   if (!config.databaseUrl) {
     logger?.warn?.('NOTIFY_DATABASE_URL unset — using the in-memory store (state is lost on restart)');
-    return createMemoryStore();
+    return createMemoryStore({ requireEntitlement: config.requireEntitlement });
   }
   const { default: pg } = await import('pg').catch(() => {
     throw new Error('NOTIFY_DATABASE_URL is set but the `pg` package is not installed');
@@ -27,7 +27,10 @@ export async function openStore(config, logger) {
     connectionTimeoutMillis: 10_000,
     idleTimeoutMillis: 30_000,
   });
-  return createPgStore(pool, { schema: config.databaseSchema });
+  return createPgStore(pool, {
+    schema: config.databaseSchema,
+    requireEntitlement: config.requireEntitlement,
+  });
 }
 
 export function createSenders(config) {

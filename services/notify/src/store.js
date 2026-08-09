@@ -38,7 +38,7 @@ function clone(value) {
   return value == null ? value : JSON.parse(JSON.stringify(value));
 }
 
-export function createMemoryStore({ now = () => Date.now() } = {}) {
+export function createMemoryStore({ now = () => Date.now(), requireEntitlement = true } = {}) {
   const devices = new Map(); // deviceId -> record
   const entitlements = new Map(); // appUserId -> record
   const aliases = new Map(); // aliasId -> canonical appUserId
@@ -82,6 +82,7 @@ export function createMemoryStore({ now = () => Date.now() } = {}) {
   }
 
   function isEntitled(device, nowMs) {
+    if (!requireEntitlement) return true;
     const ent = entitlementFor(device.appUserId);
     if (!ent) return false;
     if (ent.revoked) return false;

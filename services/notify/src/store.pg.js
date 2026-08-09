@@ -51,7 +51,7 @@ function rowToLocation(row) {
   };
 }
 
-export function createPgStore(pool, { schema = 'smokeshow_notify' } = {}) {
+export function createPgStore(pool, { schema = 'smokeshow_notify', requireEntitlement = true } = {}) {
   if (!/^[a-z_][a-z0-9_]*$/.test(schema)) {
     throw new Error('Postgres schema must be a valid unquoted identifier');
   }
@@ -65,11 +65,18 @@ export function createPgStore(pool, { schema = 'smokeshow_notify' } = {}) {
   const aliases = table('app_user_aliases');
   const cellStates = table('cell_states');
   const sentNotifications = table('sent_notifications');
-  const entitledJoin = `
-    join ${devices} d on d.id = l.device_id
-    left join ${aliases} a on a.alias_id = d.app_user_id
-    join ${entitlements} e on e.app_user_id = coalesce(a.canonical_id, d.app_user_id)
-  `;
+  const subscriberJoin = requireEntitlement
+    ? `
+      join ${devices} d on d.id = l.device_id
+      left join ${aliases} a on a.alias_id = d.app_user_id
+      join ${entitlements} e on e.app_user_id = coalesce(a.canonical_id, d.app_user_id)
+    `
+    : `join ${devices} d on d.id = l.device_id`;
+  // Keep the timestamp parameter in both modes so the cell and subscriber
+  // queries retain the same placeholders when entitlement gating is toggled.
+  const deliverablePredicate = requireEntitlement
+    ? ENTITLED_PREDICATE
+    : `d.enabled and d.push_token is not null and $1::timestamptz is not null`;
 
   async function loadLocations(deviceId) {
     const { rows } = await pool.query(
@@ -190,7 +197,7 @@ export function createPgStore(pool, { schema = 'smokeshow_notify' } = {}) {
     // The cost model, in one query. Returns cells, not users.
     async listOccupiedCells(nowMs = Date.now()) {
       const { rows } = await pool.query(
-        `select distinct l.cell_key from ${deviceLocations} l ${entitledJoin} where ${ENTITLED_PREDICATE} order by 1`,
+        `select distinct l.cell_key from ${deviceLocations} l ${subscriberJoin} where ${deliverablePredicate} order by 1`,
         [new Date(nowMs)],
       );
       return rows.map((r) => r.cell_key);
@@ -200,8 +207,8 @@ export function createPgStore(pool, { schema = 'smokeshow_notify' } = {}) {
       const { rows } = await pool.query(
         `select d.*, l.cell_key as loc_cell_key, l.label as loc_label, l.lat as loc_lat,
                 l.lon as loc_lon, l.threshold as loc_threshold
-           from ${deviceLocations} l ${entitledJoin}
-          where ${ENTITLED_PREDICATE} and l.cell_key = $2`,
+           from ${deviceLocations} l ${subscriberJoin}
+          where ${deliverablePredicate} and l.cell_key = $2`,
         [new Date(nowMs), cellKey],
       );
       return rows.map((row) => ({
@@ -347,6 +354,10 @@ export function createPgStore(pool, { schema = 'smokeshow_notify' } = {}) {
     },
 
     async isDeviceEntitled(deviceId, nowMs = Date.now()) {
+      if (!requireEntitlement) {
+        const { rows } = await pool.query(`select 1 from ${devices} where id = $1`, [deviceId]);
+        return rows.length > 0;
+      }
       const { rows } = await pool.query(
         `select 1 from ${devices} d
            left join ${aliases} a on a.alias_id = d.app_user_id
@@ -362,7 +373,7 @@ export function createPgStore(pool, { schema = 'smokeshow_notify' } = {}) {
       const { rows } = await pool.query(
         `select
            (select count(*) from ${devices}) as devices,
-           (select count(distinct l.cell_key) from ${deviceLocations} l ${entitledJoin} where ${ENTITLED_PREDICATE}) as cells,
+           (select count(distinct l.cell_key) from ${deviceLocations} l ${subscriberJoin} where ${deliverablePredicate}) as cells,
            (select count(*) from ${entitlements}) as entitlements`,
         [new Date(nowMs)],
       );

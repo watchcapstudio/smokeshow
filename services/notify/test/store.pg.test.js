@@ -21,4 +21,14 @@ describe('Postgres store schema isolation', () => {
       'valid unquoted identifier',
     );
   });
+
+  it('omits the entitlement join when launch gating is disabled', async () => {
+    const query = vi.fn(async () => ({ rows: [], rowCount: 0 }));
+    const store = createPgStore({ query }, { schema: 'smokeshow_notify', requireEntitlement: false });
+
+    await store.listOccupiedCells();
+    const sql = query.mock.calls[0][0];
+    expect(sql).toContain('"smokeshow_notify"."devices"');
+    expect(sql).not.toContain('"smokeshow_notify"."entitlements"');
+  });
 });
