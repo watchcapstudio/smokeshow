@@ -1,20 +1,15 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import LocationBanner from './components/LocationBanner.jsx';
 import LocationSearch from './components/LocationSearch.jsx';
-import RatingChip from './components/RatingChip.jsx';
 import SkyBackdrop from './components/SkyBackdrop.jsx';
-import Ridgeline from './components/Ridgeline.jsx';
 import TrendChip from './components/TrendChip.jsx';
 import ExplainSheet from './components/ExplainSheet.jsx';
-import Scrubber from './components/Scrubber.jsx';
+import ScrubberBar from './components/ScrubberBar.jsx';
+import Ridgeline from './components/Ridgeline.jsx';
 import AgreementBand from './components/AgreementBand.jsx';
 import FiveDayStrip from './components/FiveDayStrip.jsx';
-import SharedBanner from './components/SharedBanner.jsx';
-import ShareButton from './components/ShareButton.jsx';
 import AppWidgetCTA from './components/AppWidgetCTA.jsx';
 import InstallNudge from './components/InstallNudge.jsx';
-import PullToRefresh from './components/PullToRefresh.jsx';
 // Order matters: sky.css re-points the tokens.css palette at the live ink, and
 // shell.css builds the app surfaces on top of the result.
 import './styles/tokens.css';
@@ -36,6 +31,8 @@ import { ugm3ToAqi } from './lib/aqi.js';
 import { formatLocalTime, formatVerdictTime } from './lib/time.js';
 import { getJSON, setJSON, clearKey } from './lib/storage.js';
 import { getUnits, setUnits, getSensitive, setSensitive } from './lib/prefs.js';
+import { toPlace, savePlace, removePlace as removeSavedPlace, placesWithCurrent } from './lib/places.js';
+import { LEVELS } from './lib/rating.js';
 
 // Map (and Leaflet with it) loads as a separate chunk after the verdict paints —
 // share-spec rule: rating chip + clear-time render first from a single point
@@ -120,6 +117,9 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [choosingLocation, setChoosingLocation] = useState(false);
+  const [canvas, setCanvas] = useState('sky'); // 'sky' | 'map' — the flipping stage
+  const [mapEverShown, setMapEverShown] = useState(false); // mount the map lazily, keep it after
+  const [savedTick, setSavedTick] = useState(0); // bump to re-read the saved-places list
   const playIntervalRef = useRef(null);
 
   useEffect(() => {
@@ -563,75 +563,127 @@ export default function App() {
 
   const selectedPM25 = anchoredPm25[selectedIndex];
   const selectedLevel = levelForPM25(selectedPM25);
-  // Static slots in index.html below the verdict — the map and the app CTA
-  // render down there (portal) while their state stays wired up here.
-  const mapSlot = document.getElementById('map-slot');
   const ctaSlot = document.getElementById('cta-slot');
   const nowLevel = levelForPM25(anchoredPm25[nowIndex]);
-  const isShared = location.source === 'shared';
+  const selectedDate = new Date(centerData.timesUTC[selectedIndex] + 'Z');
+  const atNow = selectedIndex === nowIndex;
   const shareUrl =
     `${window.location.origin}/s?lat=${location.lat.toFixed(3)}&lon=${location.lon.toFixed(3)}` +
     `${placeName ? `&name=${encodeURIComponent(placeName)}` : ''}&utm_source=share`;
 
+  // The chip row: the saved places with the current one folded in, so it always
+  // shows where you are even before it is saved.
+  const isGeoPlace = !['manual', 'shared', 'page'].includes(location.source);
+  const currentPlace = toPlace({
+    lat: location.lat,
+    lon: location.lon,
+    label: placeName,
+    isCurrentLocation: isGeoPlace,
+  });
+  void savedTick; // read so the row re-renders after a remove
+  const chips = placesWithCurrent(currentPlace);
+
+  function handleCanvas(next) {
+    if (next === 'map') setMapEverShown(true);
+    setCanvas(next);
+  }
+  function handleSelectPlace(place) {
+    if (place.id === currentPlace.id) return;
+    setPlaying(false);
+    setPlaceName(place.label);
+    setLocation({ granted: true, lat: place.lat, lon: place.lon, label: place.label, source: 'manual' });
+  }
+  function handleRemovePlace(place) {
+    removeSavedPlace(place.id);
+    setSavedTick((t) => t + 1);
+    if (place.id === currentPlace.id) {
+      const next = placesWithCurrent(null).find((p) => p.id !== place.id);
+      if (next) handleSelectPlace(next);
+    }
+  }
+  function handleNow() {
+    setPlaying(false);
+    setSelectedIndex(nowIndex);
+  }
+  async function handleShare() {
+    const payload = {
+      title: 'Smokeshow',
+      text: `${placeName || 'This air'}: ${atNow && headline ? headline : selectedLevel?.name}`,
+      url: shareUrl,
+    };
+    try {
+      if (navigator.share) await navigator.share(payload);
+      else await navigator.clipboard?.writeText(shareUrl);
+    } catch {
+      /* dismissed */
+    }
+  }
+
   return (
-    <div className="app">
-      <PullToRefresh />
-      <SkyBackdrop
-        pm25={selectedPM25}
-        date={new Date(centerData.timesUTC[selectedIndex] + 'Z')}
-        lat={location.lat}
-        lon={location.lon}
-      />
-      {header}
-      {isShared ? (
-        <SharedBanner
-          placeName={placeName || 'a shared location'}
-          fromShare={location.fromShare}
-          onCheckYourAir={handleCheckYourAir}
+    <div className="app app--stage">
+      <div className="stage" data-canvas={canvas}>
+        <SkyBackdrop
+          pm25={selectedPM25}
+          date={selectedDate}
+          lat={location.lat}
+          lon={location.lon}
         />
-      ) : (
-        <LocationBanner placeName={placeName} onUpdateLocation={handleUpdateLocation} />
-      )}
-      {chooser}
-      <RatingChip
-        level={selectedLevel}
-        pm25={selectedPM25}
-        isNow={selectedIndex === nowIndex}
-        timeLabel={formatLocalTime(centerData.timesUTC[selectedIndex], tz)}
-        headline={selectedIndex === nowIndex ? headline : null}
-        sensor={selectedIndex === nowIndex ? activeSensor : null}
-        sources={sensorNow}
-        aqiSource={aqiSource}
-        onSourceChange={handleSourceChange}
-        onExplain={() => setExplainOpen(true)}
-      />
-      <TrendChip pm25={anchoredPm25} index={selectedIndex} verdict={verdict} />
-      <Ridgeline pm25={selectedPM25} />
-      <ShareButton
-        level={nowLevel}
-        aqi={ugm3ToAqi(anchoredPm25[nowIndex])}
-        placeName={placeName}
-        timeLabel={formatLocalTime(centerData.timesUTC[nowIndex], tz)}
-        headline={headline}
-        days={days}
-        diverged={agreement?.some((a) => a.status === 'diverge') ?? false}
-        shareUrl={shareUrl}
-      />
-      <ExplainSheet
-        open={explainOpen}
-        onClose={() => setExplainOpen(false)}
-        level={selectedLevel}
-        pm25={selectedPM25}
-        units={units}
-        sensitive={sensitive}
-        days={days}
-        sensorNow={selectedIndex === nowIndex ? sensorNow : null}
-        onUnitsChange={handleUnitsChange}
-        onSensitiveChange={handleSensitiveChange}
-      />
-      {mapSlot &&
-        createPortal(
-          <div className="map-section">
+
+        {/* The sky window: verdict on the sky, the horizon with sun and moon,
+            the five days. Hidden (not unmounted) under the map so the CSS
+            variables it owns stay live. */}
+        <div className="window" hidden={canvas !== 'sky'}>
+          <header className="whead">
+            <span className="whead__clock">{formatLocalTime(centerData.timesUTC[selectedIndex], tz)}</span>
+            <button
+              type="button"
+              className="whead__gear"
+              aria-label="Detail and settings"
+              onClick={() => setExplainOpen(true)}
+            >
+              ≡
+            </button>
+          </header>
+
+          <div className="verdict">
+            <p className="verdict__place">
+              {placeName || 'Here'}
+              <button type="button" className="verdict__change" onClick={handleUpdateLocation}>
+                change
+              </button>
+            </p>
+            <h1 className="verdict__word">{selectedLevel?.name}</h1>
+            <TrendChip pm25={anchoredPm25} index={selectedIndex} verdict={verdict} />
+            {atNow && headline && <p className="verdict__clear">{headline}</p>}
+            <p className="verdict__body">{selectedLevel?.notice}</p>
+            <p className="verdict__meta">
+              AQI {ugm3ToAqi(selectedPM25)} · {Math.round(selectedPM25)} µg/m³ PM2.5 · model estimate
+            </p>
+            <button type="button" className="verdict__more" onClick={() => setExplainOpen(true)}>
+              What this means ›
+            </button>
+          </div>
+
+          <div className="window__horizon">
+            <Ridgeline pm25={selectedPM25} />
+          </div>
+
+          <FiveDayStrip
+            timesUTC={centerData.timesUTC}
+            pm25={anchoredPm25}
+            nowIndex={nowIndex}
+            timezone={tz}
+            measuredDays={measuredDays}
+            compact
+            activeIndex={selectedIndex}
+            onPickDay={setSelectedIndex}
+          />
+        </div>
+
+        {/* The map canvas. Mounted on first flip and kept, so it does not reload
+            each time. Its own compact verdict + model-agreement ride on top. */}
+        {mapEverShown && (
+          <div className="stage__map" hidden={canvas !== 'map'}>
             {gridTiers[1] ? (
               <Suspense fallback={<div className="map-placeholder">Loading map…</div>}>
                 <SmokeMap
@@ -648,41 +700,65 @@ export default function App() {
             ) : (
               <div className="map-placeholder">
                 {gridFailed
-                  ? 'Map unavailable right now — the forecast above still works.'
+                  ? 'Map unavailable right now — the forecast still works.'
                   : 'Loading map…'}
               </div>
             )}
-            <Scrubber
-              timesUTC={centerData.timesUTC}
-              pm25={anchoredPm25}
-              windowStart={windowStart}
-              windowEnd={windowEnd}
-              selectedIndex={selectedIndex}
-              nowIndex={nowIndex}
-              onScrub={setSelectedIndex}
-              playing={playing}
-              onTogglePlay={() => setPlaying((p) => !p)}
-              timezone={tz}
-            />
-            <AgreementBand
-              agreement={agreement}
-              windowStart={windowStart}
-              windowEnd={windowEnd}
-              timesUTC={centerData.timesUTC}
-              currentPM25={centerData.pm25}
-                    hrrrSeries={hrrrLocal}
-            />
-          </div>,
-          mapSlot,
+            <div className="stage__map-verdict">
+              <strong>{selectedLevel?.name}</strong>
+              {atNow && headline && <span>{headline}</span>}
+            </div>
+            <div className="stage__map-band">
+              <AgreementBand
+                agreement={agreement}
+                windowStart={windowStart}
+                windowEnd={windowEnd}
+                timesUTC={centerData.timesUTC}
+                currentPM25={centerData.pm25}
+                hrrrSeries={hrrrLocal}
+              />
+            </div>
+          </div>
         )}
-      <FiveDayStrip
-        timesUTC={centerData.timesUTC}
-        pm25={anchoredPm25}
-        nowIndex={nowIndex}
-        timezone={tz}
-        measuredDays={measuredDays}
+
+        <ScrubberBar
+          canvas={canvas}
+          onCanvas={handleCanvas}
+          places={chips}
+          currentPlaceId={currentPlace.id}
+          onSelectPlace={handleSelectPlace}
+          onRemovePlace={handleRemovePlace}
+          onAddPlace={handleUpdateLocation}
+          timesUTC={centerData.timesUTC}
+          pm25={anchoredPm25}
+          windowStart={windowStart}
+          windowEnd={windowEnd}
+          selectedIndex={selectedIndex}
+          nowIndex={nowIndex}
+          onScrub={setSelectedIndex}
+          onNow={handleNow}
+          playing={playing}
+          onTogglePlay={() => setPlaying((p) => !p)}
+          onShare={handleShare}
+          timezone={tz}
+        />
+      </div>
+
+      {chooser}
+
+      <ExplainSheet
+        open={explainOpen}
+        onClose={() => setExplainOpen(false)}
+        level={selectedLevel}
+        pm25={selectedPM25}
+        units={units}
+        sensitive={sensitive}
+        days={days}
+        sensorNow={atNow ? sensorNow : null}
+        onUnitsChange={handleUnitsChange}
+        onSensitiveChange={handleSensitiveChange}
       />
-      {/* SLOT: cta — portaled below the map (see #cta-slot in index.html) */}
+
       {ctaSlot &&
         createPortal(
           <AppWidgetCTA
@@ -700,6 +776,7 @@ export default function App() {
           />,
           ctaSlot,
         )}
+
       <InstallNudge levelIndex={nowLevel?.index ?? 0} headline={headline} />
     </div>
   );

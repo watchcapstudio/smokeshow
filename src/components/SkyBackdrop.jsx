@@ -42,7 +42,27 @@ const clamp01 = (v) => Math.max(0, Math.min(1, v));
 const mixRGB = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
 const rgbCss = (c) => `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
 
-export default function SkyBackdrop({ pm25, date, lat, lon }) {
+// The lit region of the moon at `phase` (0 new … 0.5 full … 1 new), in a unit
+// circle. Same construction as iOS MoonShape: the limb plus a terminator scaled
+// by cos(2π·phase). Both come from the payload's sky.moon, so the browser and
+// the phone draw the identical phase.
+function moonSliver(phase) {
+  const k = Math.cos(2 * Math.PI * phase);
+  const s = phase < 0.5 ? 1 : -1;
+  const steps = 40;
+  const limb = [];
+  const term = [];
+  for (let i = 0; i <= steps; i++) {
+    const u = (i / steps) * 2 - 1;
+    const w = Math.sqrt(Math.max(0, 1 - u * u));
+    limb.push([s * w, u]);
+    term.push([s * k * w, u]);
+  }
+  const pts = [...limb, ...term.reverse()];
+  return 'M' + pts.map(([x, y]) => `${x.toFixed(3)},${y.toFixed(3)}`).join(' L') + ' Z';
+}
+
+export default function SkyBackdrop({ pm25, date, lat, lon, showsSun = true }) {
   // Before the user's location resolves, place them by their clock: the UTC
   // offset gives a longitude good to a time zone's width, which is all the sun
   // needs to be in a believable part of the sky on the loading screen.
@@ -53,9 +73,10 @@ export default function SkyBackdrop({ pm25, date, lat, lon }) {
   const pm = Number.isFinite(pm25) ? pm25 : 0;
 
   const last = useRef('');
+  const moonPathRef = useRef(null);
 
   useEffect(() => {
-    const key = `${pm}|${ms}|${useLat}|${useLon}`;
+    const key = `${pm}|${ms}|${useLat}|${useLon}|${showsSun}`;
     if (last.current === key) return;
     last.current = key;
 
@@ -80,7 +101,9 @@ export default function SkyBackdrop({ pm25, date, lat, lon }) {
     set('--scrim-hor', rgbaCss(veil, plan.scrim[2]));
 
     const { visible, xFrac, yFrac, dim, altitudeDeg } = sky.sun;
-    if (visible) {
+    // A window can suppress the sun (showsSun=false) and place it itself; by
+    // default the backdrop paints it here, low enough that the ridge sets it.
+    if (visible && showsSun) {
       const altSin = Math.sin((altitudeDeg * Math.PI) / 180);
       const warmth = altSin < LOW_SUN_SIN ? LOW_SUN_WARMTH : 0;
       const core = mixRGB(SUN_CLEAR, SUN_SMOKED, clamp01(dim * 1.2 + warmth));
@@ -93,11 +116,22 @@ export default function SkyBackdrop({ pm25, date, lat, lon }) {
     } else {
       set('--sun-op', '0');
     }
+
+    // The moon travels the same sky, placed the same way, and set behind the
+    // ridge when it is low. Pale by day, bright at night; faded in as it rises.
+    const moon = sky.moon;
+    const risen = clamp01((moon.altitudeDeg + 2) / 6);
+    const daylight = sky.sun.visible ? 0.5 : 1;
+    set('--moon-x', `${SUN_X_START + moon.xFrac * SUN_X_SPAN}%`);
+    set('--moon-y', `${moon.yFrac * 100}%`);
+    set('--moon-op', String(risen * daylight));
+    moonPathRef.current?.setAttribute('d', moonSliver(moon.phaseFraction));
+
     set('--star-op', String(sky.starOpacity));
 
     // Keep the browser chrome in the same weather as the page.
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', sky.zenith);
-  }, [pm, ms, useLat, useLon]);
+  }, [pm, ms, useLat, useLon, showsSun]);
 
   return (
     <div className="sky" aria-hidden="true">
@@ -108,6 +142,11 @@ export default function SkyBackdrop({ pm25, date, lat, lon }) {
         ))}
       </div>
       <div className="sky__sun" />
+      <div className="sky__moon">
+        <svg viewBox="-1.4 -1.4 2.8 2.8">
+          <path ref={moonPathRef} d="" />
+        </svg>
+      </div>
       <div className="sky__scrim" />
       <div className="sky__grain" />
     </div>
