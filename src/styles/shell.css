@@ -273,6 +273,16 @@ body {
   padding: 0;
   display: block;
   gap: 0;
+  --play-dur: 0s; /* scrub marks track the finger instantly while dragging */
+}
+
+/* During playback everything glides across the whole hour instead of lurching:
+   the sun, moon and sky transitions (which read --duration-base) and the
+   scrubber marks all stretch to the step interval (PLAY_INTERVAL_MS, 600ms),
+   so motion is continuous — the smooth sweep iOS does, not hourly jerks. */
+.app--stage.is-playing {
+  --duration-base: 0.6s;
+  --play-dur: 0.6s;
 }
 
 /* The stage is a centred column that grows with the screen — the phone view on
@@ -418,13 +428,19 @@ body {
    they read as a landscape you're looking at — bigger on a bigger screen, and
    the empty middle becomes hills. They break out to the full width of the
    screen; the day pills sit at their base. */
+/* Absorbs spare height above the hills, and is the first thing to give when the
+   verdict runs long (basis 0, so it collapses before the hills do). */
+.window__spacer {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
 .window__horizon {
-  /* Pushed to the foot of the window (empty sky collects above it, not as a
-     gap under the pills), full-bleed, and a substantial band so the hills read
-     as a landscape. */
-  margin-top: auto;
-  flex-shrink: 0;
+  /* A substantial landscape band that SHRINKS when the screen is tight, so a
+     tall verdict never pushes the pills into the scrubber. Full-bleed. */
+  flex: 0 1 auto;
   height: clamp(150px, 26cqmin, 360px);
+  min-height: 44px;
   width: 100vw;
   margin-left: 50%;
   transform: translateX(-50%);

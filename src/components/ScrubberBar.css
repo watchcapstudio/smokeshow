@@ -208,7 +208,8 @@
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
-/* Scrub mark: heavier, the one you are holding. */
+/* Scrub mark: heavier, the one you are holding. It tracks instantly while you
+   drag (--play-dur 0s) and glides across the hour while playing (0.6s). */
 .sbar__scrubline {
   position: absolute;
   top: 0;
@@ -218,6 +219,7 @@
   background: var(--ink);
   opacity: 0.5;
   pointer-events: none;
+  transition: left var(--play-dur, 0s) linear;
 }
 .sbar__scrubdot {
   position: absolute;
@@ -227,6 +229,9 @@
   background: var(--ink);
   transform: translate(-50%, -50%);
   pointer-events: none;
+  transition:
+    left var(--play-dur, 0s) linear,
+    top var(--play-dur, 0s) linear;
 }
 .sbar__range {
   position: absolute;

@@ -620,7 +620,7 @@ export default function App() {
   }
 
   return (
-    <div className="app app--stage">
+    <div className={'app app--stage' + (playing ? ' is-playing' : '')}>
       <div className="stage" data-canvas={canvas}>
         <SkyBackdrop
           pm25={selectedPM25}
@@ -663,6 +663,11 @@ export default function App() {
               What this means ›
             </button>
           </div>
+
+          {/* Empty sky between the verdict and the landscape; it soaks up spare
+              height on a tall screen and collapses first when the verdict runs
+              long, so the hills and pills never get shoved into the scrubber. */}
+          <div className="window__spacer" />
 
           <div className="window__horizon">
             <Ridgeline pm25={selectedPM25} />
