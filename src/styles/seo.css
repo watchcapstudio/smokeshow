@@ -76,7 +76,9 @@
 /* FAQ */
 .faq h2,
 .explainer h2,
-.landmarks h2 {
+.landmarks h2,
+.citylinks h2,
+.citylist h2 {
   font-family: var(--font-mono);
   font-size: 10.5px;
   font-weight: 600;
@@ -130,7 +132,9 @@
 
 .faq p,
 .explainer p,
-.landmarks > p {
+.landmarks > p,
+.citylinks > p,
+.citylist > p {
   color: var(--text-dim);
   line-height: 1.6;
   font-size: 0.92rem;
@@ -186,6 +190,112 @@
 
 .explainer strong {
   color: var(--ink);
+}
+
+/* Internal links — city pages and corridor pages.
+   Built on the .landmarks row grid rather than a new one: same rule-separated
+   list, same two-column baseline, so a reader running down the page does not
+   have to learn a second layout for what is still "a label and a thing". The
+   link is the label; the tag (Upwind / Nearby / Corridor) is where the band
+   sits, in the same mono accent, because it plays the same role — the reason
+   this row is on the page. */
+.citylinks__list,
+.citylist__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.citylinks__item,
+.citylist__item {
+  border-bottom: 1px solid var(--rule);
+  padding: 0.7rem 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.15rem 0.6rem;
+  align-items: baseline;
+}
+
+.citylinks__item:last-child,
+.citylist__item:last-child {
+  border-bottom: 0;
+}
+
+.citylinks__link,
+.citylist__link,
+.citylist h2 a {
+  font-weight: 650;
+  font-size: 0.95rem;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.citylinks__link:hover,
+.citylist__link:hover,
+.citylist h2 a:hover,
+.citylinks__link:focus-visible,
+.citylist__link:focus-visible {
+  border-bottom-color: currentColor;
+}
+
+/* The corridor group heading on the hub is an h2 in the mono eyebrow style, so
+   the link inside it keeps that size rather than the row size above. It does NOT
+   keep the eyebrow's colour: the eyebrow tan is a label colour, and a reader
+   scanning for "where do I read about the Canadian corridor" has to be able to
+   see that this heading is the way there. Accent is the site's link colour. */
+.citylist h2 a {
+  font-size: inherit;
+  color: var(--accent);
+}
+
+.citylinks__tag,
+.citylist__band {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--accent);
+  justify-self: end;
+  align-self: baseline;
+  white-space: nowrap;
+}
+
+.citylinks__note {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--text-dim);
+  line-height: 1.55;
+  font-size: 0.9rem;
+}
+
+/* Sitewide footer. Five links at most, and it rides on the live sky rather than
+   on the cream sheet: the reference material above ends at the disclaimer, and
+   the footer is navigation, not reference. That means it reads --ink like the
+   rest of the shell and flips with the air. */
+.site-footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.site-footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.1rem;
+}
+
+.site-footer__nav a {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.site-footer__nav a:hover,
+.site-footer__nav a:focus-visible {
+  color: var(--text);
+  border-bottom-color: currentColor;
 }
 
 /* Disclaimer — the one block that should read as fine print and still be

@@ -149,7 +149,10 @@
           </details>
         </section>
 
-        <div class="explainer">
+        <!-- id is a link target: every city page and corridor page points its
+             "Why smoke is hard to forecast" link here, so this is the one
+             explainer the whole site shares. Renaming it breaks ~30 pages. -->
+        <div class="explainer" id="how-smoke-forecasts-work">
           <h2>Why is smoke so hard to forecast?</h2>
           <p>Forecasting smoke is like forecasting weather, with three extra problems stacked on top.</p>
           <p>
@@ -189,6 +192,22 @@
           </p>
         </div>
       </div>
+
+      <!-- Sitewide footer. Hand-mirrored from FOOTER_LINKS in
+           scripts/gen-location-pages.mjs, same as the FAQ above is hand-mirrored
+           from its JSON-LD — this page is the one the generator does not write.
+           Keep the two in sync. Five links maximum, and deliberately not a city
+           list: the hub is where the full list lives. -->
+      <footer class="site-footer">
+        <nav class="site-footer__nav" aria-label="Site">
+          <a href="/">Smoke where you are</a>
+          <a href="/smoke-forecast/">All cities</a>
+          <a href="/smoke-forecast/corridor/canadian-smoke-great-lakes-northeast/"
+            >Canadian smoke explained</a
+          >
+          <a href="/#how-smoke-forecasts-work">How smoke forecasts work</a>
+        </nav>
+      </footer>
     </div>
 
     <script type="application/ld+json">
