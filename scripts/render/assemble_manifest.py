@@ -39,7 +39,7 @@ MANIFEST_VERSION = 2
 #
 # Keep in step with DOMAINS in .github/workflows/*.yml — those say what gets
 # copied onto the branch, this says what is allowed to stay.
-KNOWN_DOMAINS = ("hrrr", "hrrr-dark", "cams")
+KNOWN_DOMAINS = ("hrrr", "hrrr-dark", "cams", "cams-dark")
 
 
 def main(root):
