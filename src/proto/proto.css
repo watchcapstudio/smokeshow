@@ -337,10 +337,13 @@ html {
   stroke-width: 1.5;
 }
 
+/* 27px — three times the 9 this started at. At that size it stops being a
+   position marker and becomes a handle you can see under your own thumb,
+   which is the point: the finger covers the curve while you drag it. */
 .proto-curve__dot {
   position: absolute;
-  width: 9px;
-  height: 9px;
+  width: 27px;
+  height: 27px;
   border-radius: 50%;
   background: var(--ink);
   transform: translate(-50%, -50%);
