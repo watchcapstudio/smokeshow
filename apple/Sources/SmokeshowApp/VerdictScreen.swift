@@ -18,6 +18,9 @@ struct VerdictScreen: View {
     @Binding var showsExplain: Bool
     @Binding var showsSettings: Bool
     @State private var showsPlaces = false
+    @State private var showsMapInfo = false
+    /// Bumped to re-read the saved-places list after a chip is removed.
+    @State private var savedTick = 0
 
     /// One shared scrub index (nil = now) drives the sky verdict AND the map.
     /// That is the whole idea of the unified screen: the drag bar is the
@@ -139,7 +142,10 @@ struct VerdictScreen: View {
     /// bleeding through them.
     private var windowCanvas: some View {
         ZStack {
-            SkyBackdrop(sky: sky)
+            // Sky and stars, full-bleed. The sun moved into the ridge band
+            // below so it can set *behind* the hill, so the backdrop no longer
+            // paints its own disc.
+            SkyBackdrop(sky: sky, showsSun: false)
                 .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 0) {
@@ -149,12 +155,19 @@ struct VerdictScreen: View {
                 verdictBlock
                 Spacer(minLength: 16)
 
-                // The ridgeline is the visibility gauge — how far you can see,
-                // which is exactly what smoke and haze take away. Full-bleed, on
-                // the horizon above the days.
-                RidgeView(pm25: shownHour?.pm25, strength: 0.55)
-                    .frame(height: 96)
-                    .padding(.horizontal, -20)
+                // The ridge, in its settled place above the days — same layout
+                // the app shipped. What is new is behind it: the sun sets
+                // behind the near hill, and once it is down the moon rises at
+                // tonight's phase.
+                HorizonBand(
+                    sky: sky,
+                    pm25: shownHour?.pm25,
+                    date: validTime,
+                    latitude: model.place?.latitude,
+                    longitude: model.place?.longitude
+                )
+                .frame(height: 96)
+                .padding(.horizontal, -20)
 
                 Spacer(minLength: 14)
 
@@ -205,17 +218,7 @@ struct VerdictScreen: View {
                 #if os(iOS)
                 canvasToggle
                 #endif
-                Spacer()
-                Button { showsPlaces = true } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "mappin.and.ellipse")
-                            .font(.system(size: 11, weight: .semibold))
-                        Text((model.place?.shortName ?? "Choose").uppercased())
-                            .font(Typography.eyebrow)
-                    }
-                }
-                .buttonStyle(.plain)
-                .opacity(0.85)
+                placeChips
             }
 
             HStack {
@@ -261,6 +264,75 @@ struct VerdictScreen: View {
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 
+    // MARK: - Saved-place chips
+
+    /// The saved list, with the current place folded in if it was reached by
+    /// search and never saved, so the row always shows where you are.
+    private var savedPlaces: [Place] {
+        _ = savedTick
+        var list = PlaceStore.shared.places
+        if let current = model.place, !list.contains(where: { $0.id == current.id }) {
+            list.insert(current, at: 0)
+        }
+        return list
+    }
+
+    /// A scrollable row of places to the right of the Sky/Map toggle: tap to
+    /// switch, the × to drop one, the ＋ to add another. Replaces the single
+    /// place button, which could only ever show one and hid the rest in a sheet.
+    private var placeChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                ForEach(savedPlaces) { place in
+                    placeChip(place)
+                }
+                Button { showsPlaces = true } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 11, weight: .semibold))
+                        .padding(.horizontal, 11)
+                        .padding(.vertical, 7)
+                        .background(Capsule().fill(canvasInk.opacity(0.10)))
+                        .contentShape(Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func placeChip(_ place: Place) -> some View {
+        let isCurrent = place.id == model.place?.id
+        return HStack(spacing: 5) {
+            if place.isCurrentLocation {
+                Image(systemName: "location.fill").font(.system(size: 8))
+            }
+            Text(place.shortName.uppercased()).font(Typography.eyebrow)
+            Button { removePlace(place) } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 8, weight: .bold))
+                    .opacity(0.6)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(Capsule().fill(canvasInk.opacity(isCurrent ? 0.22 : 0.10)))
+        .overlay(Capsule().strokeBorder(canvasInk.opacity(isCurrent ? 0.4 : 0), lineWidth: 1))
+        .contentShape(Capsule())
+        .onTapGesture { Task { await model.select(place) } }
+    }
+
+    private func removePlace(_ place: Place) {
+        let wasCurrent = place.id == model.place?.id
+        PlaceStore.shared.remove(place)
+        savedTick += 1
+        // Removing the place you're looking at needs a new one to show, or the
+        // screen has nothing to describe.
+        if wasCurrent, let next = PlaceStore.shared.places.first {
+            Task { await model.select(next) }
+        }
+    }
+
     private var whenLabel: String {
         guard scrubbed != nil, points.indices.contains(currentIndex) else { return "Now" }
         return readout(for: points[currentIndex])
@@ -291,14 +363,26 @@ struct VerdictScreen: View {
         isPlaying.toggle()
     }
 
+    /// The step interval, in seconds. The per-step animation is *linear* and
+    /// exactly this long, so consecutive steps abut with no ease pulse — the
+    /// dot and the sky glide at constant speed instead of jerking each hour.
+    private static let playStep: Double = 0.34
+
     private func run() async {
         guard isPlaying, points.count > 1 else { return }
         while !Task.isCancelled && isPlaying {
-            try? await Task.sleep(for: .milliseconds(320))
+            try? await Task.sleep(for: .seconds(Self.playStep))
             guard !Task.isCancelled, isPlaying else { return }
             let count = points.count
             let current = scrubbed ?? nowIndex
-            scrubbed = current >= count - 1 ? 0 : current + 1
+            let next = current >= count - 1 ? 0 : current + 1
+            // Glide each step at constant speed — except the loop's rewind to 0,
+            // which would sweep the whole day backwards.
+            if next == 0 {
+                scrubbed = 0
+            } else {
+                withAnimation(.linear(duration: Self.playStep)) { scrubbed = next }
+            }
         }
     }
 
@@ -325,8 +409,18 @@ struct VerdictScreen: View {
             .ignoresSafeArea()
 
             // Never lose the answer while looking at the smoke: a compact
-            // verdict on the left, the model named on the right.
-            HStack(alignment: .top) {
+            // verdict on the left, the model named on the right. The required
+            // map credit tucks into the leading "i", out of the way.
+            HStack(alignment: .top, spacing: 8) {
+                Button { showsMapInfo = true } label: {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 15, weight: .medium))
+                        .opacity(0.5)
+                        .padding(.vertical, 7)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
                 if let name = forecast?.nowScaleEntry?.name {
                     Text(name.uppercased())
                         .font(Typography.eyebrow)
@@ -343,6 +437,11 @@ struct VerdictScreen: View {
                     .background(Capsule().fill(.ultraThinMaterial))
             }
             .padding(.horizontal, 16)
+        }
+        .alert("Map data", isPresented: $showsMapInfo) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("© OpenStreetMap contributors · © CARTO")
         }
     }
 

@@ -57,13 +57,11 @@ struct MapLibreCanvas: UIViewRepresentable {
         mapView.showsUserLocation = false
         mapView.logoView.isHidden = true // CARTO + OSM credit rides the info button
 
-        // The info button carries the CARTO + OSM attribution, a licence
-        // condition, so it stays — but out of the bottom-right corner, where the
-        // scrubber card clipped it in half. Top-left, below the clock, dimmed:
-        // small, out of the way, and fully on screen.
-        mapView.attributionButton.tintColor = UIColor(white: 1, alpha: 0.45)
-        mapView.attributionButtonPosition = .topLeft
-        mapView.attributionButtonMargins = CGPoint(x: 14, y: 112)
+        // The CARTO + OSM attribution is a licence condition, but MapLibre's own
+        // button floats awkwardly wherever it is pinned. It is hidden here and
+        // the credit is surfaced instead by a tucked "i" in the map's top row
+        // (`mapCanvas`), which keeps it accessible without a stray dot on screen.
+        mapView.attributionButton.isHidden = true
 
         if let center {
             mapView.setCenter(center, zoomLevel: Self.openingZoom, animated: false)
@@ -83,12 +81,16 @@ struct MapLibreCanvas: UIViewRepresentable {
     }
 
     func updateUIView(_ mapView: MLNMapView, context: Context) {
-        // Move the dot to the current place; do NOT recentre. While the map is
-        // open the only thing that changes the place is a long-press drop, and
-        // the dot should jump to under the finger, not yank the map out from
-        // under it.
         if let center {
+            // A long-press drop lands under the finger, already on screen, so
+            // the dot just moves — no yank. But a chip can pick a place that is
+            // off the visible map, and there the map has to travel to it or the
+            // pin sits somewhere you cannot see.
+            if !context.coordinator.isVisible(center, in: mapView) {
+                mapView.setCenter(center, animated: true)
+            }
             context.coordinator.moveMarker(to: center)
+            context.coordinator.lastCenter = center
         }
         context.coordinator.apply(frame: frame)
     }
@@ -128,6 +130,17 @@ struct MapLibreCanvas: UIViewRepresentable {
 
         init(onLongPress: @escaping (CLLocationCoordinate2D) -> Void) {
             self.onLongPress = onLongPress
+        }
+
+        /// Whether a coordinate is inside the map's current viewport, so a place
+        /// change can tell an on-screen drop (leave the map put) from an
+        /// off-screen chip pick (travel to it).
+        func isVisible(_ coordinate: CLLocationCoordinate2D, in mapView: MLNMapView) -> Bool {
+            let bounds = mapView.visibleCoordinateBounds
+            return coordinate.latitude >= bounds.sw.latitude
+                && coordinate.latitude <= bounds.ne.latitude
+                && coordinate.longitude >= bounds.sw.longitude
+                && coordinate.longitude <= bounds.ne.longitude
         }
 
         func apply(frame: SmokeFramePayload?) {

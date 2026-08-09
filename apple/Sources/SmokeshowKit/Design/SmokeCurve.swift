@@ -25,32 +25,52 @@ struct SmokeCurveShape: Shape {
             return CGPoint(x: x, y: y)
         }
 
-        // Each run of non-nil values is its own subpath. Gaps break the line.
-        var runStart: Int?
+        // Each run of non-nil values is its own smoothed subpath. Gaps break
+        // the line — a null hour is missing data, not a dip to zero.
+        var run: [CGPoint] = []
         for (index, item) in points.enumerated() {
-            guard let value = item.value else {
-                closeRun(&path, from: runStart, to: index - 1, rect: rect, step: step)
-                runStart = nil
-                continue
-            }
-            if runStart == nil {
-                runStart = index
-                path.move(to: point(index, value))
+            if let value = item.value {
+                run.append(point(index, value))
             } else {
-                path.addLine(to: point(index, value))
+                addRun(run, to: &path, rect: rect)
+                run = []
             }
         }
-        closeRun(&path, from: runStart, to: points.count - 1, rect: rect, step: step)
+        addRun(run, to: &path, rect: rect)
         return path
     }
 
-    private func closeRun(_ path: inout Path, from start: Int?, to end: Int, rect: CGRect, step: CGFloat) {
-        guard closed, let start, end > start else { return }
-        let xEnd = rect.minX + CGFloat(end) * step
-        let xStart = rect.minX + CGFloat(start) * step
-        path.addLine(to: CGPoint(x: xEnd, y: rect.maxY))
-        path.addLine(to: CGPoint(x: xStart, y: rect.maxY))
-        path.closeSubpath()
+    /// Draws one run of points as a Catmull-Rom spline (converted to cubic
+    /// Béziers), so the smoke reads as a curve rather than a polyline. The
+    /// tangents are clamped to the run's own endpoints, so a run never
+    /// overshoots into a neighbouring gap.
+    private func addRun(_ run: [CGPoint], to path: inout Path, rect: CGRect) {
+        guard run.count > 1 else {
+            // A lone point can still anchor a filled sliver under it.
+            if closed, let only = run.first {
+                path.move(to: only)
+                path.addLine(to: CGPoint(x: only.x, y: rect.maxY))
+                path.closeSubpath()
+            }
+            return
+        }
+
+        path.move(to: run[0])
+        for i in 0..<(run.count - 1) {
+            let p0 = run[max(i - 1, 0)]
+            let p1 = run[i]
+            let p2 = run[i + 1]
+            let p3 = run[min(i + 2, run.count - 1)]
+            let c1 = CGPoint(x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6)
+            let c2 = CGPoint(x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6)
+            path.addCurve(to: p2, control1: c1, control2: c2)
+        }
+
+        if closed {
+            path.addLine(to: CGPoint(x: run[run.count - 1].x, y: rect.maxY))
+            path.addLine(to: CGPoint(x: run[0].x, y: rect.maxY))
+            path.closeSubpath()
+        }
     }
 }
 
