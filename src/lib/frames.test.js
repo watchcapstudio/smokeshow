@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   SUPPORTED_MANIFEST_VERSION,
+  candidatesForView,
   domainCoversView,
+  domainMeasures,
   pickForView,
   domainContains,
   domainFrameURL,
@@ -240,5 +242,51 @@ describe('domainCoversView', () => {
 
   it('refuses a viewport panned across the antimeridian for a bounded domain', () => {
     expect(domainCoversView(HRRR, box(40, 45, 170, -170))).toBe(false);
+  });
+});
+
+describe('switching between models', () => {
+  const frames = {
+    domains: [HRRR, CAMS].map((d) => ({
+      ...d,
+      frameByTime: new Map(d.frames.map((f) => [f.time, `base/${d.id}/${f.file}`])),
+    })),
+  };
+  const T = '2026-08-02T12:00';
+  const box = (south, north, west, east) => ({ south, north, west, east });
+  const IN = box(46.5, 47.2, -114.4, -113.6); // Missoula, HRRR fills the view
+  const OUT = box(43, 52, -120, -105); // zoomed past 50 N
+
+  it('offers a choice only where two fields can serve the same view', () => {
+    expect(candidatesForView(frames, T, IN).map((c) => c.domain.id)).toEqual(['hrrr', 'cams']);
+    expect(candidatesForView(frames, T, OUT).map((c) => c.domain.id)).toEqual(['cams']);
+  });
+
+  it('honours the reader’s pick over the automatic one', () => {
+    expect(pickForView(frames, T, IN).domain.id).toBe('hrrr'); // automatic
+    expect(pickForView(frames, T, IN, 'cams').domain.id).toBe('cams'); // pinned
+  });
+
+  // The pin must never be able to put the seam back on screen.
+  it('ignores a pin that cannot cover the viewport', () => {
+    expect(pickForView(frames, T, OUT, 'hrrr').domain.id).toBe('cams');
+  });
+
+  // ...but it is remembered, so zooming back in returns to what was chosen.
+  it('remembers the pin through a zoom that could not honour it', () => {
+    expect(pickForView(frames, T, OUT, 'cams').domain.id).toBe('cams');
+    expect(pickForView(frames, T, IN, 'cams').domain.id).toBe('cams');
+  });
+
+  it('falls back cleanly for a pin naming a domain that is not there', () => {
+    expect(pickForView(frames, T, IN, 'nonexistent').domain.id).toBe('hrrr');
+  });
+
+  it('names what each domain measures, and does not invent it', () => {
+    expect(domainMeasures({ measures: 'smoke', label: 'x' })).toBe('smoke');
+    // Published before the field existed: the map omits the prefix rather
+    // than passing the model's name off as a description of the quantity.
+    expect(domainMeasures({ label: 'NOAA HRRR-Smoke' })).toBeNull();
+    expect(domainMeasures(null)).toBeNull();
   });
 });

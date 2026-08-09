@@ -11,7 +11,7 @@ import { levelForPM25 } from '../lib/rating.js';
 // answer different questions and must never be relabelled as each other.
 import { fetchFires, fireCard, fireRadius } from '../lib/fires.js';
 import { fetchHotspots } from '../lib/hotspots.js';
-import { domainFrameURL, pickForView } from '../lib/frames.js';
+import { candidatesForView, domainFrameURL, pickForView } from '../lib/frames.js';
 import { getJSON, setJSON } from '../lib/storage.js';
 import './SmokeMap.css';
 
@@ -49,18 +49,33 @@ const MIN_ZOOM = 4;
 // saying which one was on screen. Naming the model and its resolution is the
 // same rule as "model estimate, never observed" — the map should not imply
 // detail the data does not have.
-export function coverageLabel(domain, tier) {
+export function coverageLabel(domain, tier, next = null) {
   if (domain) {
+    // What it measures goes in the VISIBLE text, not just the tooltip. HRRR
+    // reports smoke and CAMS reports total PM2.5 including dust and traffic;
+    // a reader offered a switch has to know that is what they are switching,
+    // and on a phone there is no hover to discover it in. Domains published
+    // before the field existed simply omit the prefix.
+    const measures = domain.measures;
+    const what = measures ? `${measures[0].toUpperCase()}${measures.slice(1)} · ` : '';
+    const describe = (d) =>
+      d.measures ? `${d.measures} (${d.label}, about ${d.resolutionKm} km)` : `${d.label}, about ${d.resolutionKm} km`;
     return {
-      text: `${domain.label} · ${domain.resolutionKm} km model estimate`,
-      title:
-        `Pre-rendered ${domain.model}. Grid spacing about ${domain.resolutionKm} km. ` +
-        `Model estimate, not an observation.`,
+      // No "model estimate" here: the section heading directly above the map
+      // already says "Every hour shown is a model estimate, not a measurement"
+      // (index.html, .map-intro__sub), and this badge now has to carry the
+      // quantity, the model, the resolution and the switch. The label is not
+      // dropped — it is stated once, forty pixels away, and again in the title.
+      text: `${what}${domain.label} ${domain.resolutionKm} km${next ? ' ⇄' : ''}`,
+      title: next
+        ? `Showing ${describe(domain)}. Tap for ${describe(next)}. ` +
+          `They measure different things, and both are model estimates, not observations.`
+        : `Showing ${describe(domain)}. Model estimate, not an observation.`,
     };
   }
   const km = TIER_SPACING_KM[tier] ?? TIER_SPACING_KM[1];
   return {
-    text: `Coarse grid · ${km} km points, model estimate`,
+    text: `Coarse grid · ${km} km points`,
     title:
       `No pre-rendered field covers this view, so the map is interpolating 81 CAMS ` +
       `point forecasts about ${km} km apart. Model estimate, not an observation.`,
@@ -131,6 +146,10 @@ export default function SmokeMap({
   // which domain to paint depends on what is on screen, not on where the user
   // lives. Seeded from the location so the first paint needs no map events.
   const [view, setView] = useState({ lat: center.lat, lon: center.lon });
+  // The reader's explicit choice of field, remembered across zooms but only
+  // honoured while it can still cover the viewport (see pickForView). null =
+  // let the map choose, which is what it does until someone taps the badge.
+  const [preferredDomain, setPreferredDomain] = useState(null);
 
   // Decode-once image cache; crossOrigin so the canvas stays readable.
   function loadFrame(url) {
@@ -235,8 +254,13 @@ export default function SmokeMap({
     const Coverage = L.Control.extend({
       options: { position: 'topright' },
       onAdd() {
-        const el = L.DomUtil.create('div', 'smoke-coverage');
+        // A <button> even when there is nothing to switch to: it carries the
+        // title either way, and a control that changes element type as you
+        // zoom loses focus mid-interaction. Disabled when inert.
+        const el = L.DomUtil.create('button', 'smoke-coverage');
+        el.type = 'button';
         el.setAttribute('aria-live', 'polite');
+        L.DomEvent.disableClickPropagation(el); // tapping the badge must not pan the map
         return el;
       },
     });
@@ -402,7 +426,16 @@ export default function SmokeMap({
       west: mapBounds.getWest(),
       east: mapBounds.getEast(),
     };
-    const pick = pickForView(frames, timeA, viewBox);
+    const pick = pickForView(frames, timeA, viewBox, preferredDomain);
+    // Only offer a switch when there is genuinely something else that can
+    // serve this exact view — same rule the Station/Local toggle uses. Zoomed
+    // out past HRRR there is one field and no control.
+    const candidates = candidatesForView(frames, timeA, viewBox);
+    const next =
+      candidates.length > 1
+        ? candidates[(candidates.findIndex((c) => c.domain.id === pick?.domain.id) + 1) % candidates.length]
+            .domain
+        : null;
     const urlA = pick?.url ?? null;
     // Frame B comes from the SAME domain, so a crossfade never dissolves one
     // model's plume into another's.
@@ -432,9 +465,12 @@ export default function SmokeMap({
     frameRef.current = frame;
 
     if (coverageRef.current) {
-      const { text, title } = coverageLabel(pick?.domain, tier);
+      const { text, title } = coverageLabel(pick?.domain, tier, next);
       coverageRef.current.textContent = text;
       coverageRef.current.title = title;
+      coverageRef.current.disabled = !next;
+      coverageRef.current.classList.toggle('smoke-coverage--switch', !!next);
+      coverageRef.current.onclick = next ? () => setPreferredDomain(next.id) : null;
       // Machine-readable for scripts/verify-domains.mjs — the badge's own
       // wording is a product decision and should stay free to change.
       coverageRef.current.dataset.domain = pick?.domain.id ?? '';
@@ -466,7 +502,7 @@ export default function SmokeMap({
     const el = markerRef.current?.getElement();
     const label = el?.querySelector('.user-marker__label');
     if (label && level) label.textContent = level.name;
-  }, [gridTiers, selectedIndex, tier, playing, frames, verdictPm25, view]);
+  }, [gridTiers, selectedIndex, tier, playing, frames, verdictPm25, view, preferredDomain]);
 
   useEffect(() => {
     if (!playing) return;

@@ -275,11 +275,27 @@ for (const place of PLACES) {
         badge: document.querySelector('.smoke-coverage')?.textContent ?? null,
         domain: document.querySelector('.smoke-coverage')?.dataset.domain || null,
         base: document.querySelector('.smoke-coverage')?.dataset.base || null,
+        canSwitch: !document.querySelector('.smoke-coverage')?.disabled,
         badgeTitle: document.querySelector('.smoke-coverage')?.title ?? null,
         attribution: document.querySelector('.leaflet-control-attribution')?.textContent?.trim(),
         marker: document.querySelector('.user-marker__label')?.textContent,
       };
     });
+
+    // Where a switch is offered, take it: the point of the control is that a
+    // reader can see the other field, so a capture run that never presses it
+    // proves nothing about it.
+    if (measured.canSwitch) {
+      await page.click('.smoke-coverage');
+      await new Promise((r) => setTimeout(r, 1200));
+      measured.switchedTo = await page.evaluate(
+        () => document.querySelector('.smoke-coverage')?.dataset.domain || null,
+      );
+      const after = await page.$('.smoke-map');
+      await after.screenshot({ path: `${OUT}/domain-${TAG}-z${zoom}-${place.key}-switched.png` });
+      await page.click('.smoke-coverage'); // back, so the next zoom starts clean
+      await new Promise((r) => setTimeout(r, 800));
+    }
 
     const el = await page.$('.smoke-map');
     await el.screenshot({ path: `${OUT}/domain-${TAG}-z${zoom}-${place.key}.png` });
@@ -317,7 +333,7 @@ for (const d of manifest.domains) {
 }
 
 console.log(
-  `\n${pad('place', 15)}${pad('zoom', 6)}${pad('domain', 9)}${pad('want', 8)}${pad('cover', 8)}badge`,
+  `\n${pad('place', 15)}${pad('zoom', 6)}${pad('domain', 9)}${pad('want', 8)}${pad('switch', 9)}${pad('cover', 8)}badge`,
 );
 console.log('-'.repeat(104));
 let mismatches = 0;
@@ -327,7 +343,8 @@ for (const r of rows) {
   if (!ok) mismatches++;
   console.log(
     `${ok ? ' ' : '!'}${pad(r.name, 14)}${pad(r.zoom, 6)}${pad(r.domain ?? '—', 9)}` +
-      `${pad(want ?? '—', 8)}${pad(`${(r.cover * 100).toFixed(0)}%`, 8)}${r.badge ?? '(none)'}`,
+      `${pad(want ?? '—', 8)}${pad(r.switchedTo ? `→${r.switchedTo}` : '—', 9)}` +
+      `${pad(`${(r.cover * 100).toFixed(0)}%`, 8)}${r.badge ?? '(none)'}`,
   );
 }
 

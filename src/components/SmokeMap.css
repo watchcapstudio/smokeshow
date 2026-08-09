@@ -107,6 +107,28 @@
   overflow: hidden;
   text-overflow: ellipsis;
   pointer-events: auto; /* the title attribute is the long version */
+  font: inherit;
+  font-size: 10px;
+  text-align: left;
+}
+
+/* Inert unless there is a second field that can serve this exact view. Left
+   looking like the label it is, rather than greyed out — there is nothing
+   broken about having one model. */
+.smoke-map .smoke-coverage:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+/* Switchable: the ⇄ in the text says so, this makes it feel pressable. */
+.smoke-map .smoke-coverage--switch {
+  cursor: pointer;
+}
+
+.smoke-map .smoke-coverage--switch:hover,
+.smoke-map .smoke-coverage--switch:focus-visible {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--map-chrome-text-strong);
 }
 
 .smoke-map .smoke-coverage:empty {
