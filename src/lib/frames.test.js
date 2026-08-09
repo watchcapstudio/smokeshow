@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   SUPPORTED_MANIFEST_VERSION,
+  domainCoversView,
+  pickForView,
   domainContains,
   domainFrameURL,
   fetchFrames,
@@ -182,5 +184,61 @@ describe('fetchSeries', () => {
   it('returns null when no domain publishes a series', async () => {
     stubFetch({});
     expect(await fetchSeries({ seriesDomain: null }, 46.87, -113.99)).toBeNull();
+  });
+});
+
+describe('pickForView', () => {
+  const frames = {
+    domains: [HRRR, CAMS].map((d) => ({
+      ...d,
+      frameByTime: new Map(d.frames.map((f) => [f.time, `base/${d.id}/${f.file}`])),
+    })),
+  };
+  const T = '2026-08-02T12:00';
+  const box = (south, north, west, east) => ({ south, north, west, east });
+
+  it('uses the sharp domain when it fills the viewport', () => {
+    // zoomed in on Missoula, nowhere near the 50 N edge
+    expect(pickForView(frames, T, box(46.5, 47.2, -114.4, -113.6)).domain.id).toBe('hrrr');
+  });
+
+  // The whole point: a viewport that can see past HRRR's edge gets ONE
+  // consistent field instead of a rectangle drawn across Montana.
+  it('switches to the global field as soon as the edge would be visible', () => {
+    expect(pickForView(frames, T, box(43, 52, -120, -105)).domain.id).toBe('cams');
+  });
+
+  it('switches on the west edge too, not just the north', () => {
+    expect(pickForView(frames, T, box(40, 46, -130, -120)).domain.id).toBe('cams');
+  });
+
+  it('falls back to the widest domain when nothing contains the viewport', () => {
+    // past CAMS's own 75 N limit — still paint the global field, not nothing
+    expect(pickForView(frames, T, box(60, 80, -20, 20)).domain.id).toBe('cams');
+  });
+
+  it('returns null when no domain has the hour', () => {
+    expect(pickForView(frames, '2026-08-02T20:00', box(46.5, 47.2, -114.4, -113.6))).toBeNull();
+  });
+});
+
+describe('domainCoversView', () => {
+  const box = (south, north, west, east) => ({ south, north, west, east });
+
+  it('is false when the viewport spills past a bounded domain', () => {
+    expect(domainCoversView(HRRR, box(46, 52, -114, -113))).toBe(false);
+  });
+
+  it('is true when the viewport sits inside it', () => {
+    expect(domainCoversView(HRRR, box(46, 47, -114, -113))).toBe(true);
+  });
+
+  it('does not claim a wrapping domain covers a view past its latitude limit', () => {
+    expect(domainCoversView(CAMS, box(70, 80, -10, 10))).toBe(false);
+    expect(domainCoversView(CAMS, box(-50, 70, -180, 180))).toBe(true);
+  });
+
+  it('refuses a viewport panned across the antimeridian for a bounded domain', () => {
+    expect(domainCoversView(HRRR, box(40, 45, 170, -170))).toBe(false);
   });
 });

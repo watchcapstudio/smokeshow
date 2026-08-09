@@ -11,7 +11,7 @@ import { levelForPM25 } from '../lib/rating.js';
 // answer different questions and must never be relabelled as each other.
 import { fetchFires, fireCard, fireRadius } from '../lib/fires.js';
 import { fetchHotspots } from '../lib/hotspots.js';
-import { domainCoversView, domainFrameURL, pickDomains } from '../lib/frames.js';
+import { domainFrameURL, pickForView } from '../lib/frames.js';
 import { getJSON, setJSON } from '../lib/storage.js';
 import './SmokeMap.css';
 
@@ -49,16 +49,7 @@ const MIN_ZOOM = 4;
 // saying which one was on screen. Naming the model and its resolution is the
 // same rule as "model estimate, never observed" — the map should not imply
 // detail the data does not have.
-export function coverageLabel(domain, tier, base = null) {
-  if (domain && base) {
-    return {
-      text: `${domain.resolutionKm} km here, ${base.resolutionKm} km beyond · model estimate`,
-      title:
-        `${domain.model} at about ${domain.resolutionKm} km inside its box, ` +
-        `${base.model} at about ${base.resolutionKm} km outside it. The seam is a ` +
-        `change of model, not of air. Model estimate, not an observation.`,
-    };
-  }
+export function coverageLabel(domain, tier) {
   if (domain) {
     return {
       text: `${domain.label} · ${domain.resolutionKm} km model estimate`,
@@ -136,9 +127,9 @@ export default function SmokeMap({
     setJSON('fireHintSeen', true);
   }, []);
 
-  // Which domain covers the view, not which covers the user: pan from Missoula
-  // to Edmonton and the field under the cursor has to be the one that reaches
-  // there. Seeded from the location so the first paint needs no map events.
+  // Bumped on every moveend so the frame effect re-reads the map's bounds:
+  // which domain to paint depends on what is on screen, not on where the user
+  // lives. Seeded from the location so the first paint needs no map events.
   const [view, setView] = useState({ lat: center.lat, lon: center.lon });
 
   // Decode-once image cache; crossOrigin so the canvas stays readable.
@@ -404,18 +395,6 @@ export default function SmokeMap({
     // Prefer the sharpest pre-rendered domain that reaches this view and has
     // this hour — HRRR inside CONUS, CAMS global everywhere else. The 81-point
     // canvas field stays the fallback for hours and places neither covers.
-    const picks = pickDomains(frames, timeA, view.lat, view.lon);
-    const pick = picks[0] ?? null;
-    const urlA = pick?.url ?? null;
-    // Frame B comes from the SAME domain, so a crossfade never dissolves one
-    // model's plume into another's.
-    const urlB = (pick && domainFrameURL(pick.domain, timeB)) ?? urlA;
-    const sharpMode = !!urlA;
-
-    // When the sharp domain's rectangle does not fill the viewport, the next
-    // domain down backfills the rest. Looking north from Missoula at the fires
-    // that are making the smoke and seeing black was the CONUS-only bug in its
-    // purest form. Only fetched when it is actually going to paint.
     const mapBounds = mapRef.current.getBounds();
     const viewBox = {
       south: mapBounds.getSouth(),
@@ -423,8 +402,12 @@ export default function SmokeMap({
       west: mapBounds.getWest(),
       east: mapBounds.getEast(),
     };
-    const backfill =
-      pick && !domainCoversView(pick.domain, viewBox) ? picks[1] ?? null : null;
+    const pick = pickForView(frames, timeA, viewBox);
+    const urlA = pick?.url ?? null;
+    // Frame B comes from the SAME domain, so a crossfade never dissolves one
+    // model's plume into another's.
+    const urlB = (pick && domainFrameURL(pick.domain, timeB)) ?? urlA;
+    const sharpMode = !!urlA;
 
     const vA = frameValues(data, meta, selectedIndex);
     const vB = frameValues(data, meta, Math.min(selectedIndex + 1, lastIdx));
@@ -441,7 +424,6 @@ export default function SmokeMap({
       vB,
       imgA: null,
       imgB: null,
-      base: null,
       bounds,
       wraps,
       changedAt: performance.now(),
@@ -450,13 +432,13 @@ export default function SmokeMap({
     frameRef.current = frame;
 
     if (coverageRef.current) {
-      const { text, title } = coverageLabel(pick?.domain, tier, backfill?.domain);
+      const { text, title } = coverageLabel(pick?.domain, tier);
       coverageRef.current.textContent = text;
       coverageRef.current.title = title;
       // Machine-readable for scripts/verify-domains.mjs — the badge's own
       // wording is a product decision and should stay free to change.
       coverageRef.current.dataset.domain = pick?.domain.id ?? '';
-      coverageRef.current.dataset.base = backfill?.domain.id ?? '';
+      coverageRef.current.dataset.base = '';
     }
 
     // Always draw the exact hour on step: when playing, the rAF loop below
@@ -464,29 +446,11 @@ export default function SmokeMap({
     // throttled (hidden tab, low-power mode), this keeps playback stepping
     // instead of freezing the canvas while the clock advances.
     if (sharpMode) {
-      const baseA = backfill?.url ?? null;
-      const baseB = (backfill && domainFrameURL(backfill.domain, timeB)) ?? baseA;
-      Promise.all([
-        loadFrame(urlA),
-        urlB ? loadFrame(urlB) : null,
-        baseA ? loadFrame(baseA) : null,
-        baseB ? loadFrame(baseB) : null,
-      ]).then(([a, b, ba, bb]) => {
+      Promise.all([loadFrame(urlA), urlB ? loadFrame(urlB) : null]).then(([a, b]) => {
         if (frameRef.current !== frame || !smokeLayerRef.current) return; // stale hour
         frame.imgA = a;
         frame.imgB = b || a;
-        frame.base = ba
-          ? {
-              imgA: ba,
-              imgB: bb || ba,
-              wraps: !!backfill.domain.wraps,
-              bounds: [
-                [backfill.domain.bounds.latS, backfill.domain.bounds.lonW],
-                [backfill.domain.bounds.latN, backfill.domain.bounds.lonE],
-              ],
-            }
-          : null;
-        smokeLayerRef.current.setImageFrames(a, b || a, 0, bounds, wraps, frame.base);
+        smokeLayerRef.current.setImageFrames(a, b || a, 0, bounds, wraps);
       });
     } else {
       smokeLayerRef.current.setField(meta, vA, vA, 0);
@@ -513,7 +477,7 @@ export default function SmokeMap({
         const t = Math.min(1, (performance.now() - f.changedAt) / (frameMs || 600));
         if (f.sharpMode) {
           if (f.imgA)
-            smokeLayerRef.current.setImageFrames(f.imgA, f.imgB, t, f.bounds, f.wraps, f.base);
+            smokeLayerRef.current.setImageFrames(f.imgA, f.imgB, t, f.bounds, f.wraps);
         } else {
           smokeLayerRef.current.setField(f.meta, f.vA, f.vB, t);
         }

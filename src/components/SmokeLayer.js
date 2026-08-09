@@ -32,13 +32,15 @@ export class SmokeCanvasLayer extends L.Layer {
   // wraps: the domain spans the full 360°, so paint it in the neighbouring
   // world copies too — otherwise the global field ends at the antimeridian
   // and panning the Pacific walks off the edge of it.
-  // base: an optional coarser { imgA, imgB, bounds, wraps } painted FIRST and
-  // clipped to everything outside `bounds`. A regional field has a hard
-  // rectangular edge, and a hard edge on a smoke map reads as "no smoke here"
-  // when it means "no model here". The two never overlap, so nothing is
-  // blended and the sharp field still wins everywhere it exists.
-  setImageFrames(imgA, imgB, t, bounds, wraps = false, base = null) {
-    this._image = { imgA, imgB, t, bounds, wraps, base };
+  //
+  // One domain at a time. This used to accept a coarser `base` pair, clipped
+  // to outside `bounds`, so a regional field's rectangular edge did not read
+  // as "no smoke here" when it meant "no model here" — removed because the two
+  // domains carry different quantities (smoke vs total PM2.5) and butting them
+  // together drew that difference as a rectangle. See the note in SmokeMap.jsx
+  // and `git log` for the clipping code if a comparable field ever lands.
+  setImageFrames(imgA, imgB, t, bounds, wraps = false) {
+    this._image = { imgA, imgB, t, bounds, wraps };
     this._field = null;
     this._redraw();
   }
@@ -247,7 +249,7 @@ export class SmokeCanvasLayer extends L.Layer {
   }
 
   _redrawImage() {
-    const { imgA, imgB, t, bounds, wraps, base } = this._image;
+    const { imgA, imgB, t, bounds, wraps } = this._image;
     const ctx = this._canvas.getContext('2d');
     const w = this._canvas.width;
     const h = this._canvas.height;
@@ -255,19 +257,6 @@ export class SmokeCanvasLayer extends L.Layer {
 
     ctx.clearRect(0, 0, w, h);
     ctx.imageSmoothingEnabled = true;
-
-    if (base?.imgA) {
-      // Even-odd fill rule over "the whole canvas" plus "the sharp domain's
-      // rect" leaves exactly the region the sharp field does not reach.
-      const r = this._rect(bounds);
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(0, 0, w, h);
-      ctx.rect(r.x, r.y, r.w, r.h);
-      ctx.clip('evenodd');
-      this._paintPair(ctx, base.imgA, base.imgB, t, base.bounds, base.wraps);
-      ctx.restore();
-    }
 
     this._paintPair(ctx, imgA, imgB, t, bounds, wraps);
 

@@ -359,8 +359,6 @@ if (pal.skip) {
   let worstRGB = 0;
   let worstA = 0;
   let worstStep = 0;
-  let prev = -Infinity;
-  let reversals = 0;
   for (let i = 0; i < pal.pm.length; i++) {
     const [r, g, b, a] = smokeRGBA(pal.pm[i]);
     worstRGB = Math.max(
@@ -372,17 +370,38 @@ if (pal.skip) {
     // Index 0 is forced to alpha 0 — it means "exactly clean air".
     if (i > 0) worstA = Math.max(worstA, Math.abs(a - pal.alpha[i]));
     if (i > 0) worstStep = Math.max(worstStep, pal.alpha[i] - pal.alpha[i - 1]);
-    const cur = ratioOfLum(
-      luminance(over([pal.rgb[i * 3], pal.rgb[i * 3 + 1], pal.rgb[i * 3 + 2]], BASE, pal.alpha[i] / 255)),
-      BASE_LUM,
-    );
-    if (prev - cur > 1e-9) reversals++;
-    prev = cur;
   }
+
+  // Palette entry i, composited over one backdrop. Every backdrop, same as
+  // check 1: the palette is what the frames actually carry, so if the ramp has
+  // to stay monotonic across the basemap's whole tonal band then so does this.
+  const palRatio = (i, base) =>
+    ratioOfLum(
+      luminance(
+        over(
+          [pal.rgb[i * 3], pal.rgb[i * 3 + 1], pal.rgb[i * 3 + 2]],
+          base.rgb,
+          pal.alpha[i] / 255,
+        ),
+      ),
+      luminance(base.rgb),
+    );
+
+  const palMono = BACKDROPS.map((base) => {
+    let peak = -Infinity;
+    let worst = 0;
+    for (let i = 0; i < pal.pm.length; i++) {
+      const cur = palRatio(i, base);
+      worst = Math.max(worst, peak - cur);
+      peak = Math.max(peak, cur);
+    }
+    return { base, worst, ok: worst <= MONO_TOLERANCE };
+  });
+
   // 1 unit of 0-255 is the rounding both sides do independently; more than
   // that means the palette curve is not tracking the ramp.
   const okMatch = worstRGB <= 1 && worstA <= 1;
-  const okMono = reversals === 0;
+  const okMono = palMono.every((m) => m.ok);
   // A palette step bigger than a few alpha units would band visibly on a
   // smooth plume — the reason the index curve is quadratic, not linear.
   const okStep = worstStep <= 4;
@@ -393,11 +412,14 @@ if (pal.skip) {
     `   ${okMatch ? 'PASS' : 'FAIL'}  ${pad('matches smokeRGBA', 18)} ` +
       `worst rgb ${worstRGB}, worst alpha ${worstA} (of 255)`,
   );
-  console.log(
-    `   ${okMono ? 'PASS' : 'FAIL'}  ${pad('monotonic', 18)} ` +
-      `${pal.pm.length} entries, ${reversals} reversals, ` +
-      `0 -> ${prev.toFixed(2)}:1 against the basemap`,
-  );
+  for (const m of palMono) {
+    const r = palRatio(pal.pm.length - 1, m.base);
+    console.log(
+      `   ${m.ok ? 'PASS' : 'FAIL'}  ${pad('monotonic', 18)}${pad(m.base.key, 14)}` +
+        `${pal.pm.length} entries, worst dip ${m.worst.toFixed(4)} ` +
+        `(tolerance ${MONO_TOLERANCE}), tops out at ${r.toFixed(2)}:1`,
+    );
+  }
   console.log(
     `   ${okStep ? 'PASS' : 'FAIL'}  ${pad('no banding', 18)} ` +
       `largest alpha step between adjacent indices: ${worstStep}/255`,
