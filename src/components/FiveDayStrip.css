@@ -7,6 +7,12 @@
   scroll-behavior: smooth;
   padding-bottom: 0.2rem;
   color: var(--ink, var(--text));
+  /* The pills swipe; the scrollbar is just noise. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.five-day-strip::-webkit-scrollbar {
+  display: none;
 }
 
 .five-day-strip__toggle {
