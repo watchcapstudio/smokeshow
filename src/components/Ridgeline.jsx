@@ -19,11 +19,14 @@ function clamp01(v) {
 
 // Haze pools in the valleys: solid at the peaks, dissolving toward the base.
 // Far ridge is gone by ~32 µg/m³; the near one is swallowed gradually to 130.
+// STRENGTH matches iOS RidgeView on the phone screen (0.55), so the web hills
+// read as soft as the app's rather than a heavier slab.
+const STRENGTH = 0.55;
 function farOpacity(pm25) {
-  return clamp01(1 - (pm25 - 6) / 26) * 0.42;
+  return clamp01(1 - (pm25 - 6) / 26) * 0.42 * STRENGTH;
 }
 function nearOpacity(pm25) {
-  return clamp01(1 - (pm25 - 20) / 110) * 0.58;
+  return clamp01(1 - (pm25 - 20) / 110) * 0.58 * STRENGTH;
 }
 
 // "How far can you see" — the objective anchor src/lib/rating.js already

@@ -280,24 +280,24 @@ body {
    edge, but not stranded tiny either). Everything inside sizes off the column
    width (cqw), so type and spacing scale up together, like iOS on a bigger
    device. */
+/* Full-bleed: the sky and the hills run the whole width of the screen. The
+   content — the chunky verdict, the days, the scrubber — sits in a centred
+   column on top (.window, .sbar). */
 .stage {
   position: relative;
   width: 100%;
-  max-width: min(98vw, 1100px);
   height: 100dvh;
-  margin: 0 auto;
   overflow: hidden;
   container-type: inline-size;
   container-name: stage;
 }
 
-/* Inside the stage the sky fills the column, not the whole viewport, so the sun
-   and moon stay with the app instead of drifting off to the far edge. */
+/* The sky fills the whole stage (which is now full width). */
 .app--stage .sky {
   position: absolute;
 }
 
-/* The sky window: a centred column laid over the full-bleed backdrop. */
+/* The sky window: a centred content column over the full-bleed backdrop. */
 .window {
   position: absolute;
   inset: 0;
@@ -305,6 +305,8 @@ body {
   display: flex;
   flex-direction: column;
   width: 100%;
+  max-width: min(94vw, 760px);
+  margin: 0 auto;
   /* Bottom clears the pinned scrubber with a small gap — no more. */
   padding: max(14px, env(safe-area-inset-top)) clamp(20px, 3cqw, 40px) 200px;
   color: var(--ink);
@@ -337,11 +339,11 @@ body {
 }
 
 .verdict {
-  margin-top: 5vh;
+  margin-top: clamp(6px, 2.5vh, 44px);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: clamp(10px, 1.5cqmin, 16px);
+  gap: clamp(9px, 1.4cqmin, 15px);
 }
 .verdict__place {
   margin: 0;
@@ -369,7 +371,7 @@ body {
   margin: 0;
   /* Sized off the smaller of width/height (cqmin) so it grows big on a large or
      tall screen but never overflows a short, wide one. */
-  font-size: clamp(2.6rem, 14cqmin, 6.8rem);
+  font-size: clamp(2.6rem, 12cqmin, 6.2rem);
   line-height: 0.95;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -406,13 +408,17 @@ body {
   cursor: pointer;
 }
 
-/* The horizon sits low, above the day pills; it bleeds to both rails and grows
-   taller on a bigger screen so the sunset has room — bounded by the shorter
-   dimension so it does not eat a short screen's vertical space. */
+/* The horizon sits low, above the day pills, and breaks out of the content
+   column to run the full width of the screen. Taller on a bigger screen so the
+   hills read as hills, not a stretched line; bounded by the shorter dimension
+   so a short window doesn't lose its vertical space to them. */
 .window__horizon {
   margin-top: auto;
-  height: clamp(110px, 15cqmin, 190px);
-  margin-inline: clamp(-40px, -3cqw, -20px);
+  flex-shrink: 0;
+  width: 100vw;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  height: clamp(100px, 13cqmin, 200px);
 }
 
 .app--stage .five-day-strip {
