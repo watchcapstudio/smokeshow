@@ -117,3 +117,33 @@
     transition: none;
   }
 }
+
+/* Sunset afterglow: a warm glow pooled on the horizon at the sun's x, additive
+   (screen) over the dusk sky. It sits behind the ridge, so the hills read as a
+   silhouette against the glow — the web twin of iOS HorizonBand's bloom. */
+.sky__bloom {
+  position: absolute;
+  left: var(--bloom-x, 70%);
+  top: 64%;
+  width: min(130vw, 1200px);
+  height: 52vh;
+  transform: translate(-50%, -50%);
+  opacity: var(--bloom-op, 0);
+  background: radial-gradient(
+    ellipse 50% 50% at center,
+    var(--bloom-core, #ffb060) 0%,
+    color-mix(in srgb, var(--bloom-core, #ffb060) 45%, transparent) 28%,
+    transparent 66%
+  );
+  mix-blend-mode: screen;
+  filter: blur(28px);
+  pointer-events: none;
+  transition:
+    opacity var(--duration-base) linear,
+    left var(--duration-base) linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sky__bloom {
+    transition: none;
+  }
+}

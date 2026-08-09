@@ -29,6 +29,11 @@ const STARS = [
 const SUN_CLEAR = [255, 246, 224];
 const SUN_SMOKED = [206, 110, 48];
 
+// The afterglow pooled on the horizon as the sun sets — golden high, deepening
+// to a burnt orange as it sinks toward and behind the ridge.
+const BLOOM_HIGH = [255, 178, 96];
+const BLOOM_LOW = [226, 104, 62];
+
 // When the sun is low the demo warms its core even on clean air (demo:797).
 const LOW_SUN_SIN = 0.3;
 const LOW_SUN_WARMTH = 0.3;
@@ -117,6 +122,19 @@ export default function SkyBackdrop({ pm25, date, lat, lon, showsSun = true }) {
       set('--sun-op', '0');
     }
 
+    // Sunset afterglow: a warm glow pooled low at the sun's x, driven by how
+    // near the horizon the sun is (peaks a few degrees up, and lingers a little
+    // below, so the sun setting behind the ridge reads as a sunset instead of
+    // just switching off). Behind the ridge in the stacking order, like iOS.
+    const golden = clamp01(1 - Math.abs(altitudeDeg - 3) / 15);
+    const bloomOp = showsSun ? golden * (1 - 0.35 * sky.smoke.s2) : 0;
+    if (bloomOp > 0.001) {
+      const sink = clamp01((10 - altitudeDeg) / 16); // 0 high → 1 at/below horizon
+      set('--bloom-x', `${SUN_X_START + xFrac * SUN_X_SPAN}%`);
+      set('--bloom-core', rgbCss(mixRGB(BLOOM_HIGH, BLOOM_LOW, sink)));
+    }
+    set('--bloom-op', String(bloomOp));
+
     // The moon travels the same sky, placed the same way, and set behind the
     // ridge when it is low. Pale by day, bright at night; faded in as it rises.
     const moon = sky.moon;
@@ -141,6 +159,7 @@ export default function SkyBackdrop({ pm25, date, lat, lon, showsSun = true }) {
           <i key={`${x}-${y}`} style={{ left: `${x}%`, top: `${y}%` }} />
         ))}
       </div>
+      <div className="sky__bloom" />
       <div className="sky__sun" />
       <div className="sky__moon">
         <svg viewBox="-1.4 -1.4 2.8 2.8">
