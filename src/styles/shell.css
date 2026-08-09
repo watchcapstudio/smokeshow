@@ -417,9 +417,12 @@ body {
    the empty middle becomes hills. They break out to the full width of the
    screen; the day pills sit at their base. */
 .window__horizon {
-  flex: 1 1 auto;
-  min-height: 120px;
-  max-height: 280px;
+  /* Pushed to the foot of the window (empty sky collects above it, not as a
+     gap under the pills), full-bleed, and a substantial band so the hills read
+     as a landscape. */
+  margin-top: auto;
+  flex-shrink: 0;
+  height: clamp(150px, 26cqmin, 360px);
   width: 100vw;
   margin-left: 50%;
   transform: translateX(-50%);
