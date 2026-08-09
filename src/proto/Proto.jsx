@@ -20,9 +20,15 @@
 // explainer and the disclaimer (see asdfasdf/index.html). Joe's note: the
 // bottom material stays on the web, and a city footer joins it.
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import SkyBackdrop from '../components/SkyBackdrop.jsx';
 import Ridgeline from '../components/Ridgeline.jsx';
+// The real section, not a redrawing of it: the app pitch, the widget mocks
+// that track the visitor's own timeline, and the notification posture. It
+// already carries the "threshold alerts only, no digests, no streaks, no
+// engagement pings" line, which is the part that must not be paraphrased.
+import AppWidgetCTA from '../components/AppWidgetCTA.jsx';
 import Curve from './Curve.jsx';
 import ExplainSheet from './ExplainSheet.jsx';
 import LocationSheet from './LocationSheet.jsx';
@@ -31,7 +37,7 @@ import { SCENARIOS, rebase } from './scenarios.js';
 import { recordVisit, explain as explainInstall } from './installPolicy.js';
 import { computeVerdict, verdictHeadline } from '../lib/verdict.js';
 import { buildDaySummaries } from '../lib/days.js';
-import { levelForPM25 } from '../lib/rating.js';
+import { levelForPM25, LEVELS } from '../lib/rating.js';
 import { ugm3ToAqi } from '../lib/aqi.js';
 import { trendAt } from '../lib/trend.js';
 import { formatLocalTime, formatVerdictTime } from '../lib/time.js';
@@ -61,6 +67,14 @@ export default function Proto() {
   const [placeOverride, setPlaceOverride] = useState(null);
   const [shareState, setShareState] = useState(null); // null | 'working' | 'copied' | 'failed'
   const [forceNudge, setForceNudge] = useState(false);
+  const [pastOpen, setPastOpen] = useState(false);
+  const daysRef = useRef(null);
+
+  // Opening the past scrolls the strip back to its left edge, so the reveal
+  // lands on the history rather than leaving it off-screen behind today.
+  useLayoutEffect(() => {
+    if (pastOpen) daysRef.current?.scrollTo({ left: 0, behavior: 'smooth' });
+  }, [pastOpen]);
 
   const series = useMemo(() => {
     const scenario = SCENARIOS.find((s) => s.id === scenarioId) ?? SCENARIOS[0];
@@ -69,7 +83,7 @@ export default function Proto() {
     });
   }, [scenarioId]);
 
-  const { timesUTC, pm25, nowIndex, timezone: tz, lat, lon, scale } = series;
+  const { timesUTC, pm25, nowIndex, timezone: tz, lat, lon, scale, pastDays } = series;
   const place = placeOverride ?? series.place;
 
   // One record per load, before anything can ask for the Home Screen.
@@ -318,7 +332,44 @@ export default function Proto() {
             which moves the sky, the ridge, the reading and the level word
             together. The live site expands an accordion with a second chart in
             it instead; that material belongs in the sheet. */}
-        <section className="proto-days" aria-label="Five day outlook">
+        {/* The toggle sits outside the scroller, not inside it — sticky-inside
+            put it on top of the first day the moment the strip scrolled. */}
+        <section className="proto-days-row" aria-label="Five day outlook">
+          {/* Back through the days already spent. Collapsed by default because
+              the question the page answers is about now and next — but "what
+              did we just come through" is the second question people ask, and
+              on the live site it is the only way to see that the last three
+              days were worse than today. */}
+          <button
+            type="button"
+            className="proto-days__back"
+            onClick={() => setPastOpen((v) => !v)}
+            aria-expanded={pastOpen}
+            aria-label={
+              pastOpen ? 'Hide the days before today' : 'Show the three days before today'
+            }
+          >
+            {pastOpen ? '›' : '‹'}
+          </button>
+
+          <div
+            className={'proto-days' + (pastOpen ? ' proto-days--open' : '')}
+            ref={daysRef}
+          >
+          {pastOpen &&
+            pastDays.map((day) => (
+              // Past days sit outside the −12h scrub window, so they are not
+              // controls — they are the record. Dimmed and inert, same as the
+              // days past +48h at the other end.
+              <div className="proto-day proto-day--past" key={day.key}>
+                <span className="proto-day__weekday">{day.weekday}</span>
+                <span className="proto-day__level">{LEVELS[day.levelIndex]?.name}</span>
+                <span className="proto-day__range">
+                  {Math.round(day.minPm25)}–{Math.round(day.maxPm25)}
+                </span>
+              </div>
+            ))}
+
           {days.map((day) => {
             const target = dayTargets.get(day.key) ?? null;
             const selected = target != null && target === activeIndex;
@@ -348,6 +399,7 @@ export default function Proto() {
               </button>
             );
           })}
+          </div>
         </section>
 
         {/* The foot carries the three things that are about the whole screen
@@ -384,12 +436,30 @@ export default function Proto() {
           </button>
         </div>
 
-        <a className="proto-place" href="#map">
-          <span className="proto-place__cta">See the smoke on the map</span>
-          <span className="proto-place__chev">›</span>
-        </a>
+        {/* No "see the smoke on the map" button here. The map is the very next
+            thing on the page — a button whose whole job is to scroll you to
+            something already in view is furniture. */}
       </main>
       </div>
+
+      {/* The app-and-notifications section, between the map and the questions.
+          Portaled into its static slot the same way production does it, so the
+          widget mocks keep tracking the scrub position up in the window. */}
+      <CtaSlot>
+        <AppWidgetCTA
+          pm25={pm25}
+          timesUTC={timesUTC}
+          selectedIndex={activeIndex}
+          nowIndex={nowIndex}
+          windowStart={windowStart}
+          windowEnd={windowEnd}
+          verdict={verdict}
+          headline={headline}
+          level={level}
+          placeName={place}
+          timezone={tz}
+        />
+      </CtaSlot>
 
       <ExplainSheet
         open={explainOpen}
@@ -430,6 +500,17 @@ export default function Proto() {
 
 /// Review chrome. Not part of the proposal — it exists so the five states can
 /// be seen without waiting for the weather, and it says so on screen.
+/// The static slot lives in asdfasdf/index.html, below the map and above the
+/// questions. It only exists after the first paint, so this waits a tick
+/// rather than reading it during render.
+function CtaSlot({ children }) {
+  const [slot, setSlot] = useState(null);
+  useEffect(() => {
+    setSlot(document.getElementById('cta-slot'));
+  }, []);
+  return slot ? createPortal(children, slot) : null;
+}
+
 function ShareGlyph() {
   return (
     <svg className="proto-foot__glyph" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -451,6 +532,18 @@ function ReviewBar({ scenarioId, onPick, forceNudge, onToggleNudge }) {
   // bar, which are two of the things being reviewed.
   const [open, setOpen] = useState(false);
   const install = open ? explainInstall() : null;
+
+  // Review chrome belongs to the window. Once the reader has scrolled past it
+  // into the map, the app section and the questions, it is just something
+  // sitting on top of the page — so it retires until they come back up.
+  const [past, setPast] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setPast(window.scrollY > window.innerHeight * 0.6);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  if (past && !open) return null;
   return (
     <div className={'proto-review' + (open ? ' proto-review--open' : '')}>
       <button type="button" className="proto-review__toggle" onClick={() => setOpen((v) => !v)}>

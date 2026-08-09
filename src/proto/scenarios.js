@@ -84,6 +84,9 @@ export function rebase(fixture, { forceDivergeFromNow = null } = {}) {
     place: PLACE,
     scale: fixture.scale ?? [],
     measured: fixture.measured ?? null,
+    // The three days before today, already collapsed to a level and a range by
+    // the payload builder. What the "‹" button reveals.
+    pastDays: fixture.pastDays ?? [],
     agreement,
     agreementSummary: summary,
   };

@@ -360,11 +360,83 @@ html {
 
 /* Suggestion 6: these are a control, not a summary. Tapping one sends the
    playhead to that day's worst hour and the whole window follows it. */
-.proto-days {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+.proto-days-row {
+  display: flex;
+  align-items: stretch;
   gap: 6px;
   margin-top: 1.1rem;
+  min-width: 0;
+}
+
+.proto-days {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Collapsed: five equal days, exactly the grid this replaced. */
+.proto-days > .proto-day {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Opened: eight days is more than a phone's width, so the strip becomes a
+   scroller with each day at a fixed size rather than eight slivers. */
+.proto-days--open {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  /* The scrollbar would otherwise land on the ridge. */
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.proto-days--open::-webkit-scrollbar {
+  display: none;
+}
+
+.proto-days--open > .proto-day {
+  flex: 0 0 78px;
+  scroll-snap-align: start;
+}
+
+/* "‹" — back through the days already spent. Narrow on purpose: it is a
+   disclosure, not a peer of the days it sits next to. */
+.proto-days__back {
+  flex: 0 0 22px;
+  align-self: stretch;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  opacity: 0.65;
+  cursor: pointer;
+}
+
+.proto-days__back:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--ink) 13%, transparent);
+}
+
+/* History, not a control: these sit outside the −12h scrub window, so they
+   cannot be scrubbed to and must not look like they can. */
+.proto-day--past {
+  opacity: 0.5;
+  border: 1px dashed color-mix(in srgb, var(--ink) 22%, transparent);
+  background: none;
+}
+
+.proto-day__range {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
 }
 
 .proto-day {
@@ -726,45 +798,6 @@ body:has(.proto-nudge) .proto-window {
 .proto-sheet__note {
   font-size: 0.78rem;
   opacity: 0.8;
-}
-
-/* ------------------------------------------------------------------- place */
-
-/* The answer to "where", under everything that answers "how bad" — and the
-   door to the map, which is the thing people come back for, so it is a bar you
-   can hit rather than an eyebrow you can miss. */
-/* The map is the destination, so it gets the full-width bar and the accent
-   border rather than sharing a row with the two utilities above it. */
-.proto-place {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  min-height: 48px;
-  margin-top: 0.5rem;
-  padding: 0.8rem 0.9rem;
-  border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-  background: color-mix(in srgb, var(--accent) 9%, transparent);
-  color: var(--text);
-  text-decoration: none;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.proto-place:hover {
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-}
-
-.proto-place__cta {
-  font-weight: 600;
-}
-
-.proto-place__chev {
-  margin-left: auto;
-  opacity: 0.7;
-  letter-spacing: 0;
 }
 
 /* ------------------------------------------------------------- map section */

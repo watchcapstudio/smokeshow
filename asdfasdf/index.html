@@ -53,6 +53,12 @@
         </div>
       </div>
 
+      <!-- The app and the notifications, between the map and the questions.
+           React portals the real AppWidgetCTA in here — same component the
+           live site renders, so the widget mocks track the scrub position and
+           the notification posture ships verbatim. -->
+      <div id="cta-slot"></div>
+
       <div class="seo-sheet">
         <div class="seo-sheet__grab" aria-hidden="true"></div>
 
@@ -112,6 +118,27 @@
             that. Models must find the fires by satellite, estimate how much smoke each one makes,
             and then ride the wind forecast — and each step adds error (the full explanation is
             below). Smokeshow shows a detailed two-day window plus a five-day outlook, and tells you when the forecast models agree and when they don't. And we blend a few models to improve our guesses.
+          </p>
+          </details>
+
+          <!-- NEW in this candidate. The window now marks the hours where the
+               models split, and nothing on the page explained what that meant.
+               Written to the same rule as the rest: no dose-response claims,
+               and lead-time uncertainty kept distinct from disagreement,
+               because they are not the same thing and the page draws them
+               differently. -->
+          <details class="faq__item">
+            <summary><h3>Why do smoke forecasts disagree with each other?</h3></summary>
+            <p>
+            Because each model makes its own guesses. Every smoke forecast has to find the fires by
+            satellite, estimate how much smoke each one is making, and then ride a wind forecast —
+            and two models can reach different answers at any of those steps. When they do, they put
+            the smoke in different places at the same hour. Smokeshow shades those hours on the
+            timeline and says the models split, rather than picking a winner and drawing you one
+            confident line. Treat the timing there as rough and check back, instead of planning
+            around the exact hour. Separately, every forecast gets less certain the further out it
+            runs: past about a day and a half the timeline fades out, and that is lead time rather
+            than a disagreement.
           </p>
           </details>
 
