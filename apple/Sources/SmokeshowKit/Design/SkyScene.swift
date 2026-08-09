@@ -97,7 +97,11 @@ public struct HorizonBand: View {
         // carries the set from there.
         let fade = clamp((y - crest) / (size.height * 0.30))
         return RadialGradient(
-            colors: [core.opacity(1 - 0.35 * descent), core.opacity(0.9 - 0.4 * descent), .clear],
+            colors: [
+                core.opacity(1 - 0.35 * Double(descent)),
+                core.opacity(0.9 - 0.4 * Double(descent)),
+                .clear,
+            ],
             center: .center,
             startRadius: 0,
             endRadius: diameter * (0.5 - 0.18 * dim) * (1 - 0.15 * descent)
