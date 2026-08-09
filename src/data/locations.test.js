@@ -28,12 +28,6 @@ function allCopy(loc) {
 // answer. Region codes for the provinces we cover.
 const CANADIAN_REGIONS = new Set(['ON', 'MB']);
 
-// Every slug the site knows about, whether or not a page exists for it yet.
-// Cities land in waves, so a reference to one that is planned but unbuilt is a
-// legitimate intermediate state and gets skipped at render time. A reference to
-// a slug that is in NO corridor's city list is a typo, and that is the thing
-// worth failing on — this set is what separates the two.
-const KNOWN_SLUGS = new Set([...LOCATIONS.map((l) => l.slug), ...CORRIDORS.flatMap((c) => c.cities)]);
 const isBuilt = (slug) => locationBySlug(slug) !== null;
 
 // Parse every ld+json block the page emits. Parsing rather than string-matching
@@ -89,15 +83,12 @@ describe('location data', () => {
   // derived from the other, so they can disagree — this is the check that they
   // do not, in both directions.
   it('agrees with the corridors about which cities they hold', () => {
-    // Forward: a corridor may list a city that is not built yet, but if it is
-    // built it must agree about which corridor it is on.
     for (const c of CORRIDORS) {
-      for (const slug of c.cities.filter(isBuilt)) {
+      for (const slug of c.cities) {
+        expect(locationBySlug(slug), `${c.slug} lists ${slug}`).not.toBeNull();
         expect(locationBySlug(slug).corridor, slug).toBe(c.slug);
       }
     }
-    // Reverse: strict. A built city that its own corridor does not list would
-    // never appear on the corridor page or the hub.
     for (const l of LOCATIONS) {
       expect(corridorBySlug(l.corridor).cities, l.slug).toContain(l.slug);
     }
@@ -121,18 +112,54 @@ describe('location data', () => {
   // Every internal reference has to name a city that exists. A dangling slug is
   // skipped at render time rather than shipped as a 404 (see linkBlock), which
   // makes it invisible in the HTML — so it has to be caught here instead.
-  it('points its upwind and nearby references at slugs the site knows', () => {
+  // Now that every city is built, every reference must resolve to a real page.
+  // linkBlock() still skips an unresolvable slug rather than emitting a 404 —
+  // that is deliberate and covered separately — which is exactly why the data has
+  // to be checked here: a broken reference would go silent, not loud.
+  it('points every reference at a built city', () => {
     for (const l of LOCATIONS) {
-      for (const { slug, note } of l.upwind ?? []) {
-        expect(KNOWN_SLUGS, `${l.slug} upwind ${slug}`).toContain(slug);
-        expect(slug, `${l.slug} upwind`).not.toBe(l.slug);
-        expect(note?.length, `${l.slug} upwind ${slug} note`).toBeGreaterThan(20);
+      for (const key of ['upwind', 'downwind']) {
+        for (const { slug, note } of l[key] ?? []) {
+          expect(isBuilt(slug), `${l.slug} ${key} ${slug}`).toBe(true);
+          expect(slug, `${l.slug} ${key}`).not.toBe(l.slug);
+          expect(note?.length, `${l.slug} ${key} ${slug} note`).toBeGreaterThan(20);
+        }
       }
       for (const slug of l.nearby ?? []) {
-        expect(KNOWN_SLUGS, `${l.slug} nearby ${slug}`).toContain(slug);
+        expect(isBuilt(slug), `${l.slug} nearby ${slug}`).toBe(true);
         expect(slug, `${l.slug} nearby`).not.toBe(l.slug);
       }
     }
+  });
+
+  // Every city needs a flow link — the thing a scraper cannot fake. Source-end
+  // cities have nothing upwind of them with a page, so they carry the inverse:
+  // who gets this next. What no city may have is neither.
+  it('gives every city a flow link, upwind or downwind', () => {
+    for (const l of LOCATIONS) {
+      const flow = (l.upwind ?? []).length + (l.downwind ?? []).length;
+      expect(flow, `${l.slug} has no upwind and no downwind`).toBeGreaterThan(0);
+    }
+  });
+
+  // Destination count per city, measured off the rendered HTML rather than the
+  // data, so it counts what a reader can actually click. The spec asks for 5-8.
+  // The floor here is 4 because one city genuinely lands there on the source data
+  // and padding it with an unearned link would break the more important half of
+  // that rule ("all contextually earned"). FRESNO is that city, flagged for
+  // review rather than quietly accepted — if a second one ever drops below five,
+  // this assertion is where it has to be argued.
+  it('links four to eight destinations per city, and only Fresno is under five', () => {
+    const thin = [];
+    for (const l of LOCATIONS) {
+      const html = page(l);
+      const block = html.slice(html.indexOf(`<h2>Smoke near ${l.name}</h2>`));
+      const total = block.split('class="citylinks__link"').length - 1;
+      expect(total, `${l.slug} has ${total}`).toBeGreaterThanOrEqual(4);
+      expect(total, `${l.slug} has ${total}`).toBeLessThanOrEqual(8);
+      if (total < 5) thin.push(l.slug);
+    }
+    expect(thin).toEqual(['fresno-ca']);
   });
 
   // HARD COPY RULE. The level thresholds are rounder than the EPA breakpoints and
@@ -278,6 +305,61 @@ describe('generated location page', () => {
   });
 });
 
+describe('section order', () => {
+  // Order has moved once and the reasoning is in the template. Locking it here
+  // means a future edit that reshuffles the sheet has to argue with a test
+  // rather than land quietly across every city page at once.
+  it('runs landmarks, provenance, FAQ, links, disclaimer', () => {
+    for (const l of LOCATIONS) {
+      const html = page(l);
+      const at = (needle) => {
+        const i = html.indexOf(needle);
+        expect(i, `${l.slug} missing ${needle}`).toBeGreaterThan(-1);
+        return i;
+      };
+      const landmarks = at(`<h2>What each level looks like from ${l.name}</h2>`);
+      const provenance = at(`<h2>Where ${l.name}'s smoke comes from</h2>`);
+      const faq = at(`<h2>Smoke in ${l.name}? Common questions.</h2>`);
+      const links = at(`<h2>Smoke near ${l.name}</h2>`);
+      const disclaimer = at('class="disclaimer"');
+
+      expect(landmarks, l.slug).toBeLessThan(provenance);
+      expect(provenance, l.slug).toBeLessThan(faq);
+      expect(faq, l.slug).toBeLessThan(links);
+      expect(links, l.slug).toBeLessThan(disclaimer);
+    }
+  });
+
+  // Both optional sections belong to the "where from" pair and sit between
+  // provenance and the FAQ.
+  it('places the optional sections after provenance and before the FAQ', () => {
+    for (const l of LOCATIONS) {
+      const html = page(l);
+      const provenance = html.indexOf(`<h2>Where ${l.name}'s smoke comes from</h2>`);
+      const faq = html.indexOf(`<h2>Smoke in ${l.name}? Common questions.</h2>`);
+      for (const heading of [
+        l.notSmoke ? `<h2>What looks like smoke in ${l.name} but isn't</h2>` : null,
+        l.valley ? `<h2>${l.valley.heading}</h2>` : null,
+      ].filter(Boolean)) {
+        const i = html.indexOf(heading);
+        expect(i, `${l.slug} missing ${heading}`).toBeGreaterThan(provenance);
+        expect(i, `${l.slug} ${heading} after FAQ`).toBeLessThan(faq);
+      }
+    }
+  });
+
+  // Cities without the field get no section. Inventing a native haze for a city
+  // that does not have one would be a fabricated claim about its air.
+  it('renders no optional section for a city without the data', () => {
+    for (const l of LOCATIONS.filter((c) => !c.notSmoke)) {
+      expect(page(l), l.slug).not.toContain('explainer--not-smoke');
+    }
+    for (const l of LOCATIONS.filter((c) => !c.valley)) {
+      expect(page(l), l.slug).not.toContain('explainer--valley');
+    }
+  });
+});
+
 describe('per-city landmark bands', () => {
   // The point of the whole exercise: same level names, different visible
   // manifestation. Missoula's All clear is Lolo Peak at fifteen miles; Chicago's
@@ -419,9 +501,7 @@ describe('editorial pages', () => {
   it('groups the hub by corridor and links every built city once', () => {
     const html = hubPage();
     expect(html).toContain('<h1 class="map-intro__title">Wildfire smoke forecasts by city</h1>');
-    // A corridor with no built cities yet renders no group, which is correct:
-    // a heading over an empty list is a thin page.
-    for (const c of CORRIDORS.filter((x) => x.cities.some(isBuilt))) {
+    for (const c of CORRIDORS) {
       expect(html, c.slug).toContain(`href="/smoke-forecast/corridor/${c.slug}/"`);
     }
     for (const l of LOCATIONS) {

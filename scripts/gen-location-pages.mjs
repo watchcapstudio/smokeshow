@@ -112,26 +112,37 @@ function landmarkRows(loc) {
 // means the block grows as cities land instead of needing a second pass.
 function linkBlock(loc) {
   const items = [];
+  // Dedup precedence: a city named twice appears once, under the FIRST tag it
+  // earns. Spokane is both upwind of Missoula and nearby it, and "Upwind" is the
+  // row worth keeping, because it is the one carrying a reason.
+  const seen = new Set([loc.slug]);
 
-  for (const { slug, note } of loc.upwind ?? []) {
-    const dest = locationBySlug(slug);
-    if (!dest) continue;
-    items.push(`
+  const flowRow = (entries, tag) => {
+    for (const { slug, note } of entries ?? []) {
+      const dest = locationBySlug(slug);
+      if (!dest || seen.has(slug)) continue;
+      seen.add(slug);
+      items.push(`
               <li class="citylinks__item">
                 <a class="citylinks__link" href="/${SECTION}/${escAttr(dest.slug)}/"
                   >Wildfire smoke in ${esc(dest.name)}</a
                 >
-                <span class="citylinks__tag">Upwind</span>
+                <span class="citylinks__tag">${esc(tag)}</span>
                 <p class="citylinks__note">${esc(note)}</p>
               </li>`);
-  }
+    }
+  };
 
-  const nearby = (loc.nearby ?? [])
-    .filter((slug) => slug !== loc.slug && !(loc.upwind ?? []).some((u) => u.slug === slug))
-    .map((slug) => locationBySlug(slug))
-    .filter(Boolean);
+  flowRow(loc.upwind, 'Upwind');
+  // Downwind only exists on the source-end cities, which have no upwind at all.
+  // For a reader there the question is inverted — not "what is coming" but "who
+  // gets this next" — and their own provenance already answers it.
+  flowRow(loc.downwind, 'Downwind');
 
-  for (const dest of nearby) {
+  for (const slug of loc.nearby ?? []) {
+    const dest = locationBySlug(slug);
+    if (!dest || seen.has(slug)) continue;
+    seen.add(slug);
     items.push(`
               <li class="citylinks__item">
                 <a class="citylinks__link" href="/${SECTION}/${escAttr(dest.slug)}/"
@@ -153,6 +164,17 @@ function linkBlock(loc) {
                 <p class="citylinks__note">${esc(corridor.lede)}</p>
               </li>`);
   }
+
+  // The hub closes the block because it is the answer to the question this
+  // section provokes and cannot itself satisfy: "my city isn't listed." The
+  // footer carries it too, but a reader who has just read five city names is at
+  // the exact point of wanting the full list, and making them hunt the footer
+  // for it is worse than one more row.
+  items.push(`
+              <li class="citylinks__item">
+                <a class="citylinks__link" href="/${SECTION}/">Every city we cover</a>
+                <span class="citylinks__tag">All cities</span>
+              </li>`);
 
   items.push(`
               <li class="citylinks__item">
@@ -348,14 +370,27 @@ function page(loc) {
            and a location page simply loses it. -->
       <div id="cta-slot"></div>
 
-      <!-- The city-specific blocks sit after the questions, where the root
-           page keeps its explainer. -->
+      <!-- Section order, and the reasoning, because it moved once already:
+           landmarks -> provenance -> (what isn't smoke) -> (valley) -> FAQ ->
+           links -> disclaimer.
+
+           Landmarks lead because they are the only section that lets a reader
+           check the verdict above with their own eyes, which is the whole
+           premise of a visibility-anchored scale — it is the map's payoff, so it
+           sits directly under the map. Provenance answers the question that
+           lands next ("why is it here"), and the two optional sections are both
+           refinements of that same "where from" pair, so they follow it: what
+           isn't smoke first, since it can invalidate the reader's premise
+           entirely, then the valley/gateway widening.
+
+           The FAQ is last of the content. It used to be first, which put the
+           most generic block on the page ahead of the two that are specific to
+           this city.
+
+           Links are navigation rather than content, so they come after the
+           reading and before the fine print. The disclaimer is always last. -->
       <div class="seo-sheet">
         <div class="seo-sheet__grab" aria-hidden="true"></div>
-
-        <section class="faq">
-          <h2>Smoke in ${esc(loc.name)}? Common questions.</h2>${faqItems(loc)}
-        </section>
 
         <section class="landmarks">
           <h2>What each level looks like from ${esc(loc.name)}</h2>
@@ -371,7 +406,11 @@ function page(loc) {
           <h2>Where ${esc(loc.name)}'s smoke comes from</h2>
           <p>${esc(loc.source)}</p>
           <p>${esc(loc.memory)}</p>
-        </section>${notSmokeSection(loc)}${valleySection(loc)}${linkBlock(loc)}
+        </section>${notSmokeSection(loc)}${valleySection(loc)}
+
+        <section class="faq">
+          <h2>Smoke in ${esc(loc.name)}? Common questions.</h2>${faqItems(loc)}
+        </section>${linkBlock(loc)}
 
         <div class="disclaimer">
           <p>
