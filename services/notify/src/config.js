@@ -21,6 +21,8 @@ export function loadConfig(env = process.env) {
     port: num(env.NOTIFY_PORT, 8787),
     forecastBase: env.NOTIFY_FORECAST_BASE || 'https://smokeshow.earth',
     databaseUrl: env.NOTIFY_DATABASE_URL || null,
+    databaseSchema: env.NOTIFY_DATABASE_SCHEMA || 'smokeshow_notify',
+    databasePoolMax: num(env.NOTIFY_DATABASE_POOL_MAX, 5),
     cellConcurrency: num(env.NOTIFY_CELL_CONCURRENCY, 8),
     minGapMs: num(env.NOTIFY_MIN_GAP_MS, DEFAULT_MIN_GAP_MS),
 

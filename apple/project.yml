@@ -147,6 +147,9 @@ targets:
         # Injected at build time; empty in CI, where the stub entitlement
         # provider takes over so the app still runs.
         RevenueCatAPIKey: $(REVENUECAT_API_KEY)
+        # May point at a separately deployed notification service. An empty
+        # value falls back to https://smokeshow.earth for same-origin routing.
+        NotificationServiceBaseURL: $(NOTIFICATION_SERVICE_BASE_URL)
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
     settings:
@@ -160,6 +163,11 @@ targets:
         # for. (This is what the upload's 90474 rejection was, wrapped in a
         # -19241 "server error".)
         TARGETED_DEVICE_FAMILY: "1"
+      configs:
+        Debug:
+          APS_ENVIRONMENT: development
+        Release:
+          APS_ENVIRONMENT: production
     scheme:
       testTargets:
         - SmokeshowKitTests

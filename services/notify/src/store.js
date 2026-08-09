@@ -28,6 +28,12 @@ export const DEFAULT_QUIET_HOURS = Object.freeze({
   endHour: 7, //  7 AM local
 });
 
+export const DEFAULT_NOTIFICATION_TYPES = Object.freeze({
+  inbound: true,
+  peak: true,
+  clear: true,
+});
+
 function clone(value) {
   return value == null ? value : JSON.parse(JSON.stringify(value));
 }
@@ -257,6 +263,7 @@ export function buildDeviceRecord({
   locations = [],
   threshold = DEFAULT_THRESHOLD,
   quietHours = DEFAULT_QUIET_HOURS,
+  notificationTypes = DEFAULT_NOTIFICATION_TYPES,
   sensitiveHousehold = false,
   enabled = true,
   nowMs = Date.now(),
@@ -271,6 +278,7 @@ export function buildDeviceRecord({
     locations,
     threshold,
     quietHours: { ...DEFAULT_QUIET_HOURS, ...(quietHours ?? {}) },
+    notificationTypes: { ...DEFAULT_NOTIFICATION_TYPES, ...(notificationTypes ?? {}) },
     sensitiveHousehold: Boolean(sensitiveHousehold),
     enabled: Boolean(enabled),
     createdAtMs: nowMs,

@@ -12,7 +12,7 @@ import { constantTimeEquals } from './ids.js';
 // opaque ID unless the client supplies one, so there is still no email and no
 // account anywhere in the system.
 
-export const DEFAULT_ENTITLEMENT_ID = 'pro';
+export const DEFAULT_ENTITLEMENT_ID = 'smokeshow_pro';
 
 // RevenueCat authenticates its webhook with a shared value in the
 // `Authorization` header, configured in their dashboard. There is no HMAC to

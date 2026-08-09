@@ -12,12 +12,12 @@ const hook = (type, fields = {}) => ({
     id: `evt_${type}`,
     type,
     app_user_id: 'dev_abc',
-    entitlement_ids: ['pro'],
+    entitlement_ids: ['smokeshow_pro'],
     ...fields,
   },
 });
 
-const apply = (store, body) => applyWebhookEvent(store, body, { entitlementId: 'pro', nowMs: NOW });
+const apply = (store, body) => applyWebhookEvent(store, body, { entitlementId: 'smokeshow_pro', nowMs: NOW });
 
 describe('webhook authorization', () => {
   it('accepts the configured credential', () => {

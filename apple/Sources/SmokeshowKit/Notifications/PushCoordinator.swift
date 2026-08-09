@@ -27,6 +27,8 @@ public final class PushCoordinator: ObservableObject {
 
     private let registry: DeviceRegistering
     private var pushToken: String?
+    private var isSyncing = false
+    private var needsAnotherSync = false
 
     public init(registry: DeviceRegistering = DeviceRegistryClient()) {
         self.registry = registry
@@ -42,8 +44,13 @@ public final class PushCoordinator: ObservableObject {
     /// dialog the user has no context for.
     @discardableResult
     public func requestAuthorization() async -> Bool {
+        #if os(iOS)
+        let options: UNAuthorizationOptions = [.alert, .sound, .timeSensitive]
+        #else
+        let options: UNAuthorizationOptions = [.alert, .sound]
+        #endif
         let granted = (try? await UNUserNotificationCenter.current().requestAuthorization(
-            options: [.alert, .sound]
+            options: options
         )) ?? false
         await refreshAuthorizationStatus()
         return granted
@@ -61,16 +68,34 @@ public final class PushCoordinator: ObservableObject {
     /// Push the current preferences and place set to B7. Cheap and idempotent:
     /// call it after any change to either.
     public func syncRegistration() async {
+        // Preference and place changes can arrive while the APNs callback is
+        // in flight. Serialize them so two first-time POSTs cannot mint two
+        // server records for one install; one trailing sync sends the newest
+        // state if anything changed during the request.
+        guard !isSyncing else {
+            needsAnotherSync = true
+            return
+        }
+        isSyncing = true
+        repeat {
+            needsAnotherSync = false
+            do {
+                try await registry.register(.current(pushToken: pushToken))
+                lastRegistrationError = nil
+            } catch {
+                lastRegistrationError = error.localizedDescription
+            }
+        } while needsAnotherSync
+        isSyncing = false
+    }
+
+    public func forgetDevice() async {
         do {
-            try await registry.register(.current(pushToken: pushToken))
+            try await registry.deregister()
             lastRegistrationError = nil
         } catch {
             lastRegistrationError = error.localizedDescription
         }
-    }
-
-    public func forgetDevice() async {
-        try? await registry.deregister(deviceId: DeviceIdentity.current)
     }
 
     /// Called from the app delegate on a silent push. B7 sends one when a

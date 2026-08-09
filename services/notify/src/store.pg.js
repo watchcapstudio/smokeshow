@@ -18,12 +18,6 @@ const ENTITLED_PREDICATE = `
   and (case when e.expires_at is null then e.active else e.expires_at > $1 end)
 `;
 
-const ENTITLED_JOIN = `
-  join devices d on d.id = l.device_id
-  left join app_user_aliases a on a.alias_id = d.app_user_id
-  join entitlements e on e.app_user_id = coalesce(a.canonical_id, d.app_user_id)
-`;
-
 function rowToDevice(row, locations = []) {
   return {
     id: row.id,
@@ -34,6 +28,11 @@ function rowToDevice(row, locations = []) {
     timezone: row.timezone,
     threshold: row.threshold,
     quietHours: { enabled: row.quiet_enabled, startHour: row.quiet_start, endHour: row.quiet_end },
+    notificationTypes: {
+      inbound: row.notify_inbound,
+      peak: row.notify_peak,
+      clear: row.notify_clear,
+    },
     sensitiveHousehold: row.sensitive_household,
     enabled: row.enabled,
     locations,
@@ -52,20 +51,39 @@ function rowToLocation(row) {
   };
 }
 
-export function createPgStore(pool) {
+export function createPgStore(pool, { schema = 'smokeshow_notify' } = {}) {
+  if (!/^[a-z_][a-z0-9_]*$/.test(schema)) {
+    throw new Error('Postgres schema must be a valid unquoted identifier');
+  }
+  // Schema-qualify every table. Transaction poolers may move consecutive
+  // queries between backend sessions, so relying on a session search_path is
+  // unsafe even when the connection string accepts startup options.
+  const table = (name) => `"${schema}"."${name}"`;
+  const devices = table('devices');
+  const deviceLocations = table('device_locations');
+  const entitlements = table('entitlements');
+  const aliases = table('app_user_aliases');
+  const cellStates = table('cell_states');
+  const sentNotifications = table('sent_notifications');
+  const entitledJoin = `
+    join ${devices} d on d.id = l.device_id
+    left join ${aliases} a on a.alias_id = d.app_user_id
+    join ${entitlements} e on e.app_user_id = coalesce(a.canonical_id, d.app_user_id)
+  `;
+
   async function loadLocations(deviceId) {
     const { rows } = await pool.query(
-      `select cell_key, label, lat, lon, threshold from device_locations where device_id = $1 order by created_at`,
+      `select cell_key, label, lat, lon, threshold from ${deviceLocations} where device_id = $1 order by created_at`,
       [deviceId],
     );
     return rows.map(rowToLocation);
   }
 
   async function replaceLocations(deviceId, locations) {
-    await pool.query(`delete from device_locations where device_id = $1`, [deviceId]);
+    await pool.query(`delete from ${deviceLocations} where device_id = $1`, [deviceId]);
     for (const loc of locations ?? []) {
       await pool.query(
-        `insert into device_locations (device_id, cell_key, label, lat, lon, threshold)
+        `insert into ${deviceLocations} (device_id, cell_key, label, lat, lon, threshold)
          values ($1, $2, $3, $4, $5, $6)
          on conflict (device_id, lat, lon) do update
            set cell_key = excluded.cell_key, label = excluded.label, threshold = excluded.threshold`,
@@ -77,10 +95,11 @@ export function createPgStore(pool) {
   return {
     async registerDevice(record) {
       await pool.query(
-        `insert into devices
+        `insert into ${devices}
            (id, secret_hash, platform, push_token, app_user_id, timezone, threshold,
-            quiet_enabled, quiet_start, quiet_end, sensitive_household, enabled)
-         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+            quiet_enabled, quiet_start, quiet_end, notify_inbound, notify_peak,
+            notify_clear, sensitive_household, enabled)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
         [
           record.id,
           record.secretHash,
@@ -92,6 +111,9 @@ export function createPgStore(pool) {
           record.quietHours.enabled,
           record.quietHours.startHour,
           record.quietHours.endHour,
+          record.notificationTypes.inbound,
+          record.notificationTypes.peak,
+          record.notificationTypes.clear,
           record.sensitiveHousehold,
           record.enabled,
         ],
@@ -101,7 +123,7 @@ export function createPgStore(pool) {
     },
 
     async getDevice(deviceId) {
-      const { rows } = await pool.query(`select * from devices where id = $1`, [deviceId]);
+      const { rows } = await pool.query(`select * from ${devices} where id = $1`, [deviceId]);
       if (!rows.length) return null;
       return rowToDevice(rows[0], await loadLocations(deviceId));
     },
@@ -131,22 +153,34 @@ export function createPgStore(pool) {
           `quiet_end = $${values.length}`,
         );
       }
+      if (patch.notificationTypes !== undefined) {
+        values.push(
+          patch.notificationTypes.inbound,
+          patch.notificationTypes.peak,
+          patch.notificationTypes.clear,
+        );
+        sets.push(
+          `notify_inbound = $${values.length - 2}`,
+          `notify_peak = $${values.length - 1}`,
+          `notify_clear = $${values.length}`,
+        );
+      }
       if (sets.length) {
         values.push(deviceId);
-        await pool.query(`update devices set ${sets.join(', ')}, updated_at = now() where id = $${values.length}`, values);
+        await pool.query(`update ${devices} set ${sets.join(', ')}, updated_at = now() where id = $${values.length}`, values);
       }
       if (patch.locations !== undefined) await replaceLocations(deviceId, patch.locations);
       return this.getDevice(deviceId);
     },
 
     async deleteDevice(deviceId) {
-      const { rowCount } = await pool.query(`delete from devices where id = $1`, [deviceId]);
+      const { rowCount } = await pool.query(`delete from ${devices} where id = $1`, [deviceId]);
       return rowCount > 0;
     },
 
     async clearPushToken(deviceId, token) {
       const { rowCount } = await pool.query(
-        `update devices set push_token = null, updated_at = now()
+        `update ${devices} set push_token = null, updated_at = now()
           where id = $1 and ($2::text is null or push_token = $2)`,
         [deviceId, token ?? null],
       );
@@ -156,7 +190,7 @@ export function createPgStore(pool) {
     // The cost model, in one query. Returns cells, not users.
     async listOccupiedCells(nowMs = Date.now()) {
       const { rows } = await pool.query(
-        `select distinct l.cell_key from device_locations l ${ENTITLED_JOIN} where ${ENTITLED_PREDICATE} order by 1`,
+        `select distinct l.cell_key from ${deviceLocations} l ${entitledJoin} where ${ENTITLED_PREDICATE} order by 1`,
         [new Date(nowMs)],
       );
       return rows.map((r) => r.cell_key);
@@ -166,7 +200,7 @@ export function createPgStore(pool) {
       const { rows } = await pool.query(
         `select d.*, l.cell_key as loc_cell_key, l.label as loc_label, l.lat as loc_lat,
                 l.lon as loc_lon, l.threshold as loc_threshold
-           from device_locations l ${ENTITLED_JOIN}
+           from ${deviceLocations} l ${entitledJoin}
           where ${ENTITLED_PREDICATE} and l.cell_key = $2`,
         [new Date(nowMs), cellKey],
       );
@@ -183,13 +217,13 @@ export function createPgStore(pool) {
     },
 
     async getCellState(cellKey) {
-      const { rows } = await pool.query(`select state from cell_states where cell_key = $1`, [cellKey]);
+      const { rows } = await pool.query(`select state from ${cellStates} where cell_key = $1`, [cellKey]);
       return rows[0]?.state ?? null;
     },
 
     async putCellState(cellKey, state) {
       await pool.query(
-        `insert into cell_states (cell_key, state) values ($1, $2)
+        `insert into ${cellStates} (cell_key, state) values ($1, $2)
          on conflict (cell_key) do update set state = excluded.state, updated_at = now()`,
         [cellKey, state],
       );
@@ -200,7 +234,7 @@ export function createPgStore(pool) {
     // best-effort check, so two workers racing the same cell cannot both send.
     async claimNotification({ deviceId, dedupeKey, cellKey, sentAtMs = Date.now() }) {
       const { rowCount } = await pool.query(
-        `insert into sent_notifications (device_id, dedupe_key, cell_key, sent_at)
+        `insert into ${sentNotifications} (device_id, dedupe_key, cell_key, sent_at)
          values ($1, $2, $3, $4) on conflict (device_id, dedupe_key) do nothing`,
         [deviceId, dedupeKey, cellKey, new Date(sentAtMs)],
       );
@@ -208,7 +242,7 @@ export function createPgStore(pool) {
     },
 
     async releaseNotification({ deviceId, dedupeKey }) {
-      await pool.query(`delete from sent_notifications where device_id = $1 and dedupe_key = $2`, [
+      await pool.query(`delete from ${sentNotifications} where device_id = $1 and dedupe_key = $2`, [
         deviceId,
         dedupeKey,
       ]);
@@ -217,7 +251,7 @@ export function createPgStore(pool) {
 
     async lastNotifiedAt(deviceId, cellKey) {
       const { rows } = await pool.query(
-        `select sent_at from sent_notifications where device_id = $1 and cell_key = $2
+        `select sent_at from ${sentNotifications} where device_id = $1 and cell_key = $2
           order by sent_at desc limit 1`,
         [deviceId, cellKey],
       );
@@ -225,29 +259,29 @@ export function createPgStore(pool) {
     },
 
     async pruneSent(beforeMs) {
-      const { rowCount } = await pool.query(`delete from sent_notifications where sent_at < $1`, [
+      const { rowCount } = await pool.query(`delete from ${sentNotifications} where sent_at < $1`, [
         new Date(beforeMs),
       ]);
       return rowCount;
     },
 
     async upsertEntitlement(appUserId, record) {
-      const { rows } = await pool.query(`select canonical_id from app_user_aliases where alias_id = $1`, [
+      const { rows } = await pool.query(`select canonical_id from ${aliases} where alias_id = $1`, [
         appUserId,
       ]);
       const id = rows[0]?.canonical_id ?? appUserId;
       await pool.query(
-        `insert into entitlements
+        `insert into ${entitlements} as target
            (app_user_id, active, revoked, will_renew, billing_issue, expires_at,
             product_id, period_type, store, environment, last_event_id, last_event_type)
          values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
          on conflict (app_user_id) do update set
            active = excluded.active, revoked = excluded.revoked, will_renew = excluded.will_renew,
            billing_issue = excluded.billing_issue, expires_at = excluded.expires_at,
-           product_id = coalesce(excluded.product_id, entitlements.product_id),
-           period_type = coalesce(excluded.period_type, entitlements.period_type),
-           store = coalesce(excluded.store, entitlements.store),
-           environment = coalesce(excluded.environment, entitlements.environment),
+           product_id = coalesce(excluded.product_id, target.product_id),
+           period_type = coalesce(excluded.period_type, target.period_type),
+           store = coalesce(excluded.store, target.store),
+           environment = coalesce(excluded.environment, target.environment),
            last_event_id = excluded.last_event_id, last_event_type = excluded.last_event_type,
            updated_at = now()`,
         [
@@ -270,8 +304,8 @@ export function createPgStore(pool) {
 
     async getEntitlement(appUserId) {
       const { rows } = await pool.query(
-        `select e.* from entitlements e
-           left join app_user_aliases a on a.alias_id = $1
+        `select e.* from ${entitlements} e
+           left join ${aliases} a on a.alias_id = $1
           where e.app_user_id = coalesce(a.canonical_id, $1)`,
         [appUserId],
       );
@@ -295,28 +329,28 @@ export function createPgStore(pool) {
     async aliasAppUser(aliasId, canonicalId) {
       if (!aliasId || !canonicalId || aliasId === canonicalId) return;
       await pool.query(
-        `insert into app_user_aliases (alias_id, canonical_id) values ($1, $2)
+        `insert into ${aliases} (alias_id, canonical_id) values ($1, $2)
          on conflict (alias_id) do update set canonical_id = excluded.canonical_id`,
         [aliasId, canonicalId],
       );
       // Move an entitlement that landed on the alias before the alias existed.
       await pool.query(
-        `insert into entitlements (app_user_id, active, revoked, will_renew, billing_issue, expires_at,
+        `insert into ${entitlements} (app_user_id, active, revoked, will_renew, billing_issue, expires_at,
                                    product_id, period_type, store, environment, last_event_id, last_event_type)
          select $2, active, revoked, will_renew, billing_issue, expires_at,
                 product_id, period_type, store, environment, last_event_id, last_event_type
-           from entitlements where app_user_id = $1
+           from ${entitlements} where app_user_id = $1
          on conflict (app_user_id) do nothing`,
         [aliasId, canonicalId],
       );
-      await pool.query(`delete from entitlements where app_user_id = $1`, [aliasId]);
+      await pool.query(`delete from ${entitlements} where app_user_id = $1`, [aliasId]);
     },
 
     async isDeviceEntitled(deviceId, nowMs = Date.now()) {
       const { rows } = await pool.query(
-        `select 1 from devices d
-           left join app_user_aliases a on a.alias_id = d.app_user_id
-           join entitlements e on e.app_user_id = coalesce(a.canonical_id, d.app_user_id)
+        `select 1 from ${devices} d
+           left join ${aliases} a on a.alias_id = d.app_user_id
+           join ${entitlements} e on e.app_user_id = coalesce(a.canonical_id, d.app_user_id)
           where d.id = $2 and not e.revoked
             and (case when e.expires_at is null then e.active else e.expires_at > $1 end)`,
         [new Date(nowMs), deviceId],
@@ -327,9 +361,9 @@ export function createPgStore(pool) {
     async stats(nowMs = Date.now()) {
       const { rows } = await pool.query(
         `select
-           (select count(*) from devices) as devices,
-           (select count(distinct l.cell_key) from device_locations l ${ENTITLED_JOIN} where ${ENTITLED_PREDICATE}) as cells,
-           (select count(*) from entitlements) as entitlements`,
+           (select count(*) from ${devices}) as devices,
+           (select count(distinct l.cell_key) from ${deviceLocations} l ${entitledJoin} where ${ENTITLED_PREDICATE}) as cells,
+           (select count(*) from ${entitlements}) as entitlements`,
         [new Date(nowMs)],
       );
       return {
@@ -337,6 +371,10 @@ export function createPgStore(pool) {
         cells: Number(rows[0].cells),
         entitlements: Number(rows[0].entitlements),
       };
+    },
+
+    async close() {
+      await pool.end?.();
     },
   };
 }
