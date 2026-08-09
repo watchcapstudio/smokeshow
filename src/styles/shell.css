@@ -412,13 +412,17 @@ body {
    column to run the full width of the screen. Taller on a bigger screen so the
    hills read as hills, not a stretched line; bounded by the shorter dimension
    so a short window doesn't lose its vertical space to them. */
+/* The hills grow to fill the space between the verdict and the day pills, so
+   they read as a landscape you're looking at — bigger on a bigger screen, and
+   the empty middle becomes hills. They break out to the full width of the
+   screen; the day pills sit at their base. */
 .window__horizon {
-  margin-top: auto;
-  flex-shrink: 0;
+  flex: 1 1 auto;
+  min-height: 120px;
+  max-height: 280px;
   width: 100vw;
   margin-left: 50%;
   transform: translateX(-50%);
-  height: clamp(100px, 13cqmin, 200px);
 }
 
 .app--stage .five-day-strip {
