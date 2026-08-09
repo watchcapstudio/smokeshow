@@ -283,7 +283,7 @@ body {
 .stage {
   position: relative;
   width: 100%;
-  max-width: min(96vw, 760px);
+  max-width: min(98vw, 1100px);
   height: 100dvh;
   margin: 0 auto;
   overflow: hidden;
@@ -341,11 +341,11 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: clamp(10px, 1.6cqw, 18px);
+  gap: clamp(10px, 1.5cqmin, 16px);
 }
 .verdict__place {
   margin: 0;
-  font-size: clamp(0.74rem, 1.9cqw, 1rem);
+  font-size: clamp(0.74rem, 1.9cqmin, 1rem);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   opacity: 0.7;
@@ -367,28 +367,29 @@ body {
 }
 .verdict__word {
   margin: 0;
-  /* Scales with the column, so it grows on a wider screen. */
-  font-size: clamp(2.6rem, 13cqw, 5.4rem);
-  line-height: 0.96;
+  /* Sized off the smaller of width/height (cqmin) so it grows big on a large or
+     tall screen but never overflows a short, wide one. */
+  font-size: clamp(2.6rem, 14cqmin, 6.8rem);
+  line-height: 0.95;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 .verdict__clear {
   margin: 0;
-  font-size: clamp(1.3rem, 3.6cqw, 2.2rem);
+  font-size: clamp(1.3rem, 4cqmin, 2.7rem);
   font-weight: 600;
   color: var(--accent, var(--ink));
 }
 .verdict__body {
   margin: 0;
-  font-size: clamp(1.05rem, 2.6cqw, 1.5rem);
+  font-size: clamp(1.05rem, 2.7cqmin, 1.7rem);
   line-height: 1.4;
-  max-width: 34ch;
+  max-width: 36ch;
   opacity: 0.92;
 }
 .verdict__meta {
   margin: 4px 0 0;
-  font-size: clamp(0.8rem, 1.9cqw, 1.1rem);
+  font-size: clamp(0.8rem, 1.9cqmin, 1.1rem);
   letter-spacing: 0.03em;
   opacity: 0.6;
   font-variant-numeric: tabular-nums;
@@ -398,18 +399,20 @@ body {
   background: transparent;
   color: var(--ink);
   font: inherit;
-  font-size: 0.95rem;
+  font-size: clamp(0.95rem, 2cqmin, 1.25rem);
   font-weight: 600;
   padding: 6px 0;
   border-bottom: 1.5px solid currentColor;
   cursor: pointer;
 }
 
-/* The horizon sits low, above the day pills; it bleeds to both rails. */
+/* The horizon sits low, above the day pills; it bleeds to both rails and grows
+   taller on a bigger screen so the sunset has room — bounded by the shorter
+   dimension so it does not eat a short screen's vertical space. */
 .window__horizon {
   margin-top: auto;
-  height: 116px;
-  margin-inline: -20px;
+  height: clamp(110px, 15cqmin, 190px);
+  margin-inline: clamp(-40px, -3cqw, -20px);
 }
 
 .app--stage .five-day-strip {
