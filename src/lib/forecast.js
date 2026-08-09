@@ -136,6 +136,14 @@ function skyPayload(pm25, naiveTime, lat, lon) {
       yFrac: round(s.sun.yFrac, 3),
       dim: round(s.sun.dim, 3),
     },
+    moon: {
+      altitudeDeg: round(s.moon.altitudeDeg, 2),
+      azimuthDeg: round(s.moon.azimuthDeg, 2),
+      visible: s.moon.visible,
+      xFrac: round(s.moon.xFrac, 3),
+      yFrac: round(s.moon.yFrac, 3),
+      phaseFraction: round(s.moon.phaseFraction, 4),
+    },
   };
 }
 

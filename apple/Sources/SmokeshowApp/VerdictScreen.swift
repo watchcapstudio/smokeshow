@@ -159,13 +159,7 @@ struct VerdictScreen: View {
                 // the app shipped. What is new is behind it: the sun sets
                 // behind the near hill, and once it is down the moon rises at
                 // tonight's phase.
-                HorizonBand(
-                    sky: sky,
-                    pm25: shownHour?.pm25,
-                    date: validTime,
-                    latitude: model.place?.latitude,
-                    longitude: model.place?.longitude
-                )
+                HorizonBand(sky: sky, pm25: shownHour?.pm25)
                 .frame(height: 96)
                 .padding(.horizontal, -20)
 

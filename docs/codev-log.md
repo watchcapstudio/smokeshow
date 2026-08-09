@@ -22,6 +22,26 @@ user. Kelly's changes come in as PRs for Joe to accept or reject.
 
 ## Decisions
 
+### 2026-08-09 — the moon moved to the payload
+
+The moon was the last thing the client computed for itself. `SkyScene` ran a
+Schlyter lunar solution on the phone off `date`/`lat`/`lon`; the sun had already
+moved to the edge (`src/lib/sky.js` → `Sky.sun`), and the moon was flagged to
+follow (contract §4). It now does: `lunarPosition()` and `moonPhaseFraction()`
+are ported into `src/lib/sky.js`, `skyFor()` emits a `moon` block next to `sun`
+(altitude, azimuth, visible, xFrac, yFrac, phaseFraction), and `skyPayload()`
+carries it per hour. `Forecast.Sky.Moon` decodes it; `HorizonBand` lost its
+`date`/`latitude`/`longitude` inputs and reads `sky.moon`, so the on-device
+ephemeris is deleted. One source of truth, so a phone and a browser paint the
+identical moon — which is the point, with web parity next.
+
+Ported math is pinned in `sky.test.js` against known full/new moons (phase
+~0.5 / ~0), a half-synodic advance over 14.77 days, and the yFrac-from-altitude
+invariant the sun already uses. The `MoonShape` sliver stays in Swift — it draws
+the phase, it does not compute it.
+
+- Rollback: revert; nothing else reads `Sky.moon` yet.
+
 ### 2026-08-08 — the iOS app had never been run
 
 Joe built the SwiftUI app on 8/2–8/3. CI was green the whole time and the app
