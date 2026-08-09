@@ -9,15 +9,39 @@
 
 import SwiftUI
 import SmokeshowKit
+#if os(iOS)
+import CoreLocation
+#endif
 
 struct VerdictScreen: View {
     @EnvironmentObject private var model: AppModel
     @Binding var showsExplain: Bool
     @Binding var showsSettings: Bool
     @State private var showsPlaces = false
-    @State private var showsMap = false
-    /// Index into the curve, not into `hours`. Nil means "now".
+    @State private var showsMapInfo = false
+    /// Bumped to re-read the saved-places list after a chip is removed.
+    @State private var savedTick = 0
+
+    /// One shared scrub index (nil = now) drives the sky verdict AND the map.
+    /// That is the whole idea of the unified screen: the drag bar is the
+    /// constant, and the canvas above it — sky or map — swaps beneath the same
+    /// scrubbed moment.
     @State private var scrubbed: Int?
+    @State private var isPlaying = false
+
+    enum CanvasMode { case sky, map }
+    @State private var canvas: CanvasMode = .sky
+
+    #if os(iOS)
+    @State private var domains: [SmokeDomain] = []
+    @State private var frame: SmokeFramePayload?
+    @State private var mapStatus: MapStatus = .loading
+    private let mapTheme: SmokeDomain.Theme = .dark
+
+    enum MapStatus: Equatable {
+        case loading, painted(String), noCoverage, unavailable
+    }
+    #endif
 
     private var forecast: Forecast? { model.forecast }
     private var nowHour: Forecast.Hour? { forecast?.nowHour }
@@ -43,54 +67,116 @@ struct VerdictScreen: View {
     /// the thing that made the demo feel like a window rather than a chart.
     private var sky: Forecast.Sky? { shownHour?.sky }
 
-    var body: some View {
-        ZStack {
-            // The screen is a window. Sky behind, land in front, and the
-            // verdict sitting on the horizon between them — the demo rig's
-            // whole idea, and the reason the app is not a list of readings.
-            SkyBackdrop(sky: sky)
-                .ignoresSafeArea()
+    /// The 61-hour curve (−12h … +48h). One source for the scrubber; the map's
+    /// frame time is read off the same index.
+    private var points: [CurvePoint] {
+        guard let forecast else { return [] }
+        return TimelineBuilder.curve(around: forecast.now.index, in: forecast)
+    }
+    private var nowIndex: Int {
+        guard let forecast else { return 0 }
+        return min(forecast.now.index, TimelineBuilder.curveLookback)
+    }
+    private var currentIndex: Int {
+        let i = scrubbed ?? nowIndex
+        return points.indices.contains(i) ? i : nowIndex
+    }
+    private var validTime: Date {
+        let base = points.indices.contains(currentIndex)
+            ? points[currentIndex].t
+            : (forecast?.now.exactUTC ?? Date())
+        return Calendar(identifier: .gregorian)
+            .date(bySetting: .minute, value: 0, of: base) ?? base
+    }
 
-            VStack {
-                Spacer(minLength: 0)
-                RidgeView(pm25: shownHour?.pm25, strength: 0.55)
-                    .frame(height: 260)
+    /// Foreground ink follows the canvas: the sky decides on the window, the
+    /// dark map is always light-inked.
+    private var canvasInk: Color {
+        #if os(iOS)
+        if canvas == .map { return Palette.dark.text }
+        #endif
+        return sky?.ink ?? Palette.dark.text
+    }
+
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            canvasLayer
+
+            // One scrubber, pinned to the bottom, identical on both canvases.
+            if forecast != nil {
+                scrubberBar
+                    .padding(16)
             }
-            .ignoresSafeArea()
+        }
+        .foregroundStyle(canvasInk)
+        .task(id: isPlaying) { await run() }
+        .task(id: mapReloadKey) {
+            #if os(iOS)
+            guard canvas == .map else { return }
+            if domains.isEmpty { await loadDomains() }
+            await loadFrame()
+            #endif
+        }
+        .sheet(isPresented: $showsPlaces) {
+            PlacePickerView()
+                .environmentObject(model)
+        }
+    }
+
+    @ViewBuilder private var canvasLayer: some View {
+        #if os(iOS)
+        switch canvas {
+        case .sky: windowCanvas
+        case .map: mapCanvas
+        }
+        #else
+        windowCanvas
+        #endif
+    }
+
+    // MARK: - Sky canvas (the window)
+
+    /// Sky, verdict, ridge, days — the demo's window. The curve moved into the
+    /// bottom scrubber, so the ridge and the days move up into the space it
+    /// left, and the ridge sits on the horizon above the days rather than
+    /// bleeding through them.
+    private var windowCanvas: some View {
+        ZStack {
+            // Sky and stars, full-bleed. The sun moved into the ridge band
+            // below so it can set *behind* the hill, so the backdrop no longer
+            // paints its own disc.
+            SkyBackdrop(sky: sky, showsSun: false)
+                .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 0) {
                 header
 
-                // Everything above the word is empty sky. That space is the
-                // product doing its job: on a clear day you see a lot of it.
                 Spacer(minLength: 12)
-
                 verdictBlock
+                Spacer(minLength: 16)
 
-                Spacer(minLength: 12)
+                // The ridge, in its settled place above the days — same layout
+                // the app shipped. What is new is behind it: the sun sets
+                // behind the near hill, and once it is down the moon rises at
+                // tonight's phase.
+                HorizonBand(
+                    sky: sky,
+                    pm25: shownHour?.pm25,
+                    date: validTime,
+                    latitude: model.place?.latitude,
+                    longitude: model.place?.longitude
+                )
+                .frame(height: 96)
+                .padding(.horizontal, -20)
+
+                Spacer(minLength: 14)
 
                 if let forecast {
-                    TimelineBlock(
-                        forecast: forecast,
-                        unit: model.preferences.unit,
-                        scrubbed: $scrubbed,
-                        ink: sky?.ink ?? Palette.dark.text
-                    )
-                    // Clear of the curve. Sitting tight under it, the pills
-                    // read as part of the chart rather than a row of controls.
-                    .padding(.bottom, 26)
-
-                    // The days stand on their own at the bottom, off the
-                    // curve. Tapping one sends the scrubber there, which is
-                    // how the demo let a day pill drive the whole screen.
                     FiveDayBlock(
                         forecast: forecast,
                         selection: $scrubbed,
                         ink: sky?.ink ?? Palette.dark.text
                     )
-
-                    locationRow
-                        .padding(.top, 16)
                 }
 
                 if let error = model.loadError {
@@ -98,39 +184,353 @@ struct VerdictScreen: View {
                         .padding(.top, 12)
                 }
 
-                // Without a place there is no product, so the first screen
-                // has to carry the way out of that state itself — the
-                // eyebrow in the corner is too quiet to be the only one.
                 if model.place == nil {
-                    Button { showsPlaces = true } label: {
-                        Text("Choose a place")
-                            .font(Typography.md)
-                            .padding(.horizontal, 18)
-                            .padding(.vertical, 12)
-                            .frame(maxWidth: .infinity)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                    .fill(.white.opacity(0.14))
-                            )
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.top, 12)
+                    choosePlaceButton
                 }
             }
             .padding(20)
+            // Reserve the pinned scrubber's footprint so the days clear it.
+            .padding(.bottom, forecast == nil ? 20 : 224)
         }
-        .foregroundStyle(sky?.ink ?? Palette.dark.text)
-        .sheet(isPresented: $showsPlaces) {
-            PlacePickerView()
-                .environmentObject(model)
+    }
+
+    private var choosePlaceButton: some View {
+        Button { showsPlaces = true } label: {
+            Text("Choose a place")
+                .font(Typography.md)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(.white.opacity(0.14))
+                )
         }
+        .buttonStyle(.plain)
+        .padding(.top, 12)
+    }
+
+    // MARK: - The shared scrubber
+
+    private var scrubberBar: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                #if os(iOS)
+                canvasToggle
+                #endif
+                placeChips
+            }
+
+            HStack {
+                Text(whenLabel).font(Typography.md)
+                Spacer()
+                if scrubbed != nil {
+                    Button("Now") {
+                        isPlaying = false
+                        scrubbed = nil
+                    }
+                    .font(Typography.eyebrow)
+                    .buttonStyle(.plain)
+                    .opacity(0.7)
+                }
+            }
+
+            // The shape of the smoke is the track. The same CurveView the days
+            // and the map both read — one control, one state.
+            CurveView(
+                points: points,
+                nowIndex: nowIndex,
+                ink: canvasInk,
+                selection: $scrubbed
+            )
+            .frame(height: 84)
+
+            HStack {
+                Text("−12h").font(Typography.eyebrow).opacity(0.5)
+                Spacer()
+                Button { togglePlay() } label: {
+                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                        .font(.system(size: 15, weight: .semibold))
+                        .frame(width: 40, height: 40)
+                        .background(Circle().fill(Palette.dark.accent.opacity(0.22)))
+                }
+                .buttonStyle(.plain)
+                Spacer()
+                Text("+48h").font(Typography.eyebrow).opacity(0.5)
+            }
+        }
+        .padding(16)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+    }
+
+    // MARK: - Saved-place chips
+
+    /// The saved list, with the current place folded in if it was reached by
+    /// search and never saved, so the row always shows where you are.
+    private var savedPlaces: [Place] {
+        _ = savedTick
+        var list = PlaceStore.shared.places
+        if let current = model.place, !list.contains(where: { $0.id == current.id }) {
+            list.insert(current, at: 0)
+        }
+        return list
+    }
+
+    /// A scrollable row of places to the right of the Sky/Map toggle: tap to
+    /// switch, the × to drop one, the ＋ to add another. Replaces the single
+    /// place button, which could only ever show one and hid the rest in a sheet.
+    private var placeChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                ForEach(savedPlaces) { place in
+                    placeChip(place)
+                }
+                Button { showsPlaces = true } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 11, weight: .semibold))
+                        .padding(.horizontal, 11)
+                        .padding(.vertical, 7)
+                        .background(Capsule().fill(canvasInk.opacity(0.10)))
+                        .contentShape(Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func placeChip(_ place: Place) -> some View {
+        let isCurrent = place.id == model.place?.id
+        return HStack(spacing: 5) {
+            if place.isCurrentLocation {
+                Image(systemName: "location.fill").font(.system(size: 8))
+            }
+            Text(place.shortName.uppercased()).font(Typography.eyebrow)
+            Button { removePlace(place) } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 8, weight: .bold))
+                    .opacity(0.6)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(Capsule().fill(canvasInk.opacity(isCurrent ? 0.22 : 0.10)))
+        .overlay(Capsule().strokeBorder(canvasInk.opacity(isCurrent ? 0.4 : 0), lineWidth: 1))
+        .contentShape(Capsule())
+        .onTapGesture { Task { await model.select(place) } }
+    }
+
+    private func removePlace(_ place: Place) {
+        let wasCurrent = place.id == model.place?.id
+        PlaceStore.shared.remove(place)
+        savedTick += 1
+        // Removing the place you're looking at needs a new one to show, or the
+        // screen has nothing to describe.
+        if wasCurrent, let next = PlaceStore.shared.places.first {
+            Task { await model.select(next) }
+        }
+    }
+
+    private var whenLabel: String {
+        guard scrubbed != nil, points.indices.contains(currentIndex) else { return "Now" }
+        return readout(for: points[currentIndex])
+    }
+
+    private func readout(for point: CurvePoint) -> String {
+        let formatter = DateFormatter()
+        formatter.timeZone = forecast?.location.timeZone ?? .current
+        formatter.dateFormat = "EEE h a"
+        let stamp = formatter.string(from: point.t)
+        guard let value = point.value else { return "\(stamp) · \(Copy.noData)" }
+        switch model.preferences.unit {
+        case .microgramsPerCubicMetre:
+            return "\(stamp) · \(Int(value.rounded())) µg/m³"
+        case .aqi:
+            let hour = forecast?.hours.first { $0.t == point.t }
+            guard let aqi = hour?.aqi else { return "\(stamp) · \(Copy.noData)" }
+            return "\(stamp) · AQI \(aqi) (approx)"
+        }
+    }
+
+    private func togglePlay() {
+        if !isPlaying {
+            let count = points.count
+            let current = scrubbed ?? nowIndex
+            if count > 1, current >= count - 1 { scrubbed = 0 }
+        }
+        isPlaying.toggle()
+    }
+
+    /// The step interval, in seconds. The per-step animation is *linear* and
+    /// exactly this long, so consecutive steps abut with no ease pulse — the
+    /// dot and the sky glide at constant speed instead of jerking each hour.
+    private static let playStep: Double = 0.34
+
+    private func run() async {
+        guard isPlaying, points.count > 1 else { return }
+        while !Task.isCancelled && isPlaying {
+            try? await Task.sleep(for: .seconds(Self.playStep))
+            guard !Task.isCancelled, isPlaying else { return }
+            let count = points.count
+            let current = scrubbed ?? nowIndex
+            let next = current >= count - 1 ? 0 : current + 1
+            // Glide each step at constant speed — except the loop's rewind to 0,
+            // which would sweep the whole day backwards.
+            if next == 0 {
+                scrubbed = 0
+            } else {
+                withAnimation(.linear(duration: Self.playStep)) { scrubbed = next }
+            }
+        }
+    }
+
+    private var mapReloadKey: String {
         #if os(iOS)
-        .fullScreenCover(isPresented: $showsMap) {
-            SmokeMapView()
-                .environmentObject(model)
-        }
+        return "\(canvas == .map)|\(SmokeFrames.timeKey(for: validTime))|\(model.place?.id.uuidString ?? "-")|\(domains.count)"
+        #else
+        return ""
         #endif
     }
+
+    #if os(iOS)
+    // MARK: - Map canvas
+
+    private var mapCanvas: some View {
+        ZStack(alignment: .top) {
+            MapLibreCanvas(
+                center: model.place.map {
+                    CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)
+                },
+                frame: frame,
+                onLongPress: { coordinate in Task { await move(to: coordinate) } }
+            )
+            .ignoresSafeArea()
+
+            // Never lose the answer while looking at the smoke: a compact
+            // verdict on the left, the model named on the right. The required
+            // map credit tucks into the leading "i", out of the way.
+            HStack(alignment: .top, spacing: 8) {
+                Button { showsMapInfo = true } label: {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 15, weight: .medium))
+                        .opacity(0.5)
+                        .padding(.vertical, 7)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
+                if let name = forecast?.nowScaleEntry?.name {
+                    Text(name.uppercased())
+                        .font(Typography.eyebrow)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Capsule().fill(.ultraThinMaterial))
+                }
+                Spacer()
+                Text(mapStatusLine)
+                    .font(Typography.eyebrow)
+                    .multilineTextAlignment(.trailing)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Capsule().fill(.ultraThinMaterial))
+            }
+            .padding(.horizontal, 16)
+        }
+        .alert("Map data", isPresented: $showsMapInfo) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("© OpenStreetMap contributors · © CARTO")
+        }
+    }
+
+    private var canvasToggle: some View {
+        HStack(spacing: 2) {
+            toggleButton("Sky", on: canvas == .sky) { setCanvas(.sky) }
+            toggleButton("Map", on: canvas == .map) { setCanvas(.map) }
+        }
+        .padding(3)
+        .background(Capsule().fill(canvasInk.opacity(0.12)))
+    }
+
+    private func toggleButton(_ title: String, on: Bool, _ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title.uppercased())
+                .font(Typography.eyebrow)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Capsule().fill(on ? canvasInk.opacity(0.16) : Color.clear))
+                .opacity(on ? 1 : 0.55)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func setCanvas(_ next: CanvasMode) {
+        isPlaying = false
+        withAnimation(.easeInOut(duration: 0.28)) { canvas = next }
+    }
+
+    private var mapStatusLine: String {
+        switch mapStatus {
+        case .loading: return "LOADING"
+        case .painted(let model): return model.uppercased()
+        case .noCoverage: return "NO SMOKE COVERAGE HERE"
+        case .unavailable: return "COVERAGE UNAVAILABLE"
+        }
+    }
+
+    private func loadDomains() async {
+        do {
+            domains = try await SmokeFrames.fetchDomains()
+            if domains.isEmpty { mapStatus = .unavailable }
+        } catch {
+            mapStatus = .unavailable
+        }
+    }
+
+    private func loadFrame() async {
+        guard !domains.isEmpty, let place = model.place else { return }
+        let coordinate = CLLocationCoordinate2D(latitude: place.latitude, longitude: place.longitude)
+        guard let match = SmokeFrames.domain(
+            for: coordinate,
+            at: validTime,
+            in: domains,
+            theme: mapTheme
+        ) else {
+            frame = nil
+            mapStatus = .noCoverage
+            return
+        }
+        do {
+            let image = try await SmokeFrameImage.load(match.frame)
+            guard !Task.isCancelled else { return }
+            frame = SmokeFramePayload(image: image, bounds: match.domain.bounds)
+            mapStatus = .painted(match.domain.model)
+        } catch {
+            guard !Task.isCancelled, !(error is CancellationError) else { return }
+            if (error as NSError).code == NSURLErrorCancelled { return }
+            mapStatus = .unavailable
+        }
+    }
+
+    private func move(to coordinate: CLLocationCoordinate2D) async {
+        let name = await Self.name(for: coordinate) ?? "Dropped pin"
+        await model.select(
+            Place(name: name, latitude: coordinate.latitude, longitude: coordinate.longitude)
+        )
+    }
+
+    private static func name(for coordinate: CLLocationCoordinate2D) async -> String? {
+        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        let placemarks = try? await CLGeocoder().reverseGeocodeLocation(location)
+        guard let placemark = placemarks?.first else { return nil }
+        return placemark.locality
+            ?? placemark.subAdministrativeArea
+            ?? placemark.administrativeArea
+            ?? placemark.country
+    }
+    #endif
 
     private var header: some View {
         HStack {
@@ -147,66 +547,6 @@ struct VerdictScreen: View {
                 Image(systemName: "slider.horizontal.3")
                     .font(.system(size: 15, weight: .semibold))
                     .opacity(0.6)
-            }
-            .buttonStyle(.plain)
-        }
-    }
-
-    /// The place sits at the foot of the screen, under the days, because it is
-    /// the answer to "where" and everything above it is the answer to "how
-    /// bad". It is also the door to the map, exactly as the location name was
-    /// in the demo — so it is a bar you can hit, not an eyebrow you can miss.
-    ///
-    /// A long-press changes the place; the tap goes to the map. The map is the
-    /// thing people come back for, so it gets the primary gesture.
-    private var locationRow: some View {
-        HStack(spacing: 10) {
-            Button {
-                #if os(iOS)
-                showsMap = true
-                #else
-                // No map on macOS yet; the place picker is the whole of what
-                // this bar does there.
-                showsPlaces = true
-                #endif
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "map")
-                        .font(.system(size: 13, weight: .medium))
-                    Text((model.place?.shortName ?? "Choose a place").uppercased())
-                        .font(Typography.eyebrow)
-                    Spacer(minLength: 4)
-                    #if os(iOS)
-                    Text("SEE THE SMOKE")
-                        .font(Typography.eyebrow)
-                        .opacity(0.6)
-                    #endif
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 9, weight: .semibold))
-                        .opacity(0.6)
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 13)
-                .frame(maxWidth: .infinity)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill((sky?.ink ?? Palette.dark.text).opacity(0.09))
-                )
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .disabled(model.place == nil)
-            .simultaneousGesture(LongPressGesture().onEnded { _ in showsPlaces = true })
-
-            Button { showsPlaces = true } label: {
-                Image(systemName: "chevron.up.chevron.down")
-                    .font(.system(size: 12, weight: .semibold))
-                    .opacity(0.55)
-                    .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill((sky?.ink ?? Palette.dark.text).opacity(0.09))
-                    )
             }
             .buttonStyle(.plain)
         }

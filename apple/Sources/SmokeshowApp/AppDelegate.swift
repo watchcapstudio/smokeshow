@@ -6,16 +6,18 @@
 // timelines rather than the widgets discovering it on their own schedule.
 
 import SmokeshowKit
+import UserNotifications
 
 #if os(iOS)
 import UIKit
 
-final class AppDelegate: NSObject, UIApplicationDelegate {
+final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions options: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
         // Registration is cheap and silent; the *permission* prompt is not
         // shown here — it waits until the user asks for alerts.
         application.registerForRemoteNotifications()
@@ -42,6 +44,30 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     ) async -> UIBackgroundFetchResult {
         await MainActor.run { PushCoordinator.shared.handleVerdictChangePush() }
         return .newData
+    }
+
+    // iOS suppresses banners while the app is open unless its delegate opts
+    // in. A threshold crossing should not disappear just because someone is
+    // looking at the map when it arrives.
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification
+    ) async -> UNNotificationPresentationOptions {
+        PushCoordinator.shared.handleVerdictChangePush()
+        return [.banner, .list, .sound]
+    }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse
+    ) async {
+        PushCoordinator.shared.handleVerdictChangePush()
+        let payload = response.notification.request.content.userInfo["smokeshow"] as? [String: Any]
+        let label = payload?["label"] as? String
+        NotificationCenter.default.post(
+            name: .smokeshowDeepLink,
+            object: DeepLink.Destination.verdict(place: label)
+        )
     }
 }
 

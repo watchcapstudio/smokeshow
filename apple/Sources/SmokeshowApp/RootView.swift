@@ -58,7 +58,11 @@ struct RootView: View {
             case .paywall: showsPaywall = true
             case .widgetSetup: showsWidgetOnboarding = true
             case .settings: showsSettings = true
-            case .verdict: break
+            case .verdict(let placeName):
+                guard let placeName,
+                      let place = PlaceStore.shared.places.first(where: { $0.shortName == placeName })
+                else { return }
+                Task { await model.select(place) }
             }
         }
     }

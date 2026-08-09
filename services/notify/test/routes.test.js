@@ -10,7 +10,7 @@ function api() {
   const store = createMemoryStore({ now: () => NOW });
   const handle = createRouter({
     store,
-    config: { revenuecat: { webhookSecret: WEBHOOK_SECRET, entitlementId: 'pro' } },
+    config: { revenuecat: { webhookSecret: WEBHOOK_SECRET, entitlementId: 'smokeshow_pro' } },
     now: () => NOW,
   });
   return { store, handle };
@@ -23,6 +23,7 @@ const registration = {
   locations: [{ label: 'Home', lat: 39.7392, lon: -104.9903 }],
   threshold: 2,
   quietHours: { enabled: true, startHour: 22, endHour: 7 },
+  notificationTypes: { inbound: true, peak: false, clear: true },
   sensitiveHousehold: true,
 };
 
@@ -35,6 +36,7 @@ describe('device registration', () => {
     expect(res.body.deviceId).toMatch(/^dev_/);
     expect(res.body.deviceSecret).toBeTruthy();
     expect(res.body.locations[0].cellKey).toBe(cellKeyFor(39.7392, -104.9903));
+    expect(res.body.notificationTypes).toEqual({ inbound: true, peak: false, clear: true });
     expect(res.body.policy).toBe('Threshold alerts only. No digests, no streaks, no engagement pings.');
 
     // Nothing identifying is stored, and the secret is only ever a hash.
@@ -136,7 +138,7 @@ describe('the RevenueCat webhook', () => {
       method: 'POST',
       path: '/v1/webhooks/revenuecat',
       headers: { authorization: 'wrong' },
-      body: { event: { type: 'INITIAL_PURCHASE', app_user_id: 'dev_x', entitlement_ids: ['pro'] } },
+      body: { event: { type: 'INITIAL_PURCHASE', app_user_id: 'dev_x', entitlement_ids: ['smokeshow_pro'] } },
     });
 
     expect(res.status).toBe(401);
@@ -155,7 +157,7 @@ describe('the RevenueCat webhook', () => {
         event: {
           type: 'INITIAL_PURCHASE',
           app_user_id: device.body.appUserId,
-          entitlement_ids: ['pro'],
+          entitlement_ids: ['smokeshow_pro'],
           expiration_at_ms: NOW + 14 * 24 * 3600_000,
           period_type: 'TRIAL',
         },
@@ -182,7 +184,9 @@ describe('the RevenueCat webhook', () => {
 describe('routing', () => {
   it('answers health checks and refuses everything else', async () => {
     const { handle } = api();
-    expect((await handle({ method: 'GET', path: '/healthz' })).status).toBe(200);
+    const health = await handle({ method: 'GET', path: '/healthz' });
+    expect(health.status).toBe(200);
+    expect(health.body).toEqual({ ok: true, store: 'memory' });
     expect((await handle({ method: 'GET', path: '/v1/nope' })).status).toBe(404);
     expect((await handle({ method: 'GET', path: '/v1/devices' })).status).toBe(404);
   });

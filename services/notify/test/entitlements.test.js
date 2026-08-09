@@ -12,12 +12,12 @@ const hook = (type, fields = {}) => ({
     id: `evt_${type}`,
     type,
     app_user_id: 'dev_abc',
-    entitlement_ids: ['pro'],
+    entitlement_ids: ['smokeshow_pro'],
     ...fields,
   },
 });
 
-const apply = (store, body) => applyWebhookEvent(store, body, { entitlementId: 'pro', nowMs: NOW });
+const apply = (store, body) => applyWebhookEvent(store, body, { entitlementId: 'smokeshow_pro', nowMs: NOW });
 
 describe('webhook authorization', () => {
   it('accepts the configured credential', () => {
@@ -134,5 +134,13 @@ describe('the gate, end to end', () => {
     // An hour later the subscription has lapsed and nobody renewed it. No
     // webhook is needed for the gate to close — the timestamp does it.
     expect(await store.listOccupiedCells(NOW + 2 * HOUR_MS)).toEqual([]);
+  });
+
+  it('can be explicitly disabled before RevenueCat is connected', async () => {
+    const store = createMemoryStore({ now: () => NOW, requireEntitlement: false });
+    await seedDevice(store, { id: 'dev_abc', entitled: false, nowMs: NOW });
+
+    expect(await store.listOccupiedCells(NOW)).toHaveLength(1);
+    expect(await store.isDeviceEntitled('dev_abc', NOW)).toBe(true);
   });
 });

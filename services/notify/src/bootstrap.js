@@ -13,15 +13,24 @@ import { createForecastClient } from './forecastClient.js';
 export async function openStore(config, logger) {
   if (!config.databaseUrl) {
     logger?.warn?.('NOTIFY_DATABASE_URL unset — using the in-memory store (state is lost on restart)');
-    return createMemoryStore();
+    return createMemoryStore({ requireEntitlement: config.requireEntitlement });
   }
-  // `pg` is an optional peer: the tests and local runs never need it, so it is
-  // not a hard dependency of the repo.
   const { default: pg } = await import('pg').catch(() => {
     throw new Error('NOTIFY_DATABASE_URL is set but the `pg` package is not installed');
   });
-  const pool = new pg.Pool({ connectionString: config.databaseUrl });
-  return createPgStore(pool);
+  if (!/^[a-z_][a-z0-9_]*$/.test(config.databaseSchema)) {
+    throw new Error('NOTIFY_DATABASE_SCHEMA must be a valid unquoted Postgres identifier');
+  }
+  const pool = new pg.Pool({
+    connectionString: config.databaseUrl,
+    max: config.databasePoolMax,
+    connectionTimeoutMillis: 10_000,
+    idleTimeoutMillis: 30_000,
+  });
+  return createPgStore(pool, {
+    schema: config.databaseSchema,
+    requireEntitlement: config.requireEntitlement,
+  });
 }
 
 export function createSenders(config) {

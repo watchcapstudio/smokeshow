@@ -9,7 +9,9 @@
 		<string>group.earth.smokeshow</string>
 	</array>
 	<key>aps-environment</key>
-	<string>development</string>
+	<string>$(APS_ENVIRONMENT)</string>
+	<key>com.apple.developer.usernotifications.time-sensitive</key>
+	<true/>
 	<!-- macOS sandbox: outbound network only. No file access, no camera, no
 	     anything else — the app has nothing else to do. -->
 	<key>com.apple.security.app-sandbox</key>
