@@ -3,9 +3,10 @@
 // A DOMAIN is one rectangular pre-rendered field: a model, an extent, a pixel
 // size, and hourly PNG frames keyed by absolute valid time. Today there are
 // two — NOAA HRRR-Smoke at 3 km over CONUS, and Copernicus CAMS at 40 km over
-// most of the populated world. The map paints the sharpest domain that
-// contains the view centre and has a frame for the hour; where none does, the
-// caller falls back to the 81-point CAMS grid.
+// most of the populated world. The map paints the sharpest domain that FILLS
+// the viewport (see pickForView) — never two at once, never one running out
+// mid-screen. Where no domain has the hour, the caller falls back to the
+// 81-point CAMS grid and the badge says so.
 //
 // Frames are absolute-valid-time keyed, so a stale run simply stops matching
 // recent hours and the map falls back on its own — no freshness gate.
@@ -105,22 +106,67 @@ export function pickDomains(frames, timeUTC, lat, lon) {
   return out;
 }
 
-// The sharpest domain that covers (lat, lon) AND has a frame for this hour.
-// Returns { domain, url } or null — null is the caller's cue to draw the
-// coarse point grid and say so.
-export function pickDomain(frames, timeUTC, lat, lon) {
-  return pickDomains(frames, timeUTC, lat, lon)[0] ?? null;
-}
-
-// Does `domain` contain the whole viewport? When it does not, the map is
-// showing the edge of a regional field and something has to fill the rest —
-// otherwise Missoula looks north at the Canadian fires and sees black.
+// Does `domain` contain the WHOLE viewport? `view` is {south,north,west,east}.
 export function domainCoversView(domain, view) {
   if (!domain || !view) return false;
   const b = domain.bounds;
   if (view.south < b.latS || view.north > b.latN) return false;
   if (domain.wraps) return true;
+  if (view.west > view.east) return false; // panned across the antimeridian
   return view.west >= b.lonW && view.east <= b.lonE;
+}
+
+// Every domain that could serve this viewport: covers it entirely, and has a
+// frame for the hour. Sharpest first. More than one entry means the reader has
+// a real choice and the map can offer it; one entry means there is nothing to
+// switch to and no control should appear.
+export function candidatesForView(frames, timeUTC, view) {
+  if (!view) return [];
+  const lat = (view.south + view.north) / 2;
+  const lon = (view.west + view.east) / 2;
+  return pickDomains(frames, timeUTC, lat, lon).filter((p) => domainCoversView(p.domain, view));
+}
+
+// What the map should paint: the reader's choice if it can still serve this
+// viewport, otherwise the sharpest domain that FILLS the viewport, otherwise
+// the widest one available.
+//
+// The automatic rule is not "the sharpest domain containing the centre" — that
+// draws the sharp domain's rectangular edge across the map whenever you can
+// see past it, and a straight line through Montana reads as geography, not as
+// a model boundary. Nothing fills the gap either, because the domains measure
+// different things (see docs/global-frames.md). So the map never shows two at
+// once and never shows one running out.
+//
+// `preferredId` is honoured only while that domain still covers the whole
+// viewport, which is what keeps a pin from resurrecting the edge: zoom out
+// past HRRR and you get the global field whatever you picked, zoom back in and
+// your choice returns. The pin is remembered, not enforced.
+export function pickForView(frames, timeUTC, view, preferredId = null) {
+  const covering = candidatesForView(frames, timeUTC, view);
+  if (preferredId) {
+    const pinned = covering.find((p) => p.domain.id === preferredId);
+    if (pinned) return pinned;
+  }
+  if (covering.length) return covering[0];
+  const lat = view ? (view.south + view.north) / 2 : NaN;
+  const lon = view ? (view.west + view.east) / 2 : NaN;
+  const all = pickDomains(frames, timeUTC, lat, lon);
+  return all[all.length - 1] ?? null;
+}
+
+// What a domain measures, for the switch label. HRRR-Smoke reports smoke;
+// CAMS reports total PM2.5 including dust, sea salt and traffic. Falls back to
+// the label for a domain published before the field existed.
+export function domainMeasures(domain) {
+  return domain?.measures ?? null;
+}
+
+// The sharpest domain that covers (lat, lon) AND has a frame for this hour.
+// Returns { domain, url } or null — null is the caller's cue to draw the
+// coarse point grid and say so.
+export function pickDomain(frames, timeUTC, lat, lon) {
+  return pickDomains(frames, timeUTC, lat, lon)[0] ?? null;
 }
 
 // A second hour from the SAME domain, for the crossfade. Swapping domains

@@ -8,20 +8,23 @@
 //
 // Same rig shape as verify-map.mjs, and the same bargain about what is real:
 //
-//   TILES ARE SYNTHETIC — flat rgb(20,23,26) land plus vector furniture, so
-//   the composite arithmetic is real while the cartography is not.
+//   TILES ARE SYNTHETIC — Positron's tones, taken from SMOKE_BASEMAP_BACKDROPS
+//   so they track the real basemap, plus vector furniture. The composite
+//   arithmetic is real; the cartography is not.
 //
-//   HRRR FRAMES ARE REAL — pulled out of the `data` branch (origin/data) as
-//   published. That is genuine 3 km NOAA smoke.
+//   THE FRAMES ARE REAL — every domain the `data` branch publishes is mirrored
+//   verbatim out of origin/data, so the smoke is genuine NOAA and Copernicus
+//   output at its published resolution and its published byte size.
 //
-//   CAMS FRAMES ARE SYNTHETIC — rendered by scripts/cams/render_frames.py
-//   --source synthetic, because ADS credentials live in a GitHub Actions
-//   secret and never touch a workstation. The pipeline, the palette, the
-//   resolution, the manifest and the byte sizes are exactly what ships; the
-//   meteorology is invented. See scripts/cams/synthetic_field.py.
+//   The one exception: if the branch has not published a `cams` domain yet,
+//   the rig falls back to scripts/cams/render_frames.py --source synthetic and
+//   says so on stdout. That path existed because ADS credentials live in an
+//   Actions secret and never touch a workstation; it is now a fallback, not
+//   the normal case. When it runs, the meteorology is invented and only the
+//   pipeline, palette, resolution and manifest are real.
 //
-// Judge coverage, domain selection, the badge and the byte budget here. Judge
-// the plumes themselves against the live site once the ADS job has run.
+// Judge coverage, domain selection, the badge, the seam and the byte budget
+// here. Judge the cartography against the live site.
 //
 // Run:  npx vite --port 5173 &  node scripts/verify-domains.mjs
 import puppeteer from 'puppeteer-core';
@@ -29,6 +32,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ugm3ToAqi } from '../src/lib/aqi.js';
+import { SMOKE_BASEMAP_BACKDROPS } from '../src/lib/rating.js';
 
 const CHROME =
   process.env.CHROME_PATH ||
@@ -45,10 +49,17 @@ const DATA = arg('data', join(OUT, 'data'));
 const ZOOMS = (arg('zooms', '9,4')).split(',').map(Number);
 
 // One city per coverage story, each captured at every zoom in ZOOMS.
+//
+// `expect` is per zoom, because that is the rule now: the map paints the
+// sharpest domain that FILLS the viewport. Missoula gets HRRR's 3 km field
+// zoomed in and the global field zoomed out, where its view runs past 50 N —
+// one consistent field either way, and never a domain edge drawn across the
+// map. Border, at 48.6 N, is the case that used to show the line at any zoom.
 const PLACES = [
-  { key: 'missoula', name: 'Missoula', lat: 46.87, lon: -113.99, expect: 'hrrr' },
-  { key: 'edmonton', name: 'Edmonton', lat: 53.55, lon: -113.49, expect: 'cams' },
-  { key: 'madrid', name: 'Madrid', lat: 40.42, lon: -3.7, expect: 'cams' },
+  { key: 'missoula', name: 'Missoula', lat: 46.87, lon: -113.99, expect: { 9: 'hrrr', 4: 'cams' } },
+  { key: 'border', name: 'Border MT/AB', lat: 48.6, lon: -110.0, expect: { 9: 'hrrr', 4: 'cams' } },
+  { key: 'edmonton', name: 'Edmonton', lat: 53.55, lon: -113.49, expect: { 9: 'cams', 4: 'cams' } },
+  { key: 'madrid', name: 'Madrid', lat: 40.42, lon: -3.7, expect: { 9: 'cams', 4: 'cams' } },
 ];
 
 const PM = 45; // "Smells like fire" — mid-scale, so the ramp is clearly painting
@@ -58,60 +69,47 @@ const PM = 45; // "Smells like fire" — mid-scale, so the ramp is clearly paint
 // Built once into `scratch/data`, shaped exactly like the `data` branch.
 
 function buildData() {
-  mkdirSync(join(DATA, 'hrrr'), { recursive: true });
   const git = (path) => execFileSync('git', ['show', `origin/data:${path}`], { maxBuffer: 1 << 28 });
 
-  // Published HRRR, verbatim. Its v1 manifest becomes a v2 domain block.
-  // The data branch moved to a root manifest.json (v2, domains[]) when CAMS
-  // joined HRRR. Fall back to the old per-domain path so a run against an
-  // un-republished branch still builds instead of crashing.
-  let v1;
-  try {
-    const root = JSON.parse(git('manifest.json').toString());
-    const hrrr = (root.domains || []).find((d) => d.id === 'hrrr');
-    if (!hrrr) throw new Error('no hrrr domain in root manifest.json');
-    v1 = { ...hrrr, frames: hrrr.frames ?? JSON.parse(git('hrrr/domain.json').toString()).frames };
-  } catch {
-    v1 = JSON.parse(git('hrrr/manifest.json').toString());
-  }
-  for (const f of v1.frames) writeFileSync(join(DATA, 'hrrr', f.file), git(`hrrr/${f.file}`));
-  try {
-    writeFileSync(join(DATA, 'hrrr', 'series.json'), git('hrrr/series.json'));
-  } catch {
-    /* the band is additive */
-  }
-  writeFileSync(
-    join(DATA, 'hrrr', 'domain.json'),
-    JSON.stringify({
-      id: 'hrrr',
-      label: 'NOAA HRRR-Smoke',
-      model: 'HRRR-Smoke near-surface (MASSDEN, 8m AGL)',
-      source: 'NOAA HRRR-Smoke',
-      resolutionKm: 3,
-      priority: 100,
-      bounds: v1.bounds,
-      width: v1.width,
-      height: v1.height,
-      wraps: false,
-      run: v1.run,
-      generated: v1.generated,
-      series: 'series.json',
-      frames: v1.frames,
-    }),
-  );
+  // Mirror EVERY domain the branch publishes, not a chosen two. What the
+  // client sees is the whole manifest, so a rig that copies only the domains
+  // it expects cannot catch an unexpected one — and one showed up (see the
+  // hrrr-dark note in docs/global-frames.md). Copying them all means the
+  // captures exercise the real priority ordering.
+  const root = JSON.parse(git('manifest.json').toString());
+  if (root.version !== 2) throw new Error(`data branch manifest is v${root.version}, expected 2`);
 
-  // Global domain, from the synthetic source. Pinned to the same cycle the
-  // published HRRR run covers so both domains span the same hours.
-  const run = v1.run.slice(0, 13).replace(':', '');
-  const r = spawnSync(
-    'python3',
-    ['scripts/cams/render_frames.py', '--source', 'synthetic', '--run', run],
-    { env: { ...process.env, OUT_DIR: DATA }, encoding: 'utf8' },
-  );
-  if (r.status !== 0) throw new Error(`cams render failed:\n${r.stderr}`);
+  for (const d of root.domains) {
+    mkdirSync(join(DATA, d.id), { recursive: true });
+    const block = JSON.parse(git(`${d.id}/domain.json`).toString());
+    writeFileSync(join(DATA, d.id, 'domain.json'), JSON.stringify(block));
+    for (const f of block.frames) writeFileSync(join(DATA, d.id, f.file), git(`${d.id}/${f.file}`));
+    if (block.series) {
+      try {
+        writeFileSync(join(DATA, d.id, block.series), git(`${d.id}/${block.series}`));
+      } catch {
+        /* the agreement band is additive */
+      }
+    }
+    console.log(`  mirrored ${d.id}: ${block.frames.length} frames`);
+  }
+
+  // Only synthesise the global domain if the branch has not published one.
+  // Before the ADS credentials landed this was the only way to exercise a
+  // second domain at all; now it is a fallback, and the header's warning
+  // about invented meteorology applies only when this branch runs.
+  if (!root.domains.some((d) => d.id === 'cams')) {
+    const hrrr = root.domains.find((d) => d.id === 'hrrr');
+    console.log('  no cams domain published — falling back to the synthetic field');
+    const r = spawnSync(
+      'python3',
+      ['scripts/cams/render_frames.py', '--source', 'synthetic', '--run', hrrr.run.slice(0, 13).replace(':', '')],
+      { env: { ...process.env, OUT_DIR: DATA }, encoding: 'utf8' },
+    );
+    if (r.status !== 0) throw new Error(`cams render failed:\n${r.stderr}`);
+  }
 
   spawnSync('python3', ['scripts/render/assemble_manifest.py', DATA], { stdio: 'inherit' });
-  return v1;
 }
 
 function domainBytes(id) {
@@ -130,34 +128,56 @@ mkdirSync(OUT, { recursive: true });
 if (!existsSync(join(DATA, 'manifest.json'))) buildData();
 const manifest = JSON.parse(readFileSync(join(DATA, 'manifest.json'), 'utf8'));
 
-// The stubbed forecast has to span the hours the frames cover, or the app's
-// clock lands on a time no domain has and everything falls back.
-const HOURS = 24 * 3 + 24;
+// The stubbed forecast spans the hours the FRAMES cover, not the hours around
+// wall-clock now. Anchoring to the clock only works on a day when the checked
+// -out `data` branch happens to carry today's run; once it is a few days old,
+// every domain misses every hour and this rig reports a clean sweep of
+// coarse-grid fallbacks that looks like a product regression and is really a
+// stale checkout. It fooled the author of the rig. findNowIndex() clamps to
+// the nearest time, so anchoring to the manifest puts the initial paint on a
+// covered hour whatever the date is.
+const FRAME_TIMES = [
+  ...new Set(manifest.domains.flatMap((d) => d.frames.map((f) => f.time))),
+].sort();
+if (!FRAME_TIMES.length) throw new Error('manifest has no frames — nothing to verify');
+
 function series() {
-  const start = new Date();
-  start.setUTCMinutes(0, 0, 0);
-  start.setUTCHours(start.getUTCHours() - 72);
+  const first = new Date(`${FRAME_TIMES[0]}Z`).getTime();
+  const last = new Date(`${FRAME_TIMES[FRAME_TIMES.length - 1]}Z`).getTime();
   const time = [];
-  for (let i = 0; i < HOURS; i++) {
-    time.push(new Date(start.getTime() + i * 3_600_000).toISOString().slice(0, 16));
+  for (let t = first; t <= last; t += 3_600_000) {
+    time.push(new Date(t).toISOString().slice(0, 16));
   }
   return { time, pm2_5: time.map(() => PM) };
 }
 
 // ------------------------------------------------------------- stubbed tiles
 
+// Tones come from SMOKE_BASEMAP_BACKDROPS, not from literals here, for the
+// same reason verify-map.mjs does it: this rig shipped with hard-coded dark
+// tiles and kept using them after the map moved to Positron, so it was reading
+// a darkening ramp against a near-black stub and judging chrome legibility
+// against a backdrop the product no longer has. Derived, it cannot drift again.
 const svg = (body) =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">${body}</svg>`;
-const DARK_NOLABELS = svg(
-  `<rect width="256" height="256" fill="#14171a"/>` +
-    `<path d="M0 176 C 60 150, 120 200, 256 168 L256 256 L0 256Z" fill="#0e1417"/>` +
-    `<g stroke="#242a2e" stroke-width="2" fill="none">` +
+const [LAND, WATER, DARKEST] = SMOKE_BASEMAP_BACKDROPS.map((b) => b.rgb);
+const rgbCss = (c) => `rgb(${c.join(',')})`;
+
+// CARTO light_nolabels (Positron): pale land, a water body, and a patch at the
+// darkest tone the ramp is audited against. Everything here is below the smoke.
+const BASE_NOLABELS = svg(
+  `<rect width="256" height="256" fill="${rgbCss(LAND)}"/>` +
+    `<path d="M0 176 C 60 150, 120 200, 256 168 L256 256 L0 256Z" fill="${rgbCss(WATER)}"/>` +
+    `<rect x="150" y="24" width="86" height="64" rx="4" fill="${rgbCss(DARKEST)}"/>` +
+    `<g stroke="#e2e0dc" stroke-width="3" fill="none">` +
     `<path d="M-10 60 L266 92"/><path d="M40 -10 L72 266"/><path d="M-10 210 L266 190"/>` +
     `</g>`,
 );
-const DARK_ONLY_LABELS = svg(
+// CARTO light_only_labels: dark place names with a pale halo, transparent
+// elsewhere. Drawn ABOVE the smoke, which is the point of the sandwich.
+const BASE_ONLY_LABELS = svg(
   `<g font-family="Helvetica,Arial" font-size="11" text-anchor="middle" ` +
-    `paint-order="stroke" stroke="#000" stroke-width="3" stroke-opacity="0.7" fill="#b9c0c4">` +
+    `paint-order="stroke" stroke="#fff" stroke-width="3" stroke-opacity="0.8" fill="#43484b">` +
     `<text x="64" y="48">RIVERTON</text><text x="180" y="120">ASHFIELD</text>` +
     `<text x="96" y="212">LAKE BEND</text></g>`,
 );
@@ -207,8 +227,8 @@ for (const place of PLACES) {
       });
     }
 
-    if (url.includes('dark_only_labels')) return tile(DARK_ONLY_LABELS);
-    if (url.includes('basemaps.cartocdn.com')) return tile(DARK_NOLABELS);
+    if (url.includes('only_labels')) return tile(BASE_ONLY_LABELS);
+    if (url.includes('basemaps.cartocdn.com')) return tile(BASE_NOLABELS);
     if (url.includes('air-quality')) {
       const n = (new URL(url).searchParams.get('latitude') || '').split(',').length;
       const one = { hourly: series() };
@@ -255,11 +275,27 @@ for (const place of PLACES) {
         badge: document.querySelector('.smoke-coverage')?.textContent ?? null,
         domain: document.querySelector('.smoke-coverage')?.dataset.domain || null,
         base: document.querySelector('.smoke-coverage')?.dataset.base || null,
+        canSwitch: !document.querySelector('.smoke-coverage')?.disabled,
         badgeTitle: document.querySelector('.smoke-coverage')?.title ?? null,
         attribution: document.querySelector('.leaflet-control-attribution')?.textContent?.trim(),
         marker: document.querySelector('.user-marker__label')?.textContent,
       };
     });
+
+    // Where a switch is offered, take it: the point of the control is that a
+    // reader can see the other field, so a capture run that never presses it
+    // proves nothing about it.
+    if (measured.canSwitch) {
+      await page.click('.smoke-coverage');
+      await new Promise((r) => setTimeout(r, 1200));
+      measured.switchedTo = await page.evaluate(
+        () => document.querySelector('.smoke-coverage')?.dataset.domain || null,
+      );
+      const after = await page.$('.smoke-map');
+      await after.screenshot({ path: `${OUT}/domain-${TAG}-z${zoom}-${place.key}-switched.png` });
+      await page.click('.smoke-coverage'); // back, so the next zoom starts clean
+      await new Promise((r) => setTimeout(r, 800));
+    }
 
     const el = await page.$('.smoke-map');
     await el.screenshot({ path: `${OUT}/domain-${TAG}-z${zoom}-${place.key}.png` });
@@ -297,16 +333,18 @@ for (const d of manifest.domains) {
 }
 
 console.log(
-  `\n${pad('place', 12)}${pad('zoom', 6)}${pad('domain', 9)}${pad('backfill', 10)}${pad('cover', 8)}badge`,
+  `\n${pad('place', 15)}${pad('zoom', 6)}${pad('domain', 9)}${pad('want', 8)}${pad('switch', 9)}${pad('cover', 8)}badge`,
 );
 console.log('-'.repeat(104));
 let mismatches = 0;
 for (const r of rows) {
-  const ok = r.domain === r.expect;
+  const want = r.expect[r.zoom] ?? r.expect[String(r.zoom)];
+  const ok = r.domain === want;
   if (!ok) mismatches++;
   console.log(
-    `${ok ? ' ' : '!'}${pad(r.name, 11)}${pad(r.zoom, 6)}${pad(r.domain ?? '—', 9)}` +
-      `${pad(r.base ?? '—', 10)}${pad(`${(r.cover * 100).toFixed(0)}%`, 8)}${r.badge ?? '(none)'}`,
+    `${ok ? ' ' : '!'}${pad(r.name, 14)}${pad(r.zoom, 6)}${pad(r.domain ?? '—', 9)}` +
+      `${pad(want ?? '—', 8)}${pad(r.switchedTo ? `→${r.switchedTo}` : '—', 9)}` +
+      `${pad(`${(r.cover * 100).toFixed(0)}%`, 8)}${r.badge ?? '(none)'}`,
   );
 }
 

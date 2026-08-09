@@ -84,6 +84,7 @@ def domain_block(
     wraps=False,
     series=None,
     theme=LIGHT,
+    measures=None,
 ):
     """One entry in the v2 manifest's `domains` array.
 
@@ -91,6 +92,12 @@ def domain_block(
     winning inside CONUS. `resolution_km` and `label` are not decoration: the
     map prints them, because a user is owed the model's resolution the same
     way they are owed "model estimate, never observed".
+
+    `measures` is owed for the same reason and is the more important of the
+    two. HRRR-Smoke reports SMOKE; CAMS reports TOTAL PM2.5 including dust,
+    sea salt and traffic. A reader offered a switch between them has to be
+    told that is what they are switching, or the two just look like one model
+    disagreeing with itself.
     """
     block = {
         "id": id,
@@ -112,6 +119,8 @@ def domain_block(
         "generated": generated,
         "frames": frames,
     }
+    if measures:
+        block["measures"] = measures
     if series:
         block["series"] = series
     return block

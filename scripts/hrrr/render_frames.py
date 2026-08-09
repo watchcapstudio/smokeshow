@@ -186,6 +186,7 @@ def main():
             generated=generated,
             series="series.json",
             theme=LIGHT,
+            measures="smoke",
         ),
     )
 
@@ -211,6 +212,7 @@ def main():
             run=run.strftime("%Y-%m-%dT%H:00"),
             generated=generated,
             theme=DARK,
+            measures="smoke",
         ),
     )
 

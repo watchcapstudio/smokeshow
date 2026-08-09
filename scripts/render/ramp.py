@@ -8,7 +8,10 @@ each carrying their own transcription.
 The default ramp DARKENS with concentration, because the basemap it sits on is
 CARTO Positron (light_nolabels) on the web and MapKit's light standard style in
 the app. The rule is in CLAUDE.md build order §4: the ramp always runs opposite
-the tiles, or the worst air converges with the basemap and disappears.
+the tiles, or the worst air converges with the basemap and disappears. That
+direction has flipped twice and each flip was the same mistake, so do not adjust
+these arrays to taste — change the JS copy in lockstep and let `npm run ramp`
+decide.
 
 A second, INVERTED ramp lives below it for dark basemaps. It is not a copy of
 the light one — it is the same field rendered for the opposite backdrop, and it

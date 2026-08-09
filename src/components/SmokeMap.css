@@ -84,15 +84,21 @@
 /* Coverage badge — which field is on screen and how sharp it is.
  *
  * Same chrome tokens as the attribution and the marker label, so it clears
- * both backdrops the map has to survive: bare tiles at rgb(20,23,26) and the
- * heaviest smoke the ramp can paint. Top-right, clear of the zoom control
+ * both backdrops the map has to survive: bare tiles at rgb(242,240,236) and
+ * the heaviest smoke the ramp can paint. Top-right, clear of the zoom control
  * top-left and of the attribution strip, which now carries two mandatory
- * source credits and wraps to three lines on a phone. */
+ * source credits and wraps to three lines on a phone.
+ *
+ * The edge is not decoration. This badge was written for the dark basemap,
+ * where the pill separated from the tiles on its own; on Positron the pill is
+ * 1.07:1 against bare tiles and the shape disappears entirely, leaving the
+ * text floating. Same reason .user-marker__label and .fire-card carry one. */
 .smoke-map .smoke-coverage {
   margin: 6px 6px 0 0;
   padding: 3px 7px;
   border-radius: 999px;
   background: var(--map-chrome);
+  border: 1px solid var(--map-chrome-edge);
   color: var(--map-chrome-text);
   font-size: 10px;
   line-height: 1.4;
@@ -101,6 +107,28 @@
   overflow: hidden;
   text-overflow: ellipsis;
   pointer-events: auto; /* the title attribute is the long version */
+  font: inherit;
+  font-size: 10px;
+  text-align: left;
+}
+
+/* Inert unless there is a second field that can serve this exact view. Left
+   looking like the label it is, rather than greyed out — there is nothing
+   broken about having one model. */
+.smoke-map .smoke-coverage:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+/* Switchable: the ⇄ in the text says so, this makes it feel pressable. */
+.smoke-map .smoke-coverage--switch {
+  cursor: pointer;
+}
+
+.smoke-map .smoke-coverage--switch:hover,
+.smoke-map .smoke-coverage--switch:focus-visible {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--map-chrome-text-strong);
 }
 
 .smoke-map .smoke-coverage:empty {

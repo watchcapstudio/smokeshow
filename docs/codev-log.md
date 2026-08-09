@@ -176,6 +176,42 @@ the one thing that must never ship), not a workaround. The real fix is a
 `cams-dark` domain from the same `ramp.py` inversion that produced `hrrr-dark`;
 until then, non-US is dark basemap with no smoke. Matters for Android/global.
 
+### 2026-08-09 — web front end, first pass at iOS parity (PROPOSAL, review only)
+
+Joe asked what the web should take from Kelly's iOS build. The candidate is at
+`/asdfasdf/` — `noindex`, absent from the sitemap, not linked from anywhere,
+and listed by hand in `vite.config.js` so removing it is two deletions.
+
+What it proposes, all of it above the fold: the verdict is a window rather than
+a scrolling document; the curve becomes a drag control sitting directly under
+the words it moves; the level *word* leads and the AQI integer becomes a
+supporting line; the card chrome comes off; the source tabs, the "why two
+numbers" expander and the nose caveat move into the sheet; a day tap drives the
+scrubber instead of opening an accordion; the ridge gets the foot of the screen;
+and there is a way back to *now*.
+
+Unchanged, deliberately: the map, and everything below it. The FAQ, explainer
+and disclaimer stay on the web and stay in the initial payload — that is Joe's
+call and it is not in question. A city footer is new, rendered from
+`src/data/locations.js` so it cannot drift from the pages that exist.
+
+It runs on production modules — sky, ink, rating, verdict, days, trend, aqi,
+time — with the iOS test fixtures as the PM2.5 series, time-shifted to now. The
+verdict, the days and the headline are recomputed rather than read off the
+fixture, so what is on screen is what the real code would say about that air.
+
+One real defect came out of rendering it: `text-transform: uppercase` on a line
+carrying µg/m³ paints "MG/M³", which is a different unit by a factor of a
+thousand. Nothing carrying a unit is uppercased on that page now. **Worth
+checking the live site and the share card for the same pattern.**
+
+Also found, and pointing the other way: the web's ridge tints with `--ink` and
+so survives the sky going dark, which is exactly the thing left open against
+`RidgeView` on iOS. That answer should travel from web to Swift.
+
+- Rollback: delete `asdfasdf/` and `src/proto/`, drop `reviewPages` from
+  `vite.config.js`. Nothing else imports either directory.
+
 ## Open, and whose call
 
 - **Bundle prefix.** The app is `earth.smokeshow.*`; everything else of

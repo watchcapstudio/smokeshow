@@ -16,17 +16,50 @@ and the map degrades to the point grid, which is the intended failure mode.
 
 import json
 import os
+import shutil
 import sys
 from datetime import datetime, timezone
 
 MANIFEST_VERSION = 2
 
+# The domains this project publishes. THE allow-list — a directory on the data
+# branch is not a domain unless it is named here.
+#
+# It exists because "merge whatever is present" plus publish.sh's "preserve
+# directories I do not own" makes any published directory immortal, and a
+# workflow_dispatch from any branch can add one to production.
+#
+# It nearly did the opposite kind of damage first. `hrrr-dark` was read as an
+# accident and pruned; it is the deliberate dark-basemap render of the HRRR
+# field, published at priority 1 so no older client can select it. Which is the
+# real lesson: this list is not a guess about what looks unfamiliar, it is a
+# statement of what the project publishes, and it has to be updated in the same
+# change that adds a renderer. Adding a domain means writing one anyway, so a
+# line here costs nothing.
+#
+# Keep in step with DOMAINS in .github/workflows/*.yml — those say what gets
+# copied onto the branch, this says what is allowed to stay.
+KNOWN_DOMAINS = ("hrrr", "hrrr-dark", "cams")
+
 
 def main(root):
     domains = []
     for name in sorted(os.listdir(root)):
-        block = os.path.join(root, name, "domain.json")
+        path = os.path.join(root, name)
+        block = os.path.join(path, "domain.json")
         if not os.path.isfile(block):
+            continue
+        if name not in KNOWN_DOMAINS:
+            # Removed, not merely skipped. Skipping would keep it off the
+            # manifest but leave the frames on the branch forever, and this is
+            # the one step in the pipeline that sees the whole tree.
+            size = sum(
+                os.path.getsize(os.path.join(dirpath, f))
+                for dirpath, _, files in os.walk(path)
+                for f in files
+            )
+            print(f"  DROP {name}: not in KNOWN_DOMAINS — removing {size / 1048576:.1f} MB")
+            shutil.rmtree(path)
             continue
         with open(block) as f:
             domains.append(json.load(f))

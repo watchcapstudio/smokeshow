@@ -259,6 +259,7 @@ def main():
             run=run.strftime("%Y-%m-%dT%H:00"),
             generated=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             wraps=True,
+            measures="all PM2.5",
         ),
     )
 
