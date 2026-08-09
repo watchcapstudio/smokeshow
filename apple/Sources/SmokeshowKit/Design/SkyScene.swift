@@ -10,27 +10,19 @@
 //   • the near hill is solid, feathered and rim-lit — the sun sets *behind* it;
 //   • the far hill stays translucent and haze-eaten by PM2.5 — the visibility
 //     gauge survives;
-//   • the moon phase is computed here for now, but it belongs in the payload
-//     next to the sun (contract §4), and this file is where it plugs in.
+//   • the sun and the moon both come from `sky` in the payload (contract §4),
+//     computed once on the edge; this file only places and draws them, so a
+//     phone and a browser paint the identical sky.
 
 import SwiftUI
 
 public struct HorizonBand: View {
     private let sky: Forecast.Sky?
     private let pm25: Double?
-    private let date: Date
-    /// The observer, for the moon's altitude/azimuth. Temporary: the moon's
-    /// position belongs in the payload next to the sun (contract §4), computed
-    /// once on the edge like everything else in `Sky`.
-    private let latitude: Double?
-    private let longitude: Double?
 
-    public init(sky: Forecast.Sky?, pm25: Double?, date: Date, latitude: Double? = nil, longitude: Double? = nil) {
+    public init(sky: Forecast.Sky?, pm25: Double?) {
         self.sky = sky
         self.pm25 = pm25
-        self.date = date
-        self.latitude = latitude
-        self.longitude = longitude
     }
 
     public var body: some View {
@@ -140,18 +132,17 @@ public struct HorizonBand: View {
     /// altitude/azimuth. Below the horizon it is simply absent.
     @ViewBuilder
     private func moon(in size: CGSize, crest: CGFloat) -> some View {
-        if let latitude, let longitude {
-            let pos = Self.moonPosition(date: date, latitude: latitude, longitude: longitude)
-            let t = clamp((pos.yFrac - 0.12) / (0.60 - 0.12))
+        if let moon = sky?.moon {
+            let t = clamp((moon.yFrac - 0.12) / (0.60 - 0.12))
             let y = lerp(-size.height * 0.35, crest + (size.height - crest) * 0.45, t)
-            let x = size.width * azimuthX(pos.azimuthDeg)
+            let x = size.width * azimuthX(moon.azimuthDeg)
             // Dissolve into the ridge at the horizon ends, like the sun.
             let fade = clamp((y - crest) / (size.height * 0.30))
-            let risen = clamp((pos.altitudeDeg + 2) / 6)
+            let risen = clamp((moon.altitudeDeg + 2) / 6)
             // Pale in daylight, full at night.
             let daylight: CGFloat = (sky?.sun.visible ?? false) ? 0.5 : 1
             let diameter = size.height * 0.34
-            let phase = Self.moonPhaseFraction(date)
+            let phase = moon.phaseFraction
             ZStack {
                 Circle()
                     .fill(RadialGradient(
@@ -166,78 +157,6 @@ public struct HorizonBand: View {
             .opacity(Double((1 - fade) * risen * daylight))
             .position(x: x, y: y)
         }
-    }
-
-    /// Low-precision lunar position (Schlyter) → screen fractions matching the
-    /// server's sun mapping. Temporary; belongs on the edge next to the sun.
-    /// Returns azimuth° (0 N, 90 E, 180 S, 270 W), yFrac (0 top … 1 horizon),
-    /// and altitude°.
-    static func moonPosition(date: Date, latitude: Double, longitude: Double) -> (azimuthDeg: Double, yFrac: Double, altitudeDeg: Double) {
-        let rad = Double.pi / 180
-        func rev(_ x: Double) -> Double { let r = x.truncatingRemainder(dividingBy: 360); return r < 0 ? r + 360 : r }
-
-        // Days since the epoch 2000 Jan 0.0 UT (JD 2451543.5).
-        let d = date.timeIntervalSince1970 / 86_400 + 2_440_587.5 - 2_451_543.5
-
-        // Moon's orbital elements.
-        let N = rev(125.1228 - 0.0529538083 * d) * rad
-        let i = 5.1454 * rad
-        let w = rev(318.0634 + 0.1643573223 * d) * rad
-        let a = 60.2666
-        let e = 0.054900
-        let M = rev(115.3654 + 13.0649929509 * d) * rad
-
-        var E = M + e * sin(M) * (1 + e * cos(M))
-        E -= (E - e * sin(E) - M) / (1 - e * cos(E))
-
-        let xv = a * (cos(E) - e)
-        let yv = a * (sqrt(1 - e * e) * sin(E))
-        let v = atan2(yv, xv)
-        let r = sqrt(xv * xv + yv * yv)
-
-        let xh = r * (cos(N) * cos(v + w) - sin(N) * sin(v + w) * cos(i))
-        let yh = r * (sin(N) * cos(v + w) + cos(N) * sin(v + w) * cos(i))
-        let zh = r * (sin(v + w) * sin(i))
-
-        let lonEcl = atan2(yh, xh)
-        let latEcl = atan2(zh, sqrt(xh * xh + yh * yh))
-        let ecl = (23.4393 - 3.563e-7 * d) * rad
-
-        // Ecliptic → equatorial.
-        let xe = cos(lonEcl) * cos(latEcl)
-        let ye = sin(lonEcl) * cos(latEcl) * cos(ecl) - sin(latEcl) * sin(ecl)
-        let ze = sin(lonEcl) * cos(latEcl) * sin(ecl) + sin(latEcl) * cos(ecl)
-        let ra = atan2(ye, xe)
-        let dec = atan2(ze, sqrt(xe * xe + ye * ye))
-
-        // Local sidereal time.
-        let ws = rev(282.9404 + 4.70935e-5 * d)
-        let Ms = rev(356.0470 + 0.9856002585 * d)
-        let gmst0 = rev(ws + Ms + 180)
-        let utHours = (date.timeIntervalSince1970 / 3600).truncatingRemainder(dividingBy: 24)
-        let lst = rev(gmst0 + utHours * 15 + longitude) * rad
-        let ha = lst - ra
-
-        let lat = latitude * rad
-        let sinAlt = sin(lat) * sin(dec) + cos(lat) * cos(dec) * cos(ha)
-        let alt = asin(min(max(sinAlt, -1), 1))
-        var azimuth = atan2(sin(ha), cos(ha) * sin(lat) - tan(dec) * cos(lat)) / rad + 180
-        azimuth = rev(azimuth) // 0 N, 90 E, 180 S, 270 W — matches the sun
-
-        let altSin = sin(alt)
-        // `azimuthX` (shared with the sun) maps this to a screen fraction.
-        let yFrac = min(max(1 - min(max(altSin * 1.4, 0), 1), 0), 1) * 0.4 + 0.12
-        return (azimuth, yFrac, alt / rad)
-    }
-
-    /// Days since a known new moon, as a 0…1 fraction of the synodic month.
-    /// 0 = new, 0.5 = full.
-    static func moonPhaseFraction(_ date: Date) -> Double {
-        let jd = date.timeIntervalSince1970 / 86_400 + 2_440_587.5
-        let synodic = 29.530588853
-        var age = (jd - 2_451_550.1).truncatingRemainder(dividingBy: synodic)
-        if age < 0 { age += synodic }
-        return age / synodic
     }
 
     // MARK: Hills

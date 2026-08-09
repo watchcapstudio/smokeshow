@@ -137,6 +137,14 @@
           "xFrac": 0.615,
           "yFrac": 0.52,
           "dim": 0.041
+        },
+        "moon": {
+          "altitudeDeg": 22.16,
+          "azimuthDeg": 152.92,
+          "visible": true,
+          "xFrac": 0.35,
+          "yFrac": 0.309,
+          "phaseFraction": 0.5274
         }
       }
     },
@@ -177,6 +185,14 @@
           "xFrac": 0.529,
           "yFrac": 0.52,
           "dim": 0.042
+        },
+        "moon": {
+          "altitudeDeg": 25.83,
+          "azimuthDeg": 167.49,
+          "visible": true,
+          "xFrac": 0.431,
+          "yFrac": 0.276,
+          "phaseFraction": 0.5288
         }
       }
     },
@@ -217,6 +233,14 @@
           "xFrac": 0.441,
           "yFrac": 0.52,
           "dim": 0.044
+        },
+        "moon": {
+          "altitudeDeg": 26.89,
+          "azimuthDeg": 182.87,
+          "visible": true,
+          "xFrac": 0.516,
+          "yFrac": 0.267,
+          "phaseFraction": 0.5302
         }
       }
     },
@@ -257,6 +281,14 @@
           "xFrac": 0.357,
           "yFrac": 0.52,
           "dim": 0.046
+        },
+        "moon": {
+          "altitudeDeg": 25.2,
+          "azimuthDeg": 198.16,
+          "visible": true,
+          "xFrac": 0.601,
+          "yFrac": 0.282,
+          "phaseFraction": 0.5317
         }
       }
     },
@@ -297,6 +329,14 @@
           "xFrac": 0.28,
           "yFrac": 0.52,
           "dim": 0.048
+        },
+        "moon": {
+          "altitudeDeg": 20.98,
+          "azimuthDeg": 212.5,
+          "visible": true,
+          "xFrac": 0.681,
+          "yFrac": 0.32,
+          "phaseFraction": 0.5331
         }
       }
     },
@@ -337,6 +377,14 @@
           "xFrac": 0.211,
           "yFrac": 0.52,
           "dim": 0.05
+        },
+        "moon": {
+          "altitudeDeg": 14.68,
+          "azimuthDeg": 225.48,
+          "visible": true,
+          "xFrac": 0.753,
+          "yFrac": 0.378,
+          "phaseFraction": 0.5345
         }
       }
     },
@@ -377,6 +425,14 @@
           "xFrac": 0.149,
           "yFrac": 0.52,
           "dim": 0.052
+        },
+        "moon": {
+          "altitudeDeg": 6.81,
+          "azimuthDeg": 237.13,
+          "visible": true,
+          "xFrac": 0.817,
+          "yFrac": 0.454,
+          "phaseFraction": 0.5359
         }
       }
     },
@@ -417,6 +473,14 @@
           "xFrac": 0.092,
           "yFrac": 0.427,
           "dim": 0.054
+        },
+        "moon": {
+          "altitudeDeg": -2.15,
+          "azimuthDeg": 247.77,
+          "visible": false,
+          "xFrac": 0.876,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5373
         }
       }
     },
@@ -457,6 +521,14 @@
           "xFrac": 0.036,
           "yFrac": 0.329,
           "dim": 0.056
+        },
+        "moon": {
+          "altitudeDeg": -11.82,
+          "azimuthDeg": 257.85,
+          "visible": false,
+          "xFrac": 0.932,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5387
         }
       }
     },
@@ -497,6 +569,14 @@
           "xFrac": 0,
           "yFrac": 0.236,
           "dim": 0.057
+        },
+        "moon": {
+          "altitudeDeg": -21.88,
+          "azimuthDeg": 267.93,
+          "visible": false,
+          "xFrac": 0.988,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5401
         }
       }
     },
@@ -537,6 +617,14 @@
           "xFrac": 0,
           "yFrac": 0.153,
           "dim": 0.058
+        },
+        "moon": {
+          "altitudeDeg": -31.99,
+          "azimuthDeg": 278.71,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5415
         }
       }
     },
@@ -577,6 +665,14 @@
           "xFrac": 0,
           "yFrac": 0.12,
           "dim": 0.058
+        },
+        "moon": {
+          "altitudeDeg": -41.78,
+          "azimuthDeg": 291.19,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5429
         }
       }
     },
@@ -617,6 +713,14 @@
           "xFrac": 0,
           "yFrac": 0.12,
           "dim": 0.058
+        },
+        "moon": {
+          "altitudeDeg": -50.62,
+          "azimuthDeg": 306.91,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5444
         }
       }
     },
@@ -657,6 +761,14 @@
           "xFrac": 0,
           "yFrac": 0.12,
           "dim": 0.057
+        },
+        "moon": {
+          "altitudeDeg": -57.43,
+          "azimuthDeg": 327.86,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5458
         }
       }
     },
@@ -697,6 +809,14 @@
           "xFrac": 1,
           "yFrac": 0.12,
           "dim": 0.056
+        },
+        "moon": {
+          "altitudeDeg": -60.58,
+          "azimuthDeg": 354.56,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5472
         }
       }
     },
@@ -737,6 +857,14 @@
           "xFrac": 1,
           "yFrac": 0.12,
           "dim": 0.055
+        },
+        "moon": {
+          "altitudeDeg": -58.84,
+          "azimuthDeg": 22.34,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5486
         }
       }
     },
@@ -777,6 +905,14 @@
           "xFrac": 1,
           "yFrac": 0.12,
           "dim": 0.054
+        },
+        "moon": {
+          "altitudeDeg": -52.89,
+          "azimuthDeg": 45.16,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.55
         }
       }
     },
@@ -817,6 +953,14 @@
           "xFrac": 1,
           "yFrac": 0.18,
           "dim": 0.053
+        },
+        "moon": {
+          "altitudeDeg": -44.42,
+          "azimuthDeg": 62.23,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5514
         }
       }
     },
@@ -857,6 +1001,14 @@
           "xFrac": 1,
           "yFrac": 0.268,
           "dim": 0.052
+        },
+        "moon": {
+          "altitudeDeg": -34.68,
+          "azimuthDeg": 75.43,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5528
         }
       }
     },
@@ -897,6 +1049,14 @@
           "xFrac": 0.945,
           "yFrac": 0.363,
           "dim": 0.051
+        },
+        "moon": {
+          "altitudeDeg": -24.38,
+          "azimuthDeg": 86.49,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5542
         }
       }
     },
@@ -937,6 +1097,14 @@
           "xFrac": 0.889,
           "yFrac": 0.462,
           "dim": 0.051
+        },
+        "moon": {
+          "altitudeDeg": -13.96,
+          "azimuthDeg": 96.54,
+          "visible": false,
+          "xFrac": 0.036,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5556
         }
       }
     },
@@ -977,6 +1145,14 @@
           "xFrac": 0.831,
           "yFrac": 0.52,
           "dim": 0.051
+        },
+        "moon": {
+          "altitudeDeg": -3.74,
+          "azimuthDeg": 106.39,
+          "visible": false,
+          "xFrac": 0.091,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5571
         }
       }
     },
@@ -1017,6 +1193,14 @@
           "xFrac": 0.767,
           "yFrac": 0.52,
           "dim": 0.053
+        },
+        "moon": {
+          "altitudeDeg": 5.98,
+          "azimuthDeg": 116.63,
+          "visible": true,
+          "xFrac": 0.148,
+          "yFrac": 0.462,
+          "phaseFraction": 0.5585
         }
       }
     },
@@ -1057,6 +1241,14 @@
           "xFrac": 0.695,
           "yFrac": 0.52,
           "dim": 0.055
+        },
+        "moon": {
+          "altitudeDeg": 14.86,
+          "azimuthDeg": 127.82,
+          "visible": true,
+          "xFrac": 0.21,
+          "yFrac": 0.376,
+          "phaseFraction": 0.5599
         }
       }
     },
@@ -1097,6 +1289,14 @@
           "xFrac": 0.615,
           "yFrac": 0.52,
           "dim": 0.058
+        },
+        "moon": {
+          "altitudeDeg": 22.43,
+          "azimuthDeg": 140.44,
+          "visible": true,
+          "xFrac": 0.28,
+          "yFrac": 0.306,
+          "phaseFraction": 0.5613
         }
       }
     },
@@ -1137,6 +1337,14 @@
           "xFrac": 0.529,
           "yFrac": 0.52,
           "dim": 0.062
+        },
+        "moon": {
+          "altitudeDeg": 28.15,
+          "azimuthDeg": 154.78,
+          "visible": true,
+          "xFrac": 0.36,
+          "yFrac": 0.256,
+          "phaseFraction": 0.5627
         }
       }
     },
@@ -1177,6 +1385,14 @@
           "xFrac": 0.441,
           "yFrac": 0.52,
           "dim": 0.067
+        },
+        "moon": {
+          "altitudeDeg": 31.43,
+          "azimuthDeg": 170.68,
+          "visible": true,
+          "xFrac": 0.448,
+          "yFrac": 0.228,
+          "phaseFraction": 0.5641
         }
       }
     },
@@ -1217,6 +1433,14 @@
           "xFrac": 0.356,
           "yFrac": 0.52,
           "dim": 0.073
+        },
+        "moon": {
+          "altitudeDeg": 31.83,
+          "azimuthDeg": 187.34,
+          "visible": true,
+          "xFrac": 0.541,
+          "yFrac": 0.225,
+          "phaseFraction": 0.5655
         }
       }
     },
@@ -1257,6 +1481,14 @@
           "xFrac": 0.279,
           "yFrac": 0.52,
           "dim": 0.079
+        },
+        "moon": {
+          "altitudeDeg": 29.3,
+          "azimuthDeg": 203.58,
+          "visible": true,
+          "xFrac": 0.631,
+          "yFrac": 0.246,
+          "phaseFraction": 0.5669
         }
       }
     },
@@ -1297,6 +1529,14 @@
           "xFrac": 0.21,
           "yFrac": 0.52,
           "dim": 0.086
+        },
+        "moon": {
+          "altitudeDeg": 24.2,
+          "azimuthDeg": 218.45,
+          "visible": true,
+          "xFrac": 0.714,
+          "yFrac": 0.29,
+          "phaseFraction": 0.5683
         }
       }
     },
@@ -1337,6 +1577,14 @@
           "xFrac": 0.148,
           "yFrac": 0.52,
           "dim": 0.094
+        },
+        "moon": {
+          "altitudeDeg": 17.11,
+          "azimuthDeg": 231.64,
+          "visible": true,
+          "xFrac": 0.787,
+          "yFrac": 0.355,
+          "phaseFraction": 0.5698
         }
       }
     },
@@ -1377,6 +1625,14 @@
           "xFrac": 0.091,
           "yFrac": 0.429,
           "dim": 0.102
+        },
+        "moon": {
+          "altitudeDeg": 8.61,
+          "azimuthDeg": 243.36,
+          "visible": true,
+          "xFrac": 0.852,
+          "yFrac": 0.436,
+          "phaseFraction": 0.5712
         }
       }
     },
@@ -1417,6 +1673,14 @@
           "xFrac": 0.035,
           "yFrac": 0.331,
           "dim": 0.109
+        },
+        "moon": {
+          "altitudeDeg": -0.8,
+          "azimuthDeg": 254.09,
+          "visible": true,
+          "xFrac": 0.912,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5726
         }
       }
     },
@@ -1457,6 +1721,14 @@
           "xFrac": 0,
           "yFrac": 0.237,
           "dim": 0.117
+        },
+        "moon": {
+          "altitudeDeg": -10.74,
+          "azimuthDeg": 264.38,
+          "visible": false,
+          "xFrac": 0.969,
+          "yFrac": 0.52,
+          "phaseFraction": 0.574
         }
       }
     },
@@ -1497,6 +1769,14 @@
           "xFrac": 0,
           "yFrac": 0.154,
           "dim": 0.124
+        },
+        "moon": {
+          "altitudeDeg": -20.86,
+          "azimuthDeg": 274.86,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5754
         }
       }
     },
@@ -1537,6 +1817,14 @@
           "xFrac": 0,
           "yFrac": 0.12,
           "dim": 0.131
+        },
+        "moon": {
+          "altitudeDeg": -30.8,
+          "azimuthDeg": 286.27,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5768
         }
       }
     },
@@ -1577,6 +1865,14 @@
           "xFrac": 0,
           "yFrac": 0.12,
           "dim": 0.137
+        },
+        "moon": {
+          "altitudeDeg": -40.1,
+          "azimuthDeg": 299.65,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5782
         }
       }
     },
@@ -1617,6 +1913,14 @@
           "xFrac": 0,
           "yFrac": 0.12,
           "dim": 0.141
+        },
+        "moon": {
+          "altitudeDeg": -48.03,
+          "azimuthDeg": 316.29,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5796
         }
       }
     },
@@ -1657,6 +1961,14 @@
           "xFrac": 1,
           "yFrac": 0.12,
           "dim": 0.145
+        },
+        "moon": {
+          "altitudeDeg": -53.48,
+          "azimuthDeg": 337.34,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.581
         }
       }
     },
@@ -1697,6 +2009,14 @@
           "xFrac": 1,
           "yFrac": 0.12,
           "dim": 0.149
+        },
+        "moon": {
+          "altitudeDeg": -55.12,
+          "azimuthDeg": 1.86,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5825
         }
       }
     },
@@ -1737,6 +2057,14 @@
           "xFrac": 1,
           "yFrac": 0.12,
           "dim": 0.151
+        },
+        "moon": {
+          "altitudeDeg": -52.4,
+          "azimuthDeg": 25.8,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5839
         }
       }
     },
@@ -1777,6 +2105,14 @@
           "xFrac": 1,
           "yFrac": 0.182,
           "dim": 0.153
+        },
+        "moon": {
+          "altitudeDeg": -46.15,
+          "azimuthDeg": 45.7,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5853
         }
       }
     },
@@ -1817,6 +2153,14 @@
           "xFrac": 1,
           "yFrac": 0.269,
           "dim": 0.156
+        },
+        "moon": {
+          "altitudeDeg": -37.67,
+          "azimuthDeg": 61.35,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5867
         }
       }
     },
@@ -1857,6 +2201,14 @@
           "xFrac": 0.946,
           "yFrac": 0.365,
           "dim": 0.159
+        },
+        "moon": {
+          "altitudeDeg": -27.98,
+          "azimuthDeg": 74.01,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5881
         }
       }
     },
@@ -1897,6 +2249,14 @@
           "xFrac": 0.89,
           "yFrac": 0.463,
           "dim": 0.164
+        },
+        "moon": {
+          "altitudeDeg": -17.7,
+          "azimuthDeg": 84.94,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5895
         }
       }
     },
@@ -1937,6 +2297,14 @@
           "xFrac": 0.831,
           "yFrac": 0.52,
           "dim": 0.171
+        },
+        "moon": {
+          "altitudeDeg": -7.25,
+          "azimuthDeg": 95.09,
+          "visible": false,
+          "xFrac": 0.028,
+          "yFrac": 0.52,
+          "phaseFraction": 0.5909
         }
       }
     },
@@ -1977,6 +2345,14 @@
           "xFrac": 0.767,
           "yFrac": 0.52,
           "dim": 0.179
+        },
+        "moon": {
+          "altitudeDeg": 3.05,
+          "azimuthDeg": 105.18,
+          "visible": true,
+          "xFrac": 0.084,
+          "yFrac": 0.49,
+          "phaseFraction": 0.5923
         }
       }
     },
@@ -2017,6 +2393,14 @@
           "xFrac": 0.696,
           "yFrac": 0.52,
           "dim": 0.191
+        },
+        "moon": {
+          "altitudeDeg": 12.86,
+          "azimuthDeg": 115.84,
+          "visible": true,
+          "xFrac": 0.144,
+          "yFrac": 0.395,
+          "phaseFraction": 0.5937
         }
       }
     },
@@ -2057,6 +2441,14 @@
           "xFrac": 0.616,
           "yFrac": 0.52,
           "dim": 0.205
+        },
+        "moon": {
+          "altitudeDeg": 21.8,
+          "azimuthDeg": 127.7,
+          "visible": true,
+          "xFrac": 0.209,
+          "yFrac": 0.312,
+          "phaseFraction": 0.5952
         }
       }
     },
@@ -2097,6 +2489,14 @@
           "xFrac": 0.529,
           "yFrac": 0.52,
           "dim": 0.223
+        },
+        "moon": {
+          "altitudeDeg": 29.36,
+          "azimuthDeg": 141.35,
+          "visible": true,
+          "xFrac": 0.285,
+          "yFrac": 0.245,
+          "phaseFraction": 0.5966
         }
       }
     },
@@ -2137,6 +2537,14 @@
           "xFrac": 0.44,
           "yFrac": 0.52,
           "dim": 0.243
+        },
+        "moon": {
+          "altitudeDeg": 34.86,
+          "azimuthDeg": 157.13,
+          "visible": true,
+          "xFrac": 0.373,
+          "yFrac": 0.2,
+          "phaseFraction": 0.598
         }
       }
     },
@@ -2177,6 +2585,14 @@
           "xFrac": 0.356,
           "yFrac": 0.52,
           "dim": 0.267
+        },
+        "moon": {
+          "altitudeDeg": 37.61,
+          "azimuthDeg": 174.74,
+          "visible": true,
+          "xFrac": 0.471,
+          "yFrac": 0.178,
+          "phaseFraction": 0.5994
         }
       }
     },
@@ -2217,6 +2633,14 @@
           "xFrac": 0.278,
           "yFrac": 0.52,
           "dim": 0.292
+        },
+        "moon": {
+          "altitudeDeg": 37.16,
+          "azimuthDeg": 192.94,
+          "visible": true,
+          "xFrac": 0.572,
+          "yFrac": 0.182,
+          "phaseFraction": 0.6008
         }
       }
     },
@@ -2257,6 +2681,14 @@
           "xFrac": 0.209,
           "yFrac": 0.52,
           "dim": 0.319
+        },
+        "moon": {
+          "altitudeDeg": 33.61,
+          "azimuthDeg": 210.16,
+          "visible": true,
+          "xFrac": 0.668,
+          "yFrac": 0.21,
+          "phaseFraction": 0.6022
         }
       }
     },
@@ -2297,6 +2729,14 @@
           "xFrac": 0.147,
           "yFrac": 0.52,
           "dim": 0.347
+        },
+        "moon": {
+          "altitudeDeg": 27.52,
+          "azimuthDeg": 225.42,
+          "visible": true,
+          "xFrac": 0.752,
+          "yFrac": 0.261,
+          "phaseFraction": 0.6036
         }
       }
     },
@@ -2337,6 +2777,14 @@
           "xFrac": 0.09,
           "yFrac": 0.43,
           "dim": 0.373
+        },
+        "moon": {
+          "altitudeDeg": 19.6,
+          "azimuthDeg": 238.66,
+          "visible": true,
+          "xFrac": 0.826,
+          "yFrac": 0.332,
+          "phaseFraction": 0.605
         }
       }
     },
@@ -2377,6 +2825,14 @@
           "xFrac": 0.034,
           "yFrac": 0.332,
           "dim": 0.399
+        },
+        "moon": {
+          "altitudeDeg": 10.51,
+          "azimuthDeg": 250.34,
+          "visible": true,
+          "xFrac": 0.891,
+          "yFrac": 0.418,
+          "phaseFraction": 0.6064
         }
       }
     },
@@ -2417,6 +2873,14 @@
           "xFrac": 0,
           "yFrac": 0.238,
           "dim": 0.422
+        },
+        "moon": {
+          "altitudeDeg": 0.72,
+          "azimuthDeg": 261.09,
+          "visible": true,
+          "xFrac": 0.95,
+          "yFrac": 0.513,
+          "phaseFraction": 0.6079
         }
       }
     },
@@ -2457,6 +2921,14 @@
           "xFrac": 0,
           "yFrac": 0.156,
           "dim": 0.441
+        },
+        "moon": {
+          "altitudeDeg": -9.36,
+          "azimuthDeg": 271.54,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6093
         }
       }
     },
@@ -2497,6 +2969,14 @@
           "xFrac": 0,
           "yFrac": 0.12,
           "dim": 0.456
+        },
+        "moon": {
+          "altitudeDeg": -19.39,
+          "azimuthDeg": 282.37,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6107
         }
       }
     },
@@ -2537,6 +3017,14 @@
           "xFrac": 0,
           "yFrac": 0.12,
           "dim": 0.466
+        },
+        "moon": {
+          "altitudeDeg": -28.97,
+          "azimuthDeg": 294.33,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6121
         }
       }
     },
@@ -2577,6 +3065,14 @@
           "xFrac": 0,
           "yFrac": 0.12,
           "dim": 0.472
+        },
+        "moon": {
+          "altitudeDeg": -37.56,
+          "azimuthDeg": 308.35,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6135
         }
       }
     },
@@ -2617,6 +3113,14 @@
           "xFrac": 1,
           "yFrac": 0.12,
           "dim": 0.473
+        },
+        "moon": {
+          "altitudeDeg": -44.39,
+          "azimuthDeg": 325.38,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6149
         }
       }
     },
@@ -2657,6 +3161,14 @@
           "xFrac": 1,
           "yFrac": 0.12,
           "dim": 0.471
+        },
+        "moon": {
+          "altitudeDeg": -48.43,
+          "azimuthDeg": 345.68,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6163
         }
       }
     },
@@ -2697,6 +3209,14 @@
           "xFrac": 1,
           "yFrac": 0.12,
           "dim": 0.465
+        },
+        "moon": {
+          "altitudeDeg": -48.77,
+          "azimuthDeg": 7.71,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6177
         }
       }
     },
@@ -2737,6 +3257,14 @@
           "xFrac": 1,
           "yFrac": 0.183,
           "dim": 0.458
+        },
+        "moon": {
+          "altitudeDeg": -45.31,
+          "azimuthDeg": 28.49,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6191
         }
       }
     },
@@ -2777,6 +3305,14 @@
           "xFrac": 1,
           "yFrac": 0.271,
           "dim": 0.451
+        },
+        "moon": {
+          "altitudeDeg": -38.83,
+          "azimuthDeg": 46.07,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6205
         }
       }
     },
@@ -2817,6 +3353,14 @@
           "xFrac": 0.947,
           "yFrac": 0.367,
           "dim": 0.445
+        },
+        "moon": {
+          "altitudeDeg": -30.36,
+          "azimuthDeg": 60.47,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.622
         }
       }
     },
@@ -2857,6 +3401,14 @@
           "xFrac": 0.891,
           "yFrac": 0.465,
           "dim": 0.441
+        },
+        "moon": {
+          "altitudeDeg": -20.73,
+          "azimuthDeg": 72.58,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6234
         }
       }
     },
@@ -2897,6 +3449,14 @@
           "xFrac": 0.832,
           "yFrac": 0.52,
           "dim": 0.441
+        },
+        "moon": {
+          "altitudeDeg": -10.49,
+          "azimuthDeg": 83.32,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6248
         }
       }
     },
@@ -2937,6 +3497,14 @@
           "xFrac": 0.768,
           "yFrac": 0.52,
           "dim": 0.446
+        },
+        "moon": {
+          "altitudeDeg": -0.04,
+          "azimuthDeg": 93.48,
+          "visible": true,
+          "xFrac": 0.019,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6262
         }
       }
     },
@@ -2977,6 +3545,14 @@
           "xFrac": 0.696,
           "yFrac": 0.52,
           "dim": 0.456
+        },
+        "moon": {
+          "altitudeDeg": 10.31,
+          "azimuthDeg": 103.76,
+          "visible": true,
+          "xFrac": 0.076,
+          "yFrac": 0.42,
+          "phaseFraction": 0.6276
         }
       }
     },
@@ -3017,6 +3593,14 @@
           "xFrac": 0.616,
           "yFrac": 0.52,
           "dim": 0.471
+        },
+        "moon": {
+          "altitudeDeg": 20.21,
+          "azimuthDeg": 114.84,
+          "visible": true,
+          "xFrac": 0.138,
+          "yFrac": 0.327,
+          "phaseFraction": 0.629
         }
       }
     },
@@ -3057,6 +3641,14 @@
           "xFrac": 0.529,
           "yFrac": 0.52,
           "dim": 0.49
+        },
+        "moon": {
+          "altitudeDeg": 29.22,
+          "azimuthDeg": 127.44,
+          "visible": true,
+          "xFrac": 0.208,
+          "yFrac": 0.247,
+          "phaseFraction": 0.6304
         }
       }
     },
@@ -3097,6 +3689,14 @@
           "xFrac": 0.44,
           "yFrac": 0.52,
           "dim": 0.513
+        },
+        "moon": {
+          "altitudeDeg": 36.74,
+          "azimuthDeg": 142.33,
+          "visible": true,
+          "xFrac": 0.291,
+          "yFrac": 0.185,
+          "phaseFraction": 0.6318
         }
       }
     },
@@ -3137,6 +3737,14 @@
           "xFrac": 0.355,
           "yFrac": 0.52,
           "dim": 0.538
+        },
+        "moon": {
+          "altitudeDeg": 41.97,
+          "azimuthDeg": 159.94,
+          "visible": true,
+          "xFrac": 0.389,
+          "yFrac": 0.146,
+          "phaseFraction": 0.6332
         }
       }
     },
@@ -3177,6 +3785,14 @@
           "xFrac": 0.277,
           "yFrac": 0.52,
           "dim": 0.565
+        },
+        "moon": {
+          "altitudeDeg": 44.06,
+          "azimuthDeg": 179.7,
+          "visible": true,
+          "xFrac": 0.498,
+          "yFrac": 0.131,
+          "phaseFraction": 0.6347
         }
       }
     },
@@ -3217,6 +3833,14 @@
           "xFrac": 0.208,
           "yFrac": 0.52,
           "dim": 0.589
+        },
+        "moon": {
+          "altitudeDeg": 42.58,
+          "azimuthDeg": 199.65,
+          "visible": true,
+          "xFrac": 0.609,
+          "yFrac": 0.141,
+          "phaseFraction": 0.6361
         }
       }
     },
@@ -3257,6 +3881,14 @@
           "xFrac": 0.146,
           "yFrac": 0.52,
           "dim": 0.612
+        },
+        "moon": {
+          "altitudeDeg": 37.87,
+          "azimuthDeg": 217.73,
+          "visible": true,
+          "xFrac": 0.71,
+          "yFrac": 0.176,
+          "phaseFraction": 0.6375
         }
       }
     },
@@ -3297,6 +3929,14 @@
           "xFrac": 0.089,
           "yFrac": 0.432,
           "dim": 0.63
+        },
+        "moon": {
+          "altitudeDeg": 30.75,
+          "azimuthDeg": 233.15,
+          "visible": true,
+          "xFrac": 0.795,
+          "yFrac": 0.234,
+          "phaseFraction": 0.6389
         }
       }
     },
@@ -3337,6 +3977,14 @@
           "xFrac": 0.033,
           "yFrac": 0.333,
           "dim": 0.643
+        },
+        "moon": {
+          "altitudeDeg": 22.08,
+          "azimuthDeg": 246.23,
+          "visible": true,
+          "xFrac": 0.868,
+          "yFrac": 0.31,
+          "phaseFraction": 0.6403
         }
       }
     },
@@ -3377,6 +4025,14 @@
           "xFrac": 0,
           "yFrac": 0.24,
           "dim": 0.648
+        },
+        "moon": {
+          "altitudeDeg": 12.49,
+          "azimuthDeg": 257.72,
+          "visible": true,
+          "xFrac": 0.932,
+          "yFrac": 0.399,
+          "phaseFraction": 0.6417
         }
       }
     },
@@ -3417,6 +4073,14 @@
           "xFrac": 0,
           "yFrac": 0.157,
           "dim": 0.647
+        },
+        "moon": {
+          "altitudeDeg": 2.48,
+          "azimuthDeg": 268.39,
+          "visible": true,
+          "xFrac": 0.991,
+          "yFrac": 0.496,
+          "phaseFraction": 0.6431
         }
       }
     },
@@ -3457,6 +4121,14 @@
           "xFrac": 0,
           "yFrac": 0.12,
           "dim": 0.638
+        },
+        "moon": {
+          "altitudeDeg": -7.59,
+          "azimuthDeg": 278.92,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6445
         }
       }
     },
@@ -3497,6 +4169,14 @@
           "xFrac": 0,
           "yFrac": 0.12,
           "dim": 0.296
+        },
+        "moon": {
+          "altitudeDeg": -17.36,
+          "azimuthDeg": 289.99,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6459
         }
       }
     },
@@ -3537,6 +4217,14 @@
           "xFrac": 0,
           "yFrac": 0.12,
           "dim": 0.25
+        },
+        "moon": {
+          "altitudeDeg": -26.38,
+          "azimuthDeg": 302.31,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6474
         }
       }
     },
@@ -3577,6 +4265,14 @@
           "xFrac": 1,
           "yFrac": 0.12,
           "dim": 0.209
+        },
+        "moon": {
+          "altitudeDeg": -34.11,
+          "azimuthDeg": 316.61,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6488
         }
       }
     },
@@ -3617,6 +4313,14 @@
           "xFrac": 1,
           "yFrac": 0.12,
           "dim": 0.175
+        },
+        "moon": {
+          "altitudeDeg": -39.79,
+          "azimuthDeg": 333.41,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6502
         }
       }
     },
@@ -3657,6 +4361,14 @@
           "xFrac": 1,
           "yFrac": 0.12,
           "dim": 0.147
+        },
+        "moon": {
+          "altitudeDeg": -42.56,
+          "azimuthDeg": 352.41,
+          "visible": false,
+          "xFrac": 1,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6516
         }
       }
     },
@@ -3697,6 +4409,14 @@
           "xFrac": 1,
           "yFrac": 0.185,
           "dim": 0.127
+        },
+        "moon": {
+          "altitudeDeg": -41.9,
+          "azimuthDeg": 12.07,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.653
         }
       }
     },
@@ -3737,6 +4457,14 @@
           "xFrac": 1,
           "yFrac": 0.272,
           "dim": 0.114
+        },
+        "moon": {
+          "altitudeDeg": -37.91,
+          "azimuthDeg": 30.34,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6544
         }
       }
     },
@@ -3777,6 +4505,14 @@
           "xFrac": 0.948,
           "yFrac": 0.369,
           "dim": 0.108
+        },
+        "moon": {
+          "altitudeDeg": -31.3,
+          "azimuthDeg": 46.1,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6558
         }
       }
     },
@@ -3817,6 +4553,14 @@
           "xFrac": 0.892,
           "yFrac": 0.467,
           "dim": 0.108
+        },
+        "moon": {
+          "altitudeDeg": -22.89,
+          "azimuthDeg": 59.44,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6572
         }
       }
     },
@@ -3857,6 +4601,14 @@
           "xFrac": 0.833,
           "yFrac": 0.52,
           "dim": 0.114
+        },
+        "moon": {
+          "altitudeDeg": -13.36,
+          "azimuthDeg": 70.99,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6586
         }
       }
     },
@@ -3897,6 +4649,14 @@
           "xFrac": 0.769,
           "yFrac": 0.52,
           "dim": 0.125
+        },
+        "moon": {
+          "altitudeDeg": -3.19,
+          "azimuthDeg": 81.47,
+          "visible": false,
+          "xFrac": 0,
+          "yFrac": 0.52,
+          "phaseFraction": 0.6601
         }
       }
     },
@@ -3937,6 +4697,14 @@
           "xFrac": 0.697,
           "yFrac": 0.52,
           "dim": 0.139
+        },
+        "moon": {
+          "altitudeDeg": 7.24,
+          "azimuthDeg": 91.58,
+          "visible": true,
+          "xFrac": 0.009,
+          "yFrac": 0.449,
+          "phaseFraction": 0.6615
         }
       }
     },
@@ -3977,6 +4745,14 @@
           "xFrac": 0.616,
           "yFrac": 0.52,
           "dim": 0.158
+        },
+        "moon": {
+          "altitudeDeg": 17.63,
+          "azimuthDeg": 101.97,
+          "visible": true,
+          "xFrac": 0.067,
+          "yFrac": 0.35,
+          "phaseFraction": 0.6629
         }
       }
     },
@@ -4017,6 +4793,14 @@
           "xFrac": 0.529,
           "yFrac": 0.52,
           "dim": 0.15
+        },
+        "moon": {
+          "altitudeDeg": 27.61,
+          "azimuthDeg": 113.39,
+          "visible": true,
+          "xFrac": 0.13,
+          "yFrac": 0.26,
+          "phaseFraction": 0.6643
         }
       }
     },
@@ -4057,6 +4841,14 @@
           "xFrac": 0.44,
           "yFrac": 0.52,
           "dim": 0.144
+        },
+        "moon": {
+          "altitudeDeg": 36.71,
+          "azimuthDeg": 126.76,
+          "visible": true,
+          "xFrac": 0.204,
+          "yFrac": 0.185,
+          "phaseFraction": 0.6657
         }
       }
     },
@@ -4097,6 +4889,14 @@
           "xFrac": 0.354,
           "yFrac": 0.52,
           "dim": 0.139
+        },
+        "moon": {
+          "altitudeDeg": 44.23,
+          "azimuthDeg": 143.1,
+          "visible": true,
+          "xFrac": 0.295,
+          "yFrac": 0.129,
+          "phaseFraction": 0.6671
         }
       }
     },
@@ -4137,6 +4937,14 @@
           "xFrac": 0.277,
           "yFrac": 0.52,
           "dim": 0.135
+        },
+        "moon": {
+          "altitudeDeg": 49.15,
+          "azimuthDeg": 163.04,
+          "visible": true,
+          "xFrac": 0.406,
+          "yFrac": 0.12,
+          "phaseFraction": 0.6685
         }
       }
     },
@@ -4177,6 +4985,14 @@
           "xFrac": 0.208,
           "yFrac": 0.52,
           "dim": 0.131
+        },
+        "moon": {
+          "altitudeDeg": 50.45,
+          "azimuthDeg": 185.46,
+          "visible": true,
+          "xFrac": 0.53,
+          "yFrac": 0.12,
+          "phaseFraction": 0.6699
         }
       }
     },
@@ -4217,6 +5033,14 @@
           "xFrac": 0.145,
           "yFrac": 0.52,
           "dim": 0.127
+        },
+        "moon": {
+          "altitudeDeg": 47.79,
+          "azimuthDeg": 207.28,
+          "visible": true,
+          "xFrac": 0.652,
+          "yFrac": 0.12,
+          "phaseFraction": 0.6713
         }
       }
     },
@@ -4257,6 +5081,14 @@
           "xFrac": 0.088,
           "yFrac": 0.433,
           "dim": 0.122
+        },
+        "moon": {
+          "altitudeDeg": 41.88,
+          "azimuthDeg": 225.96,
+          "visible": true,
+          "xFrac": 0.755,
+          "yFrac": 0.146,
+          "phaseFraction": 0.6728
         }
       }
     },
@@ -4297,6 +5129,14 @@
           "xFrac": 0.031,
           "yFrac": 0.335,
           "dim": 0.117
+        },
+        "moon": {
+          "altitudeDeg": 33.82,
+          "azimuthDeg": 241.21,
+          "visible": true,
+          "xFrac": 0.84,
+          "yFrac": 0.208,
+          "phaseFraction": 0.6742
         }
       }
     },
@@ -4337,6 +5177,14 @@
           "xFrac": 0,
           "yFrac": 0.241,
           "dim": 0.112
+        },
+        "moon": {
+          "altitudeDeg": 24.52,
+          "azimuthDeg": 253.9,
+          "visible": true,
+          "xFrac": 0.911,
+          "yFrac": 0.288,
+          "phaseFraction": 0.6756
         }
       }
     },
@@ -4377,6 +5225,14 @@
           "xFrac": 0,
           "yFrac": 0.158,
           "dim": 0.107
+        },
+        "moon": {
+          "altitudeDeg": 14.62,
+          "azimuthDeg": 265.07,
+          "visible": true,
+          "xFrac": 0.973,
+          "yFrac": 0.379,
+          "phaseFraction": 0.677
         }
       }
     },
@@ -4417,6 +5273,14 @@
           "xFrac": 0,
           "yFrac": 0.12,
           "dim": 0.101
+        },
+        "moon": {
+          "altitudeDeg": 4.54,
+          "azimuthDeg": 275.55,
+          "visible": true,
+          "xFrac": 1,
+          "yFrac": 0.476,
+          "phaseFraction": 0.6784
         }
       }
     }
