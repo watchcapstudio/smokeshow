@@ -81,8 +81,13 @@ export default function ExplainSheet({
         tabIndex={-1}
       >
         <button type="button" className="explain-sheet__grab" aria-label="Close" onClick={onClose} />
+        {/* The value opts out of the eyebrow's uppercase, and it is a
+            correctness rule rather than a typographic one: text-transform
+            renders "µg/m³" as "MG/M³", which is a different unit by a factor
+            of a thousand. Nothing carrying a unit may be uppercased. */}
         <div className="explain-sheet__eyebrow mono">
-          Level {level.index + 1} of 5 · {eyebrowNumber} · model estimate
+          Level {level.index + 1} of 5 ·{' '}
+          <span className="explain-sheet__unit">{eyebrowNumber}</span> · model estimate
         </div>
         <div className="explain-sheet__ladder">
           {LEVELS.map((l) => (

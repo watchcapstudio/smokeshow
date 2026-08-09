@@ -1,0 +1,1159 @@
+/* CANDIDATE styles — /asdfasdf/ only. Nothing here is loaded by the live app.
+ *
+ * The one idea: the first viewport is a window, not a document. Sky at the
+ * top, land at the foot, and the verdict sitting on the horizon between them
+ * with the two controls that move it. Everything that explains, sells or
+ * ranks lives below the fold on production's own surfaces.
+ *
+ * Every colour is a live token — --ink, --accent, --text-dim — so the whole
+ * window inverts with the sky exactly as the live site's does, and the
+ * contrast work in lib/ink.js keeps applying. No new hex codes are introduced
+ * above the fold.
+ */
+
+html {
+  /* Only ever seen in overscroll, where it should read as more sky. */
+  background: var(--sky-hor);
+}
+
+/* ------------------------------------------------------------------- stage */
+
+.proto-stage {
+  position: relative;
+}
+
+/* Suggestion 7. The live site gives the ridge 68px between the trend chip and
+   the share button, which makes it a decorative band. Here it is the bottom of
+   the world and the verdict stands on it. Absolute inside the stage, not fixed
+   to the viewport, so it ends when the window does. */
+.proto-ridge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* 34, not the 46 this started at: on a night sky the haze paints in cream
+     ink and the peaks climbed into the curve, so the land and the chart read
+     as one tangled shape. A third of the screen is roughly the 260pt iOS gives
+     it, and it stays under the days where it belongs. */
+  height: 34svh;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.proto-ridge .ridgeline {
+  height: 100%;
+}
+
+/* ------------------------------------------------------------------ window */
+
+.proto-window {
+  position: relative;
+  z-index: 1;
+  min-height: 100svh;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 1.4rem 1.25rem 1.6rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.proto-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.proto-wordmark {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  color: var(--text);
+  margin: 0;
+}
+
+/* The demo's "NOW": which moment the screen is describing. It earns its place
+   the second the curve can be dragged away from the present. */
+.proto-clock {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  opacity: 0.75;
+}
+
+/* Empty sky. On a clear day there is a lot of it, and that is the product
+   working rather than a hole in the layout. */
+.proto-sky-gap {
+  flex: 1;
+  min-height: 6svh;
+}
+
+/* ----------------------------------------------------------------- verdict */
+
+/* Suggestion 4: no card. .rating-chip is a bordered panel with a 6px accent
+   rule sitting on a live sky; on a screen whose whole idea is a window, a
+   bordered box is the one element that reads as pasted on. */
+.proto-verdict {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+
+/* Suggestion 3: the word is the hero. The live site makes the AQI integer the
+   hero and the word a subtitle; iOS does the opposite. They have to agree, and
+   the word is the one thing no other app says. */
+.proto-level {
+  margin: 0;
+  font-size: clamp(2.5rem, 12vw, 3.9rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-wrap: balance;
+}
+
+.proto-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.15rem 0 0;
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.proto-trend__pip {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: 0 0 auto;
+}
+
+.proto-trend--rising .proto-trend__pip {
+  background: var(--tastes);
+}
+.proto-trend--falling .proto-trend__pip {
+  background: var(--all-clear);
+}
+.proto-trend--steady .proto-trend__pip {
+  background: var(--text-dim);
+}
+
+/* The one sentence guaranteed identical on the phone and the laptop, and the
+   whole question the product exists to answer. It takes the accent for that
+   reason and for no other. */
+.proto-headline {
+  margin: 0.1rem 0 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--accent);
+  text-wrap: balance;
+}
+
+/* Scrubbed away from now: the clear-time still applies, but it is no longer
+   describing the hour the rest of the screen is showing. */
+.proto-headline--away {
+  opacity: 0.6;
+}
+
+.proto-notice {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--text-dim);
+  max-width: 42ch;
+}
+
+/* Suggestion 3's other half: the number does not vanish, it stops leading.
+   Both units on one line, because the live site's tab-says-42 /
+   number-says-18 split read as two different answers to the same question.
+ *
+ * NOT uppercased, and this is a correctness rule rather than a style one:
+ * text-transform renders "µg/m³" as "MG/M³", which is a different unit off by
+ * a factor of a thousand. Nothing carrying a unit gets uppercased anywhere on
+ * this page. */
+.proto-reading {
+  margin: 0.1rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  color: var(--text-dim);
+  opacity: 0.85;
+}
+
+/* A text link, not a pill — the demo's own call, and the reason "What this
+   means" stopped being a bordered control on iOS. */
+.proto-explain {
+  margin-top: 0.35rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  opacity: 0.78;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--ink) 35%, transparent);
+}
+
+.proto-explain:hover {
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------------- timeline */
+
+/* Suggestion 2. This is the whole point of the rearrangement: the drag that
+   moves the sky sits directly under the words the sky is behind. */
+.proto-timeline {
+  margin-top: 1.4rem;
+}
+
+.proto-timeline__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.4rem;
+  min-height: 22px;
+}
+
+.proto-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.proto-eyebrow--dim {
+  color: var(--text-dim);
+  opacity: 0.7;
+}
+
+/* The scrub readout carries µg/m³, so it opts out of the uppercase the rest of
+   the eyebrows take. See .proto-reading for why that matters. */
+.proto-eyebrow--readout {
+  text-transform: none;
+  letter-spacing: 0.06em;
+}
+
+/* Suggestion 9. The live Scrubber shows a "Now" tag but gives you no way back
+   to it except dragging until you happen to land there. */
+.proto-now-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.proto-now-btn:hover {
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+}
+
+.proto-curve {
+  position: relative;
+  height: 150px;
+  /* The drag owns the gesture. Without this the browser claims the pointer for
+     a page scroll the moment the finger wanders vertically, which is the exact
+     trade a slider makes and the reason the curve is only this tall. */
+  touch-action: none;
+  cursor: ew-resize;
+  user-select: none;
+}
+
+.proto-curve__nights {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+
+.proto-curve__night {
+  flex: 1;
+}
+
+/* Night shading, per the brief. Cheap, and it tells you at a glance whether
+   the clear-time lands at 3 AM — which changes what the answer is worth. */
+.proto-curve__night--on {
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+.proto-curve__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* preserveAspectRatio="none" scales x and y differently, which would turn
+   every stroke into a wedge. non-scaling-stroke is what keeps them even. */
+.proto-curve__line,
+.proto-curve__threshold,
+.proto-curve__now,
+.proto-curve__playhead {
+  vector-effect: non-scaling-stroke;
+}
+
+.proto-curve__line {
+  stroke: var(--ink);
+  stroke-opacity: 0.72;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.proto-curve__threshold {
+  stroke: var(--ink);
+  stroke-opacity: 0.3;
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.proto-curve__now {
+  stroke: var(--ink);
+  stroke-opacity: 0.2;
+  stroke-width: 1;
+}
+
+.proto-curve__playhead {
+  stroke: var(--ink);
+  stroke-opacity: 0.5;
+  stroke-width: 1.5;
+}
+
+/* 27px — three times the 9 this started at. At that size it stops being a
+   position marker and becomes a handle you can see under your own thumb,
+   which is the point: the finger covers the curve while you drag it. */
+.proto-curve__dot {
+  position: absolute;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: var(--ink);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.proto-curve:focus-visible {
+  outline: 2px solid #bc5a1e;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* -------------------------------------------------------------- five days */
+
+/* Suggestion 6: these are a control, not a summary. Tapping one sends the
+   playhead to that day's worst hour and the whole window follows it. */
+.proto-days-row {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  margin-top: 1.1rem;
+  min-width: 0;
+}
+
+.proto-days {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Collapsed: five equal days, exactly the grid this replaced. */
+.proto-days > .proto-day {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Opened: eight days is more than a phone's width, so the strip becomes a
+   scroller with each day at a fixed size rather than eight slivers. */
+.proto-days--open {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  /* The scrollbar would otherwise land on the ridge. */
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.proto-days--open::-webkit-scrollbar {
+  display: none;
+}
+
+.proto-days--open > .proto-day {
+  flex: 0 0 78px;
+  scroll-snap-align: start;
+}
+
+/* "‹" — back through the days already spent. Narrow on purpose: it is a
+   disclosure, not a peer of the days it sits next to. */
+.proto-days__back {
+  flex: 0 0 22px;
+  align-self: stretch;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  opacity: 0.65;
+  cursor: pointer;
+}
+
+.proto-days__back:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--ink) 13%, transparent);
+}
+
+/* History, not a control: these sit outside the −12h scrub window, so they
+   cannot be scrubbed to and must not look like they can. */
+.proto-day--past {
+  opacity: 0.5;
+  border: 1px dashed color-mix(in srgb, var(--ink) 22%, transparent);
+  background: none;
+}
+
+.proto-day__range {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+}
+
+.proto-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 0.6rem 0.35rem;
+  border: 0;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  transition: background var(--duration-base) var(--easing-base);
+}
+
+.proto-day:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+.proto-day--on {
+  background: color-mix(in srgb, var(--ink) 17%, transparent);
+}
+
+/* A day past the +48h window cannot be scrubbed to, so it dims rather than
+   silently doing nothing when tapped. */
+.proto-day--out {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.proto-day__weekday {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.proto-day__level {
+  font-size: 9.5px;
+  font-weight: 500;
+  line-height: 1.15;
+  text-align: center;
+  opacity: 0.9;
+}
+
+.proto-day__parts {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+}
+
+.proto-day__parts i {
+  flex: 1;
+  height: 5px;
+  border-radius: 1.5px;
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+/* ------------------------------------------------------- agreement on curve */
+
+/* Where two models disagree. A column rather than a strip beneath the chart:
+   the disagreement belongs to those hours, and putting it on them removes the
+   eye-correlation the live agreement band asks for. */
+.proto-curve__diverge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--accent) 26%, transparent) 0 2px,
+    transparent 2px 7px
+  );
+  border-left: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  pointer-events: none;
+}
+
+/* Lead-time fade past +36h. Structural uncertainty, not a disagreement, so it
+   is a wash that deepens rather than a marked span — the curve visibly runs
+   out of confidence instead of stopping. */
+.proto-curve__fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--ink) 7%, transparent) 100%
+  );
+  pointer-events: none;
+}
+
+/* The line under the curve. Quiet when the models agree, and it only earns
+   the accent when they do not. */
+.proto-agreement {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  text-align: left;
+}
+
+.proto-agreement__pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.55;
+  flex: 0 0 auto;
+}
+
+.proto-agreement--split {
+  color: var(--accent);
+  font-weight: 650;
+}
+
+.proto-agreement--split .proto-agreement__pip {
+  opacity: 1;
+}
+
+/* -------------------------------------------------------------------- foot */
+
+.proto-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* Tappable place, per Joe: the label IS the control, and the caret is what
+   says so. Left-aligned and first, because "where" scopes everything above
+   it. */
+.proto-foot__place,
+.proto-foot__share {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.proto-foot__place {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.proto-foot__place > :not(.proto-foot__pin):not(.proto-foot__caret) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.proto-foot__share:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.proto-foot__place:hover,
+.proto-foot__share:hover {
+  background: color-mix(in srgb, var(--ink) 13%, transparent);
+}
+
+.proto-foot__pin,
+.proto-foot__caret {
+  opacity: 0.6;
+  flex: 0 0 auto;
+}
+
+.proto-foot__caret {
+  margin-left: auto;
+  padding-left: 0.4rem;
+}
+
+.proto-foot__glyph {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
+
+/* ------------------------------------------------------------- install ask */
+
+/* A bar at the foot, not a card over the verdict. Someone who is being asked
+   for a Home Screen slot should still be able to see the answer they came
+   for. */
+.proto-nudge {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem calc(0.85rem + env(safe-area-inset-bottom, 0px));
+  background: rgba(22, 19, 15, 0.94);
+  color: #f4e9d6;
+  border-top: 1px solid rgba(244, 233, 214, 0.18);
+  backdrop-filter: blur(8px);
+}
+
+.proto-nudge__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.proto-nudge__pitch {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.proto-nudge__how {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  opacity: 0.75;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.proto-nudge__glyph {
+  width: 15px;
+  height: 15px;
+  vertical-align: -2px;
+}
+
+.proto-nudge__install {
+  margin-top: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: #e8823a;
+  color: #16130f;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.proto-nudge__close {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(244, 233, 214, 0.12);
+  color: #f4e9d6;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* A fixed bar that covers the controls it is sitting on top of is the thing
+   people hate about install prompts. While it is up, the window gives back
+   the height it takes, so the place, the share and the map are all still
+   reachable underneath it. */
+body:has(.proto-nudge) .proto-window {
+  padding-bottom: 10.5rem;
+}
+
+
+/* --------------------------------------------------------- location sheet */
+
+.proto-locate {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.proto-locate:hover {
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+.proto-locate__pin {
+  opacity: 0.6;
+}
+
+.proto-search {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem; /* 16px — anything smaller and iOS zooms the page on focus */
+}
+
+.proto-results {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.proto-results__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.55rem 0.2rem;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.proto-results__item:hover {
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+.proto-results__item--on {
+  font-weight: 700;
+}
+
+.proto-sheet__panel--short {
+  gap: 0.8rem;
+}
+
+.proto-sheet__note {
+  font-size: 0.78rem;
+  opacity: 0.8;
+}
+
+/* ------------------------------------------------------------- map section */
+
+/* Unchanged in this proposal. The placeholder stands in for the live Leaflet
+   map so the review is about where the map sits, not about re-reviewing it. */
+.proto-map-placeholder {
+  aspect-ratio: 4 / 3;
+  max-height: 60svh;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  border: 1px dashed var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.proto-map-placeholder p {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.proto-map-placeholder small {
+  font-family: inherit;
+  font-size: 0.85rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-dim);
+  max-width: 34ch;
+  line-height: 1.4;
+}
+
+/* ------------------------------------------------------------------ footer */
+
+/* Joe's ask: a footer with links to cities. It rides the live sky rather than
+   the cream sheet, because it is site furniture and not reference material —
+   and because the sheet closing above it is what says the reading ended. */
+.proto-footer {
+  max-width: 720px;
+  margin: 2.5rem auto 0;
+  padding: 1.5rem 1.25rem 3rem;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.proto-footer h2 {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.proto-footer__cities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.proto-footer__cities a {
+  color: var(--text);
+  font-size: 0.95rem;
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 30%, transparent);
+}
+
+.proto-footer__cities a:hover {
+  border-bottom-color: var(--accent);
+}
+
+.proto-footer__note {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.proto-footer__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  opacity: 0.8;
+}
+
+/* ------------------------------------------------------------------- sheet */
+
+.proto-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.proto-sheet__scrim {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(10, 8, 6, 0.45);
+  cursor: pointer;
+}
+
+/* Same cream reference surface the FAQ uses, with the same scoped ink — this
+   is reference material, and the change of surface is what says so. */
+.proto-sheet__panel {
+  --ink: #26221b;
+  --accent: #8c3e10;
+  --rule: #e3d9c6;
+  --text: var(--ink);
+  --text-dim: color-mix(in srgb, var(--ink) 84%, transparent);
+  --border: color-mix(in srgb, var(--ink) 70%, transparent);
+  position: relative;
+  width: min(100%, 600px);
+  max-height: 88svh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: rgba(251, 247, 238, 0.98);
+  color: var(--ink);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 1.25rem 1.25rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.proto-sheet__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.proto-sheet__head h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.proto-sheet__done {
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.proto-sheet__section h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+}
+
+.proto-sheet__section p {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.proto-sheet__section p:last-child {
+  margin-bottom: 0;
+}
+
+.proto-sheet__dim {
+  color: var(--text-dim);
+}
+
+.proto-ladder {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.proto-ladder__rung {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  font-size: 0.88rem;
+}
+
+.proto-ladder__rung--on .proto-ladder__name {
+  font-weight: 700;
+}
+
+.proto-ladder__pip {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--text-dim);
+}
+
+.proto-ladder__pip--all-clear {
+  background: var(--all-clear);
+}
+.proto-ladder__pip--something {
+  background: var(--something);
+}
+.proto-ladder__pip--smells {
+  background: var(--smells);
+}
+.proto-ladder__pip--tastes {
+  background: var(--tastes);
+}
+.proto-ladder__pip--smokeshow {
+  background: var(--smokeshow);
+}
+
+.proto-ladder__vis {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+/* ------------------------------------------------------------ review chrome */
+
+/* Not part of the proposal. It exists so all five states can be seen without
+   waiting for the weather, and it is labelled so nobody mistakes it for UI. */
+/* Parked in the empty sky under the wordmark, not at the foot. Everything
+   this build added — place, share, the map bar, the install ask — lives in
+   the bottom third, and review chrome that sits on top of the things being
+   reviewed is worse than useless. */
+.proto-review {
+  position: fixed;
+  left: 12px;
+  top: 3.1rem;
+  z-index: 70;
+  font-family: var(--font-mono);
+}
+
+.proto-review__toggle {
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(244, 233, 214, 0.35);
+  background: rgba(22, 19, 15, 0.82);
+  color: #f4e9d6;
+  cursor: pointer;
+}
+
+.proto-review--open .proto-review__toggle {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  padding: 0.2rem 0.35rem;
+}
+
+.proto-review__body {
+  width: min(78vw, 280px);
+  padding: 0.7rem 0.8rem 0.8rem;
+  border-radius: var(--radius-md);
+  background: rgba(22, 19, 15, 0.88);
+  color: #f4e9d6;
+  border: 1px solid rgba(244, 233, 214, 0.2);
+  backdrop-filter: blur(6px);
+}
+
+.proto-review__label {
+  margin: 0 0 0.5rem;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.proto-review__scenarios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.proto-review__pick {
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(244, 233, 214, 0.22);
+  background: none;
+  color: #f4e9d6;
+  cursor: pointer;
+}
+
+.proto-review__pick--on {
+  background: #e8823a;
+  border-color: #e8823a;
+  color: #16130f;
+}
+
+.proto-review__pick--wide {
+  width: 100%;
+  margin-top: 6px;
+  justify-content: center;
+}
+
+.proto-review__note {
+  margin: 0.6rem 0 0;
+  font-size: 10px;
+  line-height: 1.5;
+  opacity: 0.62;
+}
+
+.proto-review__note a {
+  color: #e8823a;
+}
+
+/* ------------------------------------------------------------------ motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .proto-day {
+    transition: none;
+  }
+}
+
+/* Short viewports: a phone in landscape has no room for empty sky, and the
+   verdict is the thing that must survive. */
+@media (max-height: 620px) {
+  .proto-sky-gap {
+    min-height: 0;
+  }
+
+  .proto-level {
+    font-size: clamp(2rem, 8vw, 2.6rem);
+  }
+
+  .proto-curve {
+    height: 110px;
+  }
+}

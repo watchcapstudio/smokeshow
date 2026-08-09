@@ -50,6 +50,15 @@
   color: var(--text-dim);
 }
 
+/* The measured value inside that eyebrow. `uppercase` maps µ (U+00B5) to Μ
+   (U+039C, capital Mu), so "44 µg/m³" paints as "44 MG/M³" — micrograms
+   printed as milligrams, off by a thousand, in the one sheet whose whole job
+   is explaining what the number means. The label stays uppercase; the value
+   it labels does not. */
+.explain-sheet__unit {
+  text-transform: none;
+}
+
 .explain-sheet__ladder {
   position: relative;
   margin: 0.7rem 0 0.3rem;
