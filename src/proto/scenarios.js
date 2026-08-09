@@ -29,6 +29,16 @@ export const SCENARIOS = [
   { id: 'smoke-never-clears', label: 'Never clears', fixture: smokeNeverClears },
   { id: 'clear-staying-clear', label: 'All clear', fixture: clearStayingClear },
   { id: 'model-gaps', label: 'Model gaps', fixture: modelGaps },
+  // Every real fixture is single-model, so none of them carry a `diverge`
+  // hour and the treatment for the case that matters most would be
+  // unreviewable. This one forces a split across a run of afternoon hours.
+  // Synthesised, and the review panel says so.
+  {
+    id: 'models-split',
+    label: 'Models split',
+    fixture: smokeNowClearing,
+    forceDivergeFromNow: [6, 20],
+  },
 ];
 
 // `timesUTC` entries are stored WITHOUT the trailing Z, because that is what
@@ -39,7 +49,7 @@ function toSeriesStamp(ms) {
   return new Date(ms).toISOString().slice(0, 19);
 }
 
-export function rebase(fixture) {
+export function rebase(fixture, { forceDivergeFromNow = null } = {}) {
   const hours = fixture.hours ?? [];
   const nowIndex = fixture.now.index;
 
@@ -48,6 +58,18 @@ export function rebase(fixture) {
   const realNow = new Date();
   realNow.setUTCMinutes(0, 0, 0);
   const delta = realNow.getTime() - Date.parse(hours[nowIndex].t);
+
+  // Per-hour model agreement, straight off the payload: 'agree' | 'fade' |
+  // 'diverge' (contract §4, computed by lib/agreement.js server-side).
+  const agreement = hours.map((h) => h.agreement ?? 'agree');
+  let summary = fixture.agreement ?? null;
+  if (forceDivergeFromNow) {
+    const [from, to] = forceDivergeFromNow;
+    for (let i = nowIndex + from; i <= nowIndex + to && i < agreement.length; i++) {
+      agreement[i] = 'diverge';
+    }
+    summary = { multiModel: true, diverged: true, label: 'Models split on timing' };
+  }
 
   return {
     timesUTC: hours.map((h) => toSeriesStamp(Date.parse(h.t) + delta)),
@@ -62,5 +84,7 @@ export function rebase(fixture) {
     place: PLACE,
     scale: fixture.scale ?? [],
     measured: fixture.measured ?? null,
+    agreement,
+    agreementSummary: summary,
   };
 }

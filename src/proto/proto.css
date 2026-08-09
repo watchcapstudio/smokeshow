@@ -427,19 +427,324 @@ html {
   background: color-mix(in srgb, var(--ink) 12%, transparent);
 }
 
+/* ------------------------------------------------------- agreement on curve */
+
+/* Where two models disagree. A column rather than a strip beneath the chart:
+   the disagreement belongs to those hours, and putting it on them removes the
+   eye-correlation the live agreement band asks for. */
+.proto-curve__diverge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--accent) 26%, transparent) 0 2px,
+    transparent 2px 7px
+  );
+  border-left: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  pointer-events: none;
+}
+
+/* Lead-time fade past +36h. Structural uncertainty, not a disagreement, so it
+   is a wash that deepens rather than a marked span — the curve visibly runs
+   out of confidence instead of stopping. */
+.proto-curve__fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--ink) 7%, transparent) 100%
+  );
+  pointer-events: none;
+}
+
+/* The line under the curve. Quiet when the models agree, and it only earns
+   the accent when they do not. */
+.proto-agreement {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  text-align: left;
+}
+
+.proto-agreement__pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.55;
+  flex: 0 0 auto;
+}
+
+.proto-agreement--split {
+  color: var(--accent);
+  font-weight: 650;
+}
+
+.proto-agreement--split .proto-agreement__pip {
+  opacity: 1;
+}
+
+/* -------------------------------------------------------------------- foot */
+
+.proto-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* Tappable place, per Joe: the label IS the control, and the caret is what
+   says so. Left-aligned and first, because "where" scopes everything above
+   it. */
+.proto-foot__place,
+.proto-foot__share {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.proto-foot__place {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.proto-foot__place > :not(.proto-foot__pin):not(.proto-foot__caret) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.proto-foot__share:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.proto-foot__place:hover,
+.proto-foot__share:hover {
+  background: color-mix(in srgb, var(--ink) 13%, transparent);
+}
+
+.proto-foot__pin,
+.proto-foot__caret {
+  opacity: 0.6;
+  flex: 0 0 auto;
+}
+
+.proto-foot__caret {
+  margin-left: auto;
+  padding-left: 0.4rem;
+}
+
+.proto-foot__glyph {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
+
+/* ------------------------------------------------------------- install ask */
+
+/* A bar at the foot, not a card over the verdict. Someone who is being asked
+   for a Home Screen slot should still be able to see the answer they came
+   for. */
+.proto-nudge {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem calc(0.85rem + env(safe-area-inset-bottom, 0px));
+  background: rgba(22, 19, 15, 0.94);
+  color: #f4e9d6;
+  border-top: 1px solid rgba(244, 233, 214, 0.18);
+  backdrop-filter: blur(8px);
+}
+
+.proto-nudge__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.proto-nudge__pitch {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.proto-nudge__how {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  opacity: 0.75;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.proto-nudge__glyph {
+  width: 15px;
+  height: 15px;
+  vertical-align: -2px;
+}
+
+.proto-nudge__install {
+  margin-top: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: #e8823a;
+  color: #16130f;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.proto-nudge__close {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(244, 233, 214, 0.12);
+  color: #f4e9d6;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* A fixed bar that covers the controls it is sitting on top of is the thing
+   people hate about install prompts. While it is up, the window gives back
+   the height it takes, so the place, the share and the map are all still
+   reachable underneath it. */
+body:has(.proto-nudge) .proto-window {
+  padding-bottom: 10.5rem;
+}
+
+
+/* --------------------------------------------------------- location sheet */
+
+.proto-locate {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.proto-locate:hover {
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+.proto-locate__pin {
+  opacity: 0.6;
+}
+
+.proto-search {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem; /* 16px — anything smaller and iOS zooms the page on focus */
+}
+
+.proto-results {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.proto-results__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.55rem 0.2rem;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.proto-results__item:hover {
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+.proto-results__item--on {
+  font-weight: 700;
+}
+
+.proto-sheet__panel--short {
+  gap: 0.8rem;
+}
+
+.proto-sheet__note {
+  font-size: 0.78rem;
+  opacity: 0.8;
+}
+
 /* ------------------------------------------------------------------- place */
 
 /* The answer to "where", under everything that answers "how bad" — and the
    door to the map, which is the thing people come back for, so it is a bar you
    can hit rather than an eyebrow you can miss. */
+/* The map is the destination, so it gets the full-width bar and the accent
+   border rather than sharing a row with the two utilities above it. */
 .proto-place {
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  margin-top: 0.9rem;
+  min-height: 48px;
+  margin-top: 0.5rem;
   padding: 0.8rem 0.9rem;
   border-radius: 12px;
-  background: color-mix(in srgb, var(--ink) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
   color: var(--text);
   text-decoration: none;
   font-family: var(--font-mono);
@@ -449,20 +754,16 @@ html {
 }
 
 .proto-place:hover {
-  background: color-mix(in srgb, var(--ink) 14%, transparent);
-}
-
-.proto-place__name {
-  font-weight: 600;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
 }
 
 .proto-place__cta {
-  margin-left: auto;
-  opacity: 0.62;
+  font-weight: 600;
 }
 
 .proto-place__chev {
-  opacity: 0.62;
+  margin-left: auto;
+  opacity: 0.7;
   letter-spacing: 0;
 }
 
@@ -706,10 +1007,14 @@ html {
 
 /* Not part of the proposal. It exists so all five states can be seen without
    waiting for the weather, and it is labelled so nobody mistakes it for UI. */
+/* Parked in the empty sky under the wordmark, not at the foot. Everything
+   this build added — place, share, the map bar, the install ask — lives in
+   the bottom third, and review chrome that sits on top of the things being
+   reviewed is worse than useless. */
 .proto-review {
   position: fixed;
   left: 12px;
-  bottom: 12px;
+  top: 3.1rem;
   z-index: 70;
   font-family: var(--font-mono);
 }
@@ -777,6 +1082,12 @@ html {
   background: #e8823a;
   border-color: #e8823a;
   color: #16130f;
+}
+
+.proto-review__pick--wide {
+  width: 100%;
+  margin-top: 6px;
+  justify-content: center;
 }
 
 .proto-review__note {

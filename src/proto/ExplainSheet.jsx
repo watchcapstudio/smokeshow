@@ -12,7 +12,7 @@
 import { useEffect, useRef } from 'react';
 import { NOSE_CAVEAT } from '../lib/rating.js';
 
-export default function ExplainSheet({ open, onClose, level, scale, measured }) {
+export default function ExplainSheet({ open, onClose, level, scale, measured, agreement }) {
   const closeRef = useRef(null);
 
   useEffect(() => {
@@ -106,6 +106,32 @@ export default function ExplainSheet({ open, onClose, level, scale, measured }) 
             </p>
             <p className="proto-sheet__dim">
               Hours before now are model estimate — model reanalysis, not readings.
+            </p>
+          </section>
+        )}
+
+        {/* Where the agreement line under the curve lands. The one-liner on
+            the window says what; this says what it means and what to do with
+            it, which is the split the sheet exists for. */}
+        {agreement && (
+          <section className="proto-sheet__section">
+            <h3>How sure is this?</h3>
+            <p>{agreement.label}.</p>
+            {agreement.diverged ? (
+              <p>
+                Two models are running the same hours and putting the smoke in different places.
+                The shaded stretch on the curve is where they disagree — treat the timing there
+                as rough, and check back rather than planning around the exact hour.
+              </p>
+            ) : (
+              <p>
+                Nothing is contradicting this forecast right now. Confidence still falls off past
+                about 36 hours, which is why the curve washes out toward its right edge — that is
+                lead time, not a disagreement.
+              </p>
+            )}
+            <p className="proto-sheet__dim">
+              Forecasts are model estimates. Hours before now are model reanalysis, not readings.
             </p>
           </section>
         )}

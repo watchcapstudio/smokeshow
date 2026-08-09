@@ -78,6 +78,7 @@ export default function Curve({
   selectedIndex,
   onScrub,
   timezone,
+  agreement,
 }) {
   const ref = useRef(null);
   const count = windowEnd - windowStart + 1;
@@ -94,6 +95,41 @@ export default function Curve({
       Array.from({ length: count }, (_, k) => isNightHour(timesUTC[windowStart + k], timezone)),
     [timesUTC, windowStart, count, timezone],
   );
+
+  // Model agreement, drawn ON the curve rather than in a strip beneath it.
+  //
+  // The band on the live site is a second chart the reader has to correlate
+  // with the first one by eye, and agreement is a property of each forecast
+  // hour — so it belongs on the hour. Two states are worth drawing:
+  //
+  //   diverge — the models disagree here. A tinted column, because this is
+  //             the one thing a reader should be warned about, and it should
+  //             be visible without being asked for.
+  //   fade    — past +36h, uncertainty is structural rather than a
+  //             disagreement. Drawn as a wash that deepens toward the right
+  //             edge, so the curve visibly loses confidence as it runs out.
+  //
+  // 'agree' draws nothing. A chart that shouts "models agree" at every hour
+  // trains people to ignore it on the hour it matters.
+  const spans = useMemo(() => {
+    if (!agreement) return { diverge: [], fadeFrom: null };
+    const step = 100 / Math.max(1, count - 1);
+    const diverge = [];
+    let run = null;
+    let fadeFrom = null;
+    for (let k = 0; k < count; k++) {
+      const status = agreement[windowStart + k];
+      if (status === 'fade' && fadeFrom == null) fadeFrom = k;
+      if (status === 'diverge') {
+        if (run == null) run = k;
+      } else if (run != null) {
+        diverge.push({ left: (run - 0.5) * step, width: (k - run) * step });
+        run = null;
+      }
+    }
+    if (run != null) diverge.push({ left: (run - 0.5) * step, width: (count - run) * step });
+    return { diverge, fadeFrom: fadeFrom == null ? null : fadeFrom * step };
+  }, [agreement, windowStart, count]);
 
   // Pointer position -> hour index. Clamped, because a drag that leaves the
   // element still means "the first hour" or "the last one", not "stop".
@@ -185,6 +221,23 @@ export default function Curve({
           />
         ))}
       </div>
+
+      {/* Confidence, under the line and over the night shading. */}
+      {spans.fadeFrom != null && (
+        <div
+          className="proto-curve__fade"
+          aria-hidden="true"
+          style={{ left: `${spans.fadeFrom}%`, width: `${100 - spans.fadeFrom}%` }}
+        />
+      )}
+      {spans.diverge.map((s, i) => (
+        <div
+          key={i}
+          className="proto-curve__diverge"
+          aria-hidden="true"
+          style={{ left: `${s.left}%`, width: `${s.width}%` }}
+        />
+      ))}
 
       <svg
         className="proto-curve__svg"
