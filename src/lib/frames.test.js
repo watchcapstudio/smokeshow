@@ -18,6 +18,8 @@ const HRRR = {
   model: 'HRRR-Smoke near-surface',
   resolutionKm: 3,
   priority: 100,
+  // The map draws a dark basemap, so it takes the dark-themed domains.
+  theme: 'dark',
   bounds: { latS: 24, latN: 50, lonW: -125, lonE: -66.5 },
   width: 1200,
   height: 680,
@@ -35,6 +37,7 @@ const CAMS = {
   model: 'CAMS global forecast',
   resolutionKm: 40,
   priority: 10,
+  theme: 'dark',
   bounds: { latS: -60, latN: 75, lonW: -180, lonE: 180 },
   width: 1200,
   height: 639,

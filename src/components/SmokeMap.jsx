@@ -174,7 +174,7 @@ export default function SmokeMap({
     // labels baked into the basemap would be buried exactly when a reader most
     // needs to know which city is under the plume. Splitting them is the only
     // way to keep the place names above the weather.
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
       maxZoom: 12,
       // CARTO's basemaps are free to use with attribution; both credits are
       // required and must stay visible.
@@ -207,7 +207,7 @@ export default function SmokeMap({
     // "you are here" marker still sits over the labels.
     map.createPane('labels').style.zIndex = 450;
     map.getPane('labels').style.pointerEvents = 'none';
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
       maxZoom: 12,
       pane: 'labels',
       // Attribution rides the base layer — same source, and Leaflet would
