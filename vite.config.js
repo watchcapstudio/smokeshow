@@ -10,11 +10,18 @@ const locationPages = globSync('smoke-forecast/*/index.html', { cwd: import.meta
   (p) => `./${p}`,
 );
 
+// Front-end redesign candidate, for review only. Listed by hand rather than
+// globbed because it is one page and it is meant to be deleted: when the
+// proposal is accepted or rejected, this line and asdfasdf/ go together. It
+// carries `noindex` and is absent from the sitemap, which is generated from
+// src/data/locations.js and never sees this file.
+const reviewPages = ['./asdfasdf/index.html'];
+
 export default defineConfig({
   plugins: [react()],
   build: {
     rollupOptions: {
-      input: ['./index.html', ...locationPages],
+      input: ['./index.html', ...locationPages, ...reviewPages],
     },
   },
 });

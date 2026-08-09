@@ -1,0 +1,318 @@
+// CANDIDATE — web front-end redesign, first pass. Lives at /asdfasdf/.
+//
+// This is the parity review from the iOS build turned into pixels. Nothing here
+// is wired into the real app: it imports the production modules (sky, ink,
+// rating, verdict, days, trend, aqi, time) and the production components it
+// reuses unchanged (SkyBackdrop, Ridgeline), and renders a canned PM2.5 series
+// through them. Every word of rating and disclaimer copy is the real copy.
+//
+// What is being proposed, in the order the suggestions were numbered:
+//   1. the verdict is a window, not a card — one viewport, sky to horizon
+//   2. the curve is a control and it sits under the words it drives
+//   3. the level WORD is the hero; the number is the supporting line
+//   4. no panel chrome on the verdict
+//   5. sources / "why two numbers" / the nose caveat move into the sheet
+//   6. tapping a day drives the scrubber instead of opening an accordion
+//   7. the ridge gets the foot of the screen, full bleed
+//   9. a "Now" affordance the moment you scrub off the present
+//
+// Deliberately unchanged and still below the fold: the map, the FAQ, the
+// explainer and the disclaimer (see asdfasdf/index.html). Joe's note: the
+// bottom material stays on the web, and a city footer joins it.
+
+import { useEffect, useMemo, useState } from 'react';
+import SkyBackdrop from '../components/SkyBackdrop.jsx';
+import Ridgeline from '../components/Ridgeline.jsx';
+import Curve from './Curve.jsx';
+import ExplainSheet from './ExplainSheet.jsx';
+import { SCENARIOS, rebase } from './scenarios.js';
+import { computeVerdict, verdictHeadline } from '../lib/verdict.js';
+import { buildDaySummaries } from '../lib/days.js';
+import { levelForPM25 } from '../lib/rating.js';
+import { ugm3ToAqi } from '../lib/aqi.js';
+import { trendAt } from '../lib/trend.js';
+import { formatLocalTime, formatVerdictTime } from '../lib/time.js';
+import '../styles/tokens.css';
+import '../styles/sky.css';
+// The bottom of the page is production, unchanged and deliberately so: the
+// same shell primitives and the same cream reference sheet the live site
+// serves. Only the window above it is new.
+import '../styles/shell.css';
+import '../styles/seo.css';
+import './proto.css';
+
+const TREND_COPY = {
+  rising: { text: 'Getting worse', modifier: 'rising' },
+  falling: { text: 'Improving', modifier: 'falling' },
+  steady: { text: 'Holding steady', modifier: 'steady' },
+};
+const QUIET_FLOOR = 12; // clear and steady is not worth a chip — matches TrendChip.jsx
+
+export default function Proto() {
+  const [scenarioId, setScenarioId] = useState(SCENARIOS[0].id);
+  const [selectedIndex, setSelectedIndex] = useState(null); // null = now
+  const [explainOpen, setExplainOpen] = useState(false);
+
+  const series = useMemo(() => {
+    const scenario = SCENARIOS.find((s) => s.id === scenarioId) ?? SCENARIOS[0];
+    return rebase(scenario.fixture);
+  }, [scenarioId]);
+
+  const { timesUTC, pm25, nowIndex, timezone: tz, lat, lon, place, scale } = series;
+
+  // Switching scenarios has to drop the scrub with it: hour 96 of one series
+  // is a different moment in another, and holding the index across the change
+  // silently moves the reader somewhere they did not ask to be.
+  useEffect(() => {
+    setSelectedIndex(null);
+  }, [scenarioId]);
+
+  const windowStart = Math.max(0, nowIndex - 12);
+  const windowEnd = Math.min(timesUTC.length - 1, nowIndex + 48);
+  const activeIndex = selectedIndex ?? nowIndex;
+  const isNow = selectedIndex == null;
+
+  const verdict = useMemo(() => computeVerdict({ pm25, nowIndex }), [pm25, nowIndex]);
+  const headline = useMemo(
+    () => verdictHeadline(verdict, (i) => formatVerdictTime(timesUTC[i], tz)),
+    [verdict, timesUTC, tz],
+  );
+  const days = useMemo(
+    () => buildDaySummaries({ timesUTC, pm25, nowIndex, timezone: tz }),
+    [timesUTC, pm25, nowIndex, tz],
+  );
+
+  const shownPM25 = pm25[activeIndex];
+  const level = levelForPM25(shownPM25);
+  const aqi = ugm3ToAqi(shownPM25);
+
+  const trend = shownPM25 == null ? null : trendAt(pm25, activeIndex, verdict);
+  const showTrend = trend && !(trend === 'steady' && shownPM25 < QUIET_FLOOR);
+
+  // Day -> the worst hour inside the scrubbable window, which is the hour a
+  // person means when they point at a day and ask "what about then?".
+  // Days past +48h cannot be reached, so they dim rather than doing nothing.
+  const dayTargets = useMemo(() => {
+    const keyFmt = new Intl.DateTimeFormat('en-CA', { timeZone: tz });
+    const targets = new Map();
+    for (let i = windowStart; i <= windowEnd; i++) {
+      const key = keyFmt.format(new Date(timesUTC[i] + 'Z'));
+      const best = targets.get(key);
+      if (best == null || (pm25[i] ?? -1) > (pm25[best] ?? -1)) targets.set(key, i);
+    }
+    return targets;
+  }, [timesUTC, pm25, windowStart, windowEnd, tz]);
+
+  const clockLabel = isNow
+    ? formatLocalTime(timesUTC[nowIndex], tz)
+    : formatLocalTime(timesUTC[activeIndex], tz);
+
+  return (
+    <>
+      <SkyBackdrop
+        pm25={shownPM25}
+        date={new Date(timesUTC[activeIndex] + 'Z')}
+        lat={lat}
+        lon={lon}
+      />
+
+      {/* The stage is what scopes the ridge. Positioned inside it rather than
+          fixed to the viewport, so the land ends where the window ends and
+          does not follow the reader down onto the FAQ. */}
+      <div className="proto-stage">
+      {/* Suggestion 7: the ridge is the bottom of the window, not a 68px band
+          floating between two controls. Same component, same ink-following
+          haze the live site already gets right — only the frame changed. */}
+      <div className="proto-ridge" aria-hidden="true">
+        <Ridgeline pm25={shownPM25} />
+      </div>
+
+      <main className="proto-window">
+        <header className="proto-header">
+          <h1 className="proto-wordmark">SMOKESHOW</h1>
+          <span className="proto-clock">
+            {isNow ? clockLabel : `${clockLabel} · model`}
+          </span>
+        </header>
+
+        {/* Empty sky. On a clear day you see a lot of it, and that is the
+            product doing its job rather than a layout with a hole in it. */}
+        <div className="proto-sky-gap" />
+
+        <section className="proto-verdict">
+          {/* Suggestion 3: the word is the hero. The live site leads with the
+              AQI integer, iOS leads with the word, and the two surfaces
+              currently give a reader a different lead answer. */}
+          <p className="proto-level">{level?.name ?? 'Unavailable'}</p>
+
+          {showTrend && (
+            <p className={`proto-trend proto-trend--${TREND_COPY[trend].modifier}`}>
+              <span className="proto-trend__pip" />
+              {TREND_COPY[trend].text}
+            </p>
+          )}
+
+          {/* The one sentence that must be identical on the phone and the
+              laptop, and the whole question the product answers. It gets the
+              accent for that reason. */}
+          {/* The headline is always about now, but the word above it follows
+              the scrub — so once the reader is out at Tuesday the two are
+              answering different questions and only the header clock says so.
+              Dimming it is the lightest way to scope it; inventing a "from
+              now" label would be new user-facing copy, which is Joe's call and
+              not a prototype's. Flagged in the writeup. */}
+          <p className={'proto-headline' + (isNow ? '' : ' proto-headline--away')}>{headline}</p>
+
+          <p className="proto-notice">{level?.notice}</p>
+
+          <p className="proto-reading">
+            {shownPM25 == null
+              ? '—  ·  no model value for this hour'
+              : `AQI ${aqi}  ·  ${Math.round(shownPM25)} µg/m³ PM2.5  ·  model estimate`}
+          </p>
+
+          <button type="button" className="proto-explain" onClick={() => setExplainOpen(true)}>
+            What this means ›
+          </button>
+        </section>
+
+        <section className="proto-timeline">
+          <div className="proto-timeline__head">
+            {isNow ? (
+              <>
+                <span className="proto-eyebrow">Now</span>
+                <span className="proto-eyebrow proto-eyebrow--dim">−12h · +48h</span>
+              </>
+            ) : (
+              <>
+                <span className="proto-eyebrow proto-eyebrow--readout">
+                  {new Intl.DateTimeFormat('en-US', {
+                    weekday: 'short',
+                    hour: 'numeric',
+                    hour12: true,
+                    timeZone: tz,
+                  }).format(new Date(timesUTC[activeIndex] + 'Z'))}
+                  {shownPM25 == null ? ' · —' : ` · ${Math.round(shownPM25)} µg/m³`}
+                </span>
+                {/* Suggestion 9: the live site gives you no way back to now
+                    except dragging until you find it. */}
+                <button
+                  type="button"
+                  className="proto-now-btn"
+                  onClick={() => setSelectedIndex(null)}
+                >
+                  Now
+                </button>
+              </>
+            )}
+          </div>
+
+          <Curve
+            timesUTC={timesUTC}
+            pm25={pm25}
+            windowStart={windowStart}
+            windowEnd={windowEnd}
+            nowIndex={nowIndex}
+            selectedIndex={activeIndex}
+            onScrub={(i) => setSelectedIndex(i === nowIndex ? null : i)}
+            timezone={tz}
+          />
+        </section>
+
+        {/* Suggestion 6: a day tap sends the playhead to that day's worst hour,
+            which moves the sky, the ridge, the reading and the level word
+            together. The live site expands an accordion with a second chart in
+            it instead; that material belongs in the sheet. */}
+        <section className="proto-days" aria-label="Five day outlook">
+          {days.map((day) => {
+            const target = dayTargets.get(day.key) ?? null;
+            const selected = target != null && target === activeIndex;
+            return (
+              <button
+                type="button"
+                key={day.key}
+                className={
+                  'proto-day' +
+                  (selected ? ' proto-day--on' : '') +
+                  (target == null ? ' proto-day--out' : '')
+                }
+                disabled={target == null}
+                aria-pressed={selected}
+                onClick={() => setSelectedIndex(selected ? null : target)}
+              >
+                <span className="proto-day__weekday">{day.weekday}</span>
+                <span className="proto-day__level">{day.level?.name}</span>
+                <span className="proto-day__parts">
+                  {(day.dayParts ?? []).map((p) => (
+                    <i
+                      key={p.key}
+                      style={{ background: p.bucket ? p.bucket.color : 'transparent' }}
+                    />
+                  ))}
+                </span>
+              </button>
+            );
+          })}
+        </section>
+
+        {/* The place is the answer to "where", so it sits under everything that
+            answers "how bad" — and it is the door to the map, which is the
+            thing people come back for. */}
+        <a className="proto-place" href="#map">
+          <span className="proto-place__name">{place}</span>
+          <span className="proto-place__cta">SEE THE SMOKE</span>
+          <span className="proto-place__chev">›</span>
+        </a>
+      </main>
+      </div>
+
+      <ExplainSheet
+        open={explainOpen}
+        onClose={() => setExplainOpen(false)}
+        level={level}
+        scale={scale}
+        measured={series.measured}
+      />
+
+      <ReviewBar scenarioId={scenarioId} onPick={setScenarioId} />
+    </>
+  );
+}
+
+/// Review chrome. Not part of the proposal — it exists so the five states can
+/// be seen without waiting for the weather, and it says so on screen.
+function ReviewBar({ scenarioId, onPick }) {
+  // Collapsed by default: opened, it sits on top of the days and the place
+  // bar, which are two of the things being reviewed.
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={'proto-review' + (open ? ' proto-review--open' : '')}>
+      <button type="button" className="proto-review__toggle" onClick={() => setOpen((v) => !v)}>
+        {open ? '×' : 'Review'}
+      </button>
+      {open && (
+        <div className="proto-review__body">
+          <p className="proto-review__label">Candidate · review only</p>
+          <div className="proto-review__scenarios">
+            {SCENARIOS.map((s) => (
+              <button
+                type="button"
+                key={s.id}
+                className={
+                  'proto-review__pick' + (s.id === scenarioId ? ' proto-review__pick--on' : '')
+                }
+                onClick={() => onPick(s.id)}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+          <p className="proto-review__note">
+            Fixture data from the iOS test payloads, time-shifted to now. The verdict, the days
+            and the headline are recomputed by the production modules. <a href="/">Live site ›</a>
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
