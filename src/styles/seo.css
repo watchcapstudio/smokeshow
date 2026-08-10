@@ -298,6 +298,16 @@
   border-bottom-color: currentColor;
 }
 
+/* The Copernicus licence line. Fine print by rank, not by importance: the CAMS
+   terms require the sentence wherever the data is shown, so it has to be legible,
+   but it is a credit rather than something the reader came for. */
+.colophon {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+  margin: 0;
+}
+
 /* Disclaimer — the one block that should read as fine print and still be
    comfortably legible. */
 .disclaimer {

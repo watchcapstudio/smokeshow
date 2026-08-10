@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "npm run pages && vite build",
     "pages": "node scripts/gen-location-pages.mjs",
+    "review": "node scripts/gen-review-doc.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "tokens": "node scripts/generate-tokens.mjs",

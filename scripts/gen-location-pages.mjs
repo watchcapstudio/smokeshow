@@ -16,6 +16,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { LOCATIONS, locationBySlug } from '../src/data/locations.js';
 import { CORRIDORS, corridorBySlug } from '../src/data/corridors.js';
+import { sourcesByRole } from '../src/data/sources.js';
 import { LEVELS } from '../src/lib/rating.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -101,6 +102,14 @@ function footer() {
         <nav class="site-footer__nav" aria-label="Site">${links}
         </nav>
       </footer>`;
+}
+
+// Source names as links, comma-joined, read from src/data/sources.js so the
+// About page and the candidate's footer cannot credit different URLs.
+function sourceLinks(role) {
+  return sourcesByRole(role)
+    .map((s) => `<a href="${escAttr(s.href)}">${esc(s.name)}</a>`)
+    .join(', ');
 }
 
 function landmarkRows(loc) {
@@ -717,11 +726,12 @@ function aboutPage() {
         <section class="explainer">
           <h2>Where the numbers come from</h2>
           <p>
-            Forecast: NOAA HRRR-Smoke, Copernicus CAMS and Open-Meteo. Fires: NIFC WFIGS. Thermal
-            hotspots: NASA FIRMS. The hotspots are heat detections rather than confirmed fires, and
-            the fire cards carry the date each fact was reported, because a fire report is not a
-            forecast and does not move with the timeline.
+            Forecast: ${sourceLinks('forecast')}. Fires: ${sourceLinks('fires')}. Thermal hotspots:
+            ${sourceLinks('hotspots')}. The hotspots are heat detections rather than confirmed
+            fires, and the fire cards carry the date each fact was reported, because a fire report
+            is not a forecast and does not move with the timeline.
           </p>
+          <p class="colophon">Generated using Copernicus Atmosphere Monitoring Service information.</p>
           <p>
             Smokeshow is made by
             <a href="${escAttr(STUDIO_ORIGIN)}">WatchCap Studio</a>. A studio because we like to

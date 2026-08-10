@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { LOCATIONS, locationBySlug } from './locations.js';
 import { CORRIDORS, corridorBySlug } from './corridors.js';
+import { SOURCES } from './sources.js';
 import { LEVELS } from '../lib/rating.js';
 import { _internal } from '../../scripts/gen-location-pages.mjs';
 
@@ -553,6 +554,23 @@ describe('editorial pages', () => {
     }
     // No store badges yet, so the page must not imply an app you can download.
     expect(html).not.toMatch(/App Store|Google Play|download the app/i);
+  });
+
+  // Every credit is a link, and it is the link src/data/sources.js names. A
+  // named-but-unlinked source is a dead end for a reader checking our work,
+  // which is the whole reason that section exists.
+  it('links every data source it credits', () => {
+    const html = aboutPage();
+    for (const s of SOURCES) {
+      expect(html, s.key).toContain(`<a href="${s.href}">${s.name}</a>`);
+    }
+  });
+
+  // CAMS licence terms require this exact sentence wherever the data is shown.
+  it('carries the Copernicus licence wording', () => {
+    expect(aboutPage()).toContain(
+      'Generated using Copernicus Atmosphere Monitoring Service information',
+    );
   });
 
   it('never boots the app or claims a place', () => {
