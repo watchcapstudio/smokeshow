@@ -648,9 +648,17 @@ export default function App() {
           <div className="verdict">
             <p className="verdict__place">
               {placeName || 'Here'}
-              <button type="button" className="verdict__change" onClick={handleUpdateLocation}>
-                change
-              </button>
+              {location.source === 'shared' ? (
+                // A shared-link viewer looking at someone else's air — the
+                // moment to offer them their own.
+                <button type="button" className="verdict__change" onClick={handleCheckYourAir}>
+                  Check your air →
+                </button>
+              ) : (
+                <button type="button" className="verdict__change" onClick={handleUpdateLocation}>
+                  change
+                </button>
+              )}
             </p>
             <h1 className="verdict__word">{selectedLevel?.name}</h1>
             <TrendChip pm25={anchoredPm25} index={selectedIndex} verdict={verdict} />

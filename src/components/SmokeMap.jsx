@@ -43,6 +43,11 @@ const TIER_SPACING_KM = { 1: 25, 2: 75, 3: 200 };
 // frame hides the thing the reader came to see. MIN_ZOOM is also Leaflet's
 // floor here, so "wide" and "as wide as it goes" are the same number.
 const MIN_ZOOM = 4;
+// Where the map opens: regional, not continental. Wide enough to show smoke
+// arriving from a state or two away, close enough that the reader lands on
+// their own area rather than at 50,000 feet. You can still pinch out to
+// MIN_ZOOM for the where-did-it-come-from view.
+const DEFAULT_ZOOM = 6;
 
 // What the reader is actually looking at. The fallback used to be silent: a
 // 9-across point grid rendered exactly like a 3 km model field, with nothing
@@ -129,7 +134,7 @@ export default function SmokeMap({
   // Seed from the opening zoom, not from 1: the map now opens wide, so the
   // very first onNeedTier() must ask for the wide grid. Seeding at 1 requested
   // the 25 km grid for a continental view and left the fallback stretched.
-  const [tier, setTier] = useState(tierForZoom(MIN_ZOOM));
+  const [tier, setTier] = useState(tierForZoom(DEFAULT_ZOOM));
   const [fireHint, setFireHint] = useState(false);
   // { fire, radius, pinned } — pinned means opened by tap and immune to the
   // mouseout that a pointer device would send.
@@ -167,7 +172,7 @@ export default function SmokeMap({
     if (!containerRef.current || mapRef.current) return;
     const map = L.map(containerRef.current, { zoomControl: true, minZoom: MIN_ZOOM }).setView(
       [center.lat, center.lon],
-      MIN_ZOOM,
+      DEFAULT_ZOOM,
     );
     // Three-layer sandwich, not light_all: base tiles, then the smoke canvas,
     // then the labels on top. Heavy smoke composites to near-opaque black, so
@@ -176,6 +181,7 @@ export default function SmokeMap({
     // way to keep the place names above the weather.
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
       maxZoom: 12,
+      detectRetina: true,
       // CARTO's basemaps are free to use with attribution; both credits are
       // required and must stay visible.
       attribution:
@@ -210,6 +216,7 @@ export default function SmokeMap({
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
       maxZoom: 12,
       pane: 'labels',
+      detectRetina: true,
       // Attribution rides the base layer — same source, and Leaflet would
       // otherwise print the pair twice.
     }).addTo(map);

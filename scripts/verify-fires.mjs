@@ -173,10 +173,16 @@ for (const scene of SCENES) {
         `&mockOfficial=${ugm3ToAqi(backdrop.pm)}`,
       { waitUntil: 'networkidle2' },
     );
+    // The map rides in the top canvas now, behind a Sky/Map toggle, and mounts
+    // lazily on first flip — switch to it before waiting for the smoke layer.
+    await page.waitForSelector('.sbar__seg', { timeout: 30000 });
+    await page.evaluate(() => {
+      const btn = [...document.querySelectorAll('.sbar__seg')].find(
+        (b) => b.textContent.trim() === 'Map',
+      );
+      btn?.click();
+    });
     await page.waitForSelector('.smoke-canvas-layer', { timeout: 30000 });
-    await page.evaluate(() =>
-      document.getElementById('map-slot')?.scrollIntoView({ block: 'center' }),
-    );
     // Drive zoom directly — the map exposes itself in DEV for exactly this.
     await page.evaluate((z) => window.__smokeshowMap?.setZoom(z), scene.zoom);
     await page.waitForFunction(() => document.querySelectorAll('.fire-icon').length > 0, {

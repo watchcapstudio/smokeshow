@@ -191,10 +191,16 @@ for (const level of LEVELS) {
     `${BASE}/?lat=44.98&lon=-93.27&name=Minneapolis&mockOfficial=${ugm3ToAqi(level.pm)}`,
     { waitUntil: 'networkidle2' },
   );
+  // The map now rides in the top canvas behind a Sky/Map toggle and mounts
+  // lazily on first flip, so switch to it before waiting for the smoke layer.
+  await page.waitForSelector('.sbar__seg', { timeout: 30000 });
+  await page.evaluate(() => {
+    const btn = [...document.querySelectorAll('.sbar__seg')].find(
+      (b) => b.textContent.trim() === 'Map',
+    );
+    btn?.click();
+  });
   await page.waitForSelector('.smoke-canvas-layer', { timeout: 30000 });
-  await page.evaluate(() =>
-    document.getElementById('map-slot')?.scrollIntoView({ block: 'center' }),
-  );
   await new Promise((r) => setTimeout(r, 1200)); // tiles + the canvas redraw
 
   // Read before the click below: reaching a fire is what retires the hint, so
