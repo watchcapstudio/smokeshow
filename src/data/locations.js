@@ -448,7 +448,12 @@ export const LOCATIONS = [
       'Winnipeg is usually the source end of the corridor, not the receiving end. Fires in northern Manitoba, northwestern Ontario, and Saskatchewan burn a few hundred kilometres north and northwest, which means Winnipeg gets smoke fresh and concentrated rather than aged and thinned. What lands here thick reaches Minneapolis within a day and Chicago, Detroit, and the Great Lakes a day after that.',
 
     memory:
-      'That proximity is why Manitoba’s worst fire seasons register as national air quality events, and why the province has repeatedly run large-scale evacuations from northern communities in recent summers.',
+      // The original second clause here cited repeated large-scale evacuations
+      // from northern Manitoba communities without a year behind it. Cut rather
+      // than dated: an undated "in recent summers" is the kind of claim that
+      // reads authoritative and cannot be checked, and the paragraph makes its
+      // point without it.
+      'That proximity is why Manitoba’s worst fire seasons register as national air quality events rather than provincial ones.',
 
     landmarks: [
       'From the Forks the downtown towers are sharp and the prairie horizon reads as a hard line in every direction, which on flat ground is the cleanest visibility test there is.',
@@ -469,7 +474,7 @@ export const LOCATIONS = [
       },
       {
         q: "Why is Winnipeg's air quality bad today?",
-        a: 'Because Winnipeg is upwind of almost everyone else and downwind of the boreal forest. Fires in northern Manitoba, northwestern Ontario, and Saskatchewan sit a few hundred kilometres north and northwest, and their smoke does not need days in transit to get here. When Manitoba has a bad fire season it registers as a national air quality event, and the province has repeatedly run large-scale evacuations from northern communities in recent summers.',
+        a: 'Because Winnipeg is upwind of almost everyone else and downwind of the boreal forest. Fires in northern Manitoba, northwestern Ontario, and Saskatchewan sit a few hundred kilometres north and northwest, and their smoke does not need days in transit to get here. That is also why a bad Manitoba fire season registers as a national air quality event rather than a provincial one — what starts here does not stay here.',
       },
       {
         q: 'Where is the wildfire smoke in Winnipeg coming from?',
@@ -511,7 +516,11 @@ export const LOCATIONS = [
       "Minneapolis is one of the first major American cities Canadian smoke reaches. Fires in Manitoba, northwestern Ontario, and Saskatchewan sit almost directly upwind, and on northerly flow their smoke crosses the border and reaches the Twin Cities in under a day. That proximity is why Minnesota's air quality alerts often fire before Chicago's, and why the same plume that arrives here fresh reaches the East Coast a day or two later, thinned out.",
 
     memory:
-      'The 2021 and 2023 seasons both put Minneapolis among the worst air quality readings in the country for stretches of days. Minnesota issued more air quality alerts in 2021 than in the previous fifteen years combined, and that is the season most people here mean when they say the summers changed.',
+      // The original middle sentence here compared Minnesota's 2021 air quality
+      // alert count against the previous fifteen years combined. It was the most
+      // specific quantitative claim on the site and the hardest to source, so it
+      // is cut rather than hedged. The season it was there to mark is still named.
+      'The 2021 and 2023 seasons both put Minneapolis among the worst air quality readings in the country for stretches of days, and 2021 is the season most people here mean when they say the summers changed.',
 
     landmarks: [
       'The downtown skyline is sharp from Bde Maka Ska, about three miles southwest, and from the Mendota Bridge you can pick out both downtowns nine miles apart.',
@@ -532,7 +541,7 @@ export const LOCATIONS = [
       },
       {
         q: "Why is Minneapolis's air quality bad today?",
-        a: 'Because Manitoba, northwestern Ontario, and Saskatchewan sit almost directly upwind and northerly flow is a short trip. This is the reason Minnesota’s air quality alerts often fire before Chicago’s do, and the reason people here date the change to 2021 — the state issued more alerts that year than in the previous fifteen years combined. Scrub the timeline backward twelve hours to see the plume come down across the border.',
+        a: 'Because Manitoba, northwestern Ontario, and Saskatchewan sit almost directly upwind and northerly flow is a short trip. This is the reason Minnesota’s air quality alerts often fire before Chicago’s do, and the reason people here date the change to the 2021 season rather than to anything more recent. Scrub the timeline backward twelve hours to see the plume come down across the border.',
       },
       {
         q: 'Where is the wildfire smoke in Minneapolis coming from?',

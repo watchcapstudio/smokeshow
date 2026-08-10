@@ -186,13 +186,20 @@ function linkBlock(loc) {
 
   if (!items.length) return '';
 
+  // The lead has to match the direction of the rows under it. On an upwind city
+  // these links are places the smoke appears BEFORE it gets here; on a
+  // source-end city they are places it appears AFTER. One sentence describing
+  // both is wrong on one of them, and it was wrong on Winnipeg, Toronto and
+  // Fresno — the three pages where the block is the most interesting thing on
+  // the page and least deserved a backwards caption.
+  const lead = (loc.upwind ?? []).length
+    ? `Where ${esc(loc.name)}'s smoke usually shows up first, and the places that share its air.`
+    : `Where ${esc(loc.name)}'s smoke goes after it leaves, and the places that share its air.`;
+
   return `
         <section class="citylinks">
           <h2>Smoke near ${esc(loc.name)}</h2>
-          <p>
-            Where ${esc(loc.name)}'s smoke usually shows up first, and the places that share its
-            air.
-          </p>
+          <p>${lead}</p>
           <ul class="citylinks__list">${items.join('')}
           </ul>
         </section>`;

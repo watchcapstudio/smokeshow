@@ -149,6 +149,24 @@ describe('location data', () => {
   // that rule ("all contextually earned"). FRESNO is that city, flagged for
   // review rather than quietly accepted — if a second one ever drops below five,
   // this assertion is where it has to be argued.
+  // The lead sentence describes the direction of the rows beneath it. On a
+  // source-end city those rows are Downwind, and the upwind wording ("shows up
+  // first") is not merely awkward there — it says the opposite of what the links
+  // mean.
+  it('captions the block in the direction its rows actually run', () => {
+    for (const l of LOCATIONS) {
+      const html = page(l);
+      if ((l.upwind ?? []).length) {
+        expect(html, l.slug).toContain(`Where ${l.name}'s smoke usually shows up first`);
+        expect(html, l.slug).not.toContain('<span class="citylinks__tag">Downwind</span>');
+      } else {
+        expect(html, l.slug).toContain(`Where ${l.name}'s smoke goes after it leaves`);
+        expect(html, l.slug).toContain('<span class="citylinks__tag">Downwind</span>');
+        expect(html, l.slug).not.toContain('<span class="citylinks__tag">Upwind</span>');
+      }
+    }
+  });
+
   it('links four to eight destinations per city, and only Fresno is under five', () => {
     const thin = [];
     for (const l of LOCATIONS) {
