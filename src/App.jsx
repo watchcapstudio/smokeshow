@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import LocationSearch from './components/LocationSearch.jsx';
+import LocationSheet from './components/LocationSheet.jsx';
 import SkyBackdrop from './components/SkyBackdrop.jsx';
 import TrendChip from './components/TrendChip.jsx';
 import ExplainSheet from './components/ExplainSheet.jsx';
@@ -31,7 +32,7 @@ import { ugm3ToAqi } from './lib/aqi.js';
 import { formatLocalTime, formatVerdictTime } from './lib/time.js';
 import { getJSON, setJSON, clearKey } from './lib/storage.js';
 import { getUnits, setUnits, getSensitive, setSensitive } from './lib/prefs.js';
-import { toPlace, savePlace, removePlace as removeSavedPlace, placesWithCurrent } from './lib/places.js';
+import { toPlace, savePlace, getPlaces, placeId, removePlace as removeSavedPlace, placesWithCurrent } from './lib/places.js';
 import { LEVELS } from './lib/rating.js';
 
 // Map (and Leaflet with it) loads as a separate chunk after the verdict paints —
@@ -469,6 +470,26 @@ export default function App() {
     setLocation(loc);
   }
 
+  // Add-and-go from the place sheet: pin the pill, switch the verdict to it, and
+  // close. `result` is either a geocoder hit (name/admin1/label) or a saved
+  // Place (shortName/label) — savePlace upserts by coordinate id either way.
+  function handleAddPlace(result) {
+    setPlaying(false);
+    setChoosingLocation(false);
+    const label = result.label ?? result.shortName ?? null;
+    setPlaceName(label);
+    savePlace(
+      toPlace({
+        lat: result.lat,
+        lon: result.lon,
+        label,
+        isCurrentLocation: !!result.isCurrentLocation,
+      }),
+    );
+    setSavedTick((t) => t + 1);
+    setLocation({ granted: true, lat: result.lat, lon: result.lon, label, source: 'manual' });
+  }
+
   // Re-runs the whole fetch effect for the location we already have.
   function handleRetry() {
     setLocation((current) => (current ? { ...current } : current));
@@ -488,22 +509,18 @@ export default function App() {
     </header>
   );
 
-  const chooser = choosingLocation ? (
-    <div className="location-chooser">
-      <LocationSearch
-        onSelect={handleManualSelect}
-        hint="Search for a city, or use your current location."
-      />
-      <div className="location-chooser__actions">
-        <button type="button" className="btn btn--filled" onClick={handleUseMyLocation}>
-          Use my current location
-        </button>
-        <button type="button" className="btn btn--quiet" onClick={() => setChoosingLocation(false)}>
-          Cancel
-        </button>
-      </div>
-    </div>
-  ) : null;
+  const chooser = (
+    <LocationSheet
+      open={choosingLocation}
+      onClose={() => setChoosingLocation(false)}
+      onAddPlace={handleAddPlace}
+      onUseMyLocation={handleUseMyLocation}
+      saved={getPlaces()}
+      currentPlaceId={
+        location && location.lat != null ? placeId(location.lat, location.lon) : null
+      }
+    />
+  );
 
   // Every state below paints on the same sky, so nothing about the page's
   // colour changes between "locating" and "here is your air" — the sky just
