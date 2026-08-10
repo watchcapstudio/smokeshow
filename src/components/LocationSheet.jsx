@@ -69,30 +69,6 @@ export default function LocationSheet({
     };
   }, [open, onClose]);
 
-  // Keep the sheet flush on top of the software keyboard. This is a bottom sheet
-  // (bottom: 0), but iOS overlays the keyboard on the layout viewport instead of
-  // shrinking it, so bottom: 0 lands *behind* the keyboard and the short empty
-  // state leaves a gap of page bleeding through above it. Track the visual
-  // viewport and lift the sheet's bottom edge to the keyboard's top; the inset is
-  // 0 with no keyboard (desktop, or before focus), so nothing changes there.
-  useEffect(() => {
-    if (!open) return undefined;
-    const vv = window.visualViewport;
-    if (!vv) return undefined;
-    const apply = () => {
-      const inset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      if (sheetRef.current) sheetRef.current.style.bottom = `${inset}px`;
-    };
-    apply();
-    vv.addEventListener('resize', apply);
-    vv.addEventListener('scroll', apply);
-    return () => {
-      vv.removeEventListener('resize', apply);
-      vv.removeEventListener('scroll', apply);
-      if (sheetRef.current) sheetRef.current.style.bottom = '';
-    };
-  }, [open]);
-
   // Debounced type-ahead.
   useEffect(() => {
     const q = query.trim();
