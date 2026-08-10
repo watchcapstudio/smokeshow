@@ -11,7 +11,7 @@
 // that place, and closes the sheet. Search is Open-Meteo's geocoder, debounced
 // so a five-letter city is one request, not five.
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { searchPlaces } from '../lib/geocoding.js';
 import './LocationSheet.css';
 
@@ -39,9 +39,6 @@ export default function LocationSheet({
     setQuery('');
     setResults([]);
     previouslyFocusedRef.current = document.activeElement;
-    // Focus the field, but not on a touch device where the keyboard would slam
-    // up over the sheet the instant it opens.
-    if (!window.matchMedia('(pointer: coarse)').matches) inputRef.current?.focus();
 
     function onKeyDown(e) {
       if (e.key === 'Escape') {
@@ -68,6 +65,14 @@ export default function LocationSheet({
       previouslyFocusedRef.current?.focus?.();
     };
   }, [open, onClose]);
+
+  // Focus the search field on open so the keyboard is up and ready to type. This
+  // runs in a layout effect, and App opens the sheet inside flushSync, so the
+  // focus lands synchronously within the tap that opened it — the only way iOS
+  // will actually raise the keyboard for a programmatic focus.
+  useLayoutEffect(() => {
+    if (open) inputRef.current?.focus();
+  }, [open]);
 
   // Debounced type-ahead.
   useEffect(() => {

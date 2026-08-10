@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { createPortal, flushSync } from 'react-dom';
 import LocationSearch from './components/LocationSearch.jsx';
 import LocationSheet from './components/LocationSheet.jsx';
 import SkyBackdrop from './components/SkyBackdrop.jsx';
@@ -438,7 +438,13 @@ export default function App() {
   // "Update location" opens a chooser: search any city, or re-use the GPS.
   function handleUpdateLocation() {
     setPlaying(false);
-    setChoosingLocation((v) => !v);
+    if (choosingLocation) {
+      setChoosingLocation(false);
+      return;
+    }
+    // flushSync so the sheet mounts and its input focuses synchronously inside
+    // this tap — iOS only raises the keyboard for a focus within a user gesture.
+    flushSync(() => setChoosingLocation(true));
   }
 
   async function handleUseMyLocation() {
