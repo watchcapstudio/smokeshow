@@ -31,12 +31,6 @@ struct VerdictScreen: View {
 
     enum CanvasMode { case sky, map }
     @State private var canvas: CanvasMode = .sky
-    /// The Map view goes undiscovered if the toggle reads as inert, so the Map
-    /// segment breathes an accent hint until the reader opens it once — then it
-    /// goes quiet for good. Session-scoped, like the web twin.
-    @State private var mapEverShown = false
-    @State private var hintPulse = false
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     #if os(iOS)
     @State private var domains: [SmokeDomain] = []
@@ -453,48 +447,27 @@ struct VerdictScreen: View {
     private var canvasToggle: some View {
         HStack(spacing: 2) {
             toggleButton("Sky", on: canvas == .sky) { setCanvas(.sky) }
-            toggleButton("Map", on: canvas == .map, hint: !mapEverShown) { setCanvas(.map) }
+            toggleButton("Map", on: canvas == .map) { setCanvas(.map) }
         }
         .padding(3)
         .background(Capsule().fill(canvasInk.opacity(0.12)))
-        .onAppear {
-            guard !reduceMotion else { return }
-            withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) {
-                hintPulse = true
-            }
-        }
     }
 
-    private func toggleButton(
-        _ title: String,
-        on: Bool,
-        hint: Bool = false,
-        _ action: @escaping () -> Void
-    ) -> some View {
-        // The undiscovered-Map hint: a soft accent halo that breathes until the
-        // reader opens the map once. Reduce Motion gets a static ring instead.
-        let showHint = hint && !on
-        let ringOpacity = showHint ? (reduceMotion ? 0.5 : (hintPulse ? 0.6 : 0.0)) : 0
-        let ringWidth: CGFloat = reduceMotion ? 1.5 : (hintPulse ? 3 : 0)
-        return Button(action: action) {
+    private func toggleButton(_ title: String, on: Bool, _ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
             Text(title.uppercased())
                 .font(Typography.eyebrow)
-                .foregroundStyle(on ? Palette.light.text : (showHint ? toggleAccent : canvasInk))
+                .foregroundStyle(on ? Palette.light.text : canvasInk)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(Capsule().fill(on ? toggleAccent : Color.clear))
-                .overlay(
-                    Capsule()
-                        .strokeBorder(toggleAccent.opacity(ringOpacity), lineWidth: ringWidth)
-                )
-                .opacity(on || showHint ? 1 : 0.55)
+                .opacity(on ? 1 : 0.55)
         }
         .buttonStyle(.plain)
     }
 
     private func setCanvas(_ next: CanvasMode) {
         isPlaying = false
-        if next == .map { mapEverShown = true }
         withAnimation(.easeInOut(duration: 0.28)) { canvas = next }
     }
 
