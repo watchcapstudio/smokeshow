@@ -81,6 +81,10 @@ export default function ExplainSheet({
         tabIndex={-1}
       >
         <button type="button" className="explain-sheet__grab" aria-label="Close" onClick={onClose} />
+        {/* Web has no drag-to-dismiss, so give the sheet a real close control. */}
+        <button type="button" className="explain-sheet__close" aria-label="Close" onClick={onClose}>
+          ×
+        </button>
         {/* The value opts out of the eyebrow's uppercase, and it is a
             correctness rule rather than a typographic one: text-transform
             renders "µg/m³" as "MG/M³", which is a different unit by a factor

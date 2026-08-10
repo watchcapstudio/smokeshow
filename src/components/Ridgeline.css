@@ -1,6 +1,6 @@
 /* Ridgeline — the visibility gauge: how far the haze lets you see */
 .ridgeline {
-  height: 68px;
+  height: 100%;
   pointer-events: none;
   user-select: none;
 }

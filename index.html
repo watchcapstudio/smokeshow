@@ -52,29 +52,10 @@
          the initial payload. The app renders above in #root, and portals the
          map and the app CTA into the slots below. -->
     <div class="app app--bottom">
-      <!-- Static, not React: this is the map section's only heading and the
-           FAQ's "the map above" points at it, so crawlers need it in the
-           initial payload. Sits on the live sky, not the cream sheet — reads
-           --ink and carries the scrim like the rest of the shell. -->
-      <header class="map-intro">
-        <h2 class="map-intro__title">Where the smoke was and might be</h2>
-        <p class="map-intro__sub">
-          Scrub back 12 hours to see where it came from, or forward 48 to see where it's headed.
-          Every hour shown is a model estimate, not a measurement.
-        </p>
-      </header>
-
-      <!-- React portals the live smoke map here (see App.jsx). Its sheet ends
-           here: the reference sheet below starts on its own, with sky between
-           them, so the questions don't read as map chrome. FAQ copy still
-           references "the map above", which is still what it is. -->
-      <div id="map-slot"></div>
-
-      <!-- React portals AppWidgetCTA here — between the map and the reference
-           sheet. It has to live below the scrubber: its lead copy promises the
-           widget mocks follow "the timeline above", and above is where the
-           timeline now is. On the live sky like .map-intro, not on either
-           cream sheet, so the widget faces keep showing the reader's own sky. -->
+      <!-- The live smoke map now rides in the top canvas (Sky/Map toggle in the
+           scrubber), so there is no separate map section here. The FAQ's "the
+           map above" points at that canvas. React portals the app CTA here,
+           below the fold, on the live sky. -->
       <div id="cta-slot"></div>
 
       <!-- The reference material rides on the demo's bottom sheet rather than

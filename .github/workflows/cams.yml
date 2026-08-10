@@ -53,5 +53,9 @@ jobs:
         shell: bash -leo pipefail {0}
         env:
           DOMAIN: cams
+          # One regrid, two palettes: the light field the web map used to draw
+          # and the dark-ramp copy it draws now (and the global dark coverage
+          # HRRR-dark can't reach).
+          DOMAINS: cams cams-dark
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: bash scripts/render/publish.sh

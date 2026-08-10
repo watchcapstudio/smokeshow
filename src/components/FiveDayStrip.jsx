@@ -172,7 +172,18 @@ function DayDetail({ day, hours, measured }) {
   );
 }
 
-export default function FiveDayStrip({ timesUTC, pm25, nowIndex, timezone, measuredDays }) {
+export default function FiveDayStrip({
+  timesUTC,
+  pm25,
+  nowIndex,
+  timezone,
+  measuredDays,
+  // Stage mode: pills only, no inline detail. Tapping a day drives the shared
+  // scrubber (onPickDay) and the highlight follows the scrubbed hour.
+  compact = false,
+  activeIndex,
+  onPickDay,
+}) {
   const [showPast, setShowPast] = useState(false);
   const stripRef = useRef(null);
 
@@ -216,9 +227,38 @@ export default function FiveDayStrip({ timesUTC, pm25, nowIndex, timezone, measu
 
   const days = buildDaySummaries({ timesUTC, pm25, nowIndex, timezone });
   const pastDays = buildPastDaySummaries({ timesUTC, pm25, nowIndex, timezone });
-  const effectiveKey = selectedKey === undefined ? days[0]?.key : selectedKey;
-  const selectedDay =
-    [...pastDays, ...days].find((d) => d.key === effectiveKey) ?? null;
+
+  // Local-day key for a series index, and the midday index for a day key — the
+  // two directions the compact strip needs to sync with the scrubber.
+  const dayKeyFmt = new Intl.DateTimeFormat('en-CA', { timeZone: timezone });
+  const keyOfIndex = (i) => dayKeyFmt.format(new Date(timesUTC[i] + 'Z'));
+  const middayIndexOf = (key) => {
+    let best = null;
+    let bestGap = Infinity;
+    for (let i = 0; i < timesUTC.length; i++) {
+      if (keyOfIndex(i) !== key) continue;
+      const hour = new Date(timesUTC[i] + 'Z').getUTCHours();
+      const gap = Math.abs(hour - 18); // ~local midday for US zones; good enough to land in-day
+      if (gap < bestGap) {
+        bestGap = gap;
+        best = i;
+      }
+    }
+    return best;
+  };
+
+  // In compact mode the highlight tracks the scrubbed hour instead of an
+  // internal selection, so the strip and the curve always agree.
+  const compactKey =
+    compact && activeIndex != null && timesUTC[activeIndex] ? keyOfIndex(activeIndex) : null;
+  const effectiveKey = compact
+    ? compactKey
+    : selectedKey === undefined
+      ? days[0]?.key
+      : selectedKey;
+  const selectedDay = compact
+    ? null
+    : ([...pastDays, ...days].find((d) => d.key === effectiveKey) ?? null);
 
   // Hourly series for the selected local day — feeds the bar chart.
   let selectedHours = [];
@@ -238,6 +278,12 @@ export default function FiveDayStrip({ timesUTC, pm25, nowIndex, timezone, measu
   }
 
   function toggleSelect(key, el) {
+    if (compact) {
+      const idx = middayIndexOf(key);
+      if (idx != null) onPickDay?.(idx);
+      if (el) glideToElement(stripRef.current, el);
+      return;
+    }
     const next = effectiveKey === key ? null : key;
     setSelectedKey(next);
     if (next && el) glideToElement(stripRef.current, el);
