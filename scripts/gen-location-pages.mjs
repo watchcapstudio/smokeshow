@@ -524,10 +524,24 @@ function editorialHead({ title, description, url }) {
   <body>`;
 }
 
-// One row per city, used by both the hub and the corridor pages. The band shown
-// is the city's own All-clear distance, because that single number is the fastest
-// way to see that these pages are not one page repeated — ten miles of lakefront
-// in Chicago against sixty miles of Rainier in Seattle.
+// One row per city, used by the hub and the corridor pages. The number is the
+// city's own top-of-scale distance: how far you can see there on a clean day.
+// It is the fastest way to show that these pages are calibrated locally rather
+// than duplicated, ten miles of Chicago lakefront against fifty of Rainier.
+//
+// It does NOT carry the level name, and that is the whole point of this comment.
+// This column used to read "All clear: 50+ miles", which put a LEVEL NAME beside
+// 25 city names on a page about smoke. Level names are the one thing on this site
+// that mean "right now", so 25 rows all reading "All clear" rendered as a status
+// board announcing that every city we cover was currently clear. It was not; the
+// string was a constant. locations.js opens by forbidding precisely that ("nothing
+// in this table describes current conditions, and nothing ever should"), and a
+// directory that quietly answers today's question wrongly is worse than one that
+// does not answer it at all.
+//
+// If a live per-city status ever belongs here, it has to come from the same live
+// verdict the city pages paint, carry the time it was read, and not be baked into
+// a static file by a build.
 function cityRows(slugs) {
   return slugs
     .map((slug) => locationBySlug(slug))
@@ -538,7 +552,7 @@ function cityRows(slugs) {
               <a class="citylist__link" href="/${SECTION}/${escAttr(loc.slug)}/"
                 >Wildfire smoke in ${esc(loc.label)}</a
               >
-              <span class="citylist__band">All clear: ${esc(
+              <span class="citylist__band">clean day: ${esc(
                 loc.bands?.[0] ?? LEVELS[0].visibility,
               )}</span>
             </li>`,
@@ -575,7 +589,8 @@ function hubPage() {
         <h1 class="map-intro__title">Wildfire smoke forecasts by city</h1>
         <p class="map-intro__sub">
           One page per city, each answering the same question: how bad is the air here, and when
-          does it clear. Every hour shown on any of them is a model estimate, not a measurement.
+          does it clear. This page is the directory and reports conditions nowhere. Open a city for
+          today's air. Every hour shown on any of these pages is a model estimate, not a measurement.
         </p>
       </header>
 
@@ -621,6 +636,12 @@ function hubPage() {
           <p>
             Read the ladder on your city's page from the outside in. The furthest thing you can still
             resolve tells you which level you are in, and it tells you before any app does.
+          </p>
+          <p>
+            The distance listed beside each city below is the top of its ladder: how far you can see
+            there on a clean day. Fifty miles in Seattle and eight in Detroit describe the same clean
+            air, which is the whole reason the bands are per-city. None of those numbers is a reading
+            for today.
           </p>
         </section>${groups}
 
@@ -781,8 +802,10 @@ ${
     ? `        <section class="citylist">
           <h2>Cities on this corridor</h2>
           <p>
-            Listed in the order the smoke reaches them, not alphabetically. Each page carries its own
-            visibility bands and its own named sightlines.
+            Listed in the order the smoke reaches them, not alphabetically. The distance beside each
+            city is how far you can see there on a clean day, which is why the same five levels
+            describe different views in different places. It is a property of the city, not a reading
+            for today. Open a page for that.
           </p>
           <ul class="citylist__list">${rows}
           </ul>
