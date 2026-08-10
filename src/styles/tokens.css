@@ -2,7 +2,6 @@
   color-scheme: dark;
   --bg: #16130f;
   --bg-panel: #201b16;
-  --sheet-solid: #1c1813;
   --border: #3a322a;
   --text: #f1ece3;
   --text-dim: #b8ada0;
@@ -39,7 +38,6 @@
     color-scheme: light;
     --bg: #faf7f2;
     --bg-panel: #ffffff;
-    --sheet-solid: #ffffff;
     --border: #e2d9cc;
     --text: #241f19;
     --text-dim: #6b6156;

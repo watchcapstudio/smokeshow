@@ -22,10 +22,13 @@
   border-radius: 1.25rem 1.25rem 0 0;
   padding: 0.6rem 1.25rem 1.25rem;
   padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
-  /* On the Sky view --bg-panel is translucent (the cities would read through a
-     results list), so paint an OPAQUE surface. It must track the theme: a
-     hardcoded dark panel leaves the theme's dark text invisible in light mode. */
-  background-color: var(--sheet-solid);
+  /* --bg-panel is translucent (the cities would read through a results list),
+     so paint an OPAQUE surface. Use --panel-tint, the sky-driven panel colour:
+     cream on light air, its dark ink counterpart on dark air. It flips with the
+     air the same way --text (= --ink) does, so panel and text can never
+     diverge. A hardcoded dark panel was the bug — it left the light-air ink
+     invisible on a clear-sky day. */
+  background-color: rgb(var(--panel-tint));
   display: flex;
   flex-direction: column;
   max-height: 82vh;
