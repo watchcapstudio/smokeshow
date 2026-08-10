@@ -737,6 +737,7 @@ export default function App() {
         <ScrubberBar
           canvas={canvas}
           onCanvas={handleCanvas}
+          hintMap={!mapEverShown}
           places={chips}
           currentPlaceId={currentPlace.id}
           onSelectPlace={handleSelectPlace}

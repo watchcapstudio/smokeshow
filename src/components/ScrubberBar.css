@@ -53,7 +53,37 @@
 
 .sbar__seg.is-on {
   opacity: 1;
-  background: color-mix(in srgb, var(--ink) 16%, transparent);
+  /* The live side wears the sky's own accent (rust by day, ember at night) so
+     it reads at a glance which stage you are on. --accent is contrast-tested
+     against every sky state, so it holds from noon to sunset to dark. */
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* First-run hint on the Map segment: a soft accent halo that breathes until the
+   reader has opened the map once, then goes quiet for good. It says "there is
+   more here," it does not nag — App drops the class on first flip. */
+.sbar__seg--hint:not(.is-on) {
+  color: var(--accent);
+  opacity: 1;
+  animation: sbar-seg-pulse 2s ease-in-out infinite;
+}
+
+@keyframes sbar-seg-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 42%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 0%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sbar__seg--hint:not(.is-on) {
+    animation: none;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 34%, transparent);
+  }
 }
 
 .sbar__chips {
