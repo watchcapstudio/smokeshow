@@ -37,7 +37,6 @@ function buildCurve(pm25, windowStart, windowEnd, nowIndex, selectedIndex) {
 export default function ScrubberBar({
   canvas,
   onCanvas,
-  hintMap,
   places,
   currentPlaceId,
   onSelectPlace,
@@ -85,11 +84,7 @@ export default function ScrubberBar({
             type="button"
             role="tab"
             aria-selected={canvas === 'map'}
-            className={
-              'sbar__seg' +
-              (canvas === 'map' ? ' is-on' : '') +
-              (hintMap ? ' sbar__seg--hint' : '')
-            }
+            className={'sbar__seg' + (canvas === 'map' ? ' is-on' : '')}
             onClick={() => onCanvas('map')}
           >
             Map
