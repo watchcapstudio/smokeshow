@@ -439,6 +439,11 @@ struct VerdictScreen: View {
         }
     }
 
+    /// The sky's own warm accent, so the live stage reads at a glance and the
+    /// switch carries the app's identity instead of a grey wash. Constant across
+    /// both canvases (the map is always dark-inked), matching the web twin.
+    private var toggleAccent: Color { Palette.dark.accent }
+
     private var canvasToggle: some View {
         HStack(spacing: 2) {
             toggleButton("Sky", on: canvas == .sky) { setCanvas(.sky) }
@@ -452,9 +457,10 @@ struct VerdictScreen: View {
         Button(action: action) {
             Text(title.uppercased())
                 .font(Typography.eyebrow)
+                .foregroundStyle(on ? Palette.light.text : canvasInk)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(Capsule().fill(on ? canvasInk.opacity(0.16) : Color.clear))
+                .background(Capsule().fill(on ? toggleAccent : Color.clear))
                 .opacity(on ? 1 : 0.55)
         }
         .buttonStyle(.plain)

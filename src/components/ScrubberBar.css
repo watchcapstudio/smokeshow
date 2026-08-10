@@ -53,7 +53,11 @@
 
 .sbar__seg.is-on {
   opacity: 1;
-  background: color-mix(in srgb, var(--ink) 16%, transparent);
+  /* The live side wears the sky's own accent (rust by day, ember at night) so
+     it reads at a glance which stage you are on. --accent is contrast-tested
+     against every sky state, so it holds from noon to sunset to dark. */
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .sbar__chips {
