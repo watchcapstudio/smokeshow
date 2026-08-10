@@ -470,12 +470,35 @@ export default function App() {
     setLocation(loc);
   }
 
+  // The place we're about to leave is often the folded-in current place that was
+  // never saved (first-run search, geolocation). Pin it before switching away so
+  // it stays a chip instead of vanishing — but only if it isn't already saved,
+  // so existing chips keep their order.
+  function pinIfUnsaved(place) {
+    if (place?.lat == null) return;
+    if (getPlaces().some((p) => p.id === place.id)) return;
+    savePlace(place);
+  }
+
+  // The current active place, derived from location the same way the chip row
+  // does. Handlers defined before the render-scope `currentPlace` use this.
+  function outgoingPlace() {
+    if (location?.lat == null) return null;
+    return toPlace({
+      lat: location.lat,
+      lon: location.lon,
+      label: placeName,
+      isCurrentLocation: !['manual', 'shared', 'page'].includes(location.source),
+    });
+  }
+
   // Add-and-go from the place sheet: pin the pill, switch the verdict to it, and
   // close. `result` is either a geocoder hit (name/admin1/label) or a saved
   // Place (shortName/label) — savePlace upserts by coordinate id either way.
   function handleAddPlace(result) {
     setPlaying(false);
     setChoosingLocation(false);
+    pinIfUnsaved(outgoingPlace());
     const label = result.label ?? result.shortName ?? null;
     setPlaceName(label);
     savePlace(
@@ -607,6 +630,8 @@ export default function App() {
   function handleSelectPlace(place) {
     if (place.id === currentPlace.id) return;
     setPlaying(false);
+    pinIfUnsaved(currentPlace);
+    setSavedTick((t) => t + 1);
     setPlaceName(place.label);
     setLocation({ granted: true, lat: place.lat, lon: place.lon, label: place.label, source: 'manual' });
   }
