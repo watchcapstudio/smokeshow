@@ -266,3 +266,30 @@
   color: var(--text-dim);
   line-height: 1.5;
 }
+
+/* Web has no drag-to-dismiss; this is the close control. Top-right, above the
+   eyebrow, on the sheet's own fixed positioning context. */
+.explain-sheet__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text) 9%, transparent);
+  color: var(--text);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.explain-sheet__close:hover {
+  background: color-mix(in srgb, var(--text) 16%, transparent);
+}
+/* Keep the eyebrow clear of the close button. */
+.explain-sheet__eyebrow {
+  padding-right: 2.5rem;
+}
