@@ -536,6 +536,34 @@ describe('house style', () => {
 });
 
 describe('editorial pages', () => {
+  // A directory must not answer today's question. This column used to read
+  // "All clear: 50+ miles", which put a level name beside 25 city names on a page
+  // about smoke, so the list rendered as a status board claiming every city was
+  // currently clear. Level names are the one thing on this site that mean "right
+  // now"; a static file may never use one.
+  it('never puts a level name in a city list row', () => {
+    for (const html of [hubPage(), ...CORRIDORS.map((c) => corridorPage(c))]) {
+      const rows = [...html.matchAll(/<span class="citylist__band">([^<]*)<\/span>/g)].map(
+        (m) => m[1],
+      );
+      expect(rows.length, 'no rows found, selector drifted').toBeGreaterThan(0);
+      for (const row of rows) {
+        for (const level of LEVELS) {
+          expect(row, `"${row}" names the level "${level.name}"`).not.toContain(level.name);
+        }
+      }
+    }
+  });
+
+  // Same rule, stated positively: the directory says outright that it reports
+  // nothing, so the numbers on it cannot be mistaken for a reading.
+  it('says on its face that it reports no conditions', () => {
+    expect(hubPage()).toContain('reports conditions nowhere');
+    for (const c of CORRIDORS) {
+      expect(corridorPage(c), c.slug).toContain('not a reading\n            for today');
+    }
+  });
+
   // A hub has no coordinates. Booting App.jsx there lands in requestLocation()
   // and prompts a reader who asked for a list of cities.
   // /about/ is the only page allowed to be about us. It must still hold to every
