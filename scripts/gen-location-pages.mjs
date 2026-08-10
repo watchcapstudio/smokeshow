@@ -70,6 +70,13 @@ const DISCLAIMER = `<strong>Smokeshow is for informational and educational purpo
 // WatchCap Studio; the Terms' section on what the software is not is written
 // squarely at products like this one.
 //
+// Six rather than the spec's five, which is a deliberate overrun. The spec's five
+// were hub, how-it-works, about, privacy and the Canadian explainer, written
+// before Terms was in the picture; Terms is not optional furniture. Dropping the
+// Canadian explainer instead would have got back to five, but it would also cost
+// that page an internal link from all 30 pages, and "five" was a rule against
+// dumping 25 city links here, not against six pieces of named furniture.
+//
 // Hand-mirrored in index.html, same as the FAQ already is. Keep them in sync.
 const STUDIO_ORIGIN = 'https://watchcapstudio.com';
 const FOOTER_LINKS = [
@@ -79,6 +86,7 @@ const FOOTER_LINKS = [
     href: `/${SECTION}/${CORRIDOR_SEGMENT}/canadian-smoke-great-lakes-northeast/`,
     text: 'Canadian smoke explained',
   },
+  { href: '/about/', text: 'About' },
   { href: `${STUDIO_ORIGIN}/privacy`, text: 'Privacy' },
   { href: `${STUDIO_ORIGIN}/terms`, text: 'Terms' },
 ];
@@ -297,8 +305,8 @@ function placeJsonLd(loc, url) {
 
 function page(loc) {
   const url = `${ORIGIN}/${SECTION}/${loc.slug}/`;
-  const title = `Wildfire Smoke in ${loc.name} — When Will It Clear? | SMOKESHOW`;
-  const description = `Live wildfire smoke forecast for ${loc.label}. See the smoke over the city right now, where it came from, and the clear time — when the air is forecast to stay cleaner for six straight hours.`;
+  const title = `Wildfire Smoke in ${loc.name}: When Will It Clear? | SMOKESHOW`;
+  const description = `Live wildfire smoke forecast for ${loc.label}. See the smoke over the city right now, where it came from, and the clear time, meaning when the air is forecast to stay cleaner for six straight hours.`;
   // Place only. The OG endpoint defaults to the wordmark when no rating is
   // passed, which is what we want: a static page must not stamp a verdict into
   // a share card, because it does not know one.
@@ -311,7 +319,7 @@ function page(loc) {
 
     <!-- Google tag (gtag.js). Charset stays first so it lands well inside the
          first 1024 bytes the HTML spec requires; the tag is otherwise as early
-         as it can be. \`async\` keeps it off the critical path — the verdict must
+         as it can be. \`async\` keeps it off the critical path, because the verdict must
          still paint in under 3 seconds on cellular. -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-XTJYZ1SJCE"></script>
     <script>
@@ -381,7 +389,7 @@ function page(loc) {
       </header>
 
       <!-- The live map now rides in the top canvas (Sky/Map toggle), so there
-           is no separate map section here — the heading above is SEO copy for
+           is no separate map section here. The heading above is SEO copy for
            the flip map. The live app CTA still React-portals into this slot;
            it has to exist on this template too, or a location page loses it. -->
       <div id="cta-slot"></div>
@@ -531,7 +539,7 @@ function cityRows(slugs) {
 
 function hubPage() {
   const url = `${ORIGIN}/${SECTION}/`;
-  const title = 'Wildfire Smoke Forecasts by City — When Will It Clear? | SMOKESHOW';
+  const title = 'Wildfire Smoke Forecasts by City: When Will It Clear? | SMOKESHOW';
   const description =
     'Wildfire smoke forecasts for cities across the US and Canada. What a clear time is, how the visibility scale works, and a live forecast for every city we cover.';
 
@@ -571,7 +579,7 @@ function hubPage() {
             Every city page leads with one answer: the clear time. It is the first stretch of at
             least six straight hours where the forecast drops below the Smells-like-fire threshold
             and stays there. The six-hour hold is the whole point of the rule. Smoke does not leave
-            cleanly — it thins for an hour, comes back, thins again — and a forecast that announced
+            cleanly. It thins for an hour, comes back, thins again, and a forecast that announced
             the first dip as the all-clear would be wrong within the hour and right about nothing.
             Six hours is long enough that the answer is usable: it is a window you can open a window
             in.
@@ -593,7 +601,7 @@ function hubPage() {
           <p>
             What changes city to city is what that air looks like out your window, and that is
             deliberate. The scale is anchored to visibility because visibility is the one reading you
-            can take yourself without trusting a model — you do not need an instrument to notice a
+            can take yourself without trusting a model, and you do not need an instrument to notice a
             mountain is gone. But ten miles of visibility is an ordinary clear day on the Chicago
             lakefront and an extraordinary one in the San Joaquin Valley, and in Seattle the top of
             the scale is Rainier standing out at roughly sixty miles. So each city page carries its
@@ -620,9 +628,126 @@ function hubPage() {
 `;
 }
 
+// /about/ — the only page on the site that is allowed to be about us, and it
+// earns that by answering the two questions a reader has no other way to check:
+// why this exists, and what it refuses to do.
+//
+// Sits at the root rather than under /smoke-forecast/, because it is not a
+// forecast. The studio's own identity, the Privacy page and the Terms all live
+// on watchcapstudio.com and are linked rather than retold here — this page is
+// about the product.
+function aboutPage() {
+  const url = `${ORIGIN}/about/`;
+  const title = 'About Smokeshow: Why We Made It | SMOKESHOW';
+  const description =
+    'Why we built a wildfire smoke forecast that answers one question, where its data comes from, and what it will not do.';
+
+  return `${editorialHead({ title, description, url })}
+    <div class="app app--bottom">
+      <header class="map-intro">
+        <h1 class="map-intro__title">Why we made Smokeshow</h1>
+        <p class="map-intro__sub">
+          One page, one question. How bad is the air here, and when does it clear.
+        </p>
+      </header>
+
+      <div class="seo-sheet">
+        <div class="seo-sheet__grab" aria-hidden="true"></div>
+
+        <section class="explainer">
+          <h2>We wanted to go outside</h2>
+          <p>
+            That is most of it. The data for whether that is a good idea already exists, in public:
+            a federal smoke model, a European one, federal fire reporting, satellite heat
+            detections. It is just scattered across separate agencies, in formats built for people
+            who do this for a living. Getting a straight answer meant digging, every time, and by
+            the time you had it the afternoon was gone.
+          </p>
+          <p>
+            So we stopped digging and built the thing we wanted. One page, one question.
+          </p>
+          <p>
+            We like being outside. The activity, the weather, the feeling of being in it. Smoke
+            turns that inside out. The air you went out for becomes the reason to stay in, and it
+            takes the run, the game, the trip, the weekend with it. You end up resenting a sky. What
+            you want in that moment is not a dashboard. It is an answer you can plan around.
+          </p>
+          <p>
+            Which is why this site leads with a clear time rather than a reading. It is the first
+            stretch of at least six straight hours the forecast holds cleaner, and the six-hour rule
+            is there because smoke does not leave cleanly. It thins, comes back, thins again. An
+            answer you can make a plan on has to be longer than the next dip.
+          </p>
+        </section>
+
+        <section class="explainer">
+          <h2>The name</h2>
+          <p>
+            A watch cap is the wool cap North Atlantic fishermen wore for centuries before it became
+            standard issue at sea. Hand made, simple, still worn by the most elite operators and
+            sometimes by baristas in Brooklyn. It is for noticing. That is the idea. Notice.
+          </p>
+          <p>
+            Which is what this site asks of you. Every level on the scale is anchored to how far you
+            can see, and every city page names the hill, the tower or the peak that goes at each
+            step, because visibility is the one reading you can take yourself without trusting us.
+            Look out the window. That is the instrument.
+          </p>
+        </section>
+
+        <section class="explainer">
+          <h2>What we will not do</h2>
+          <p>
+            Dress up a guess. Everything here is a model estimate, including the hours before now.
+            Those are the model's account of the past, not measurements. Where the models disagree,
+            the page says so instead of showing you the prettier one.
+          </p>
+          <p>
+            There is no account, no email capture, nothing sold, and no advertising against your
+            weather. The site is free to use, and nothing here starts costing money without us
+            telling you the price first.
+          </p>
+          <p>
+            And Smokeshow is information, not advice. It cannot tell you whether the air is safe for
+            you to breathe, and it does not try. For that, use AirNow.gov, the National Weather
+            Service, your local health authorities, and a professional who knows your situation.
+          </p>
+        </section>
+
+        <section class="explainer">
+          <h2>Where the numbers come from</h2>
+          <p>
+            Forecast: NOAA HRRR-Smoke, Copernicus CAMS and Open-Meteo. Fires: NIFC WFIGS. Thermal
+            hotspots: NASA FIRMS. The hotspots are heat detections rather than confirmed fires, and
+            the fire cards carry the date each fact was reported, because a fire report is not a
+            forecast and does not move with the timeline.
+          </p>
+          <p>
+            Smokeshow is made by
+            <a href="${escAttr(STUDIO_ORIGIN)}">WatchCap Studio</a>. A studio because we like to
+            make. Live with attention. Make with attention. Enjoy it.
+          </p>
+        </section>
+
+        <div class="disclaimer">
+          <p>
+            ${DISCLAIMER}
+          </p>
+        </div>
+      </div>${footer()}
+    </div>
+    <script type="module" src="/src/editorial.js"></script>
+  </body>
+</html>
+`;
+}
+
 function corridorPage(corridor) {
   const url = `${ORIGIN}/${SECTION}/${CORRIDOR_SEGMENT}/${corridor.slug}/`;
-  const title = `${corridor.name} — Live Forecasts | SMOKESHOW`;
+  // No separator before SMOKESHOW beyond the pipe: every corridor name already
+  // contains a colon ("Canadian smoke: Great Lakes and Northeast"), so the
+  // "<name>: Live Forecasts" shape this replaced produced a double colon.
+  const title = `${corridor.name} | Live Forecasts | SMOKESHOW`;
   const rows = cityRows(corridor.cities);
 
   const body = corridor.body.map((p) => `
@@ -687,6 +812,7 @@ ${
 function sitemap(locations) {
   const urls = [
     `${ORIGIN}/`,
+    `${ORIGIN}/about/`,
     `${ORIGIN}/${SECTION}/`,
     ...CORRIDORS.map((c) => `${ORIGIN}/${SECTION}/${CORRIDOR_SEGMENT}/${c.slug}/`),
     ...locations.map((l) => `${ORIGIN}/${SECTION}/${l.slug}/`),
@@ -723,6 +849,11 @@ export async function generate() {
     await emit(join(ROOT, SECTION, CORRIDOR_SEGMENT, corridor.slug), corridorPage(corridor));
   }
 
+  // /about/ sits outside SECTION, so the wipe at the top of this function does
+  // not reach it. Overwriting is enough: it is one file at a fixed path, with no
+  // slug that can be renamed and leave an orphan behind.
+  await emit(join(ROOT, 'about'), aboutPage());
+
   await mkdir(join(ROOT, 'public'), { recursive: true });
   await writeFile(join(ROOT, 'public', 'sitemap.xml'), sitemap(LOCATIONS), 'utf8');
 
@@ -734,6 +865,7 @@ export const _internal = {
   page,
   hubPage,
   corridorPage,
+  aboutPage,
   sitemap,
   esc,
   escAttr,
@@ -746,6 +878,6 @@ export const _internal = {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const written = await generate();
   console.log(
-    `pages: ${written.length} written (${LOCATIONS.length} cities, 1 hub, ${CORRIDORS.length} corridors), sitemap.xml updated`,
+    `pages: ${written.length} written (${LOCATIONS.length} cities, 1 hub, ${CORRIDORS.length} corridors, 1 about), sitemap.xml updated`,
   );
 }

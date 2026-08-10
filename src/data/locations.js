@@ -176,7 +176,7 @@ export const LOCATIONS = [
     questions: [
       {
         q: 'Is there wildfire smoke in Missoula right now?',
-        a: 'The verdict at the top of this page answers that for Missoula specifically. It reads the forecast model over the valley floor, which is the part that matters here — because the valley caps itself overnight, the air on the valley floor and the air above the inversion up on Snowbowl can be two different stories on the same morning, and the one you breathe is the low one. Everything shown is a model estimate rather than a measurement at your address.',
+        a: 'The verdict at the top of this page answers that for Missoula specifically. It reads the forecast model over the valley floor, which is the part that matters here, because the valley caps itself overnight, the air on the valley floor and the air above the inversion up on Snowbowl can be two different stories on the same morning, and the one you breathe is the low one. Everything shown is a model estimate rather than a measurement at your address.',
       },
       {
         q: 'When will the smoke clear in Missoula?',
@@ -184,7 +184,7 @@ export const LOCATIONS = [
       },
       {
         q: "Why is Missoula's air quality bad today?",
-        a: "There are two different reasons and they need different answers. Either something new arrived — western Montana, the Idaho panhandle, or a westerly push out of Washington, Oregon, or interior British Columbia — or nothing new arrived and the valley simply never let go of what came in days ago. That second case is the one Missoula is known for, and it is why the air here often stays bad after the fire behavior upwind has calmed down. Scrub the timeline backward twelve hours: if the plume is not moving, you are looking at the valley, not at a fire.",
+        a: "There are two different reasons and they need different answers. Either something new arrived from western Montana, the Idaho panhandle, or a westerly push out of Washington, Oregon, or interior British Columbia. Or nothing new arrived and the valley simply never let go of what came in days ago. That second case is the one Missoula is known for, and it is why the air here often stays bad after the fire behavior upwind has calmed down. Scrub the timeline backward twelve hours: if the plume is not moving, you are looking at the valley, not at a fire.",
       },
       {
         q: 'Where is the wildfire smoke in Missoula coming from?',
@@ -244,7 +244,7 @@ export const LOCATIONS = [
     questions: [
       {
         q: 'Is there wildfire smoke in Whitefish right now?',
-        a: 'The verdict at the top of this page answers that for Whitefish and, in practice, for the Flathead — Kalispell, Columbia Falls, and Bigfork are close enough and low enough in the same basin that a bad hour here is a bad hour there. It reads the forecast model over the valley floor and states the level in plain language, from All clear through Smokeshow. Everything shown is a model estimate rather than a measurement at your address.',
+        a: 'The verdict at the top of this page answers that for Whitefish and, in practice, for the Flathead. Kalispell, Columbia Falls, and Bigfork are close enough and low enough in the same basin that a bad hour here is a bad hour there. It reads the forecast model over the valley floor and states the level in plain language, from All clear through Smokeshow. Everything shown is a model estimate rather than a measurement at your address.',
       },
       {
         q: 'When will the smoke clear in Whitefish?',
@@ -264,7 +264,7 @@ export const LOCATIONS = [
       },
       {
         q: 'How can I tell how smoky it is in Whitefish without an app?',
-        a: 'Look east across the Flathead at the Glacier peaks first — when they flatten into one blue band with the Swan Range losing its notches, something has arrived. Then check Big Mountain to the north: whether you can still read the ski runs on it is the middle of the scale, and when the mountain the whole town is built to look at disappears from Central Avenue, you are at the top of it.',
+        a: 'Look east across the Flathead at the Glacier peaks first. When they flatten into one blue band with the Swan Range losing its notches, something has arrived. Then check Big Mountain to the north: whether you can still read the ski runs on it is the middle of the scale, and when the mountain the whole town is built to look at disappears from Central Avenue, you are at the top of it.',
       },
     ],
   },
@@ -320,11 +320,11 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Bozeman?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Bozeman has a neighbour worth comparing it against. Paradise Valley, twenty-six miles east, is wind country, and the wind that scours Livingston most of the year can flush a plume out faster than it leaves the Gallatin — so a clear time there is not a clear time here, and the difference is the basin.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Bozeman has a neighbour worth comparing it against. Paradise Valley, twenty-six miles east, is wind country, and the wind that scours Livingston most of the year can flush a plume out faster than it leaves the Gallatin, so a clear time there is not a clear time here, and the difference is the basin.',
       },
       {
         q: "Why is Bozeman's air quality bad today?",
-        a: 'Bozeman has fire country on every side, which means the honest answer is usually "several places at once." Central Idaho, western Montana, and the Yellowstone country to the south are the near sources; Washington, Oregon, and interior British Columbia feed it from hundreds of miles out on westerly flow. And the valley itself is half the story on any given morning — it holds what arrived yesterday, so a bad day here does not require anything new to be burning.',
+        a: 'Bozeman has fire country on every side, which means the honest answer is usually "several places at once." Central Idaho, western Montana, and the Yellowstone country to the south are the near sources; Washington, Oregon, and interior British Columbia feed it from hundreds of miles out on westerly flow. And the valley itself is half the story on any given morning, because it holds what arrived yesterday, so a bad day here does not require anything new to be burning.',
       },
       {
         q: 'Where is the wildfire smoke in Bozeman coming from?',
@@ -336,7 +336,7 @@ export const LOCATIONS = [
       },
       {
         q: 'How can I tell how smoky it is in Bozeman without an app?',
-        a: 'Start with the Spanish Peaks to the southwest — thirty miles out, so they are the first thing to flatten. Then look at whether Sacagawea still has detail and whether the Bridger ridgeline still separates from the sky. The M on the Bridger foothills is the close check from Main Street, and when the M itself goes you have lost the mountain faces that frame the entire valley, which is as clear a reading as any instrument will give you.',
+        a: 'Start with the Spanish Peaks to the southwest, thirty miles out, so they are the first thing to flatten. Then look at whether Sacagawea still has detail and whether the Bridger ridgeline still separates from the sky. The M on the Bridger foothills is the close check from Main Street, and when the M itself goes you have lost the mountain faces that frame the entire valley, which is as clear a reading as any instrument will give you.',
       },
     ],
   },
@@ -391,7 +391,7 @@ export const LOCATIONS = [
       },
       {
         q: "Why is Jackson's air quality bad today?",
-        a: 'Either something is burning close — the Bridger-Teton, or the parks immediately north — or smoke has ridden westerly and southwesterly flow in from central and southern Idaho, the Great Basin, or western Montana. In heavy California and Pacific Northwest seasons there is a third case that catches people out: smoke arrives aloft from a thousand miles away and then settles into the valley, so the air goes bad with no fire within several states.',
+        a: 'Either something is burning close, in the Bridger-Teton or the parks immediately north, or smoke has ridden westerly and southwesterly flow in from central and southern Idaho, the Great Basin, or western Montana. In heavy California and Pacific Northwest seasons there is a third case that catches people out: smoke arrives aloft from a thousand miles away and then settles into the valley, so the air goes bad with no fire within several states.',
       },
       {
         q: 'Where is the wildfire smoke in Jackson coming from?',
@@ -399,11 +399,11 @@ export const LOCATIONS = [
       },
       {
         q: 'Will the air quality in Jackson be better tomorrow?',
-        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. In a valley built entirely around looking at the Tetons, the question people are usually asking is when the range comes back, and that is not quite the same question as when the air is cleaner — visibility recovers from the top of the scale downward, so the Grand reappears well before an all-clear. Forecasts are sharpest one to two days out.',
+        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. In a valley built entirely around looking at the Tetons, the question people are usually asking is when the range comes back, and that is not quite the same question as when the air is cleaner. Visibility recovers from the top of the scale downward, so the Grand reappears well before an all-clear. Forecasts are sharpest one to two days out.',
       },
       {
         q: 'How can I tell how smoky it is in Jackson without an app?',
-        a: 'Look northwest up the valley at the Grand first: when the range stops separating peak by peak and flattens into one blue wall with no couloirs showing, smoke has arrived. Then look east at Sleeping Indian across the valley, and when that has no rock left in it the Tetons are already gone. The last check is Snow King, directly above town — when the mountain sitting on top of you goes, that is the bottom of the scale.',
+        a: 'Look northwest up the valley at the Grand first: when the range stops separating peak by peak and flattens into one blue wall with no couloirs showing, smoke has arrived. Then look east at Sleeping Indian across the valley, and when that has no rock left in it the Tetons are already gone. The last check is Snow King, directly above town. When the mountain sitting on top of you goes, that is the bottom of the scale.',
       },
     ],
   },
@@ -466,7 +466,7 @@ export const LOCATIONS = [
     questions: [
       {
         q: 'Is there wildfire smoke in Winnipeg right now?',
-        a: 'The verdict at the top of this page answers that for Winnipeg specifically. What makes this city different from most on this corridor is that its smoke has not travelled far — the fires are a few hundred kilometres north and northwest, so what arrives here is fresh and concentrated rather than aged and thinned out. Everything shown is a model estimate rather than a measurement at your address.',
+        a: 'The verdict at the top of this page answers that for Winnipeg specifically. What makes this city different from most on this corridor is that its smoke has not travelled far. The fires are a few hundred kilometres north and northwest, so what arrives here is fresh and concentrated rather than aged and thinned out. Everything shown is a model estimate rather than a measurement at your address.',
       },
       {
         q: 'When will the smoke clear in Winnipeg?',
@@ -474,7 +474,7 @@ export const LOCATIONS = [
       },
       {
         q: "Why is Winnipeg's air quality bad today?",
-        a: 'Because Winnipeg is upwind of almost everyone else and downwind of the boreal forest. Fires in northern Manitoba, northwestern Ontario, and Saskatchewan sit a few hundred kilometres north and northwest, and their smoke does not need days in transit to get here. That is also why a bad Manitoba fire season registers as a national air quality event rather than a provincial one — what starts here does not stay here.',
+        a: 'Because Winnipeg is upwind of almost everyone else and downwind of the boreal forest. Fires in northern Manitoba, northwestern Ontario, and Saskatchewan sit a few hundred kilometres north and northwest, and their smoke does not need days in transit to get here. That is also why a bad Manitoba fire season registers as a national air quality event rather than a provincial one. What starts here does not stay here.',
       },
       {
         q: 'Where is the wildfire smoke in Winnipeg coming from?',
@@ -486,7 +486,7 @@ export const LOCATIONS = [
       },
       {
         q: 'How can I tell how smoky it is in Winnipeg without an app?',
-        a: 'Use the horizon, which is a luxury most cities on this list do not have. From the Forks the prairie edge reads as a hard line in every direction on a clean day, and flat ground makes that the most sensitive visibility test there is — the edge softens into a band before any downtown building looks different. After that it is the Golden Boy on the Legislative Building, then the top of 201 Portage.',
+        a: 'Use the horizon, which is a luxury most cities on this list do not have. From the Forks the prairie edge reads as a hard line in every direction on a clean day, and flat ground makes that the most sensitive visibility test there is. The edge softens into a band before any downtown building looks different. After that it is the Golden Boy on the Legislative Building, then the top of 201 Portage.',
       },
     ],
   },
@@ -533,7 +533,7 @@ export const LOCATIONS = [
     questions: [
       {
         q: 'Is there wildfire smoke in Minneapolis right now?',
-        a: 'The verdict at the top of this page answers that for Minneapolis specifically. The Twin Cities are close enough to the source that the answer changes fast — Manitoba and northwestern Ontario smoke crosses the border and gets here in under a day, so a clean morning and a bad evening on the same plume is an ordinary Minneapolis pattern rather than an unusual one. Everything shown is a model estimate rather than a measurement at your address.',
+        a: 'The verdict at the top of this page answers that for Minneapolis specifically. The Twin Cities are close enough to the source that the answer changes fast. Manitoba and northwestern Ontario smoke crosses the border and gets here in under a day, so a clean morning and a bad evening on the same plume is an ordinary Minneapolis pattern rather than an unusual one. Everything shown is a model estimate rather than a measurement at your address.',
       },
       {
         q: 'When will the smoke clear in Minneapolis?',
@@ -553,7 +553,7 @@ export const LOCATIONS = [
       },
       {
         q: 'How can I tell how smoky it is in Minneapolis without an app?',
-        a: 'The Twin Cities give you a two-downtown test nothing else on this list has: from the Mendota Bridge you can normally pick out both skylines nine miles apart, and St. Paul disappearing behind Minneapolis is the first real step down. After that it is the IDS Center from Bde Maka Ska — still the tallest thing there, or merged into one mass with the buildings behind it — and finally its upper floors going from the West River Parkway.',
+        a: 'The Twin Cities give you a two-downtown test nothing else on this list has: from the Mendota Bridge you can normally pick out both skylines nine miles apart, and St. Paul disappearing behind Minneapolis is the first real step down. After that it is the IDS Center from Bde Maka Ska, still the tallest thing there or merged into one mass with the buildings behind it, and finally its upper floors going from the West River Parkway.',
       },
     ],
   },
@@ -608,7 +608,7 @@ export const LOCATIONS = [
       },
       {
         q: "Why is Seattle's air quality bad today?",
-        a: 'It depends which of Seattle’s two mechanisms is running, and they do not feel alike. An easterly flow event means the Cascades or eastern Washington are burning and the passes are funnelling it west — sharp, fast, over quickly. A settled event means Oregon, California, or interior British Columbia smoke came in aloft and dropped into the basin, and that is the one that turns the sky flat orange-grey for days, as it did through August and September 2020.',
+        a: 'It depends which of Seattle’s two mechanisms is running, and they do not feel alike. An easterly flow event means the Cascades or eastern Washington are burning and the passes are funnelling it west: sharp, fast, over quickly. A settled event means Oregon, California, or interior British Columbia smoke came in aloft and dropped into the basin, and that is the one that turns the sky flat orange-grey for days, as it did through August and September 2020.',
       },
       {
         q: 'Where is the wildfire smoke in Seattle coming from?',
@@ -616,11 +616,11 @@ export const LOCATIONS = [
       },
       {
         q: 'Will the air quality in Seattle be better tomorrow?',
-        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. The honest caveat for Seattle is that "better tomorrow" is a much safer bet on an easterly-flow event than on a settled one — 2020 is the reference for how long the basin can hold smoke once it has it. Forecasts are sharpest one to two days out and the page shows where the models disagree.',
+        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. The honest caveat for Seattle is that "better tomorrow" is a much safer bet on an easterly-flow event than on a settled one. 2020 is the reference for how long the basin can hold smoke once it has it. Forecasts are sharpest one to two days out and the page shows where the models disagree.',
       },
       {
         q: 'How can I tell how smoky it is in Seattle without an app?',
-        a: 'Look for Rainier to the southeast first. It is sixty miles out, so it goes before anything else does, and losing it is the earliest real signal you get. Then the Olympics across the Sound: flattened to a grey band, then gone. Then Bainbridge — still there but with its trees gone is the middle of the scale. When the tops of the downtown towers go and you lose the far side of Elliott Bay from the waterfront, that is the bottom.',
+        a: 'Look for Rainier to the southeast first. It is sixty miles out, so it goes before anything else does, and losing it is the earliest real signal you get. Then the Olympics across the Sound: flattened to a grey band, then gone. Then Bainbridge: still there but with its trees gone is the middle of the scale. When the tops of the downtown towers go and you lose the far side of Elliott Bay from the waterfront, that is the bottom.',
       },
     ],
   },
@@ -670,7 +670,7 @@ export const LOCATIONS = [
     questions: [
       {
         q: 'Is there wildfire smoke in Denver right now?',
-        a: 'The verdict at the top of this page answers that for Denver specifically, and it is a smoke forecast rather than a haze forecast — which in this city is a meaningful distinction. Denver has a native brown cloud that looks like smoke and is not, so the verdict can read All clear on an afternoon when the Front Range has genuinely disappeared. The section above on what is not smoke covers the tell. Everything shown is a model estimate rather than a measurement at your address.',
+        a: 'The verdict at the top of this page answers that for Denver specifically, and it is a smoke forecast rather than a haze forecast, which in this city is a meaningful distinction. Denver has a native brown cloud that looks like smoke and is not, so the verdict can read All clear on an afternoon when the Front Range has genuinely disappeared. The section above on what is not smoke covers the tell. Everything shown is a model estimate rather than a measurement at your address.',
       },
       {
         q: 'When will the smoke clear in Denver?',
@@ -678,7 +678,7 @@ export const LOCATIONS = [
       },
       {
         q: "Why is Denver's air quality bad today?",
-        a: 'There are two answers and the page will not pretend they are one. If it is a hot summer afternoon with no wind and a brown tinge at the horizon, that is most likely ozone off Front Range traffic and industry, trapped against the mountains — a local problem with nothing burning anywhere. If it is smoke, it has usually travelled: Colorado’s western slope, Utah and the Great Basin, or California and the Pacific Northwest on upper-level flow a thousand miles east.',
+        a: 'There are two answers and the page will not pretend they are one. If it is a hot summer afternoon with no wind and a brown tinge at the horizon, that is most likely ozone off Front Range traffic and industry, trapped against the mountains, a local problem with nothing burning anywhere. If it is smoke, it has usually travelled: Colorado’s western slope, Utah and the Great Basin, or California and the Pacific Northwest on upper-level flow a thousand miles east.',
       },
       {
         q: 'Where is the wildfire smoke in Denver coming from?',
@@ -737,7 +737,7 @@ export const LOCATIONS = [
     questions: [
       {
         q: 'Is there wildfire smoke in Spokane right now?',
-        a: 'The verdict at the top of this page answers that for Spokane specifically. Spokane is worth checking more often than most cities on this site, because it sits downwind of nearly everything that burns in the interior Northwest — four separate source regions feed it, so the odds that at least one is active in August are high. Everything shown is a model estimate rather than a measurement at your address.',
+        a: 'The verdict at the top of this page answers that for Spokane specifically. Spokane is worth checking more often than most cities on this site, because it sits downwind of nearly everything that burns in the interior Northwest. Four separate source regions feed it, so the odds that at least one is active in August are high. Everything shown is a model estimate rather than a measurement at your address.',
       },
       {
         q: 'When will the smoke clear in Spokane?',
@@ -745,7 +745,7 @@ export const LOCATIONS = [
       },
       {
         q: "Why is Spokane's air quality bad today?",
-        a: 'Because almost everything upwind of Spokane is fire country. Central and eastern Washington, the Idaho panhandle, and western Montana all feed it, and British Columbia is the one people underestimate — a bad BC season puts smoke over Spokane repeatedly with nothing burning in Washington at all. Spokane has spent parts of recent summers with the worst measured air quality in the United States, which is not a ranking anyone here is surprised by.',
+        a: 'Because almost everything upwind of Spokane is fire country. Central and eastern Washington, the Idaho panhandle, and western Montana all feed it, and British Columbia is the one people underestimate. A bad BC season puts smoke over Spokane repeatedly with nothing burning in Washington at all. Spokane has spent parts of recent summers with the worst measured air quality in the United States, which is not a ranking anyone here is surprised by.',
       },
       {
         q: 'Where is the wildfire smoke in Spokane coming from?',
@@ -753,7 +753,7 @@ export const LOCATIONS = [
       },
       {
         q: 'Will the air quality in Spokane be better tomorrow?',
-        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. Spokane’s bad stretches have historically run in weeks rather than days — 2015 and 2020 both produced multi-week runs of degraded air — so the five-day view is the one worth reading here, not the next hour. Forecasts are sharpest one to two days out and the page shows the spread.',
+        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. Spokane’s bad stretches have historically run in weeks rather than days. 2015 and 2020 both produced multi-week runs of degraded air, so the five-day view is the one worth reading here, not the next hour. Forecasts are sharpest one to two days out and the page shows the spread.',
       },
       {
         q: 'How can I tell how smoky it is in Spokane without an app?',
@@ -804,7 +804,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Detroit?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Detroit is far enough down the Ontario corridor that plumes tend to arrive as broad haze rather than sharp fronts, which usually makes the clear time a steadier answer here than it is in Winnipeg or Minneapolis — and a slower one.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Detroit is far enough down the Ontario corridor that plumes tend to arrive as broad haze rather than sharp fronts, which usually makes the clear time a steadier answer here than it is in Winnipeg or Minneapolis, and a slower one.',
       },
       {
         q: "Why is Detroit's air quality bad today?",
@@ -812,7 +812,7 @@ export const LOCATIONS = [
       },
       {
         q: 'Where is the wildfire smoke in Detroit coming from?',
-        a: 'The Canadian boreal forest by way of Ontario — northern Ontario or Quebec for most events, on northerly and northeasterly flow, usually crossing Lake Huron on the way. Toronto sits under the same plumes about a day earlier, which is why it is the upwind link on this page. Run the timeline backward on the map and the path comes down and across rather than in from the west.',
+        a: 'The Canadian boreal forest by way of Ontario: northern Ontario or Quebec for most events, on northerly and northeasterly flow, usually crossing Lake Huron on the way. Toronto sits under the same plumes about a day earlier, which is why it is the upwind link on this page. Run the timeline backward on the map and the path comes down and across rather than in from the west.',
       },
       {
         q: 'Will the air quality in Detroit be better tomorrow?',
@@ -820,7 +820,7 @@ export const LOCATIONS = [
       },
       {
         q: 'How can I tell how smoky it is in Detroit without an app?',
-        a: 'Detroit has an international sightline that does the work for you: from Belle Isle, Windsor across the river should read clean with the far shoreline holding. The Ambassador Bridge is the next step — when its towers lose their cables at about five miles, something has arrived. Then the Ren Cen from Hart Plaza. When you can lose Windsor entirely from the riverfront, a half mile across the water, that is the bottom of the scale.',
+        a: 'Detroit has an international sightline that does the work for you: from Belle Isle, Windsor across the river should read clean with the far shoreline holding. The Ambassador Bridge is the next step. When its towers lose their cables at about five miles, something has arrived. Then the Ren Cen from Hart Plaza. When you can lose Windsor entirely from the riverfront, a half mile across the water, that is the bottom of the scale.',
       },
     ],
   },
@@ -867,11 +867,11 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Milwaukee?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Milwaukee has a local reason that answer can wobble. The lake breeze turns through the day, so a plume can be pinned against the shore in the afternoon and released in the evening without anything upwind changing at all — which is exactly the kind of hour-long dip the six-hour hold exists to ignore.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Milwaukee has a local reason that answer can wobble. The lake breeze turns through the day, so a plume can be pinned against the shore in the afternoon and released in the evening without anything upwind changing at all, which is exactly the kind of hour-long dip the six-hour hold exists to ignore.',
       },
       {
         q: "Why is Milwaukee's air quality bad today?",
-        a: 'The source is the same Canadian corridor that feeds Chicago and Minneapolis — Ontario, Manitoba, and Quebec on northerly flow across the upper Midwest. What Lake Michigan adds is timing rather than cause: it can keep the smoke over the shoreline for hours after the inland air has improved. June 2023 is the local marker, when Quebec smoke put Milwaukee among the worst air quality in the country for parts of two days.',
+        a: 'The source is the same Canadian corridor that feeds Chicago and Minneapolis: Ontario, Manitoba, and Quebec on northerly flow across the upper Midwest. What Lake Michigan adds is timing rather than cause: it can keep the smoke over the shoreline for hours after the inland air has improved. June 2023 is the local marker, when Quebec smoke put Milwaukee among the worst air quality in the country for parts of two days.',
       },
       {
         q: 'Where is the wildfire smoke in Milwaukee coming from?',
@@ -883,7 +883,7 @@ export const LOCATIONS = [
       },
       {
         q: 'How can I tell how smoky it is in Milwaukee without an app?',
-        a: 'The lake horizon is the most sensitive test you have — from South Shore Park it reads as a hard line on a clean day, and it softens into nothing before the skyline looks much different. After that, whether the US Bank Center is still the tallest distinct thing from the south side or has merged into one mass with the buildings around it. The Hoan Bridge from the Art Museum is the close check, and losing it under a mile away is the bottom.',
+        a: 'The lake horizon is the most sensitive test you have. From South Shore Park it reads as a hard line on a clean day, and it softens into nothing before the skyline looks much different. After that, whether the US Bank Center is still the tallest distinct thing from the south side or has merged into one mass with the buildings around it. The Hoan Bridge from the Art Museum is the close check, and losing it under a mile away is the bottom.',
       },
     ],
   },
@@ -934,7 +934,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Cleveland?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Lake Erie complicates it at the back end as much as the front. The lake breeze can pin a plume against the shoreline through the afternoon, so the Edgewater lakefront can stay bad while the air a few miles south has already turned — and a clear time is a forecast for the point, not for the county.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Lake Erie complicates it at the back end as much as the front. The lake breeze can pin a plume against the shoreline through the afternoon, so the Edgewater lakefront can stay bad while the air a few miles south has already turned, and a clear time is a forecast for the point, not for the county.',
       },
       {
         q: "Why is Cleveland's air quality bad today?",
@@ -942,7 +942,7 @@ export const LOCATIONS = [
       },
       {
         q: 'Where is the wildfire smoke in Cleveland coming from?',
-        a: 'Ontario and Quebec, with Lake Erie as the last leg. Detroit sits upwind on northwesterly setups and Toronto sits at the near end of the same corridor, getting the smoke thick a day or so earlier — both are linked below for exactly that reason. Run the timeline backward on the map and the plume comes down over the lake rather than in overland.',
+        a: 'Ontario and Quebec, with Lake Erie as the last leg. Detroit sits upwind on northwesterly setups and Toronto sits at the near end of the same corridor, getting the smoke thick a day or so earlier, and both are linked below for exactly that reason. Run the timeline backward on the map and the plume comes down over the lake rather than in overland.',
       },
       {
         q: 'Will the air quality in Cleveland be better tomorrow?',
@@ -1078,7 +1078,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Boston?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Being far downwind makes it a steadier answer than it is in Toronto — an aged plume is broad rather than sharp, so it comes and goes slowly. The trade is that it also lingers, which is what June 2023 looked like here: multiple days rather than one bad afternoon.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Being far downwind makes it a steadier answer than it is in Toronto. An aged plume is broad rather than sharp, so it comes and goes slowly. The trade is that it also lingers, which is what June 2023 looked like here: multiple days rather than one bad afternoon.',
       },
       {
         q: "Why is Boston's air quality bad today?",
@@ -1086,11 +1086,11 @@ export const LOCATIONS = [
       },
       {
         q: 'Where is the wildfire smoke in Boston coming from?',
-        a: 'Quebec and Ontario for most events, arriving on northerly flow after a day or more aloft. The Maritimes — Nova Scotia and New Brunswick — supply the rarer easterly version. Toronto is the useful upwind check on the common case, sitting under the same Quebec plumes roughly two days earlier and getting them thick. Run the timeline backward on the map and the transit shows.',
+        a: 'Quebec and Ontario for most events, arriving on northerly flow after a day or more aloft. Nova Scotia and New Brunswick supply the rarer easterly version. Toronto is the useful upwind check on the common case, sitting under the same Quebec plumes roughly two days earlier and getting them thick. Run the timeline backward on the map and the transit shows.',
       },
       {
         q: 'Will the air quality in Boston be better tomorrow?',
-        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. Boston gets the longest warning of any city on this corridor, because the smoke has to cross Ontario and New York State first — so the five-day view here is worth more than it is upwind. Forecasts are sharpest one to two days out and the page shows where the models disagree.',
+        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. Boston gets the longest warning of any city on this corridor, because the smoke has to cross Ontario and New York State first, so the five-day view here is worth more than it is upwind. Forecasts are sharpest one to two days out and the page shows where the models disagree.',
       },
       {
         q: 'How can I tell how smoky it is in Boston without an app?',
@@ -1137,7 +1137,7 @@ export const LOCATIONS = [
     questions: [
       {
         q: 'Is there wildfire smoke in New York right now?',
-        a: 'The verdict at the top of this page answers that for New York specifically, and the hour matters more here than almost anywhere. Because the city is far enough downwind that smoke arrives aloft and then mixes down, a clean morning and a visibly bad afternoon on the same plume is an ordinary New York pattern — so a reading taken at 8am does not describe 3pm. Everything shown is a model estimate rather than a measurement at your address.',
+        a: 'The verdict at the top of this page answers that for New York specifically, and the hour matters more here than almost anywhere. Because the city is far enough downwind that smoke arrives aloft and then mixes down, a clean morning and a visibly bad afternoon on the same plume is an ordinary New York pattern, so a reading taken at 8am does not describe 3pm. Everything shown is a model estimate rather than a measurement at your address.',
       },
       {
         q: 'When will the smoke clear in New York?',
@@ -1153,11 +1153,11 @@ export const LOCATIONS = [
       },
       {
         q: 'Will the air quality in New York be better tomorrow?',
-        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. New York gets a long warning — the smoke has to cross Ontario, the Lakes, and upstate New York first — so the five-day view is unusually useful here. The thing it cannot tell you cleanly is what time of day the plume mixes down, which is why the hour-by-hour timeline is worth reading alongside it.',
+        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. New York gets a long warning. The smoke has to cross Ontario, the Lakes, and upstate New York first, so the five-day view is unusually useful here. The thing it cannot tell you cleanly is what time of day the plume mixes down, which is why the hour-by-hour timeline is worth reading alongside it.',
       },
       {
         q: 'How can I tell how smoky it is in New York without an app?',
-        a: 'From the Brooklyn Heights Promenade the Verrazzano about six miles south is the far check and goes first. Then the Statue of Liberty going soft while the Manhattan buildings merge into one mass. Then the top of One World Trade a mile off. When its upper floors and the Empire State Building disappear and you can lose Manhattan entirely from Brooklyn, that is the bottom of the scale — and it is exactly what June 2023 looked like.',
+        a: 'From the Brooklyn Heights Promenade the Verrazzano about six miles south is the far check and goes first. Then the Statue of Liberty going soft while the Manhattan buildings merge into one mass. Then the top of One World Trade a mile off. When its upper floors and the Empire State Building disappear and you can lose Manhattan entirely from Brooklyn, that is the bottom of the scale, and it is exactly what June 2023 looked like.',
       },
     ],
   },
@@ -1215,19 +1215,19 @@ export const LOCATIONS = [
       },
       {
         q: "Why is Philadelphia's air quality bad today?",
-        a: 'The question splits in two here more than on most pages. If the horizon is white or blue-grey and smells like nothing, that is humidity and ozone, and it is a local Mid-Atlantic summer problem. If the horizon is yellow-brown and you could smell it before you saw it, that is Quebec or Ontario smoke on northerly flow after a day or more in transit — which is what June 2023 was, when the skyline went orange-brown for parts of two days.',
+        a: 'The question splits in two here more than on most pages. If the horizon is white or blue-grey and smells like nothing, that is humidity and ozone, and it is a local Mid-Atlantic summer problem. If the horizon is yellow-brown and you could smell it before you saw it, that is Quebec or Ontario smoke on northerly flow after a day or more in transit, which is what June 2023 was, when the skyline went orange-brown for parts of two days.',
       },
       {
         q: 'Where is the wildfire smoke in Philadelphia coming from?',
-        a: 'Quebec and Ontario, on the same northerly flow that brings it to New York and Boston, arriving after a day or more aloft. New York usually sits under it first, and on northwesterly setups Pittsburgh gets it earlier still and holds it in the river valleys — both are linked below. Run the timeline backward on the map and the smoke path is visible, which is the fastest way to separate a smoke day from a humid one.',
+        a: 'Quebec and Ontario, on the same northerly flow that brings it to New York and Boston, arriving after a day or more aloft. New York usually sits under it first, and on northwesterly setups Pittsburgh gets it earlier still and holds it in the river valleys, and both are linked below. Run the timeline backward on the map and the smoke path is visible, which is the fastest way to separate a smoke day from a humid one.',
       },
       {
         q: 'Will the air quality in Philadelphia be better tomorrow?',
-        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. If the current haze is humidity rather than smoke, this page is the wrong instrument for the question and a plain weather forecast is the right one — the strip will happily show clean air behind a sky that stays soft. Smoke forecasts are sharpest one to two days out and the page shows the spread.',
+        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. If the current haze is humidity rather than smoke, this page is the wrong instrument for the question and a plain weather forecast is the right one. The strip will happily show clean air behind a sky that stays soft. Smoke forecasts are sharpest one to two days out and the page shows the spread.',
       },
       {
         q: 'How can I tell how smoky it is in Philadelphia without an app?',
-        a: 'Belmont Plateau is the far vantage: about four miles to Center City, with the towers reading individually against a clean sky. When the buildings behind Comcast lose their separation, something is in the air. Then the Comcast towers from the Art Museum steps, then the crown of the Comcast Technology Center. But check colour at every step — white or blue-grey is water, yellow-brown at the horizon is smoke.',
+        a: 'Belmont Plateau is the far vantage: about four miles to Center City, with the towers reading individually against a clean sky. When the buildings behind Comcast lose their separation, something is in the air. Then the Comcast towers from the Art Museum steps, then the crown of the Comcast Technology Center. But check colour at every step: white or blue-grey is water, yellow-brown at the horizon is smoke.',
       },
     ],
   },
@@ -1281,11 +1281,11 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Pittsburgh?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Pittsburgh is the eastern city where that answer is least about the wind. The valleys cap themselves overnight and hold whatever is in them well into the morning, so a plume that would have passed over a flatter city sits here — and the clear time has to wait for the cap to break, not just for the flow to change.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Pittsburgh is the eastern city where that answer is least about the wind. The valleys cap themselves overnight and hold whatever is in them well into the morning, so a plume that would have passed over a flatter city sits here, and the clear time has to wait for the cap to break, not just for the flow to change.',
       },
       {
         q: "Why is Pittsburgh's air quality bad today?",
-        a: 'Two mechanisms, and the honest answer is often both at once. The smoke comes from Ontario and Quebec on northerly flow, the same as the rest of this corridor. The valleys then keep it. June 2023 is the local marker precisely because it layered Quebec smoke on top of an inversion and produced some of the worst readings in the country — the fire was in Canada, but the reason it was that bad here was the terrain.',
+        a: 'Two mechanisms, and the honest answer is often both at once. The smoke comes from Ontario and Quebec on northerly flow, the same as the rest of this corridor. The valleys then keep it. June 2023 is the local marker precisely because it layered Quebec smoke on top of an inversion and produced some of the worst readings in the country. The fire was in Canada, but the reason it was that bad here was the terrain.',
       },
       {
         q: 'Where is the wildfire smoke in Pittsburgh coming from?',
@@ -1352,7 +1352,7 @@ export const LOCATIONS = [
       },
       {
         q: "Why is Portland's air quality bad today?",
-        a: 'The Cascades, southern and eastern Oregon, or northern California — and on the worst setups all of them at once. But the mechanism people here watch for is the gorge: east winds turn it into a funnel and deliver smoke to the metro directly rather than letting it drift in. September 2020 is the reference, when east winds drove the Riverside, Beachie Creek, and Holiday Farm fires toward the valley and ash fell in the city.',
+        a: 'The Cascades, southern and eastern Oregon, or northern California, and on the worst setups all of them at once. But the mechanism people here watch for is the gorge: east winds turn it into a funnel and deliver smoke to the metro directly rather than letting it drift in. September 2020 is the reference, when east winds drove the Riverside, Beachie Creek, and Holiday Farm fires toward the valley and ash fell in the city.',
       },
       {
         q: 'Where is the wildfire smoke in Portland coming from?',
@@ -1419,7 +1419,7 @@ export const LOCATIONS = [
       },
       {
         q: "Why is Bend's air quality bad today?",
-        a: 'Bend is surrounded by fire country in every direction — the Cascade crest to the west, central and southern Oregon around it, northern California to the south, and Idaho and Washington far enough out to still count. So the arriving-smoke question usually has more than one answer. The second half is the basin: clear cold nights settle it in, which means a bad Bend morning does not require anything new to have started.',
+        a: 'Bend is surrounded by fire country in every direction: the Cascade crest to the west, central and southern Oregon around it, northern California to the south, and Idaho and Washington far enough out to still count. So the arriving-smoke question usually has more than one answer. The second half is the basin: clear cold nights settle it in, which means a bad Bend morning does not require anything new to have started.',
       },
       {
         q: 'Where is the wildfire smoke in Bend coming from?',
@@ -1427,7 +1427,7 @@ export const LOCATIONS = [
       },
       {
         q: 'Will the air quality in Bend be better tomorrow?',
-        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. Bend’s bad seasons have run in weeks rather than days — 2017, 2020, and 2021 all produced multi-week stretches — so the strip is the more honest instrument here than the next hour. Forecasts are sharpest one to two days out and the page shows the spread.',
+        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. Bend’s bad seasons have run in weeks rather than days. 2017, 2020, and 2021 all produced multi-week stretches, so the strip is the more honest instrument here than the next hour. Forecasts are sharpest one to two days out and the page shows the spread.',
       },
       {
         q: 'How can I tell how smoky it is in Bend without an app?',
@@ -1478,7 +1478,7 @@ export const LOCATIONS = [
     questions: [
       {
         q: 'Is there wildfire smoke in Boise right now?',
-        a: 'The verdict at the top of this page answers that for Boise specifically, reading the model over the Treasure Valley floor. That is the number worth having, because the valley traps smoke against the foothills — so the air along the Greenbelt can be meaningfully worse than the air a few hundred feet up the Boise Front on the same afternoon. Everything shown is a model estimate rather than a measurement at your address.',
+        a: 'The verdict at the top of this page answers that for Boise specifically, reading the model over the Treasure Valley floor. That is the number worth having, because the valley traps smoke against the foothills, so the air along the Greenbelt can be meaningfully worse than the air a few hundred feet up the Boise Front on the same afternoon. Everything shown is a model estimate rather than a measurement at your address.',
       },
       {
         q: 'When will the smoke clear in Boise?',
@@ -1486,7 +1486,7 @@ export const LOCATIONS = [
       },
       {
         q: "Why is Boise's air quality bad today?",
-        a: 'Central Idaho, eastern Oregon, and Nevada are the near sources, with California and the Pacific Northwest adding to it in bad years on southwesterly and westerly flow. But the Treasure Valley is half the answer on any given day, because it holds what it is given — which is how this valley has repeatedly recorded some of the worst readings in the country during peak weeks without being the closest place to a fire.',
+        a: 'Central Idaho, eastern Oregon, and Nevada are the near sources, with California and the Pacific Northwest adding to it in bad years on southwesterly and westerly flow. But the Treasure Valley is half the answer on any given day, because it holds what it is given, which is how this valley has repeatedly recorded some of the worst readings in the country during peak weeks without being the closest place to a fire.',
       },
       {
         q: 'Where is the wildfire smoke in Boise coming from?',
@@ -1494,7 +1494,7 @@ export const LOCATIONS = [
       },
       {
         q: 'Will the air quality in Boise be better tomorrow?',
-        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. Boise’s bad stretches have run long — 2020 and 2021 both produced extended runs of unhealthy air — and because the valley holds smoke after the flow shifts, "the wind changed" is not the same as "tomorrow is clear." Forecasts are sharpest one to two days out and the page shows the spread.',
+        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. Boise’s bad stretches have run long. 2020 and 2021 both produced extended runs of unhealthy air, and because the valley holds smoke after the flow shifts, "the wind changed" is not the same as "tomorrow is clear." Forecasts are sharpest one to two days out and the page shows the spread.',
       },
       {
         q: 'How can I tell how smoky it is in Boise without an app?',
@@ -1552,7 +1552,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Salt Lake City?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. A bowl between two ranges is slow to give that up. Once smoke is in this valley the mountains keep it there, so the clear time is usually a forecast about the bowl emptying rather than about the flow off the Sierra turning — and 2021 ran long stretches where it did not empty at all.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. A bowl between two ranges is slow to give that up. Once smoke is in this valley the mountains keep it there, so the clear time is usually a forecast about the bowl emptying rather than about the flow off the Sierra turning, and 2021 ran long stretches where it did not empty at all.',
       },
       {
         q: "Why is Salt Lake City's air quality bad today?",
@@ -1564,11 +1564,11 @@ export const LOCATIONS = [
       },
       {
         q: 'Will the air quality in Salt Lake City be better tomorrow?',
-        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. In a valley that holds what it is given, the five-day view is the one worth reading — 2020 and 2021 both put Salt Lake among the worst air quality in the world on multiple days, and those were not single-day events. Forecasts are sharpest one to two days out and the page shows the spread.',
+        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. In a valley that holds what it is given, the five-day view is the one worth reading. 2020 and 2021 both put Salt Lake among the worst air quality in the world on multiple days, and those were not single-day events. Forecasts are sharpest one to two days out and the page shows the spread.',
       },
       {
         q: 'How can I tell how smoky it is in Salt Lake City without an app?',
-        a: 'Look west across the valley at the Oquirrhs, about fifteen miles out — they are the far check and they go first, while Twin Peaks and the Wasatch crest are still readable to the southeast. Then whether the Wasatch canyons still have shadows in them. When the Wasatch front is a silhouette four miles east with no canyon detail, it is well in. From the Avenues, losing the valley floor below you is the bottom.',
+        a: 'Look west across the valley at the Oquirrhs, about fifteen miles out. They are the far check and they go first, while Twin Peaks and the Wasatch crest are still readable to the southeast. Then whether the Wasatch canyons still have shadows in them. When the Wasatch front is a silhouette four miles east with no canyon detail, it is well in. From the Avenues, losing the valley floor below you is the bottom.',
       },
     ],
   },
@@ -1619,7 +1619,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Reno?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Reno gets the worst of both halves. Smoke crosses the Sierra crest on westerly flow, and then the ridges ringing the Truckee Meadows hold it — so the arrival is fast and the departure is not. The 2021 Dixie Fire ran weeks of degraded air here, with repeated school and event cancellations.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Reno gets the worst of both halves. Smoke crosses the Sierra crest on westerly flow, and then the ridges ringing the Truckee Meadows hold it, so the arrival is fast and the departure is not. The 2021 Dixie Fire ran weeks of degraded air here, with repeated school and event cancellations.',
       },
       {
         q: "Why is Reno's air quality bad today?",
@@ -1631,11 +1631,11 @@ export const LOCATIONS = [
       },
       {
         q: 'Will the air quality in Reno be better tomorrow?',
-        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. In Reno the strip is the one to read, because the ridges mean a plume that has arrived does not leave on the next shift — 2021 is the reference for how long that can run. Forecasts are sharpest one to two days out and the page shows where the models disagree.',
+        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. In Reno the strip is the one to read, because the ridges mean a plume that has arrived does not leave on the next shift. 2021 is the reference for how long that can run. Forecasts are sharpest one to two days out and the page shows where the models disagree.',
       },
       {
         q: 'How can I tell how smoky it is in Reno without an app?',
-        a: 'Mount Rose to the southwest is the far check at about fifteen miles, and Slide Mountain beside it is the fine one — when its scar stops reading, something has arrived even if Peavine to the northwest still looks fine. When the Sierra crest is gone entirely and Peavine is a silhouette with no texture, it is well in. Losing downtown from midtown is the bottom of the scale.',
+        a: 'Mount Rose to the southwest is the far check at about fifteen miles, and Slide Mountain beside it is the fine one. When its scar stops reading, something has arrived even if Peavine to the northwest still looks fine. When the Sierra crest is gone entirely and Peavine is a silhouette with no texture, it is well in. Losing downtown from midtown is the bottom of the scale.',
       },
     ],
   },
@@ -1689,7 +1689,7 @@ export const LOCATIONS = [
       },
       {
         q: "Why is Sacramento's air quality bad today?",
-        a: 'Sacramento sits at the bottom of a valley with mountains on three sides and collects from all of them — the northern Sierra, the Coast Range, and the foothills all drain in here. The 2018 Camp Fire is the reference for how far that reaches: smoke from Paradise, ninety miles north, gave the city the worst air quality in the world for days and closed schools across the region. If the sky is tan or white rather than grey-brown, though, check the dust and fog explanation above first.',
+        a: 'Sacramento sits at the bottom of a valley with mountains on three sides and collects from all of them: the northern Sierra, the Coast Range, and the foothills all drain in here. The 2018 Camp Fire is the reference for how far that reaches: smoke from Paradise, ninety miles north, gave the city the worst air quality in the world for days and closed schools across the region. If the sky is tan or white rather than grey-brown, though, check the dust and fog explanation above first.',
       },
       {
         q: 'Where is the wildfire smoke in Sacramento coming from?',
@@ -1697,7 +1697,7 @@ export const LOCATIONS = [
       },
       {
         q: 'Will the air quality in Sacramento be better tomorrow?',
-        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. The single most useful thing to watch in Sacramento is whether the Delta breeze is forecast to run, because that decides whether a plume leaves or settles — 2018 and the 2020 August Complex both show what a valley that will not flush looks like. Forecasts are sharpest one to two days out.',
+        a: 'The five-day strip above gives the day-by-day read and the timeline covers forty-eight hours hour by hour. The single most useful thing to watch in Sacramento is whether the Delta breeze is forecast to run, because that decides whether a plume leaves or settles. 2018 and the 2020 August Complex both show what a valley that will not flush looks like. Forecasts are sharpest one to two days out.',
       },
       {
         q: 'How can I tell how smoky it is in Sacramento without an app?',
@@ -1760,11 +1760,11 @@ export const LOCATIONS = [
     questions: [
       {
         q: 'Is there wildfire smoke in Fresno right now?',
-        a: 'The verdict at the top of this page answers that for Fresno specifically, and Fresno needs the distinction more than any city on this site. The San Joaquin vents poorly in every direction, so agricultural dust, diesel, and valley industry are already in the air before a single fire starts — the mountains can be gone on a day with no smoke in the forecast at all. Everything shown is a model estimate rather than a measurement at your address.',
+        a: 'The verdict at the top of this page answers that for Fresno specifically, and Fresno needs the distinction more than any city on this site. The San Joaquin vents poorly in every direction, so agricultural dust, diesel, and valley industry are already in the air before a single fire starts. The mountains can be gone on a day with no smoke in the forecast at all. Everything shown is a model estimate rather than a measurement at your address.',
       },
       {
         q: 'When will the smoke clear in Fresno?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. It is worth being precise about what that promises in Fresno. It is the point at which the smoke component drops, not the point at which the valley is clean — the baseline this city starts from does not go anywhere, and a clear time here often arrives with the mountains still missing.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. It is worth being precise about what that promises in Fresno. It is the point at which the smoke component drops, not the point at which the valley is clean. The baseline this city starts from does not go anywhere, and a clear time here often arrives with the mountains still missing.',
       },
       {
         q: "Why is Fresno's air quality bad today?",

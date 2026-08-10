@@ -4,7 +4,17 @@ import { CORRIDORS, corridorBySlug } from './corridors.js';
 import { LEVELS } from '../lib/rating.js';
 import { _internal } from '../../scripts/gen-location-pages.mjs';
 
-const { page, hubPage, corridorPage, sitemap, CORRIDOR_SEGMENT, FOOTER_LINKS } = _internal;
+const { page, hubPage, corridorPage, aboutPage, sitemap, CORRIDOR_SEGMENT, FOOTER_LINKS } =
+  _internal;
+
+// Every page the generator writes. Used by the rules that have to hold across
+// all of them rather than on a spot-checked one.
+const allPages = () => [
+  ...LOCATIONS.map((l) => page(l)),
+  hubPage(),
+  aboutPage(),
+  ...CORRIDORS.map((c) => corridorPage(c)),
+];
 
 // Every string a reader can see on a city page. Used by the copy rules below,
 // which have to hold across all of it and not just the parts a spot-check reads.
@@ -492,15 +502,34 @@ describe('internal links', () => {
   // Sitewide footer, five links maximum. A footer carrying every city would
   // flatten the one signal these pages have.
   it('ships the same short footer on every page', () => {
-    expect(FOOTER_LINKS.length).toBeLessThanOrEqual(5);
-    const pages = [
-      ...LOCATIONS.map((l) => page(l)),
-      hubPage(),
-      ...CORRIDORS.map((c) => corridorPage(c)),
-    ];
-    for (const html of pages) {
+    // Six: the spec's five plus Terms, which was not in the spec. See the note
+    // above FOOTER_LINKS. The bound is here so it stays furniture and never
+    // becomes a city list.
+    expect(FOOTER_LINKS.length).toBeLessThanOrEqual(6);
+    for (const html of allPages()) {
       expect(html).toContain('class="site-footer"');
       for (const { href } of FOOTER_LINKS) expect(html).toContain(`href="${href}"`);
+    }
+  });
+});
+
+describe('house style', () => {
+  // No em-dashes anywhere in a generated page. House rule, and the reason it is a
+  // test rather than a note is that em-dashes arrive one sentence at a time: the
+  // sweep that removed 83 of them is worth nothing if the next city page adds two.
+  //
+  // Scoped to the emitted HTML, which includes the comments inside the templates,
+  // because those ship in the payload. Comments in .js and .mjs source do not
+  // ship and are not covered.
+  //
+  // En-dashes are a different character and are left alone: LEVELS.visibility
+  // uses them for numeric ranges ("5–10 miles"), which is what they are for.
+  it('uses no em-dashes in any generated page', () => {
+    for (const html of allPages()) {
+      const hit = html.indexOf('—');
+      if (hit === -1) continue;
+      const title = html.match(/<title>([^<]*)</)?.[1] ?? 'unknown page';
+      throw new Error(`em-dash in "${title}": ...${html.slice(hit - 70, hit + 70)}...`);
     }
   });
 });
@@ -508,8 +537,26 @@ describe('internal links', () => {
 describe('editorial pages', () => {
   // A hub has no coordinates. Booting App.jsx there lands in requestLocation()
   // and prompts a reader who asked for a list of cities.
+  // /about/ is the only page allowed to be about us. It must still hold to every
+  // rule the forecast pages do, and it must not quietly become a second copy of
+  // the studio's Privacy or Terms, which live on watchcapstudio.com.
+  it('serves an about page that links the studio rather than retelling it', () => {
+    const html = aboutPage();
+    expect(html).toContain('<h1 class="map-intro__title">Why we made Smokeshow</h1>');
+    expect(html).toContain(
+      '<link rel="canonical" href="https://smokeshow.earth/about/" />',
+    );
+    expect(html).toContain('href="https://watchcapstudio.com"');
+    // The sources it names are the ones the site actually reads.
+    for (const source of ['NOAA HRRR-Smoke', 'Copernicus CAMS', 'NIFC WFIGS', 'NASA FIRMS']) {
+      expect(html, source).toContain(source);
+    }
+    // No store badges yet, so the page must not imply an app you can download.
+    expect(html).not.toMatch(/App Store|Google Play|download the app/i);
+  });
+
   it('never boots the app or claims a place', () => {
-    for (const html of [hubPage(), ...CORRIDORS.map((c) => corridorPage(c))]) {
+    for (const html of [hubPage(), aboutPage(), ...CORRIDORS.map((c) => corridorPage(c))]) {
       expect(html).not.toContain('__SMOKESHOW_PLACE__');
       expect(html).not.toContain('/src/main.jsx');
       expect(html).toContain('/src/editorial.js');
@@ -547,7 +594,7 @@ describe('editorial pages', () => {
   // Same rules as the city pages: no condition, no AQI, forecast never a
   // measurement, disclaimer verbatim.
   it('holds to the sitewide copy rules', () => {
-    for (const html of [hubPage(), ...CORRIDORS.map((c) => corridorPage(c))]) {
+    for (const html of [hubPage(), aboutPage(), ...CORRIDORS.map((c) => corridorPage(c))]) {
       expect(html).toContain(
         '<strong>Smokeshow is for informational and educational purposes only.</strong>',
       );

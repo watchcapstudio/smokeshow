@@ -16,6 +16,7 @@ const locationPages = [
   'smoke-forecast/index.html',
   'smoke-forecast/*/index.html',
   'smoke-forecast/corridor/*/index.html',
+  'about/index.html',
 ].flatMap((pattern) => globSync(pattern, { cwd: import.meta.dirname }).map((p) => `./${p}`));
 
 // Front-end redesign candidate, for review only. Listed by hand rather than

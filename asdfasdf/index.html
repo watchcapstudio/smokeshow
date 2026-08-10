@@ -12,7 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <!-- Replaced at runtime with the live zenith colour (SkyBackdrop.jsx). -->
     <meta name="theme-color" content="#8ba9c4" />
-    <title>SMOKESHOW — front-end candidate</title>
+    <title>SMOKESHOW: front-end candidate</title>
     <link rel="icon" type="image/png" href="/favicon.png" />
   </head>
   <body>
@@ -22,7 +22,7 @@
     <!-- Everything below is production's own bottom-of-page, reproduced so the
          review shows the whole composition rather than a floating hero. The
          FAQ, explainer and disclaimer copy is verbatim from index.html and is
-         NOT part of the proposal — Joe's note: it stays on the web, it needs
+         NOT part of the proposal. Joe's note: it stays on the web, it needs
          to be there.
 
          The FAQPage JSON-LD that index.html carries is the one thing left out.
@@ -44,7 +44,7 @@
            Leaflet into a review page for no review value. -->
       <div id="map-slot">
         <div class="proto-map-placeholder">
-          <p>Live smoke map — unchanged</p>
+          <p>Live smoke map, unchanged</p>
           <small>
             Leaflet, CARTO Positron, the darkening smoke ramp, the −12/+48 scrubber, the fire
             cards and the hotspot layer. This proposal moves it below the verdict; it does not
@@ -54,7 +54,7 @@
       </div>
 
       <!-- The app and the notifications, between the map and the questions.
-           React portals the real AppWidgetCTA in here — same component the
+           React portals the real AppWidgetCTA in here: the same component the
            live site renders, so the widget mocks track the scrub position and
            the notification posture ships verbatim. -->
       <div id="cta-slot"></div>
@@ -116,7 +116,7 @@
             <p>
             Smoke forecasts are sharp for about the next one to two days and get fuzzier after
             that. Models must find the fires by satellite, estimate how much smoke each one makes,
-            and then ride the wind forecast — and each step adds error (the full explanation is
+            and then ride the wind forecast, and each step adds error (the full explanation is
             below). Smokeshow shows a detailed two-day window plus a five-day outlook, and tells you when the forecast models agree and when they don't. And we blend a few models to improve our guesses.
           </p>
           </details>
@@ -131,7 +131,7 @@
             <summary><h3>Why do smoke forecasts disagree with each other?</h3></summary>
             <p>
             Because each model makes its own guesses. Every smoke forecast has to find the fires by
-            satellite, estimate how much smoke each one is making, and then ride a wind forecast —
+            satellite, estimate how much smoke each one is making, and then ride a wind forecast,
             and two models can reach different answers at any of those steps. When they do, they put
             the smoke in different places at the same hour. Smokeshow shades those hours on the
             timeline and says the models split, rather than picking a winner and drawing you one
@@ -154,7 +154,7 @@
              is noindex and nothing links to it. Every city and corridor page
              points its "Why smoke is hard to forecast" link at
              /#how-smoke-forecasts-work, so whoever promotes this candidate to be
-             the homepage needs the anchor to come with it — without the id those
+             the homepage needs the anchor to come with it. Without the id those
              ~29 links still resolve, they just land at the top of the page
              instead of at this section, which is the kind of breakage nothing
              fails on and nobody notices. -->
