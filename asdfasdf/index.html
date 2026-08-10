@@ -150,7 +150,15 @@
           </details>
         </section>
 
-        <div class="explainer">
+        <!-- The id is carried from index.html deliberately, even though this page
+             is noindex and nothing links to it. Every city and corridor page
+             points its "Why smoke is hard to forecast" link at
+             /#how-smoke-forecasts-work, so whoever promotes this candidate to be
+             the homepage needs the anchor to come with it — without the id those
+             ~29 links still resolve, they just land at the top of the page
+             instead of at this section, which is the kind of breakage nothing
+             fails on and nobody notices. -->
+        <div class="explainer" id="how-smoke-forecasts-work">
           <h2>Why is smoke so hard to forecast?</h2>
           <p>Forecasting smoke is like forecasting weather, with three extra problems stacked on top.</p>
           <p>

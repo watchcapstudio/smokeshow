@@ -56,20 +56,31 @@ const DISCLAIMER = `<strong>Smokeshow is for informational and educational purpo
             National Weather Service, and your local health authorities, and talk to a medical
             professional about your own situation.`;
 
-// The shared footer. Five links at most, sitewide, and deliberately NOT 25 city
-// links: a footer that lists every city on every city page dilutes the one
-// signal these pages have, which is that each of them links a small number of
-// places for a stated reason. The hub is where the full list lives.
+// The shared footer. Five links, sitewide, and deliberately NOT 25 city links: a
+// footer that lists every city on every city page dilutes the one signal these
+// pages have, which is that each of them links a small number of places for a
+// stated reason. The hub is where the full list lives.
+//
+// Privacy and Terms point OFF-SITE, to watchcapstudio.com, and that is on
+// purpose. Those documents cover every product the studio ships and say so
+// themselves — "We keep one privacy page rather than one per app, so there is a
+// single place to check." Copying them onto this domain would create a second
+// copy of a legal document that drifts from the canonical one, which is worse
+// than an external link in every way that matters. The studio is BTTY LLC dba
+// WatchCap Studio; the Terms' section on what the software is not is written
+// squarely at products like this one.
 //
 // Hand-mirrored in index.html, same as the FAQ already is. Keep them in sync.
+const STUDIO_ORIGIN = 'https://watchcapstudio.com';
 const FOOTER_LINKS = [
-  { href: '/', text: 'Smoke where you are' },
   { href: `/${SECTION}/`, text: 'All cities' },
+  { href: '/#how-smoke-forecasts-work', text: 'How smoke forecasts work' },
   {
     href: `/${SECTION}/${CORRIDOR_SEGMENT}/canadian-smoke-great-lakes-northeast/`,
     text: 'Canadian smoke explained',
   },
-  { href: '/#how-smoke-forecasts-work', text: 'How smoke forecasts work' },
+  { href: `${STUDIO_ORIGIN}/privacy`, text: 'Privacy' },
+  { href: `${STUDIO_ORIGIN}/terms`, text: 'Terms' },
 ];
 
 function footer() {
@@ -381,8 +392,9 @@ function page(loc) {
 
            Landmarks lead because they are the only section that lets a reader
            check the verdict above with their own eyes, which is the whole
-           premise of a visibility-anchored scale — it is the map's payoff, so it
-           sits directly under the map. Provenance answers the question that
+           premise of a visibility-anchored scale. It reads as the payoff of the
+           canvas at the top of the page, which is where the live map now sits
+           behind the Sky/Map toggle. Provenance answers the question that
            lands next ("why is it here"), and the two optional sections are both
            refinements of that same "where from" pair, so they follow it: what
            isn't smoke first, since it can invalidate the reader's premise
