@@ -3,6 +3,8 @@ dist
 # Location pages are generated from src/data/locations.js at build time
 # (npm run pages). The generator is the source; these are output.
 /smoke-forecast
+# Same generator, same reason: /about/ is written by scripts/gen-location-pages.mjs.
+/about
 /public/sitemap.xml
 .DS_Store
 *.local

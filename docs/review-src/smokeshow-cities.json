@@ -1,0 +1,865 @@
+{
+  "_note": "25 cities. Distances approximate and flagged in each `validate` array. Bands are per-city by design; Canadian pages use km. Level thresholds: 12/35/55/150 ug/m3, max exclusive. See SPEC.md.",
+  "cities": [
+    {
+      "slug": "missoula-mt",
+      "city": "Missoula",
+      "state": "MT",
+      "corridor": "wildfire-smoke-pacific-northwest-northern-rockies",
+      "anchor_type": "mountain-valley",
+      "bands": [
+        "15+ miles",
+        "8-15 miles",
+        "3-8 miles",
+        "1-3 miles",
+        "under 1 mile"
+      ],
+      "levels": {
+        "all_clear": "Lolo Peak stands clean on the south horizon, about fifteen miles out, and the Bitterroots behind it hold their layers.",
+        "in_the_air": "Lolo Peak has gone flat and blue, and Snowbowl on the north side of the valley, about eight miles up, is losing its ridgeline.",
+        "smells_like_fire": "Blue Mountain still reads southwest at roughly five miles, but the valley walls have turned into silhouettes with no texture.",
+        "tastes_like_fire": "From downtown the M on Mount Sentinel is still there, about a mile off, while the top of the ridge above it fades out.",
+        "smokeshow": "Mount Sentinel goes. From the Higgins Avenue bridge you lose the hillside that defines the whole town."
+      },
+      "provenance": "Missoula sits in a valley that traps what blows into it. Smoke here arrives from fires across western Montana and the Idaho panhandle, and from as far as Washington, Oregon, and interior British Columbia on westerly flow. The valley's own geography is the second half of the story: cool air settles overnight, caps the valley, and holds smoke at ground level long after the fire behavior upwind has calmed down.\n\nThe August and September inversions are why Missoula's bad air often outlasts the event that caused it. Residents here have measured their summers by it for decades, and the 2017 and 2021 seasons both produced multi-week stretches where the valley never fully cleared.",
+      "upwind": [
+        "spokane-wa",
+        "boise-id"
+      ],
+      "nearby": [
+        "whitefish-mt",
+        "bozeman-mt",
+        "spokane-wa"
+      ],
+      "validate": [
+        "Lolo Peak distance from downtown (I have ~15mi)",
+        "Snowbowl visibility from town — is it actually a vantage locals use?",
+        "Is Blue Mountain or Sentinel the better mid-band anchor?",
+        "Confirm 2017/2021 as the reference seasons locals cite"
+      ]
+    },
+    {
+      "slug": "whitefish-mt",
+      "city": "Whitefish",
+      "state": "MT",
+      "corridor": "wildfire-smoke-pacific-northwest-northern-rockies",
+      "anchor_type": "mountain-valley",
+      "bands": [
+        "25+ miles",
+        "12-25 miles",
+        "5-12 miles",
+        "1.5-5 miles",
+        "under 1.5 miles"
+      ],
+      "levels": {
+        "all_clear": "The Glacier peaks read sharp to the east, twenty-five miles and more across the Flathead, and the Swan Range holds its whole ridgeline south of them.",
+        "in_the_air": "The Glacier skyline has flattened into one blue band and the Swans have lost their notches, though Big Mountain still shows its runs.",
+        "smells_like_fire": "The ranges across the valley are gone. Big Mountain, five miles north of downtown, is a silhouette with the ski runs barely readable on it.",
+        "tastes_like_fire": "From City Beach the far shore of Whitefish Lake, about two miles up, disappears into grey.",
+        "smokeshow": "Big Mountain goes. From Central Avenue you lose the mountain the whole town is built to look at."
+      },
+      "provenance": "The Flathead has a different upwind neighbour than the rest of Montana. Interior British Columbia sits directly north, and a bad BC fire season puts smoke over Whitefish and Kalispell repeatedly without a single acre burning in the United States. On top of that come the usual western Montana and Idaho panhandle fires, plus Washington and Oregon smoke on westerly flow, and fires inside Glacier itself.\n\nThe valley then does what mountain valleys do. Cool air settles overnight, caps the basin, and holds smoke at ground level after the flow upwind has already shifted. The 2017 season is the local marker, when the Sprague Fire burned in Glacier and took Sperry Chalet with it, and the valley spent weeks without a clear view of the park.",
+      "flathead_valley": "Whitefish is one town in a valley that breathes as a single unit. Kalispell sits fifteen miles south and is the valley's population centre, Columbia Falls holds the western entrance to Glacier, and Bigfork sits at the top of Flathead Lake. The lake and the surrounding ranges mean smoke that settles into the Flathead tends to stay in the Flathead, so a bad stretch in Whitefish is a bad stretch in all of them. Glacier National Park sits immediately east, and on smoky weeks the Going-to-the-Sun corridor loses the views it exists for.",
+      "upwind": [
+        "spokane-wa"
+      ],
+      "nearby": [
+        "missoula-mt",
+        "bozeman-mt"
+      ],
+      "validate": [
+        "Big Mountain distance from downtown (I have ~5mi to the base, and the face is visible from Central Ave)",
+        "Glacier peak sightline from Whitefish — which summit is the recognizable one at 25mi? Great Northern? Stanton?",
+        "Is City Beach or the Whitefish Trail the vantage locals name?",
+        "Confirm the 2017 Sprague Fire / Sperry Chalet framing reads right to locals",
+        "SLUG DECISION: built as whitefish-mt, but 'air quality kalispell' is 60/mo vs 'air quality whitefish mt' at 20. Kalispell is covered in the flathead_valley section, the meta description, and the FAQ. If Kalispell traffic has not landed on this page in ~90 days, split it into its own page.",
+        "BC is the dominant upwind and has no page. Cranbrook is the literal upwind town but is tiny; Kelowna is the big interior BC fire market. Consider one BC page later."
+      ]
+    },
+    {
+      "slug": "bozeman-mt",
+      "city": "Bozeman",
+      "state": "MT",
+      "corridor": "wildfire-smoke-pacific-northwest-northern-rockies",
+      "anchor_type": "mountain-valley",
+      "bands": [
+        "30+ miles",
+        "15-30 miles",
+        "5-15 miles",
+        "1.5-5 miles",
+        "under 1.5 miles"
+      ],
+      "levels": {
+        "all_clear": "The Spanish Peaks read clean to the southwest, about thirty miles out, and the Bridgers hold every gully along the northeast wall of the valley.",
+        "in_the_air": "The Spanish Peaks have flattened into one blue shape and Sacagawea has lost its detail, though the Bridger ridgeline still separates from the sky.",
+        "smells_like_fire": "The Gallatins reduce to a silhouette south of town. The M on the Bridger foothills, about three miles from Main Street, is the furthest thing with texture.",
+        "tastes_like_fire": "From Main Street the Bridgers are a suggestion, and the benchland east of town, roughly two miles out, disappears into grey.",
+        "smokeshow": "The M goes. From downtown you lose the mountain faces that frame the entire Gallatin Valley."
+      },
+      "provenance": "Bozeman sits in the Gallatin Valley with fire country on every side. Smoke arrives from central Idaho, western Montana, the Yellowstone country to the south, and from Washington, Oregon, and interior British Columbia on westerly flow that carries it hundreds of miles. Like Missoula, the valley traps what lands in it: clear high-country nights settle cool air into the basin and hold smoke at ground level into the following morning.\n\nThe 2017, 2020, and 2021 seasons all produced stretches where the Bridgers were not visible from town for days at a time, and the summer fire season now overlaps almost exactly with the months the valley is most used.",
+      "upwind": [
+        "missoula-mt",
+        "boise-id"
+      ],
+      "nearby": [
+        "missoula-mt",
+        "whitefish-mt",
+        "jackson-wy"
+      ],
+      "validate": [
+        "Spanish Peaks distance and visibility from town (I have ~30mi)",
+        "Is the M on the Bridger foothills the right mid-band anchor, or is Baldy better?",
+        "Confirm the reference seasons locals actually cite",
+        "Yellowstone gateway towns are covered in prose on this page, not as separate pages. Volumes for Big Sky, West Yellowstone, Livingston, Gardiner, and Red Lodge all measure at zero."
+      ],
+      "yellowstone_gateway": "Bozeman is the north end of a corridor of towns that all breathe the same summer air. Livingston sits twenty-six miles east in Paradise Valley, where the wind that scours the town most of the year can also flush smoke out faster than it leaves the Gallatin. Big Sky is forty-five miles south under Lone Peak. Gardiner and West Yellowstone hold the park's north and west entrances, both deep in valleys that pool smoke overnight the same way Bozeman's does. When a plume settles over southwest Montana it rarely picks one of these towns, and a bad week in Bozeman usually means a bad week in all of them."
+    },
+    {
+      "slug": "jackson-wy",
+      "city": "Jackson",
+      "state": "WY",
+      "corridor": "wildfire-smoke-pacific-northwest-northern-rockies",
+      "anchor_type": "mountain-valley",
+      "bands": [
+        "20+ miles",
+        "10-20 miles",
+        "4-10 miles",
+        "1.5-4 miles",
+        "under 1.5 miles"
+      ],
+      "levels": {
+        "all_clear": "The Grand stands sharp to the northwest, about twenty miles up the valley, and the Teton range separates peak by peak along the whole skyline.",
+        "in_the_air": "The Tetons have flattened into one blue wall with no couloirs showing, though Sleeping Indian still reads across the valley to the east.",
+        "smells_like_fire": "The Tetons are gone. Sleeping Indian, about eight miles east, is a silhouette with no rock left in it.",
+        "tastes_like_fire": "From the Town Square Snow King holds a mile south, while the ridgeline above the runs fades out entirely.",
+        "smokeshow": "Snow King goes. From downtown you lose the mountain sitting directly above the town."
+      },
+      "provenance": "Jackson takes smoke from central and southern Idaho, the Great Basin, and western Montana on westerly and southwesterly flow, plus whatever burns in the Bridger-Teton and the parks immediately north. In heavy California and Pacific Northwest seasons, smoke also arrives aloft from a thousand miles away and settles.\n\nThe valley's name describes the problem. A hole rimmed by mountains pools cold air overnight and holds smoke at the valley floor into the morning, so the town can read worse than the passes above it. The 2016, 2018, and 2021 seasons all produced stretches where the Tetons were not visible from town for days, which in a valley built entirely around looking at them is the whole story.",
+      "upwind": [
+        "boise-id",
+        "salt-lake-city-ut"
+      ],
+      "nearby": [
+        "bozeman-mt"
+      ],
+      "validate": [
+        "Grand Teton distance from town (I have ~20mi)",
+        "Sleeping Indian / Sheep Mountain — which name do locals use?",
+        "Confirm the reference seasons; 2016 Berry Fire was in the park but check local impact",
+        "Snow King as the last-resort anchor — right call, or is the Town Square elk arch better?",
+        "SEARCH VOLUME IS LOW (~40/mo combined). This page is justified by the outdoor community and the separate valley, not by search."
+      ]
+    },
+    {
+      "slug": "minneapolis-mn",
+      "city": "Minneapolis",
+      "state": "MN",
+      "corridor": "canadian-smoke-great-lakes-northeast",
+      "anchor_type": "skyline",
+      "bands": [
+        "9+ miles",
+        "5-9 miles",
+        "3-5 miles",
+        "1.5-3 miles",
+        "under 1.5 miles"
+      ],
+      "levels": {
+        "all_clear": "The downtown skyline is sharp from Bde Maka Ska, about three miles southwest, and from the Mendota Bridge you can pick out both downtowns nine miles apart.",
+        "in_the_air": "The skyline still reads from Lake Nokomis, roughly five miles out, but it has gone flat and grey and St. Paul has disappeared behind it.",
+        "smells_like_fire": "From Bde Maka Ska the IDS Center is still the tallest thing there, three miles off, but the buildings behind it have merged into one shape.",
+        "tastes_like_fire": "From the Stone Arch Bridge the near towers hold while the tops of the tallest ones, a bit over a mile away, fade into the haze.",
+        "smokeshow": "The upper floors of the IDS Center disappear. From the West River Parkway you can lose downtown entirely."
+      },
+      "provenance": "Minneapolis is one of the first major American cities Canadian smoke reaches. Fires in Manitoba, northwestern Ontario, and Saskatchewan sit almost directly upwind, and on northerly flow their smoke crosses the border and reaches the Twin Cities in under a day. That proximity is why Minnesota's air quality alerts often fire before Chicago's, and why the same plume that arrives here fresh reaches the East Coast a day or two later, thinned out.\n\nThe 2021 and 2023 seasons both put Minneapolis among the worst air quality readings in the country for stretches of days. Minnesota issued more air quality alerts in 2021 than in the previous fifteen years combined, and that is the season most people here mean when they say the summers changed.",
+      "upwind": [
+        "winnipeg-mb"
+      ],
+      "nearby": [
+        "milwaukee-wi",
+        "chicago-il"
+      ],
+      "validate": [
+        "Mendota Bridge two-downtown sightline — is that ~9mi and is it real?",
+        "Is Bde Maka Ska or Lake Nokomis the more commonly cited vantage?",
+        "Confirm the 2021 MN alert-count claim before publishing",
+        "Winnipeg page is being built, so the upwind link resolves."
+      ]
+    },
+    {
+      "slug": "seattle-wa",
+      "city": "Seattle",
+      "state": "WA",
+      "corridor": "wildfire-smoke-pacific-northwest-northern-rockies",
+      "anchor_type": "mountain",
+      "bands": [
+        "50+ miles",
+        "15-50 miles",
+        "5-15 miles",
+        "2-5 miles",
+        "under 2 miles"
+      ],
+      "levels": {
+        "all_clear": "The mountain is out. Rainier stands clear to the southeast, about sixty miles off, and the Olympics hold their ridgeline across the Sound.",
+        "in_the_air": "Rainier is gone and the Olympics have flattened to a grey band, but Bainbridge reads clean across Elliott Bay.",
+        "smells_like_fire": "The Olympics have disappeared entirely. Bainbridge, about five miles west, is still there but has lost its trees.",
+        "tastes_like_fire": "From Alki the downtown towers hold, two and a half miles across the bay, while the Space Needle softens against the sky.",
+        "smokeshow": "The tops of the downtown towers go. From the waterfront you lose the far side of Elliott Bay completely."
+      },
+      "provenance": "Seattle gets smoke from two directions and they behave differently. Fires in the Cascades and eastern Washington push smoke west through the passes on easterly flow, which arrives fast and clears fast. Fires in Oregon, California, and interior British Columbia deliver smoke aloft that settles into the Puget Sound basin and sits, sometimes for a week, because the same marine geography that keeps the city mild also keeps air from moving.\n\nAugust and September 2020 is the reference event. Smoke from the Oregon and California fires pushed Seattle to the worst air quality of any major city on earth for several days, and the sky stayed a flat orange-grey for the better part of two weeks.",
+      "upwind": [
+        "portland-or",
+        "spokane-wa"
+      ],
+      "nearby": [
+        "portland-or"
+      ],
+      "validate": [
+        "Rainier is ~58mi from downtown — confirm the band cutoff at 50 makes sense",
+        "Is Alki or Kerry Park the vantage locals name?",
+        "Confirm 'the mountain is out' reads as native and not as a tourist phrase"
+      ]
+    },
+    {
+      "slug": "denver-co",
+      "city": "Denver",
+      "state": "CO",
+      "corridor": "wildfire-smoke-california-great-basin",
+      "anchor_type": "mountain",
+      "bands": [
+        "40+ miles",
+        "15-40 miles",
+        "5-15 miles",
+        "2-5 miles",
+        "under 2 miles"
+      ],
+      "levels": {
+        "all_clear": "Longs Peak is sharp to the northwest, about forty-five miles out, and on the best days Pikes Peak reads south at over sixty.",
+        "in_the_air": "Longs is gone. Mount Blue Sky still marks the west, roughly thirty-five miles off, but the range behind it has gone to one grey wall.",
+        "smells_like_fire": "The Front Range flattens to a silhouette. The foothills above Golden, about fifteen miles west, are the furthest thing you can still resolve.",
+        "tastes_like_fire": "From Sloan's Lake the downtown skyline holds two miles east, while the foothills behind it vanish entirely.",
+        "smokeshow": "The tops of the downtown towers go. From City Park you can lose the skyline that sits three miles away."
+      },
+      "provenance": "Denver's haze has two separate causes and they get confused constantly. The Front Range produces its own summer ozone and brown cloud from traffic and industry trapped against the mountains, which is a local problem with local timing. Wildfire smoke is different: it arrives from Colorado's own western slope, from Utah and the Great Basin, and increasingly from California and the Pacific Northwest on upper-level flow that carries it a thousand miles east.\n\nThe 2020 season is the marker, when the Cameron Peak and East Troublesome fires burned close enough to drop ash on the metro. But the more common modern pattern is high smoke from somewhere else entirely, which is why the mountains disappear on days when nothing in Colorado is burning.",
+      "upwind": [
+        "salt-lake-city-ut",
+        "reno-nv"
+      ],
+      "nearby": [
+        "salt-lake-city-ut"
+      ],
+      "validate": [
+        "Pikes Peak visibility from Denver — real on clear days or overstated?",
+        "Mount Blue Sky is the renamed Mount Evans; confirm which name locals use now",
+        "The ozone vs smoke distinction is important here — does the site handle it?"
+      ],
+      "not_smoke": "Denver's brown cloud is not wildfire smoke. Traffic and industry emissions get trapped against the Front Range and cook into ozone through the summer, which produces a brown-tinged haze on hot afternoons with nothing burning anywhere. It looks like smoke, it hurts to breathe like smoke, and it is a separate problem with separate timing. Smoke arrives and leaves with the wind. The brown cloud builds through the day and breaks with a front."
+    },
+    {
+      "slug": "spokane-wa",
+      "city": "Spokane",
+      "state": "WA",
+      "corridor": "wildfire-smoke-pacific-northwest-northern-rockies",
+      "anchor_type": "mountain",
+      "bands": [
+        "25+ miles",
+        "10-25 miles",
+        "4-10 miles",
+        "1.5-4 miles",
+        "under 1.5 miles"
+      ],
+      "levels": {
+        "all_clear": "Mount Spokane stands clean to the northeast, about twenty-five miles out, and the Selkirks behind it hold their layers.",
+        "in_the_air": "Mount Spokane has gone flat and blue, and the ridgelines north of the valley are losing their edges.",
+        "smells_like_fire": "The hills above the valley reduce to silhouettes. Five Mile Prairie, about five miles north, is the furthest thing with any texture left.",
+        "tastes_like_fire": "From the South Hill the downtown towers hold about two miles below, while the far side of the valley fades out.",
+        "smokeshow": "Downtown goes soft from the South Hill. From Riverfront Park you lose the ridge that frames the whole city."
+      },
+      "provenance": "Spokane sits downwind of nearly everything that burns in the interior Northwest. Smoke arrives from central and eastern Washington, the Idaho panhandle, western Montana, and interior British Columbia, and the Columbia Basin funnels it into the valley on westerly and southwesterly flow. British Columbia is the one people underestimate: a bad BC season puts smoke over Spokane repeatedly without a single fire burning in Washington.\n\nThe 2015 and 2020 seasons both produced multi-week stretches of degraded air, and Spokane has spent parts of recent summers with the worst measured air quality in the United States.",
+      "upwind": [
+        "portland-or",
+        "boise-id"
+      ],
+      "nearby": [
+        "missoula-mt",
+        "whitefish-mt",
+        "boise-id"
+      ],
+      "validate": [
+        "Mount Spokane distance from downtown (I have ~25mi)",
+        "Is Five Mile Prairie a vantage locals actually reference?",
+        "Confirm the 'worst in the US' claim has a citable instance"
+      ]
+    },
+    {
+      "slug": "detroit-mi",
+      "city": "Detroit",
+      "state": "MI",
+      "corridor": "canadian-smoke-great-lakes-northeast",
+      "anchor_type": "skyline",
+      "bands": [
+        "8+ miles",
+        "4-8 miles",
+        "2-4 miles",
+        "1-2 miles",
+        "under 1 mile"
+      ],
+      "levels": {
+        "all_clear": "From Belle Isle the Renaissance Center is sharp three miles west, and the Windsor skyline reads clean across the river with the far shoreline holding.",
+        "in_the_air": "The Ren Cen still reads from Belle Isle but has gone flat, and the Ambassador Bridge towers, about five miles out, have lost their cables.",
+        "smells_like_fire": "From the riverfront the Ambassador Bridge is a shape without detail. Windsor is still there across the water but its buildings have merged.",
+        "tastes_like_fire": "The Ren Cen holds from Hart Plaza, under a mile off, while the towers behind it on the Detroit skyline fade out.",
+        "smokeshow": "The top of the Ren Cen goes. From the riverfront you can lose Windsor entirely, a half mile across the water."
+      },
+      "provenance": "Detroit sits at the downwind end of a corridor running from the Canadian boreal forest through Ontario. Most smoke here originates in northern Ontario or Quebec and arrives on northerly and northeasterly flow, often after crossing Lake Huron. Because the source is usually east of the Rockies, Detroit frequently gets smoke on days when nothing in the American West is burning.\n\nJune 2023 is the reference event, when Quebec smoke pushed Detroit to among the worst air quality readings in the world for parts of two days and turned the sky a flat orange.",
+      "upwind": [
+        "toronto-on"
+      ],
+      "nearby": [
+        "cleveland-oh",
+        "chicago-il"
+      ],
+      "validate": [
+        "Belle Isle to Ren Cen distance (I have ~3mi)",
+        "Is Hart Plaza or the Riverwalk the better named vantage?",
+        "Confirm the June 2023 Detroit ranking claim"
+      ]
+    },
+    {
+      "slug": "milwaukee-wi",
+      "city": "Milwaukee",
+      "state": "WI",
+      "corridor": "canadian-smoke-great-lakes-northeast",
+      "anchor_type": "skyline",
+      "bands": [
+        "8+ miles",
+        "4-8 miles",
+        "2-4 miles",
+        "1-2 miles",
+        "under 1 mile"
+      ],
+      "levels": {
+        "all_clear": "From South Shore Park the downtown skyline is sharp three miles north, the Hoan Bridge reads clean, and the horizon over the lake is a hard line.",
+        "in_the_air": "Downtown still reads from South Shore but has gone flat and grey, and the lake horizon has softened into nothing.",
+        "smells_like_fire": "The US Bank Center is still the tallest thing from the south side, three miles off, but the buildings around it have merged into one mass.",
+        "tastes_like_fire": "From the Art Museum the Hoan Bridge holds about a mile and a half south, while the towers behind downtown fade out.",
+        "smokeshow": "The top of the US Bank Center goes. From the lakefront you lose the Hoan Bridge under a mile away."
+      },
+      "provenance": "Milwaukee sits on the same Canadian corridor as Chicago and Minneapolis, taking smoke from Ontario, Manitoba, and Quebec on northerly flow across the upper Midwest. Lake Michigan adds a wrinkle: the lake breeze can hold a plume against the shoreline or push it inland depending on the hour, so conditions downtown and conditions ten miles west can differ noticeably.\n\nJune 2023 put Milwaukee under the same Quebec smoke that hit Chicago and Detroit, with air quality among the worst in the country for parts of two days.",
+      "upwind": [
+        "minneapolis-mn"
+      ],
+      "nearby": [
+        "chicago-il",
+        "minneapolis-mn"
+      ],
+      "validate": [
+        "South Shore Park to downtown distance (I have ~3mi)",
+        "Is the lake-breeze detail accurate enough to state plainly?"
+      ]
+    },
+    {
+      "slug": "boston-ma",
+      "city": "Boston",
+      "state": "MA",
+      "corridor": "canadian-smoke-great-lakes-northeast",
+      "anchor_type": "skyline",
+      "bands": [
+        "10+ miles",
+        "5-10 miles",
+        "2-5 miles",
+        "1-2 miles",
+        "under 1 mile"
+      ],
+      "levels": {
+        "all_clear": "From Castle Island the downtown skyline is sharp three miles northwest, and the Blue Hills read clean on the southern horizon about ten miles out.",
+        "in_the_air": "The Blue Hills have gone. Downtown still reads from Castle Island but has flattened, and the harbor islands have lost their trees.",
+        "smells_like_fire": "The Prudential and 200 Clarendon still mark the skyline from South Boston, three miles off, but everything behind them has merged.",
+        "tastes_like_fire": "From the Harborwalk the near towers hold while the tops of the tallest buildings, a bit over a mile away, fade into the haze.",
+        "smokeshow": "The top of 200 Clarendon goes. From the waterfront you can lose the far side of the harbor entirely."
+      },
+      "provenance": "Boston is at the far downwind end of the Quebec corridor. Fires in Quebec and Ontario sit north and northwest, and their smoke reaches New England on northerly flow after a day or more aloft, which means it often arrives as a high haze before descending. Boston also catches smoke from Nova Scotia and New Brunswick on the rarer easterly setups.\n\nJune 2023 is the event that changed local awareness, when Quebec smoke pushed Boston into unhealthy air for multiple days and the sun went orange in the middle of the afternoon.",
+      "upwind": [
+        "toronto-on"
+      ],
+      "nearby": [
+        "new-york-ny"
+      ],
+      "validate": [
+        "Blue Hills distance from Castle Island (I have ~10mi)",
+        "200 Clarendon is the Hancock Tower — which name do locals use?",
+        "Is Castle Island the right vantage or is Deer Island better?"
+      ]
+    },
+    {
+      "slug": "new-york-ny",
+      "city": "New York",
+      "state": "NY",
+      "corridor": "canadian-smoke-great-lakes-northeast",
+      "anchor_type": "skyline",
+      "bands": [
+        "10+ miles",
+        "5-10 miles",
+        "2-5 miles",
+        "1-2 miles",
+        "under 1 mile"
+      ],
+      "levels": {
+        "all_clear": "From the Brooklyn Heights Promenade the Lower Manhattan skyline is sharp a mile across the East River, and the Verrazzano reads clean about six miles south.",
+        "in_the_air": "The Verrazzano has flattened to a silhouette and the harbor has gone grey, but One World Trade holds its shape from Brooklyn.",
+        "smells_like_fire": "From Brooklyn the Manhattan skyline is still there but the buildings have merged into one mass, and the Statue of Liberty has gone soft.",
+        "tastes_like_fire": "The near towers hold from the Promenade while the top of One World Trade, a mile off, fades into the haze.",
+        "smokeshow": "The upper floors of One World Trade and the Empire State Building disappear. From Brooklyn you can lose Manhattan entirely."
+      },
+      "provenance": "New York sits at the end of the same Quebec and Ontario corridor that runs through the Great Lakes, but far enough downwind that smoke usually arrives aloft and then mixes down. That delay is why the city often gets clear morning air followed by a visibly bad afternoon on the same plume.\n\nJune 7, 2023 is the reference. Quebec smoke gave New York the worst air quality of any major city in the world, turned the sky orange, grounded flights, and produced the images that most Americans now picture when they hear the phrase wildfire smoke.",
+      "upwind": [
+        "toronto-on"
+      ],
+      "nearby": [
+        "philadelphia-pa",
+        "boston-ma"
+      ],
+      "validate": [
+        "Verrazzano distance from Brooklyn Heights (I have ~6mi)",
+        "Is the Promenade the right vantage, or should this be Queens or Jersey?",
+        "The morning-clear / afternoon-bad mixing pattern — confirm before stating"
+      ]
+    },
+    {
+      "slug": "philadelphia-pa",
+      "city": "Philadelphia",
+      "state": "PA",
+      "corridor": "canadian-smoke-great-lakes-northeast",
+      "anchor_type": "skyline",
+      "bands": [
+        "8+ miles",
+        "4-8 miles",
+        "2-4 miles",
+        "1-2 miles",
+        "under 1 mile"
+      ],
+      "levels": {
+        "all_clear": "From Belmont Plateau the Center City skyline is sharp about four miles southeast, and the towers read individually against a clean sky.",
+        "in_the_air": "The skyline still reads from Belmont Plateau but has gone flat, and the buildings behind Comcast have lost their separation.",
+        "smells_like_fire": "From the Art Museum steps the Comcast towers hold a mile and a half off, while City Hall and the buildings around it soften.",
+        "tastes_like_fire": "From the Camden waterfront the near Center City towers hold across the river, a mile out, while the tops start to disappear.",
+        "smokeshow": "The crown of the Comcast Technology Center goes. From the Schuylkill banks you can lose Center City entirely."
+      },
+      "provenance": "Philadelphia takes Canadian smoke on the same northerly flow that brings it to New York and Boston, arriving from Quebec and Ontario after a day or more in transit. The city's own summer haze from humidity and ozone is a separate thing, which is why hazy days here are not automatically smoke days and the source matters.\n\nJune 2023 is the local marker, when Quebec smoke pushed Philadelphia into the worst air quality category and the skyline went orange-brown for parts of two days.",
+      "upwind": [
+        "new-york-ny",
+        "pittsburgh-pa"
+      ],
+      "nearby": [
+        "new-york-ny",
+        "pittsburgh-pa"
+      ],
+      "validate": [
+        "Belmont Plateau to Center City distance (I have ~4mi)",
+        "Humidity haze vs smoke is a real confusion here — does the page need to address it harder?"
+      ],
+      "not_smoke": "Most hazy summer days in Philadelphia are humidity, not smoke. Mid-Atlantic moisture scatters light the same way fine particles do, which flattens the skyline and softens the horizon on a perfectly clean air day. The tell is colour and smell: humid haze stays white or blue-grey and smells like nothing. Smoke goes yellow-brown at the horizon and you can smell it before you can see it."
+    },
+    {
+      "slug": "pittsburgh-pa",
+      "city": "Pittsburgh",
+      "state": "PA",
+      "corridor": "canadian-smoke-great-lakes-northeast",
+      "anchor_type": "skyline-valley",
+      "bands": [
+        "8+ miles",
+        "4-8 miles",
+        "2-4 miles",
+        "0.75-2 miles",
+        "under 0.75 miles"
+      ],
+      "levels": {
+        "all_clear": "From the Mount Washington overlook the Golden Triangle is sharp below, the Cathedral of Learning reads clean three miles east, and the river valleys hold their far bends.",
+        "in_the_air": "The Cathedral of Learning has gone flat, and the Allegheny and Monongahela valleys lose their far ends into grey.",
+        "smells_like_fire": "From Mount Washington the downtown towers still separate but the hills behind them, three miles out, have become one silhouette.",
+        "tastes_like_fire": "The Point holds from the overlook, under a mile below, while the tops of the tallest downtown buildings fade.",
+        "smokeshow": "The top of the US Steel Tower goes. From Mount Washington you can lose the Golden Triangle a half mile below you."
+      },
+      "provenance": "Pittsburgh gets Canadian smoke on northerly flow from Ontario and Quebec, but the city has a second problem that makes it unusual: river valley inversions. Cool air settles into the valleys overnight and caps them, holding whatever is in the air at ground level well into the morning. That means a smoke plume that would pass over a flatter city can sit here.\n\nThe inversion behavior predates wildfire smoke by a century and is the reason Pittsburgh has an air quality culture at all. June 2023 layered Quebec smoke on top of it and produced some of the worst readings in the country.",
+      "upwind": [
+        "cleveland-oh",
+        "detroit-mi"
+      ],
+      "nearby": [
+        "cleveland-oh",
+        "philadelphia-pa"
+      ],
+      "validate": [
+        "Cathedral of Learning distance from Mount Washington (I have ~3mi)",
+        "Confirm the inversion framing is accurate and not overstated"
+      ],
+      "not_smoke": "Pittsburgh's valley fog and inversion haze predate wildfire smoke by a century. Cool air settles into the river valleys overnight and holds moisture and local emissions at ground level well into the morning, which flattens the view from Mount Washington on days with clean regional air. Fog burns off by late morning. Smoke does not."
+    },
+    {
+      "slug": "cleveland-oh",
+      "city": "Cleveland",
+      "state": "OH",
+      "corridor": "canadian-smoke-great-lakes-northeast",
+      "anchor_type": "skyline",
+      "bands": [
+        "8+ miles",
+        "4-8 miles",
+        "2-4 miles",
+        "1-2 miles",
+        "under 1 mile"
+      ],
+      "levels": {
+        "all_clear": "From Edgewater Park the downtown skyline is sharp three miles east, Terminal Tower and Key Tower separate cleanly, and the lake horizon is a hard line.",
+        "in_the_air": "Downtown still reads from Edgewater but has flattened, and the horizon over Lake Erie has dissolved into grey.",
+        "smells_like_fire": "Key Tower is still the tallest thing from Edgewater, three miles off, but the buildings beside it have merged into one shape.",
+        "tastes_like_fire": "From the lakefront the near downtown buildings hold while the top of Key Tower, a mile out, fades into the haze.",
+        "smokeshow": "The top of Terminal Tower goes. From Edgewater you can lose the skyline entirely."
+      },
+      "provenance": "Cleveland sits on the Ontario corridor, taking smoke that crosses Lake Erie on northerly and northwesterly flow from fires in Ontario and Quebec. The lake matters twice: it gives the plume a clean run with nothing to break it up, and the lake breeze can pin it against the shoreline through the afternoon.\n\nJune 2023 put Cleveland among the worst air quality in the country for parts of two days on Quebec smoke, and it is the event most people here reference.",
+      "upwind": [
+        "detroit-mi",
+        "toronto-on"
+      ],
+      "nearby": [
+        "detroit-mi",
+        "pittsburgh-pa"
+      ],
+      "validate": [
+        "Edgewater to downtown distance (I have ~3mi)",
+        "Terminal Tower vs Key Tower — which is the local reference point?"
+      ]
+    },
+    {
+      "slug": "toronto-on",
+      "city": "Toronto",
+      "state": "ON",
+      "corridor": "canadian-smoke-great-lakes-northeast",
+      "anchor_type": "skyline",
+      "bands": [
+        "13+ km",
+        "6-13 km",
+        "3-6 km",
+        "1.5-3 km",
+        "under 1.5 km"
+      ],
+      "levels": {
+        "all_clear": "From the Toronto Islands the downtown skyline is sharp three kilometres north, the CN Tower reads clean top to bottom, and the lake horizon is a hard line.",
+        "in_the_air": "The skyline still reads from the Islands but has gone flat and grey, and the lake horizon has softened out of existence.",
+        "smells_like_fire": "The CN Tower is still there from the Islands, three kilometres off, but the bank towers around it have merged into one mass.",
+        "tastes_like_fire": "From Harbourfront the near towers hold while the top of the CN Tower, a kilometre up, fades into the haze.",
+        "smokeshow": "The pod on the CN Tower disappears. From the ferry docks you can lose the skyline entirely."
+      },
+      "provenance": "Toronto is close enough to the source that smoke often arrives thick rather than aged. Fires in northern Ontario and Quebec sit a few hundred kilometres north and northeast, and their smoke reaches the city in well under a day on northerly flow. What Toronto gets fresh, Detroit and Cleveland get a day later and Boston and New York get a day after that.\n\nJune 2023 gave Toronto some of the worst air quality readings in the world, and the 2023 season overall was the worst wildfire year in Canadian history by area burned.",
+      "upwind": [],
+      "nearby": [
+        "detroit-mi",
+        "cleveland-oh"
+      ],
+      "validate": [
+        "METRIC CONFIRMED — km throughout on Canadian pages.",
+        "Islands to downtown distance (I have ~3km)",
+        "Is Harbourfront or Polson Pier the better close-range vantage?"
+      ]
+    },
+    {
+      "slug": "winnipeg-mb",
+      "city": "Winnipeg",
+      "state": "MB",
+      "corridor": "canadian-smoke-great-lakes-northeast",
+      "anchor_type": "prairie-skyline",
+      "bands": [
+        "16+ km",
+        "8-16 km",
+        "5-8 km",
+        "2-5 km",
+        "under 2 km"
+      ],
+      "levels": {
+        "all_clear": "From the Forks the downtown towers are sharp and the prairie horizon reads as a hard line in every direction, which on flat ground is the cleanest visibility test there is.",
+        "in_the_air": "The skyline still reads from the Forks but has flattened, and the horizon has dissolved into a soft band with no edge.",
+        "smells_like_fire": "The Golden Boy still catches light on the Legislative Building about a kilometre off, but the buildings behind it have merged into one mass.",
+        "tastes_like_fire": "From the Esplanade Riel the near downtown towers hold while their tops fade into the haze.",
+        "smokeshow": "The top of 201 Portage goes. From the Forks you can lose downtown entirely."
+      },
+      "provenance": "Winnipeg is usually the source end of the corridor, not the receiving end. Fires in northern Manitoba, northwestern Ontario, and Saskatchewan burn a few hundred kilometres north and northwest, which means Winnipeg gets smoke fresh and concentrated rather than aged and thinned. What lands here thick reaches Minneapolis within a day and Chicago, Detroit, and the Great Lakes a day after that.\n\nThat proximity is why Manitoba's worst fire seasons register as national air quality events, and why the province has repeatedly run large-scale evacuations from northern communities in recent summers.",
+      "upwind": [],
+      "nearby": [
+        "minneapolis-mn"
+      ],
+      "validate": [
+        "METRIC CONFIRMED — km throughout on Canadian pages.",
+        "Is the Forks the right vantage, or is Esplanade Riel / Assiniboine Park better?",
+        "201 Portage is the tallest — confirm it is the local reference point",
+        "I referenced recent northern Manitoba evacuations without a specific year. Verify or cut that clause."
+      ]
+    },
+    {
+      "slug": "portland-or",
+      "city": "Portland",
+      "state": "OR",
+      "corridor": "wildfire-smoke-pacific-northwest-northern-rockies",
+      "anchor_type": "mountain",
+      "bands": [
+        "45+ miles",
+        "15-45 miles",
+        "5-15 miles",
+        "2-5 miles",
+        "under 2 miles"
+      ],
+      "levels": {
+        "all_clear": "Mount Hood is sharp to the east, about fifty miles out, and St. Helens reads clean to the north across the Columbia.",
+        "in_the_air": "Hood has gone. St. Helens is a flat grey shape, and the West Hills have lost their depth.",
+        "smells_like_fire": "Both volcanoes are gone entirely. The West Hills, about five miles west of downtown, are the furthest thing with any texture.",
+        "tastes_like_fire": "From the Eastbank Esplanade the downtown towers hold a mile across the river, while the hills behind them vanish.",
+        "smokeshow": "The top of the US Bancorp Tower goes. From the east side you can lose downtown across the Willamette."
+      },
+      "provenance": "Portland's smoke comes from the Cascades, southern and eastern Oregon, northern California, and on the worst setups from all of them at once. The Columbia River Gorge is the local wrinkle: east winds funnel smoke straight down the gorge into the metro, which is fast, concentrated, and hard to forecast more than a day out.\n\nSeptember 2020 is the event nobody here has forgotten. East winds drove the Riverside, Beachie Creek, and Holiday Farm fires toward the valley and gave Portland the worst air quality on earth for several days, with ash falling in the city.",
+      "upwind": [
+        "sacramento-ca",
+        "fresno-ca"
+      ],
+      "nearby": [
+        "seattle-wa",
+        "bend-or"
+      ],
+      "validate": [
+        "Mount Hood distance from downtown (I have ~50mi)",
+        "Is the gorge east-wind mechanism stated correctly?",
+        "Confirm the 2020 fire names"
+      ]
+    },
+    {
+      "slug": "bend-or",
+      "city": "Bend",
+      "state": "OR",
+      "corridor": "wildfire-smoke-pacific-northwest-northern-rockies",
+      "anchor_type": "mountain",
+      "bands": [
+        "25+ miles",
+        "12-25 miles",
+        "5-12 miles",
+        "1.5-5 miles",
+        "under 1.5 miles"
+      ],
+      "levels": {
+        "all_clear": "The Three Sisters stand clean to the west, about twenty-five miles out, and Broken Top and Bachelor separate individually along the ridge.",
+        "in_the_air": "The Sisters have flattened into one blue shape and Broken Top has lost its notch, though Bachelor still marks the southwest.",
+        "smells_like_fire": "The Cascades are gone. Awbrey Butte, a couple of miles from downtown, is the furthest thing that still has trees on it.",
+        "tastes_like_fire": "From the top of Pilot Butte the town holds below, but the west side of Bend, three miles out, disappears into grey.",
+        "smokeshow": "From downtown you lose Pilot Butte, a mile east, and the mountains might as well not exist."
+      },
+      "provenance": "Bend sits on the dry east side of the Cascades, surrounded by fire country in every direction. Smoke arrives from the Cascade crest, from central and southern Oregon, from northern California, and from as far as Idaho and Washington. The high desert also means clear, cold nights that settle smoke into the basin overnight, so mornings often read worse than afternoons.\n\nThe 2017, 2020, and 2021 seasons all produced multi-week stretches where the Sisters were not visible from town, which is the local shorthand for how bad a summer was.",
+      "upwind": [
+        "fresno-ca",
+        "sacramento-ca"
+      ],
+      "nearby": [
+        "portland-or"
+      ],
+      "validate": [
+        "Three Sisters distance from Bend (I have ~25mi)",
+        "Is 'you can't see the Sisters' actually the local shorthand, or is that me projecting?",
+        "Confirm the overnight settling / worse-mornings pattern"
+      ]
+    },
+    {
+      "slug": "boise-id",
+      "city": "Boise",
+      "state": "ID",
+      "corridor": "wildfire-smoke-pacific-northwest-northern-rockies",
+      "anchor_type": "mountain",
+      "bands": [
+        "16+ miles",
+        "8-16 miles",
+        "3-8 miles",
+        "1-3 miles",
+        "under 1 mile"
+      ],
+      "levels": {
+        "all_clear": "Shafer Butte reads clean above Bogus Basin, about sixteen miles north, and the Owyhees hold the far southwest horizon.",
+        "in_the_air": "Shafer Butte has flattened to a blue shape and the Owyhees are gone, though the Boise Front still shows its ridgelines.",
+        "smells_like_fire": "The foothills reduce to a silhouette. Table Rock, about three miles east of downtown, is the furthest thing with texture.",
+        "tastes_like_fire": "From the Greenbelt the downtown towers hold about a mile off, while the foothills behind them vanish entirely.",
+        "smokeshow": "The top of the Zions Bank building goes. From the Boise River you lose downtown."
+      },
+      "provenance": "Boise is surrounded by fire country and sits in a valley that holds what arrives. Smoke comes from central Idaho, eastern Oregon, Nevada, and on bad years from California and the Pacific Northwest, riding southwesterly and westerly flow into the Treasure Valley. The valley's own geometry does the rest, trapping smoke against the foothills for days after the flow shifts.\n\nThe 2020 and 2021 seasons both put Boise into extended stretches of unhealthy air, and the Treasure Valley has repeatedly recorded some of the worst readings in the country during peak weeks.",
+      "upwind": [
+        "reno-nv",
+        "sacramento-ca"
+      ],
+      "nearby": [
+        "spokane-wa",
+        "salt-lake-city-ut"
+      ],
+      "validate": [
+        "Shafer Butte distance (I have ~16mi)",
+        "Is Table Rock or Camel's Back the better mid-band anchor?",
+        "Zions Bank building is the tallest — confirm it's the local reference"
+      ]
+    },
+    {
+      "slug": "salt-lake-city-ut",
+      "city": "Salt Lake City",
+      "state": "UT",
+      "corridor": "wildfire-smoke-california-great-basin",
+      "anchor_type": "mountain-valley",
+      "bands": [
+        "20+ miles",
+        "10-20 miles",
+        "4-10 miles",
+        "1.5-4 miles",
+        "under 1.5 miles"
+      ],
+      "levels": {
+        "all_clear": "Twin Peaks and the Wasatch crest read sharp to the southeast, and the Oquirrhs hold their ridgeline about fifteen miles west across the valley.",
+        "in_the_air": "The Oquirrhs have gone flat and grey, and the canyons in the Wasatch have lost their shadows.",
+        "smells_like_fire": "The Oquirrhs disappear. The Wasatch front reduces to a silhouette four miles east with no canyon detail at all.",
+        "tastes_like_fire": "From Liberty Park the downtown towers hold two miles north, while the mountains behind them vanish.",
+        "smokeshow": "The top of the Wells Fargo Center goes. From the Avenues you can lose the valley floor below you."
+      },
+      "provenance": "Salt Lake sits in a bowl between two ranges, which is the whole story. Smoke arrives from California, Nevada, Oregon, and Idaho on westerly and southwesterly flow, and once it is in the valley the mountains keep it there. The city already has a winter inversion problem for the same geographic reason, so the mechanism is familiar even when the source is new.\n\nThe 2020 and 2021 seasons put Salt Lake among the worst air quality in the world on multiple days, and the 2021 summer in particular ran long stretches where the Oquirrhs were not visible from downtown.",
+      "upwind": [
+        "reno-nv",
+        "sacramento-ca"
+      ],
+      "nearby": [
+        "boise-id",
+        "denver-co"
+      ],
+      "validate": [
+        "Oquirrh distance across the valley (I have ~15mi)",
+        "Is Twin Peaks the right Wasatch reference or should it be Lone Peak / Olympus?",
+        "Confirm winter inversion parallel is fair to draw"
+      ],
+      "not_smoke": "Salt Lake's winter inversion is the same trapping mechanism as summer smoke and a completely different pollutant. Cold air settles into the valley, caps it, and holds local emissions at ground level for days. It looks identical from the Avenues. The season tells you which one you are in: inversions run December through February, smoke runs July through September."
+    },
+    {
+      "slug": "reno-nv",
+      "city": "Reno",
+      "state": "NV",
+      "corridor": "wildfire-smoke-california-great-basin",
+      "anchor_type": "mountain",
+      "bands": [
+        "15+ miles",
+        "7-15 miles",
+        "3-7 miles",
+        "1-3 miles",
+        "under 1 mile"
+      ],
+      "levels": {
+        "all_clear": "Mount Rose is sharp to the southwest, about fifteen miles out, and Peavine Peak holds its ridgeline to the northwest.",
+        "in_the_air": "Mount Rose has flattened to a blue shape and Slide Mountain beside it has lost its scar, though Peavine still reads.",
+        "smells_like_fire": "The Sierra crest is gone entirely. Peavine, about seven miles northwest, is a silhouette with no texture left.",
+        "tastes_like_fire": "From the Truckee River path the downtown towers hold a mile off, while the hills ringing the valley vanish.",
+        "smokeshow": "The top of the Grand Sierra goes. From midtown you can lose downtown Reno."
+      },
+      "provenance": "Reno sits directly downwind of the northern Sierra and northern California, which is the worst possible address in a bad California fire year. Smoke crosses the crest on westerly flow and drops into the Truckee Meadows, and the surrounding ridges hold it. Nevada's own Great Basin fires add to it on southerly and easterly setups.\n\nThe 2018 Camp Fire, the 2020 season, and the 2021 Dixie Fire all buried Reno for extended stretches, with 2021 producing weeks of degraded air and repeated school and event cancellations.",
+      "upwind": [
+        "sacramento-ca",
+        "fresno-ca"
+      ],
+      "nearby": [
+        "sacramento-ca",
+        "salt-lake-city-ut"
+      ],
+      "validate": [
+        "Mount Rose distance (I have ~15mi)",
+        "Slide Mountain's scar as a detail — real and recognizable?",
+        "Confirm 2021 Dixie Fire impact on Reno specifically"
+      ]
+    },
+    {
+      "slug": "sacramento-ca",
+      "city": "Sacramento",
+      "state": "CA",
+      "corridor": "wildfire-smoke-california-great-basin",
+      "anchor_type": "valley",
+      "bands": [
+        "40+ miles",
+        "15-40 miles",
+        "5-15 miles",
+        "1.5-5 miles",
+        "under 1.5 miles"
+      ],
+      "levels": {
+        "all_clear": "The Sutter Buttes read clean about forty miles north, and on the best mornings the Sierra crest shows to the east.",
+        "in_the_air": "The Sierra is gone and the Sutter Buttes have flattened to a grey lump, though the Coast Range still marks the west.",
+        "smells_like_fire": "The Buttes disappear. The valley closes in and nothing beyond about ten miles resolves at all.",
+        "tastes_like_fire": "From the Tower Bridge the Capitol dome holds a mile east, while the downtown towers behind it fade.",
+        "smokeshow": "The Capitol dome goes soft from across the river. From Old Sacramento you can lose the skyline entirely."
+      },
+      "provenance": "Sacramento sits at the bottom of a valley with mountains on three sides, which means it collects smoke from all of them. Fires in the northern Sierra, the Coast Range, and the foothills all drain into the Central Valley, and the valley holds smoke the way a bowl holds water. The Delta breeze is the only reliable flush, and when it fails the air stays put.\n\nThe 2018 Camp Fire is the reference: smoke from Paradise, ninety miles north, gave Sacramento the worst air quality in the world for days and closed schools across the region. The 2020 August Complex season repeated it.",
+      "upwind": [
+        "fresno-ca"
+      ],
+      "nearby": [
+        "fresno-ca",
+        "reno-nv"
+      ],
+      "validate": [
+        "Sutter Buttes distance and visibility from Sacramento (I have ~40mi)",
+        "Is the Sierra crest genuinely visible from the city on clear days?",
+        "Delta breeze framing — accurate?"
+      ],
+      "not_smoke": "Central Valley haze is not always smoke. Agricultural dust, valley fog in the cooler months, and trapped local emissions all close the horizon the same way. When the Delta breeze fails, whatever is in the valley stays in the valley regardless of source. Colour is the tell: valley haze reads tan or white, smoke reads grey-brown and carries a smell."
+    },
+    {
+      "slug": "fresno-ca",
+      "city": "Fresno",
+      "state": "CA",
+      "corridor": "wildfire-smoke-california-great-basin",
+      "anchor_type": "valley",
+      "bands": [
+        "50+ miles",
+        "20-50 miles",
+        "6-20 miles",
+        "2-6 miles",
+        "under 2 miles"
+      ],
+      "levels": {
+        "all_clear": "You can see the mountains. The Sierra crest reads clean to the east, fifty miles and more out, and the Coast Range marks the western horizon.",
+        "in_the_air": "The Sierra has gone to a flat blue band with no snow or canyon detail, and the Coast Range has disappeared.",
+        "smells_like_fire": "The mountains are gone in both directions. Nothing past about ten miles resolves and the valley feels closed.",
+        "tastes_like_fire": "From downtown the near towers hold while anything past a few miles disappears into a flat grey wall.",
+        "smokeshow": "The tops of the downtown buildings go. From the freeway you lose the city a mile ahead."
+      },
+      "provenance": "Fresno has the hardest air in the country to begin with, and wildfire smoke lands on top of that. The San Joaquin Valley is ringed by mountains and vents poorly, so agricultural dust, traffic, and industry already sit in the air before a single fire starts. Smoke arrives from the Sierra, from the Coast Range, and from fires hundreds of miles north that drain south down the valley.\n\nThe 2020 Creek Fire burned in the Sierra directly east and put Fresno under some of the worst readings ever recorded in the valley. Locals here measure a good day by whether the mountains are visible at all, because in a bad stretch they are not visible for weeks.",
+      "upwind": [],
+      "nearby": [
+        "sacramento-ca"
+      ],
+      "validate": [
+        "Is 'can you see the mountains' genuinely the local shorthand? This is the whole page if so.",
+        "Sierra crest distance from Fresno (I have ~50mi)",
+        "Confirm the 2020 Creek Fire framing"
+      ],
+      "not_smoke": "Fresno's air is hard before anything is burning. Agricultural dust, diesel, and valley industry sit in the air year-round because the San Joaquin vents poorly in every direction. On a bad non-fire day the mountains are already gone. The difference is smell and colour: dust reads tan and dry, smoke reads grey-brown and you can taste it."
+    },
+    {
+      "slug": "chicago-il",
+      "city": "Chicago",
+      "state": "IL",
+      "corridor": "canadian-smoke-great-lakes-northeast",
+      "anchor_type": "skyline",
+      "bands": [
+        "10+ miles",
+        "5-10 miles",
+        "3-5 miles",
+        "1.5-3 miles",
+        "under 1.5 miles"
+      ],
+      "levels": "ALREADY BUILT — do not regenerate. Add internal links only.",
+      "provenance": "ALREADY BUILT",
+      "upwind": [
+        "minneapolis-mn",
+        "milwaukee-wi"
+      ],
+      "nearby": [
+        "milwaukee-wi",
+        "detroit-mi"
+      ],
+      "validate": [
+        "Add the upwind and nearby link block to the existing page"
+      ]
+    }
+  ]
+}

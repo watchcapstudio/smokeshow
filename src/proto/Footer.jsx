@@ -8,6 +8,26 @@
 // the honest state of it, not a placeholder to be filled with fake cities.
 
 import { LOCATIONS } from '../data/locations.js';
+import { sourcesByRole } from '../data/sources.js';
+
+// The credits, linked. Read from src/data/sources.js rather than written out
+// here, for the same reason the city list is mapped rather than typed: the map's
+// attribution control and the About page name the same feeds, and three
+// hardcoded copies of a credit is three chances to link the wrong thing.
+function Credits({ label, role }) {
+  const sources = sourcesByRole(role);
+  return (
+    <span>
+      {label}:{' '}
+      {sources.map((s, i) => (
+        <span key={s.key}>
+          {i > 0 ? ' · ' : ''}
+          <a href={s.href}>{s.name}</a>
+        </span>
+      ))}
+    </span>
+  );
+}
 
 export default function Footer() {
   return (
@@ -31,9 +51,17 @@ export default function Footer() {
 
       <div className="proto-footer__meta">
         <span>Smokeshow</span>
-        <span>Forecast: NOAA HRRR-Smoke · Copernicus CAMS · Open-Meteo</span>
-        <span>Fires: NIFC WFIGS · NASA FIRMS</span>
+        <Credits label="Forecast" role="forecast" />
+        <Credits label="Fires" role="fires" />
+        <Credits label="Hotspots" role="hotspots" />
       </div>
+
+      {/* Licence wording, not a courtesy: the CAMS terms require this sentence
+          wherever the data is shown, and the footer is the one place on the page
+          guaranteed to be present whether or not the map has been opened. */}
+      <p className="proto-footer__note">
+        Generated using Copernicus Atmosphere Monitoring Service information.
+      </p>
     </footer>
   );
 }
