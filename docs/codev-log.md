@@ -22,6 +22,26 @@ user. Kelly's changes come in as PRs for Joe to accept or reject.
 
 ## Decisions
 
+### 2026-08-09 — the moon moved to the payload
+
+The moon was the last thing the client computed for itself. `SkyScene` ran a
+Schlyter lunar solution on the phone off `date`/`lat`/`lon`; the sun had already
+moved to the edge (`src/lib/sky.js` → `Sky.sun`), and the moon was flagged to
+follow (contract §4). It now does: `lunarPosition()` and `moonPhaseFraction()`
+are ported into `src/lib/sky.js`, `skyFor()` emits a `moon` block next to `sun`
+(altitude, azimuth, visible, xFrac, yFrac, phaseFraction), and `skyPayload()`
+carries it per hour. `Forecast.Sky.Moon` decodes it; `HorizonBand` lost its
+`date`/`latitude`/`longitude` inputs and reads `sky.moon`, so the on-device
+ephemeris is deleted. One source of truth, so a phone and a browser paint the
+identical moon — which is the point, with web parity next.
+
+Ported math is pinned in `sky.test.js` against known full/new moons (phase
+~0.5 / ~0), a half-synodic advance over 14.77 days, and the yFrac-from-altitude
+invariant the sun already uses. The `MoonShape` sliver stays in Swift — it draws
+the phase, it does not compute it.
+
+- Rollback: revert; nothing else reads `Sky.moon` yet.
+
 ### 2026-08-08 — the iOS app had never been run
 
 Joe built the SwiftUI app on 8/2–8/3. CI was green the whole time and the app
@@ -137,6 +157,81 @@ and watchOS stopped compiling until it was gated to iOS; and
 clear expired on 2026-08-08, so two assertions started failing on their own.
 Both fixed.
 
+### 2026-08-08 — the map went dark, on MapLibre
+
+The map moved off MapKit and onto MapLibre, on `feat/maplibre-dark-map`. This
+is what unblocks the dark basemap: MapKit would not hand its own tiles a dark
+style that agreed with the frames, so the darkening ramp had no legible
+backdrop. MapLibre draws a basemap we control — CARTO's dark-matter **vector**
+style — and draws it on iOS and Android both, so this is also the engine
+Android will share. (It started as CARTO raster with a separate labels layer;
+raster labels stayed soft on a 3x screen, so it moved to the vector style,
+whose glyph labels are crisp at any density. The smoke is inserted below the
+style's first symbol layer, so the city names still ride above heavy smoke.)
+
+The frames did not change. They are PNG-8 in Web Mercator, which is MapLibre's
+projection too, so an `MLNImageSource` with the domain's corners as its quad
+lands with no resampling — the same free ride MapKit's `MKMapRect` gave. The
+theme is now fixed at dark and reads the published `hrrr-dark` domain (grey
+where the air is barely off, warming to amber as it thickens — smoke lit from
+within, on black). `SmokeMapView`'s old `darkBasemapAvailable` gate is gone;
+`MapCanvas`/`SmokeOverlay`'s MapKit renderer is replaced by `MapLibreCanvas`.
+
+Wiring notes for whoever touches this next: MapLibre is added in `project.yml`
+as a package on the app target with `destinationFilters: [iOS]`. That filter
+matters — `platforms: [iOS]` on a package product is silently dropped by
+XcodeGen for a multiplatform target, which leaves the module unresolved;
+`destinationFilters` emits a real `platformFilters = (ios,)` so the macOS app
+still links without MapLibre (which ships no macOS slice). Built and run in the
+iPhone 17 Pro simulator and on device (Sunrise): dark map, amber plume over
+Missoula, crisp labels on top, scrubber steps the frames. The pre-rendered
+domain is a rectangle, so its edges feather to transparent over a thin margin —
+otherwise HRRR's northern edge draws a hard line across Canada. macOS and the
+kit tests still build.
+
+Coverage is the honest gap. Only `hrrr-dark` is published, so the dark map has
+smoke over CONUS and paints none outside it — where a light basemap would have
+shown CAMS. That is correct for a dark basemap (a light ramp on dark tiles is
+the one thing that must never ship), not a workaround. The real fix is a
+`cams-dark` domain from the same `ramp.py` inversion that produced `hrrr-dark`;
+until then, non-US is dark basemap with no smoke. Matters for Android/global.
+
+### 2026-08-09 — web front end, first pass at iOS parity (PROPOSAL, review only)
+
+Joe asked what the web should take from Kelly's iOS build. The candidate is at
+`/asdfasdf/` — `noindex`, absent from the sitemap, not linked from anywhere,
+and listed by hand in `vite.config.js` so removing it is two deletions.
+
+What it proposes, all of it above the fold: the verdict is a window rather than
+a scrolling document; the curve becomes a drag control sitting directly under
+the words it moves; the level *word* leads and the AQI integer becomes a
+supporting line; the card chrome comes off; the source tabs, the "why two
+numbers" expander and the nose caveat move into the sheet; a day tap drives the
+scrubber instead of opening an accordion; the ridge gets the foot of the screen;
+and there is a way back to *now*.
+
+Unchanged, deliberately: the map, and everything below it. The FAQ, explainer
+and disclaimer stay on the web and stay in the initial payload — that is Joe's
+call and it is not in question. A city footer is new, rendered from
+`src/data/locations.js` so it cannot drift from the pages that exist.
+
+It runs on production modules — sky, ink, rating, verdict, days, trend, aqi,
+time — with the iOS test fixtures as the PM2.5 series, time-shifted to now. The
+verdict, the days and the headline are recomputed rather than read off the
+fixture, so what is on screen is what the real code would say about that air.
+
+One real defect came out of rendering it: `text-transform: uppercase` on a line
+carrying µg/m³ paints "MG/M³", which is a different unit by a factor of a
+thousand. Nothing carrying a unit is uppercased on that page now. **Worth
+checking the live site and the share card for the same pattern.**
+
+Also found, and pointing the other way: the web's ridge tints with `--ink` and
+so survives the sky going dark, which is exactly the thing left open against
+`RidgeView` on iOS. That answer should travel from web to Swift.
+
+- Rollback: delete `asdfasdf/` and `src/proto/`, drop `reviewPages` from
+  `vite.config.js`. Nothing else imports either directory.
+
 ## Open, and whose call
 
 - **Bundle prefix.** The app is `earth.smokeshow.*`; everything else of
@@ -148,11 +243,10 @@ Both fixed.
   The operation couldn't be completed. (SmokeshowKit.DeviceRegistryClient
   .RegistryError error 0.)" That is a developer string in a user's face; it
   wants a written sentence. The B7 registry being provisional is the cause.
-- **The dark basemap.** The dark-ramp frames publish and the app selects them,
-  gated behind `SmokeMapView.darkBasemapAvailable`, which is `false`. MapKit
-  will not render its own tiles dark, so turning it on today puts the amber
-  ramp on pale tiles. The answer is CARTO `dark_nolabels` via MapLibre — the
-  demo's basemap, and one that would serve Android too. Flip the flag when
-  that lands; nothing else has to change.
+- **The dark basemap.** DONE on `feat/maplibre-dark-map` — CARTO dark via
+  MapLibre. See the 2026-08-08 MapLibre entry above.
+- **Global dark coverage.** The dark map is CONUS-only: only `hrrr-dark` is
+  published, so outside the US the map is a dark basemap with no smoke. Needs a
+  `cams-dark` domain from `ramp.py`'s dark inversion. Matters most for Android.
 - **Watch entitlement.** An unpaired-launch watch reads an empty snapshot.
   Known, documented in `apple/docs/watch-and-live-activity.md`.

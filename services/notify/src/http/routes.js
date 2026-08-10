@@ -1,5 +1,10 @@
 import { newDeviceId, newDeviceSecret, secretMatches } from '../ids.js';
-import { buildDeviceRecord, DEFAULT_QUIET_HOURS, DEFAULT_THRESHOLD } from '../store.js';
+import {
+  buildDeviceRecord,
+  DEFAULT_NOTIFICATION_TYPES,
+  DEFAULT_QUIET_HOURS,
+  DEFAULT_THRESHOLD,
+} from '../store.js';
 import { normalizeLocation } from '../cells.js';
 import { applyWebhookEvent, authorizeWebhook } from '../entitlements.js';
 
@@ -51,6 +56,18 @@ function parseThreshold(input, fallback = DEFAULT_THRESHOLD) {
   return value;
 }
 
+function parseNotificationTypes(input) {
+  if (input == null) return { ...DEFAULT_NOTIFICATION_TYPES };
+  if (typeof input !== 'object' || Array.isArray(input)) {
+    throw new BadRequest('notificationTypes must be an object');
+  }
+  return {
+    inbound: input.inbound !== false,
+    peak: input.peak !== false,
+    clear: input.clear !== false,
+  };
+}
+
 function parseLocations(input) {
   if (input == null) return null;
   if (!Array.isArray(input)) throw new BadRequest('locations must be an array');
@@ -72,6 +89,7 @@ function publicDevice(device, { entitled = null } = {}) {
     timezone: device.timezone,
     threshold: device.threshold,
     quietHours: device.quietHours,
+    notificationTypes: device.notificationTypes,
     sensitiveHousehold: device.sensitiveHousehold,
     enabled: device.enabled,
     hasPushToken: Boolean(device.pushToken),
@@ -135,6 +153,7 @@ export function createRouter({ store, config, logger = null, now = () => Date.no
       locations: parseLocations(body?.locations) ?? [],
       threshold: parseThreshold(body?.threshold),
       quietHours: parseQuietHours(body?.quietHours),
+      notificationTypes: parseNotificationTypes(body?.notificationTypes),
       sensitiveHousehold: Boolean(body?.sensitiveHousehold),
       nowMs: now(),
     });
@@ -169,6 +188,7 @@ export function createRouter({ store, config, logger = null, now = () => Date.no
     if (body?.locations !== undefined) patch.locations = parseLocations(body.locations) ?? [];
     if (body?.threshold !== undefined) patch.threshold = parseThreshold(body.threshold);
     if (body?.quietHours !== undefined) patch.quietHours = parseQuietHours(body.quietHours);
+    if (body?.notificationTypes !== undefined) patch.notificationTypes = parseNotificationTypes(body.notificationTypes);
     if (body?.sensitiveHousehold !== undefined) patch.sensitiveHousehold = Boolean(body.sensitiveHousehold);
     if (body?.enabled !== undefined) patch.enabled = Boolean(body.enabled);
     if (body?.appUserId !== undefined) patch.appUserId = String(body.appUserId);
@@ -195,7 +215,12 @@ export function createRouter({ store, config, logger = null, now = () => Date.no
 
   return async function handle({ method, path, headers = {}, body = null }) {
     try {
-      if (method === 'GET' && path === '/healthz') return json(200, { ok: true });
+      if (method === 'GET' && path === '/healthz') {
+        // Make deployment validation meaningful: opening a pg Pool is lazy,
+        // so run one harmless aggregate before claiming the database is up.
+        await store.stats();
+        return json(200, { ok: true, store: config?.databaseUrl ? 'postgres' : 'memory' });
+      }
 
       if (method === 'POST' && path === '/v1/devices') return await registerDevice(body);
 

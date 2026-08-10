@@ -70,6 +70,7 @@ export async function seedDevice(store, {
   label = 'Home',
   threshold = 2,
   quietHours = { enabled: false, startHour: 22, endHour: 7 },
+  notificationTypes,
   sensitiveHousehold = false,
   timezone = 'America/Denver',
   entitled = true,
@@ -86,6 +87,7 @@ export async function seedDevice(store, {
     locations: [{ label, lat: lat ?? coords.lat, lon: lon ?? coords.lon, cellKey, threshold: null }],
     threshold,
     quietHours,
+    notificationTypes,
     sensitiveHousehold,
     nowMs,
   });

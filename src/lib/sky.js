@@ -95,6 +95,80 @@ function clampUnit(v) {
   return Math.max(-1, Math.min(1, v));
 }
 
+// Low-precision lunar position (Schlyter), the JS twin of the Swift that used
+// to run on the phone (SkyScene.moonPosition). The moon belongs in the payload
+// next to the sun (contract §4) so a phone and a browser paint the identical
+// moon instead of each computing its own. Returns altitude° (negative below the
+// horizon) and azimuth° clockwise from north (0 N, 90 E, 180 S, 270 W) — the
+// same azimuth convention solarPosition() returns.
+export function lunarPosition(date, latDeg, lonDeg) {
+  const rev = (x) => {
+    const r = x % 360;
+    return r < 0 ? r + 360 : r;
+  };
+
+  // Days since the epoch 2000 Jan 0.0 UT (JD 2451543.5).
+  const d = date.getTime() / 86400000 + 2440587.5 - 2451543.5;
+
+  // The moon's orbital elements.
+  const N = deg2rad(rev(125.1228 - 0.0529538083 * d));
+  const i = deg2rad(5.1454);
+  const w = deg2rad(rev(318.0634 + 0.1643573223 * d));
+  const a = 60.2666;
+  const e = 0.0549;
+  const M = deg2rad(rev(115.3654 + 13.0649929509 * d));
+
+  let E = M + e * Math.sin(M) * (1 + e * Math.cos(M));
+  E -= (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+
+  const xv = a * (Math.cos(E) - e);
+  const yv = a * (Math.sqrt(1 - e * e) * Math.sin(E));
+  const v = Math.atan2(yv, xv);
+  const r = Math.sqrt(xv * xv + yv * yv);
+
+  const xh = r * (Math.cos(N) * Math.cos(v + w) - Math.sin(N) * Math.sin(v + w) * Math.cos(i));
+  const yh = r * (Math.sin(N) * Math.cos(v + w) + Math.cos(N) * Math.sin(v + w) * Math.cos(i));
+  const zh = r * (Math.sin(v + w) * Math.sin(i));
+
+  const lonEcl = Math.atan2(yh, xh);
+  const latEcl = Math.atan2(zh, Math.sqrt(xh * xh + yh * yh));
+  const ecl = deg2rad(23.4393 - 3.563e-7 * d);
+
+  // Ecliptic -> equatorial.
+  const xe = Math.cos(lonEcl) * Math.cos(latEcl);
+  const ye = Math.sin(lonEcl) * Math.cos(latEcl) * Math.cos(ecl) - Math.sin(latEcl) * Math.sin(ecl);
+  const ze = Math.sin(lonEcl) * Math.cos(latEcl) * Math.sin(ecl) + Math.sin(latEcl) * Math.cos(ecl);
+  const ra = Math.atan2(ye, xe);
+  const dec = Math.atan2(ze, Math.sqrt(xe * xe + ye * ye));
+
+  // Local sidereal time.
+  const ws = rev(282.9404 + 4.70935e-5 * d);
+  const Ms = rev(356.047 + 0.9856002585 * d);
+  const gmst0 = rev(ws + Ms + 180);
+  const utHours = (date.getTime() / 3600000) % 24;
+  const lst = deg2rad(rev(gmst0 + utHours * 15 + lonDeg));
+  const ha = lst - ra;
+
+  const lat = deg2rad(latDeg);
+  const sinAlt = Math.sin(lat) * Math.sin(dec) + Math.cos(lat) * Math.cos(dec) * Math.cos(ha);
+  const altitudeDeg = rad2deg(Math.asin(clampUnit(sinAlt)));
+  const azimuthDeg = rev(
+    rad2deg(Math.atan2(Math.sin(ha), Math.cos(ha) * Math.sin(lat) - Math.tan(dec) * Math.cos(lat))) + 180,
+  );
+
+  return { altitudeDeg, azimuthDeg };
+}
+
+// Days since a known new moon, as a 0…1 fraction of the synodic month.
+// 0 = new, 0.5 = full. The phase MoonShape draws from.
+export function moonPhaseFraction(date) {
+  const jd = date.getTime() / 86400000 + 2440587.5;
+  const synodic = 29.530588853;
+  let age = (jd - 2451550.1) % synodic;
+  if (age < 0) age += synodic;
+  return age / synodic;
+}
+
 const DAY_ZEN = [139, 169, 196],
   DAY_HOR = [226, 222, 206];
 const GOLD_ZEN = [126, 138, 168],
@@ -145,6 +219,13 @@ export function skyFor(pm25, date, lat, lon) {
   const xFrac = clamp01((azimuthDeg - 90) / 180);
   const yFrac = clamp01(1 - clamp01(altSin * 1.4)) * 0.4 + 0.12;
 
+  // The moon rides the same band the sun does, mapped the same way, so the
+  // renderer can place it with the shared azimuth/altitude math. Below the
+  // horizon it is still emitted (altitude negative) — the client fades it in as
+  // it rises rather than switching it on at exactly 0°.
+  const moonPos = lunarPosition(date, lat, lon);
+  const moonAltSin = Math.sin(deg2rad(moonPos.altitudeDeg));
+
   return {
     zenith: rgbCss(zen),
     zenithRGB: zen,
@@ -159,6 +240,14 @@ export function skyFor(pm25, date, lat, lon) {
       xFrac,
       yFrac,
       dim: s1, // 0 (clear) -> 1 (smoke-dimmed), same driver as the haze tint
+    },
+    moon: {
+      altitudeDeg: moonPos.altitudeDeg,
+      azimuthDeg: moonPos.azimuthDeg,
+      visible: moonPos.altitudeDeg > -2, // the fade-in window opens just under the horizon
+      xFrac: clamp01((moonPos.azimuthDeg - 90) / 180),
+      yFrac: clamp01(1 - clamp01(moonAltSin * 1.4)) * 0.4 + 0.12,
+      phaseFraction: moonPhaseFraction(date), // 0 new, 0.5 full
     },
     starOpacity: (1 - day) * (1 - s1) * 0.9,
     isDark: lum(mid) < 0.42,

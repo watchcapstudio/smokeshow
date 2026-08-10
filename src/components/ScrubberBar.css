@@ -1,0 +1,270 @@
+/* Centred in the column, not stretched across a wide screen — the sky and hills
+   go full-bleed behind it, this stays in the middle with the days. */
+.sbar {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(94vw, 680px);
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 11px 14px 10px;
+  border-radius: 20px;
+  color: var(--ink);
+  /* A defined box, not a wash: a firmer frosted panel with a hairline edge. */
+  background: color-mix(in srgb, var(--ink-inverse, #fff) 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.18);
+}
+
+.sbar__top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sbar__toggle {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+  flex: none;
+}
+
+.sbar__seg {
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  opacity: 0.55;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.sbar__seg.is-on {
+  opacity: 1;
+  /* The live side wears the sky's own accent (rust by day, ember at night) so
+     it reads at a glance which stage you are on. --accent is contrast-tested
+     against every sky state, so it holds from noon to sunset to dark. */
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.sbar__chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  flex: 1 1 auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.sbar__chips::-webkit-scrollbar {
+  display: none;
+}
+
+.sbar__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+}
+.sbar__chip.is-current {
+  background: color-mix(in srgb, var(--ink) 22%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--ink) 40%, transparent);
+}
+
+.sbar__chip-label {
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 6px 4px 6px 10px;
+  cursor: pointer;
+}
+.sbar__chip-loc {
+  margin-right: 4px;
+  font-size: 0.7em;
+}
+
+.sbar__chip-x {
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  opacity: 0.55;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 4px 8px 4px 2px;
+  cursor: pointer;
+}
+
+.sbar__chip-add {
+  flex: none;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+  color: var(--ink);
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 6px 11px;
+  cursor: pointer;
+}
+
+.sbar__share {
+  flex: none;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.sbar__when {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.sbar__time {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.sbar__reading {
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+.sbar__tag {
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+.sbar__now {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  opacity: 0.7;
+  font: inherit;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.sbar__track {
+  position: relative;
+  height: 56px;
+}
+.sbar__curve {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.sbar__line {
+  stroke: var(--ink);
+  stroke-width: 1.6;
+  opacity: 0.7;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Now mark: a faint full-height rule and a small dot sitting on the curve. */
+.sbar__nowline {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: translateX(-0.5px);
+  background: var(--ink);
+  opacity: 0.18;
+  pointer-events: none;
+}
+.sbar__nowdot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+  opacity: 0.9;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+/* Scrub mark: heavier, the one you are holding. It tracks instantly while you
+   drag (--play-dur 0s) and glides across the hour while playing (0.6s). */
+.sbar__scrubline {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
+  transform: translateX(-0.75px);
+  background: var(--ink);
+  opacity: 0.5;
+  pointer-events: none;
+  transition: left var(--play-dur, 0s) linear;
+}
+.sbar__scrubdot {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--ink);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition:
+    left var(--play-dur, 0s) linear,
+    top var(--play-dur, 0s) linear;
+}
+.sbar__range {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.sbar__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sbar__edge {
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+.sbar__play {
+  border: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent, var(--ink)) 22%, transparent);
+  color: var(--ink);
+  font-size: 0.8rem;
+  cursor: pointer;
+}

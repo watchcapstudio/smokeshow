@@ -31,6 +31,17 @@ That is what makes a failed run safe to retry.
 
 ## Setup
 
+For the hosted Supabase database, link the repository once and apply the
+committed migrations:
+
+```sh
+supabase link --project-ref <project-ref>
+supabase db push
+```
+
+For any other Postgres host, the canonical schema can still be applied
+directly:
+
 ```sh
 psql "$NOTIFY_DATABASE_URL" -f services/notify/schema.sql
 ```
@@ -39,8 +50,24 @@ With `NOTIFY_DATABASE_URL` unset the service runs on the in-memory store and
 loses everything on restart. That is fine for local work and for the tests; it
 is not a deployment.
 
-`pg` is an optional peer dependency, imported only when a database URL is
-configured — `npm i pg` on the box that runs this, not in the web build.
+`pg` is a production dependency because the Vercel registry and evaluator use
+the same durable store.
+
+## Vercel deployment
+
+The production adapters live at:
+
+| Route | Purpose |
+| --- | --- |
+| `/v1/devices` and `/v1/devices/:id` | Same-origin native device registry |
+| `/v1/webhooks/revenuecat` | RevenueCat entitlement webhook |
+| `/api/notify-evaluate` | Secret-protected hourly evaluator |
+
+`vercel.json` invokes the evaluator at `:10` past every hour. Set
+`CRON_SECRET` so Vercel signs those requests, and use Supabase's **transaction
+pooler** connection string (port `6543`) for `NOTIFY_DATABASE_URL`. The schema
+is fully qualified in every query, which keeps it safe under transaction
+pooling.
 
 ## Environment
 
@@ -48,12 +75,16 @@ configured — `npm i pg` on the box that runs this, not in the web build.
 | --- | --- | --- |
 | `NOTIFY_PORT` | `8787` | Registry API port |
 | `NOTIFY_FORECAST_BASE` | `https://smokeshow.earth` | Where `/api/forecast` lives |
-| `NOTIFY_DATABASE_URL` | — | Postgres. Unset ⇒ in-memory |
+| `NOTIFY_DATABASE_URL` | — | Postgres. Unset ⇒ in-memory. Use Supabase's transaction pooler URL in Vercel |
+| `NOTIFY_DATABASE_SCHEMA` | `smokeshow_notify` | Private Postgres schema used by the service |
+| `NOTIFY_DATABASE_POOL_MAX` | `5` | Per-instance Postgres client pool limit |
 | `NOTIFY_CELL_CONCURRENCY` | `8` | Parallel cell fetches. Raise with the cell count — see the load estimate |
 | `NOTIFY_MIN_GAP_MS` | `10800000` | Minimum gap between non-urgent alerts for one place (3 h) |
+| `NOTIFY_REQUIRE_ENTITLEMENT` | `true` | Set `false` to notify every registered device before RevenueCat is connected |
 | `NOTIFY_LOG_LEVEL` | `info` | `debug` logs every request |
-| `REVENUECAT_WEBHOOK_SECRET` | — | **Required.** Unset means the webhook rejects everything |
-| `REVENUECAT_ENTITLEMENT_ID` | `pro` | Which entitlement gates notifications |
+| `CRON_SECRET` | — | **Required on Vercel.** Authorizes the hourly evaluator |
+| `REVENUECAT_WEBHOOK_SECRET` | — | Required only when entitlement gating is enabled. Unset means the webhook rejects everything |
+| `REVENUECAT_ENTITLEMENT_ID` | `smokeshow_pro` | Which entitlement gates notifications; must match the app and RevenueCat dashboard |
 | `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_KEY_P8` | — | Apple provider token (ES256 `.p8`) |
 | `APNS_TOPIC`, `APNS_TOPIC_IOS`, `APNS_TOPIC_MACOS` | — | Bundle IDs; the per-platform ones win |
 | `APNS_HOST` | `api.push.apple.com` | `api.sandbox.push.apple.com` in development |
@@ -83,6 +114,7 @@ All responses are JSON and `no-store`.
   "timezone": "America/Denver",            // IANA; used for quiet hours
   "threshold": 2,                          // rating index 0-4 — 2 is "Smells like fire"
   "quietHours": { "enabled": true, "startHour": 22, "endHour": 7 },
+  "notificationTypes": { "inbound": true, "peak": true, "clear": true },
   "sensitiveHousehold": false,             // urgent one level earlier
   "locations": [                           // max 10; each may override `threshold`
     { "label": "Home", "lat": 39.7392, "lon": -104.9903 }

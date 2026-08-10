@@ -1,0 +1,274 @@
+/* Add-a-place roll-up — the web twin of the iOS PlacePickerView. Same tokens
+   the rest of the app uses, so it reads as one surface: warm panel, ember
+   accent, mono eyebrows. Sheet chrome mirrors ExplainSheet. */
+
+.place-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1300;
+}
+
+.place-sheet {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  width: 100%;
+  max-width: 720px;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 1.25rem 1.25rem 0 0;
+  padding: 0.6rem 1.25rem 1.25rem;
+  padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
+  /* --bg-panel is translucent (the cities would read through a results list),
+     so paint an OPAQUE surface. Use --panel-tint, the sky-driven panel colour:
+     cream on light air, its dark ink counterpart on dark air. It flips with the
+     air the same way --text (= --ink) does, so panel and text can never
+     diverge. A hardcoded dark panel was the bug — it left the light-air ink
+     invisible on a clear-sky day. */
+  background-color: rgb(var(--panel-tint));
+  display: flex;
+  flex-direction: column;
+  max-height: 82vh;
+  z-index: 1301;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.place-sheet:focus {
+  outline: none;
+}
+
+.place-sheet__grab {
+  display: block;
+  width: 2.25rem;
+  height: 0.25rem;
+  border-radius: 2px;
+  background: var(--border);
+  border: none;
+  margin: 0.3rem auto 0.9rem;
+  padding: 0;
+  cursor: pointer;
+}
+
+.place-sheet__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.place-sheet__eyebrow {
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 0.15rem;
+}
+
+.place-sheet__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.place-sheet__done {
+  border: 0;
+  background: none;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 0.2rem 0;
+}
+
+.mono {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+/* Search field — warm, bordered, ember caret. */
+.place-sheet__search {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--bg);
+}
+
+.place-sheet__search-icon {
+  color: var(--text-dim);
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.place-sheet__search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem; /* 16px — anything smaller and iOS zooms the page on focus */
+  caret-color: var(--accent);
+}
+
+.place-sheet__search input::placeholder {
+  color: var(--text-dim);
+}
+
+.place-sheet__search input:focus {
+  outline: none;
+}
+
+.place-sheet__clear {
+  border: 0;
+  background: none;
+  color: var(--text-dim);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.15rem;
+}
+
+.place-sheet__body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0 -0.25rem;
+  padding: 0 0.25rem;
+}
+
+.place-sheet__section {
+  font-size: 0.64rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin: 1.1rem 0 0.2rem;
+}
+
+.place-sheet__searching {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  margin: 0.8rem 0 0;
+}
+
+/* Use-my-location — ember arrow, the obvious way in. */
+.place-sheet__locate {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.75rem 0;
+}
+
+.place-sheet__locate-icon {
+  color: var(--accent);
+  font-size: 1rem;
+  transform: rotate(0deg);
+}
+
+.place-sheet__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.place-sheet__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0.7rem 0;
+}
+
+.place-sheet__row:hover {
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+}
+
+.place-sheet__place {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.place-sheet__name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.place-sheet__here {
+  color: var(--text-dim);
+}
+
+.place-sheet__region {
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* The ember ring that says "add". */
+.place-sheet__add {
+  flex: 0 0 auto;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.place-sheet__row:hover .place-sheet__add {
+  background: var(--accent);
+  color: #16130f;
+}
+
+.place-sheet__check {
+  flex: 0 0 auto;
+  color: var(--accent);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .place-sheet {
+    animation: place-sheet-rise 0.32s cubic-bezier(0.32, 0.72, 0.33, 1);
+  }
+}
+
+@keyframes place-sheet-rise {
+  from {
+    transform: translate(-50%, 100%);
+  }
+  to {
+    transform: translate(-50%, 0);
+  }
+}

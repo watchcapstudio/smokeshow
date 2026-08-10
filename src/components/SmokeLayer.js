@@ -260,12 +260,9 @@ export class SmokeCanvasLayer extends L.Layer {
 
     this._paintPair(ctx, imgA, imgB, t, bounds, wraps);
 
-    // Screen-space ash grain, weighted by the smoke's own opacity:
-    // source-atop multiplies the pattern by destination alpha, so specks
-    // are faint over thin haze and dense over heavy smoke — no pixel reads.
-    ctx.globalCompositeOperation = 'source-atop';
-    ctx.fillStyle = this._grainPattern(ctx);
-    ctx.fillRect(0, 0, w, h);
-    ctx.globalCompositeOperation = 'source-over';
+    // No screen-space grain over the pre-rendered frames: on the dark basemap
+    // the pale stipple reads as noise across the whole map (it was tuned for
+    // the old light basemap), and iOS draws these same frames clean. The grid
+    // fallback keeps its own per-cell speck — that path needs the texture.
   }
 }

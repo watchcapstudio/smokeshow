@@ -50,6 +50,15 @@
   color: var(--text-dim);
 }
 
+/* The measured value inside that eyebrow. `uppercase` maps µ (U+00B5) to Μ
+   (U+039C, capital Mu), so "44 µg/m³" paints as "44 MG/M³" — micrograms
+   printed as milligrams, off by a thousand, in the one sheet whose whole job
+   is explaining what the number means. The label stays uppercase; the value
+   it labels does not. */
+.explain-sheet__unit {
+  text-transform: none;
+}
+
 .explain-sheet__ladder {
   position: relative;
   margin: 0.7rem 0 0.3rem;
@@ -256,4 +265,31 @@
   font-size: 0.7rem;
   color: var(--text-dim);
   line-height: 1.5;
+}
+
+/* Web has no drag-to-dismiss; this is the close control. Top-right, above the
+   eyebrow, on the sheet's own fixed positioning context. */
+.explain-sheet__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text) 9%, transparent);
+  color: var(--text);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.explain-sheet__close:hover {
+  background: color-mix(in srgb, var(--text) 16%, transparent);
+}
+/* Keep the eyebrow clear of the close button. */
+.explain-sheet__eyebrow {
+  padding-right: 2.5rem;
 }

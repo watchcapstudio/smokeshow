@@ -229,6 +229,22 @@ public struct Forecast: Decodable, Sendable, Equatable {
             public let dim: Double
         }
 
+        /// The moon, computed on the edge next to the sun so every client paints
+        /// the identical phase and position rather than each running its own
+        /// ephemeris. Emitted even below the horizon (negative altitude) — the
+        /// renderer fades it in as it rises.
+        public struct Moon: Decodable, Sendable, Equatable {
+            public let altitudeDeg: Double
+            public let azimuthDeg: Double
+            public let visible: Bool
+            /// 0 = left/east … 1 = right/west.
+            public let xFrac: Double
+            /// 0 = top … 1 = bottom.
+            public let yFrac: Double
+            /// 0 new … 0.5 full … 1 new again.
+            public let phaseFraction: Double
+        }
+
         public let zenith: RGB
         public let mid: RGB
         public let horizon: RGB
@@ -238,6 +254,7 @@ public struct Forecast: Decodable, Sendable, Equatable {
         public let starOpacity: Double
         public let smoke: Smoke
         public let sun: Sun
+        public let moon: Moon
     }
 
     /// `[r, g, b]`, each 0–255. Integer triples, not CSS strings, so every

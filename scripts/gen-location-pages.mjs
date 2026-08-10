@@ -369,12 +369,10 @@ function page(loc) {
         </p>
       </header>
 
-      <div id="map-slot"></div>
-
-      <!-- Section order tracks index.html: map, then the live app CTA React
-           portals in here, then the reference sheet. The slot has to exist on
-           this template too — without it App.jsx has nowhere to put the CTA
-           and a location page simply loses it. -->
+      <!-- The live map now rides in the top canvas (Sky/Map toggle), so there
+           is no separate map section here — the heading above is SEO copy for
+           the flip map. The live app CTA still React-portals into this slot;
+           it has to exist on this template too, or a location page loses it. -->
       <div id="cta-slot"></div>
 
       <!-- Section order, and the reasoning, because it moved once already:

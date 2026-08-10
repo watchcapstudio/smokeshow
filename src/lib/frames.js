@@ -29,12 +29,12 @@ function withURLs(domain) {
 }
 
 function usable(domain) {
-  // Domains are published per basemap theme. This map draws CARTO Positron, so
-  // it takes the light ones; a domain with no theme predates the field and is
-  // light by definition. Painting a dark-ramp domain here would put the pale
-  // end of the ramp on pale tiles, which is the convergence the ramp exists to
-  // avoid.
-  if (domain?.theme && domain.theme !== 'light') return false;
+  // Domains are published per basemap theme. This map draws CARTO dark-matter,
+  // so it takes the dark ones (hrrr-dark, cams-dark) — the amber ramp lightens
+  // with concentration, the way it must on dark tiles. Light and theme-less
+  // domains are for a light basemap and would sink the pale end of the ramp
+  // into pale tiles, the convergence the ramp exists to avoid.
+  if (domain?.theme !== 'dark') return false;
   return (
     domain &&
     typeof domain.id === 'string' &&

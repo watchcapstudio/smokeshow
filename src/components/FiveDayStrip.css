@@ -7,6 +7,12 @@
   scroll-behavior: smooth;
   padding-bottom: 0.2rem;
   color: var(--ink, var(--text));
+  /* The pills swipe; the scrollbar is just noise. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.five-day-strip::-webkit-scrollbar {
+  display: none;
 }
 
 .five-day-strip__toggle {
@@ -16,10 +22,10 @@
   align-items: center;
   justify-content: center;
   gap: 0.15rem;
-  background: color-mix(in srgb, var(--ink, var(--text)) 10%, transparent);
+  background: color-mix(in srgb, var(--ink, var(--text)) 7%, transparent);
   border: none;
   border-radius: var(--radius-md, 0.75rem);
-  color: color-mix(in srgb, var(--ink, var(--text)) 65%, transparent);
+  color: color-mix(in srgb, var(--ink, var(--text)) 55%, transparent);
   padding: 0.3rem 0.45rem;
   cursor: pointer;
 }
@@ -78,8 +84,10 @@
 }
 
 .five-day-strip__day--selected {
-  border-color: color-mix(in srgb, var(--ink, var(--text)) 45%, transparent);
-  background: color-mix(in srgb, var(--ink, var(--text)) 16%, transparent);
+  /* A soft filled highlight, not a hard outlined box — the way iOS marks the
+     active day. */
+  border-color: transparent;
+  background: color-mix(in srgb, var(--ink, var(--text)) 20%, transparent);
 }
 
 .five-day-strip__range {

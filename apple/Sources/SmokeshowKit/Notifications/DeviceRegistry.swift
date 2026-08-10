@@ -1,31 +1,19 @@
-// Push registration against B7's device registry.
+// The native client for the notification service's anonymous device registry.
 //
-// ⚠️ PROVISIONAL SHAPE. B7 (`claude/b7-notify-backend`) had not landed when
-// this was written, so the request bodies below are this branch's reading of
-// its brief (platform plan §5 and the B7 prompt in docs/branch-prompts.md):
-// anonymous device-scoped opaque IDs; a device registers its push token,
-// platform, subscribed locations, thresholds, quiet hours, and the
-// sensitive-household flag. Everything B7-shaped is confined to this one file
-// and to `DeviceRegistration`, so reconciling with the real API is an edit
-// here, not a refactor across the app.
-//
-// Two things this client deliberately does *not* do:
-//   • send anything that identifies a person — no email, no name, no IDFA;
-//   • send coordinates at full precision. Locations are snapped to the same
-//     0.1° lattice the forecast cache uses (contract §1), which is both the
-//     privacy-preserving choice and the one that makes B7's evaluation loop
-//     O(unique cells) instead of O(users).
+// The service, not the app, creates the registry identity. It returns an
+// opaque device ID and a secret once; both are kept in the Keychain and used
+// as bearer credentials for later updates and deletion. DeviceIdentity remains
+// the RevenueCat app-user ID, which lets the webhook attach an entitlement to
+// this registry record without identifying a person.
 
 import Foundation
+import Security
 
 public struct DeviceRegistration: Codable, Sendable, Equatable {
 
     public struct MonitoredLocation: Codable, Sendable, Equatable {
-        /// Snapped to the 0.1° lattice before it leaves the device.
         public let lat: Double
         public let lon: Double
-        /// Client-side label, sent so the push text can name the place. It is
-        /// the user's own words for somewhere, not an identifier.
         public let label: String
 
         public init(lat: Double, lon: Double, label: String) {
@@ -43,12 +31,21 @@ public struct DeviceRegistration: Codable, Sendable, Equatable {
         }
     }
 
-    public struct Thresholds: Codable, Sendable, Equatable {
-        /// Smoke is on its way. Fires on the *arrival* state change.
+    public struct QuietHours: Codable, Sendable, Equatable {
+        public let enabled: Bool
+        public let startHour: Int
+        public let endHour: Int
+
+        public init(enabled: Bool, startHour: Int = 22, endHour: Int = 7) {
+            self.enabled = enabled
+            self.startHour = startHour
+            self.endHour = endHour
+        }
+    }
+
+    public struct NotificationTypes: Codable, Sendable, Equatable {
         public let inbound: Bool
-        /// The worst of it has been reached.
         public let peak: Bool
-        /// It cleared, and held.
         public let clear: Bool
 
         public init(inbound: Bool, peak: Bool, clear: Bool) {
@@ -58,24 +55,37 @@ public struct DeviceRegistration: Codable, Sendable, Equatable {
         }
     }
 
-    /// Anonymous, device-scoped, from the Keychain.
-    public let deviceId: String
-    /// "ios" | "macos". B7 needs it to choose APNs topic and to reason about
-    /// which surfaces a lapse affects.
     public let platform: String
-    /// APNs token, hex. Nil when the user has not granted permission — the
-    /// registration is still sent so preferences survive a later grant.
     public let pushToken: String?
+    public let appUserId: String
     public let locations: [MonitoredLocation]
-    public let thresholds: Thresholds
-    /// 10 PM–7 AM local, urgent only. Applied at fan-out, not at send.
-    public let quietHours: Bool
-    /// Shifts which `scale[].guidance` line the push text uses. It is a
-    /// household preference, not a health record, and it never leaves B7.
+    public let threshold: Int
+    public let quietHours: QuietHours
+    public let notificationTypes: NotificationTypes
     public let sensitiveHousehold: Bool
-    /// IANA zone, so quiet hours can be evaluated server-side.
-    public let timeZone: String
-    public let appVersion: String
+    public let timezone: String
+
+    public init(
+        platform: String,
+        pushToken: String?,
+        appUserId: String,
+        locations: [MonitoredLocation],
+        threshold: Int = 2,
+        quietHours: QuietHours,
+        notificationTypes: NotificationTypes = .init(inbound: true, peak: true, clear: true),
+        sensitiveHousehold: Bool,
+        timezone: String
+    ) {
+        self.platform = platform
+        self.pushToken = pushToken
+        self.appUserId = appUserId
+        self.locations = locations
+        self.threshold = threshold
+        self.quietHours = quietHours
+        self.notificationTypes = notificationTypes
+        self.sensitiveHousehold = sensitiveHousehold
+        self.timezone = timezone
+    }
 
     public static func snap(_ value: Double) -> Double {
         (value * 10).rounded() / 10
@@ -93,78 +103,189 @@ public struct DeviceRegistration: Codable, Sendable, Equatable {
         #endif
 
         return DeviceRegistration(
-            deviceId: DeviceIdentity.current,
             platform: platform,
             pushToken: pushToken,
+            appUserId: DeviceIdentity.current,
             locations: places.map(MonitoredLocation.init(place:)),
-            thresholds: Thresholds(
+            quietHours: QuietHours(enabled: preferences.quietHours),
+            notificationTypes: NotificationTypes(
                 inbound: preferences.notifyInbound,
                 peak: preferences.notifyPeak,
                 clear: preferences.notifyClear
             ),
-            quietHours: preferences.quietHours,
             sensitiveHousehold: preferences.sensitiveHousehold,
-            timeZone: TimeZone.current.identifier,
-            appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0"
+            timezone: TimeZone.current.identifier
         )
     }
 }
 
 public protocol DeviceRegistering: Sendable {
     func register(_ registration: DeviceRegistration) async throws
-    func deregister(deviceId: String) async throws
+    func deregister() async throws
+}
+
+public struct DeviceRegistryCredentials: Codable, Sendable, Equatable {
+    public let deviceId: String
+    public let deviceSecret: String
+
+    public init(deviceId: String, deviceSecret: String) {
+        self.deviceId = deviceId
+        self.deviceSecret = deviceSecret
+    }
+}
+
+public protocol DeviceRegistryCredentialStoring: Sendable {
+    func load() -> DeviceRegistryCredentials?
+    func save(_ credentials: DeviceRegistryCredentials)
+    func clear()
+}
+
+public struct KeychainDeviceRegistryCredentialStore: DeviceRegistryCredentialStoring {
+    private let service = "earth.smokeshow.notifications"
+    private let account = "device-registry-credentials"
+
+    public init() {}
+
+    private var baseQuery: [String: Any] {
+        [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account,
+        ]
+    }
+
+    public func load() -> DeviceRegistryCredentials? {
+        var query = baseQuery
+        query[kSecReturnData as String] = true
+        query[kSecMatchLimit as String] = kSecMatchLimitOne
+        var item: CFTypeRef?
+        guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess,
+              let data = item as? Data
+        else { return nil }
+        return try? JSONDecoder().decode(DeviceRegistryCredentials.self, from: data)
+    }
+
+    public func save(_ credentials: DeviceRegistryCredentials) {
+        guard let data = try? JSONEncoder().encode(credentials) else { return }
+        var query = baseQuery
+        query[kSecValueData as String] = data
+        query[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
+        SecItemDelete(baseQuery as CFDictionary)
+        SecItemAdd(query as CFDictionary, nil)
+    }
+
+    public func clear() {
+        SecItemDelete(baseQuery as CFDictionary)
+    }
 }
 
 public struct DeviceRegistryClient: DeviceRegistering {
-
-    /// B7's routes. One constant to change when the real ones land.
     public enum Route {
-        public static let register = "api/devices"
-        public static func device(_ id: String) -> String { "api/devices/\(id)" }
+        public static let register = "v1/devices"
+        public static func device(_ id: String) -> String { "v1/devices/\(id)" }
+    }
+
+    public static var productionBaseURL: URL {
+        if let value = Bundle.main.object(forInfoDictionaryKey: "NotificationServiceBaseURL") as? String,
+           let url = URL(string: value), !value.isEmpty {
+            return url
+        }
+        return ForecastClient.productionBaseURL
     }
 
     private let baseURL: URL
     private let session: URLSession
+    private let credentials: any DeviceRegistryCredentialStoring
 
-    public init(baseURL: URL = ForecastClient.productionBaseURL, session: URLSession = .shared) {
+    public init(
+        baseURL: URL = DeviceRegistryClient.productionBaseURL,
+        session: URLSession = .shared,
+        credentials: any DeviceRegistryCredentialStoring = KeychainDeviceRegistryCredentialStore()
+    ) {
         self.baseURL = baseURL
         self.session = session
+        self.credentials = credentials
     }
 
     public func register(_ registration: DeviceRegistration) async throws {
-        var request = URLRequest(url: baseURL.appendingPathComponent(Route.register))
-        request.httpMethod = "PUT" // idempotent: same device ID overwrites
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONEncoder().encode(registration)
-
-        let (_, response) = try await session.data(for: request)
-        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
-        guard (200...299).contains(status) else {
-            throw RegistryError.http(status: status)
+        if let existing = credentials.load() {
+            let status = try await update(registration, using: existing)
+            if status != 404 { return }
+            // The server no longer knows this credential (for example after a
+            // database restore). Re-register instead of leaving alerts dead.
+            credentials.clear()
         }
+
+        // APNs registration is asynchronous. Preference/place changes before
+        // the token arrives are still stored locally and will sync from
+        // didRegisterForRemoteNotifications; the server requires a real token.
+        guard let token = registration.pushToken, !token.isEmpty else { return }
+        try await create(registration)
     }
 
-    public func deregister(deviceId: String) async throws {
-        var request = URLRequest(url: baseURL.appendingPathComponent(Route.device(deviceId)))
+    public func deregister() async throws {
+        guard let existing = credentials.load() else { return }
+        var request = URLRequest(url: url(Route.device(existing.deviceId)))
         request.httpMethod = "DELETE"
+        request.setValue("Bearer \(existing.deviceSecret)", forHTTPHeaderField: "Authorization")
         let (_, response) = try await session.data(for: request)
         let status = (response as? HTTPURLResponse)?.statusCode ?? 0
-        // A device the registry has already forgotten is a success, not a
-        // failure — this path runs when the user turns notifications off and
-        // must not leave the switch stuck.
         guard (200...299).contains(status) || status == 404 else {
             throw RegistryError.http(status: status)
         }
+        credentials.clear()
     }
 
-    public enum RegistryError: Error, Sendable, Equatable {
+    private func create(_ registration: DeviceRegistration) async throws {
+        var request = URLRequest(url: url(Route.register))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(registration)
+        let (data, response) = try await session.data(for: request)
+        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        guard status == 201 else { throw RegistryError.http(status: status) }
+        guard let issued = try? JSONDecoder().decode(DeviceRegistryCredentials.self, from: data),
+              !issued.deviceId.isEmpty, !issued.deviceSecret.isEmpty
+        else { throw RegistryError.malformedResponse }
+        credentials.save(issued)
+    }
+
+    private func update(
+        _ registration: DeviceRegistration,
+        using existing: DeviceRegistryCredentials
+    ) async throws -> Int {
+        var request = URLRequest(url: url(Route.device(existing.deviceId)))
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(existing.deviceSecret)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try JSONEncoder().encode(registration)
+        let (_, response) = try await session.data(for: request)
+        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        guard (200...299).contains(status) || status == 404 else {
+            throw RegistryError.http(status: status)
+        }
+        return status
+    }
+
+    private func url(_ path: String) -> URL {
+        baseURL.appendingPathComponent(path)
+    }
+
+    public enum RegistryError: Error, Sendable, Equatable, LocalizedError {
         case http(status: Int)
+        case malformedResponse
+
+        public var errorDescription: String? {
+            switch self {
+            case .http(let status): return "Notification service returned HTTP \(status)."
+            case .malformedResponse: return "Notification service returned an invalid registration."
+            }
+        }
     }
 }
 
-/// No-op registry for previews, tests, and any build without a backend.
 public struct NoopDeviceRegistry: DeviceRegistering {
     public init() {}
     public func register(_ registration: DeviceRegistration) async throws {}
-    public func deregister(deviceId: String) async throws {}
+    public func deregister() async throws {}
 }

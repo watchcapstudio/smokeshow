@@ -19,11 +19,15 @@ function clamp01(v) {
 
 // Haze pools in the valleys: solid at the peaks, dissolving toward the base.
 // Far ridge is gone by ~32 µg/m³; the near one is swallowed gradually to 130.
+// The web canvas is far bigger than the phone's, so the hills carry more weight
+// here than iOS's 0.55 — enough to read as a landscape ("how far can you see"),
+// not a faint distant line.
+const STRENGTH = 0.72;
 function farOpacity(pm25) {
-  return clamp01(1 - (pm25 - 6) / 26) * 0.42;
+  return clamp01(1 - (pm25 - 6) / 26) * 0.42 * STRENGTH;
 }
 function nearOpacity(pm25) {
-  return clamp01(1 - (pm25 - 20) / 110) * 0.58;
+  return clamp01(1 - (pm25 - 20) / 110) * 0.58 * STRENGTH;
 }
 
 // "How far can you see" — the objective anchor src/lib/rating.js already
@@ -32,16 +36,21 @@ function nearOpacity(pm25) {
 export default function Ridgeline({ pm25 }) {
   const uid = useId();
   const farStopRef = useRef(null);
-  const nearStopRef = useRef(null);
+  const farBaseStopRef = useRef(null);
+  const nearPathRef = useRef(null);
 
   useLayoutEffect(() => {
     const pm = pm25 ?? 0;
-    farStopRef.current?.setAttribute('stop-opacity', farOpacity(pm).toFixed(3));
-    nearStopRef.current?.setAttribute('stop-opacity', nearOpacity(pm).toFixed(3));
+    const far = farOpacity(pm);
+    // The far ridge is the distance gauge: it fades top-to-base, and thins
+    // whole as smoke swallows it. The near ridge is the foreground you're
+    // standing in — a solid landmass that only goes as the air goes.
+    farStopRef.current?.setAttribute('stop-opacity', far.toFixed(3));
+    farBaseStopRef.current?.setAttribute('stop-opacity', (far * 0.35).toFixed(3));
+    nearPathRef.current?.setAttribute('fill-opacity', nearOpacity(pm).toFixed(3));
   }, [pm25]);
 
   const farGradId = `ridgeFar${uid}`;
-  const nearGradId = `ridgeNear${uid}`;
 
   return (
     <div className="ridgeline" aria-hidden="true">
@@ -49,15 +58,17 @@ export default function Ridgeline({ pm25 }) {
         <defs>
           <linearGradient id={farGradId} x1="0" y1="0" x2="0" y2="1">
             <stop ref={farStopRef} offset="0" style={{ stopColor: HAZE_COLOR }} stopOpacity="0" />
-            <stop offset="1" style={{ stopColor: HAZE_COLOR }} stopOpacity="0" />
-          </linearGradient>
-          <linearGradient id={nearGradId} x1="0" y1="0" x2="0" y2="1">
-            <stop ref={nearStopRef} offset="0" style={{ stopColor: HAZE_COLOR }} stopOpacity="0" />
-            <stop offset="1" style={{ stopColor: HAZE_COLOR }} stopOpacity="0" />
+            <stop ref={farBaseStopRef} offset="1" style={{ stopColor: HAZE_COLOR }} stopOpacity="0" />
           </linearGradient>
         </defs>
         <path className="ridgeline__far" d={RIDGE_FAR} fill={`url(#${farGradId})`} />
-        <path className="ridgeline__near" d={RIDGE_NEAR} fill={`url(#${nearGradId})`} />
+        <path
+          ref={nearPathRef}
+          className="ridgeline__near"
+          d={RIDGE_NEAR}
+          fill={HAZE_COLOR}
+          fillOpacity="0"
+        />
       </svg>
     </div>
   );

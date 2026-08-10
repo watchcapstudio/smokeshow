@@ -85,3 +85,65 @@
     transition: none;
   }
 }
+
+/* The moon rides the same sky as the sun, placed off the payload's sky.moon.
+   A soft glow plus the lit sliver; the ridge in the window occludes it when it
+   is low, so it reads as rising from behind the hills. */
+.sky__moon {
+  position: absolute;
+  left: var(--moon-x, 50%);
+  top: var(--moon-y, 20%);
+  width: min(15vw, 74px);
+  height: min(15vw, 74px);
+  transform: translate(-50%, -50%);
+  opacity: var(--moon-op, 0);
+  filter: drop-shadow(0 0 14px rgba(240, 242, 235, 0.5));
+  transition:
+    opacity var(--duration-base) linear,
+    left var(--duration-base) linear,
+    top var(--duration-base) linear;
+}
+.sky__moon svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+}
+.sky__moon path {
+  fill: #f2f3ec;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sky__moon {
+    transition: none;
+  }
+}
+
+/* Sunset afterglow: a warm glow pooled on the horizon at the sun's x, additive
+   (screen) over the dusk sky. It sits behind the ridge, so the hills read as a
+   silhouette against the glow — the web twin of iOS HorizonBand's bloom. */
+.sky__bloom {
+  position: absolute;
+  left: var(--bloom-x, 70%);
+  top: 64%;
+  width: min(130vw, 1200px);
+  height: 52vh;
+  transform: translate(-50%, -50%);
+  opacity: var(--bloom-op, 0);
+  background: radial-gradient(
+    ellipse 50% 50% at center,
+    var(--bloom-core, #ffb060) 0%,
+    color-mix(in srgb, var(--bloom-core, #ffb060) 45%, transparent) 28%,
+    transparent 66%
+  );
+  mix-blend-mode: screen;
+  filter: blur(28px);
+  pointer-events: none;
+  transition:
+    opacity var(--duration-base) linear,
+    left var(--duration-base) linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sky__bloom {
+    transition: none;
+  }
+}

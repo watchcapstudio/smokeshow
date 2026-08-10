@@ -66,7 +66,8 @@ struct SettingsView: View {
                         Toggle("Sensitive household", isOn: sensitiveBinding)
                         Text("""
                             Asthma, young kids, older adults, pregnancy, heart or lung conditions. \
-                            Switches to the stricter EPA guidance line. It never leaves this device.
+                            Uses the stricter EPA guidance line and makes serious smoke alerts urgent. \
+                            The notification service receives only this switch, never health details.
                             """)
                             .font(Typography.xs)
                             .opacity(0.6)

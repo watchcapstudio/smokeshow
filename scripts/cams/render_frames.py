@@ -37,9 +37,11 @@ import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from render.frames import domain_block, save_frame, target_grid, write_domain  # noqa: E402
+from render.ramp import DARK, LIGHT  # noqa: E402
 
 OUT = os.environ.get("OUT_DIR", "out")
 DOMAIN = "cams"
+DARK_DOMAIN = f"{DOMAIN}-dark"
 # Below HRRR's, so HRRR keeps winning inside CONUS.
 PRIORITY = 10
 
@@ -217,7 +219,9 @@ def main():
     regridder = Regridder(src_lats, src_lons)
 
     out_dir = os.path.join(OUT, DOMAIN)
+    dark_dir = os.path.join(OUT, DARK_DOMAIN)
     os.makedirs(out_dir, exist_ok=True)
+    os.makedirs(dark_dir, exist_ok=True)
 
     window = [run - timedelta(hours=PAST_HOURS) + timedelta(hours=h)
               for h in range(PAST_HOURS + FORECAST_HOURS + 1)]
@@ -229,8 +233,13 @@ def main():
             print(f"  skip {valid:%Y-%m-%dT%H} (no lead time covers it)")
             continue
         stamp = valid.strftime("%Y%m%dT%H")
+        image = regridder.image(field)
         path = f"{out_dir}/frame-{stamp}.png"
-        save_frame(path, regridder.image(field))
+        save_frame(path, image)
+        # Same field, ramp inverted, for clients drawing a dark basemap — the
+        # global dark coverage the map has been missing outside CONUS. One
+        # regrid, two palettes.
+        save_frame(f"{dark_dir}/frame-{stamp}.png", image, theme=DARK)
         frames.append({"time": valid.strftime("%Y-%m-%dT%H:00"), "file": f"frame-{stamp}.png"})
         print(f"  wrote {valid:%Y-%m-%dT%H}  {os.path.getsize(path) / 1024:6.1f} KB")
 
@@ -243,6 +252,7 @@ def main():
         f"{total / 1024 / 1024:.1f} MB total, {total / len(frames) / 1024:.0f} KB mean"
     )
 
+    generated = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     write_domain(
         OUT,
         domain_block(
@@ -257,8 +267,33 @@ def main():
             height=regridder.height,
             frames=frames,
             run=run.strftime("%Y-%m-%dT%H:00"),
-            generated=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            generated=generated,
             wraps=True,
+            theme=LIGHT,
+            measures="all PM2.5",
+        ),
+    )
+
+    # The same global field for a dark basemap — the coverage HRRR-dark can't
+    # give outside CONUS. Priority 0, below hrrr-dark's 1, so the sharp US dark
+    # domain still wins inside CONUS and a theme-blind client never lands here.
+    write_domain(
+        OUT,
+        domain_block(
+            id=DARK_DOMAIN,
+            label="Copernicus CAMS global",
+            model="CAMS global forecast, near-surface PM2.5",
+            source="Copernicus Atmosphere Monitoring Service",
+            resolution_km=CAMS_RES_KM,
+            priority=0,
+            bounds={"latS": LAT_S, "latN": LAT_N, "lonW": LON_W, "lonE": LON_E},
+            width=WIDTH,
+            height=regridder.height,
+            frames=frames,
+            run=run.strftime("%Y-%m-%dT%H:00"),
+            generated=generated,
+            wraps=True,
+            theme=DARK,
             measures="all PM2.5",
         ),
     )

@@ -47,6 +47,15 @@ export function buildMessage({ event, next, location }) {
   };
 }
 
+function notificationTypeEnabled(device, eventType) {
+  const choices = device.notificationTypes;
+  if (!choices) return true; // Records created before this preference existed.
+  if (eventType === 'incoming') return choices.inbound !== false;
+  if (eventType === 'peak-reached') return choices.peak !== false;
+  if (eventType === 'cleared') return choices.clear !== false;
+  return true; // The core threshold-crossed alert is what enables alerts.
+}
+
 export async function fanOutCell({
   store,
   dispatcher,
@@ -71,6 +80,7 @@ export async function fanOutCell({
       label: location.label,
     });
     if (!event) continue;
+    if (!notificationTypeEnabled(device, event.type)) continue;
     counts.matched++;
 
     if (!passesQuietHours({ event, device, timezone: next.timezone, atMs: nowMs })) {

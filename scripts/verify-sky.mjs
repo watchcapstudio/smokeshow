@@ -84,7 +84,7 @@ await page.goto(
   `${BASE}/?lat=44.98&lon=-93.27&name=Minneapolis&mockOfficial=${ugm3ToAqi(PM)}`,
   { waitUntil: 'networkidle2' },
 );
-await page.waitForSelector('.rating-chip', { timeout: 30000 });
+await page.waitForSelector('.verdict__word', { timeout: 30000 });
 await new Promise((r) => setTimeout(r, 800)); // effects + the sky crossfade
 
 // Read what the page actually painted: the ink it is using, and the pixel
@@ -92,7 +92,7 @@ await new Promise((r) => setTimeout(r, 800)); // effects + the sky crossfade
 const probe = async (label) => {
   const state = await page.evaluate(() => {
     const cs = getComputedStyle(document.documentElement);
-    const el = document.querySelector('.app-header__wordmark');
+    const el = document.querySelector('.verdict__word');
     const r = el.getBoundingClientRect();
     return {
       dark: document.documentElement.classList.contains('dark-air'),
@@ -104,7 +104,7 @@ const probe = async (label) => {
       sky: ['--sky-zen', '--sky-mid', '--sky-hor'].map((k) => cs.getPropertyValue(k).trim()),
       color: getComputedStyle(el).color,
       probe: { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) },
-      time: document.querySelector('.rating-chip__time')?.textContent ?? '',
+      time: document.querySelector('.whead__clock')?.textContent ?? '',
     };
   });
   await page.screenshot({ path: `${OUT}/sky-pm${PM}-${label}.png` });
@@ -116,7 +116,7 @@ stops.push({ label: 'now', ...(await probe('now')) });
 
 // Walk the timeline: the scrubber's range covers -12h to +48h, so a handful
 // of positions sweeps two full solar days.
-const slider = await page.$('.scrubber input[type=range], input[type=range]');
+const slider = await page.$('.sbar__range, input[type=range]');
 if (slider) {
   const range = await page.evaluate((el) => ({ min: +el.min, max: +el.max }), slider);
   for (const f of [0.1, 0.3, 0.5, 0.7, 0.9]) {

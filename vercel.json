@@ -1,5 +1,17 @@
 {
-  "rewrites": [{ "source": "/s", "destination": "/api/s" }],
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/s", "destination": "/api/s" },
+    { "source": "/healthz", "destination": "/api/notify?__notify_path=healthz" },
+    { "source": "/v1/:path*", "destination": "/api/notify?__notify_path=v1/:path*" }
+  ],
+  "functions": {
+    "api/notify.js": { "maxDuration": 30 },
+    "api/notify-evaluate.js": { "maxDuration": 300 }
+  },
+  "crons": [
+    { "path": "/api/notify-evaluate", "schedule": "10 * * * *" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

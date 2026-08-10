@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { skyFor, solarPosition, clamp01, lerp, mix, lum } from './sky.js';
+import { skyFor, solarPosition, lunarPosition, moonPhaseFraction, clamp01, lerp, mix, lum } from './sky.js';
 import { LEVELS } from './rating.js';
 
 describe('math primitives', () => {
@@ -112,5 +112,48 @@ describe('skyFor — level anchors x times of day', () => {
     const smokeshow = skyFor(LEVEL_ANCHORS[4].pm25, TIMES_OF_DAY[2].date, LAT, LON);
     expect(smokeshow.sun.dim).toBeGreaterThan(clear.sun.dim);
     expect(lum(smokeshow.midRGB)).toBeLessThanOrEqual(lum(clear.midRGB));
+  });
+});
+
+// The moon moved off the phone and onto the edge (contract §4): the server
+// computes it next to the sun so iOS and web paint the identical moon. These
+// pin the ported Schlyter math so a phone and a browser can't drift.
+describe('lunarPosition / moonPhaseFraction — the moon in the payload', () => {
+  it('phase is ~0.5 at a known full moon and ~0 at a known new moon', () => {
+    // Astronomical events: full 2025-01-13 22:27Z, new 2025-01-29 12:36Z.
+    expect(moonPhaseFraction(new Date('2025-01-13T22:27:00Z'))).toBeCloseTo(0.5, 1);
+    const newMoon = moonPhaseFraction(new Date('2025-01-29T12:36:00Z'));
+    // 0 and 1 are the same new moon; accept either end of the cycle.
+    expect(Math.min(newMoon, 1 - newMoon)).toBeLessThan(0.05);
+  });
+
+  it('phase advances by ~half a synodic month over ~14.77 days', () => {
+    const t0 = new Date('2025-03-01T00:00:00Z');
+    const t1 = new Date(t0.getTime() + 14.765 * 86400000);
+    let delta = moonPhaseFraction(t1) - moonPhaseFraction(t0);
+    if (delta < 0) delta += 1;
+    expect(delta).toBeCloseTo(0.5, 1);
+  });
+
+  it('altitude and azimuth are finite and in range; a winter full moon rides high at midnight', () => {
+    const p = lunarPosition(new Date('2025-01-14T06:00:00Z'), 45, -93); // MSP local midnight
+    expect(Number.isFinite(p.altitudeDeg)).toBe(true);
+    expect(p.altitudeDeg).toBeGreaterThan(-90);
+    expect(p.altitudeDeg).toBeLessThan(90);
+    expect(p.azimuthDeg).toBeGreaterThanOrEqual(0);
+    expect(p.azimuthDeg).toBeLessThan(360);
+    expect(p.altitudeDeg).toBeGreaterThan(40); // full moon opposes the low winter sun
+  });
+
+  it("moon.yFrac is the sun's screen mapping applied to the moon's altitude", () => {
+    const sky = skyFor(6, TIMES_OF_DAY[0].date, LAT, LON);
+    const altSin = Math.sin((sky.moon.altitudeDeg * Math.PI) / 180);
+    const expected = clamp01(1 - clamp01(altSin * 1.4)) * 0.4 + 0.12;
+    expect(sky.moon.yFrac).toBeCloseTo(expected, 6);
+    expect(sky.moon.xFrac).toBeGreaterThanOrEqual(0);
+    expect(sky.moon.xFrac).toBeLessThanOrEqual(1);
+    expect(sky.moon.phaseFraction).toBeGreaterThanOrEqual(0);
+    expect(sky.moon.phaseFraction).toBeLessThan(1);
+    expect(sky.moon.visible).toBe(sky.moon.altitudeDeg > -2);
   });
 });
