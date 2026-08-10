@@ -36,6 +36,26 @@
   box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
 }
 
+/* On a phone the keyboard overlays the layout viewport (iOS doesn't shrink it),
+   so a short bottom sheet leaves a gap of page bleeding through between the card
+   and the keyboard. Fill from near the top down to bottom: 0 instead. Content
+   still sits at the top; the empty area below it is the sheet's OWN background,
+   and the keyboard simply overlays the lower part of it. No page can show
+   through, at any keyboard height, on any iOS version. This is how the native
+   iOS picker behaves. Desktop keeps the content-height roll-up. */
+@media (max-width: 720px) {
+  .place-sheet {
+    top: max(3.5rem, env(safe-area-inset-top));
+    max-height: none;
+  }
+  /* Fill the tall sheet and scroll internally; the empty area under the content
+     is the body's own background, which is what covers the old gap. */
+  .place-sheet__body {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+}
+
 .place-sheet:focus {
   outline: none;
 }
