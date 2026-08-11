@@ -80,15 +80,19 @@ public enum Copy {
 
     /// The verdict-area headline while the first forecast is on its way.
     public static let loadingHeadline = "Pulling forecast"
-    public static let loadingDetail = "Assembling the sky for this place."
+
+    /// The subline under it, rotated one at a time so the (brief) wait reads as
+    /// steps of real work rather than a spinner.
+    public static let loadingLines = [
+        "Building forecast",
+        "Checking winds",
+        "Reading the smoke",
+    ]
 
     /// The verdict-area headline when we have a place but can't reach the
     /// service and have nothing cached to fall back on.
     public static let offlineHeadline = "Can't reach the forecast"
     public static let offlineDetail = "Check your connection — we'll try again."
-
-    /// The thin banner pinned to the top when the network is unreachable.
-    public static let offlineBar = "You're offline"
 
     // MARK: - Notifications posture (platform plan §5, ships as written)
 

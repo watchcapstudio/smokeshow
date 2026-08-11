@@ -129,14 +129,6 @@ struct VerdictScreen: View {
                     .padding(16)
             }
         }
-        // The offline bar rides above everything, on both canvases and even
-        // over a stale cached forecast — the whole point is that it is visible
-        // when the numbers below it might be old.
-        .overlay(alignment: .top) {
-            if isOffline {
-                OfflineBar()
-            }
-        }
         .foregroundStyle(canvasInk)
         .task(id: isPlaying) { await run() }
         .task(id: mapReloadKey) {
@@ -571,13 +563,27 @@ struct VerdictScreen: View {
     #endif
 
     private var header: some View {
-        HStack {
+        HStack(spacing: 8) {
             // The demo's "NOW" — the clock that says which moment the screen
             // is describing. It matters more once the curve can be scrubbed
             // away from the present.
             Text(clockLabel)
                 .font(Typography.eyebrow)
                 .opacity(0.45)
+
+            // Offline, but there is still a (stale) forecast to read. A quiet
+            // inline tag in the eyebrow row — not a banner dropped over the
+            // screen — that the numbers below might be old. The no-forecast
+            // offline case doesn't need it; its headline already says so.
+            if isOffline, forecast != nil {
+                HStack(spacing: 4) {
+                    Image(systemName: "wifi.slash")
+                        .font(.system(size: 9, weight: .semibold))
+                    Text("OFFLINE")
+                        .font(Typography.eyebrow)
+                }
+                .opacity(0.55)
+            }
 
             Spacer()
 
@@ -615,9 +621,7 @@ struct VerdictScreen: View {
             switch phase {
             case .loading:
                 LoadingHeadline()
-                Text(Copy.loadingDetail)
-                    .font(Typography.base)
-                    .opacity(0.7)
+                RotatingLine(phrases: Copy.loadingLines)
             case .offline:
                 Text(Copy.offlineHeadline)
                     .font(Typography.display)
@@ -954,6 +958,25 @@ struct LoadingHeadline: View {
     }
 }
 
+/// The loading subline, rotating through a few plainspoken steps so the wait
+/// reads as work in progress. Driven off the clock; crossfades on each change.
+struct RotatingLine: View {
+    let phrases: [String]
+    private let period: Double = 1.6
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: period)) { context in
+            let i = Int(context.date.timeIntervalSinceReferenceDate / period) % max(phrases.count, 1)
+            Text(phrases[i])
+                .font(Typography.base)
+                .opacity(0.7)
+                .id(i)
+                .transition(.opacity)
+                .animation(.easeInOut(duration: 0.4), value: i)
+        }
+    }
+}
+
 /// Three dots cycling to signal work, driven off the clock so there is no
 /// animation state to reset between redraws.
 struct PulsingDots: View {
@@ -968,24 +991,6 @@ struct PulsingDots: View {
                 }
             }
         }
-    }
-}
-
-/// A thin, honest strip pinned to the top: the connection is down. It does not
-/// block the screen — a stale forecast underneath is still worth reading — it
-/// just says the numbers might be old.
-struct OfflineBar: View {
-    var body: some View {
-        HStack(spacing: 7) {
-            Image(systemName: "wifi.slash")
-                .font(.system(size: 12, weight: .semibold))
-            Text(Copy.offlineBar)
-                .font(Typography.eyebrow)
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
-        .frame(maxWidth: .infinity)
-        .background(.ultraThinMaterial)
     }
 }
 
