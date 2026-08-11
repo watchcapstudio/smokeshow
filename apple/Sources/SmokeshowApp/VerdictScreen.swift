@@ -571,20 +571,6 @@ struct VerdictScreen: View {
                 .font(Typography.eyebrow)
                 .opacity(0.45)
 
-            // Offline, but there is still a (stale) forecast to read. A quiet
-            // inline tag in the eyebrow row — not a banner dropped over the
-            // screen — that the numbers below might be old. The no-forecast
-            // offline case doesn't need it; its headline already says so.
-            if isOffline, forecast != nil {
-                HStack(spacing: 4) {
-                    Image(systemName: "wifi.slash")
-                        .font(.system(size: 9, weight: .semibold))
-                    Text("OFFLINE")
-                        .font(Typography.eyebrow)
-                }
-                .opacity(0.55)
-            }
-
             Spacer()
 
             Button { showsSettings = true } label: {
@@ -673,6 +659,14 @@ struct VerdictScreen: View {
 
             explainButton
                 .padding(.top, 6)
+
+            // Offline with a forecast still on screen: a clear tag right under
+            // the explainer, where the eye already is. The old top banner was
+            // too easy to miss; this reads as "these numbers are last-known".
+            if isOffline {
+                OfflineTag()
+                    .padding(.top, 8)
+            }
 
             if model.isStale, let generatedAt = forecast?.generatedAt {
                 Text(Copy.asOf(generatedAt))
@@ -955,6 +949,27 @@ struct LoadingHeadline: View {
                 .lineLimit(2)
             PulsingDots()
         }
+    }
+}
+
+/// The offline indicator that lives under "What this means", where the eye
+/// already rests. A material capsule so it reads on any sky, light or dark.
+struct OfflineTag: View {
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "wifi.slash")
+                .font(.system(size: 11, weight: .semibold))
+            Text(Copy.offlineTag)
+                .font(Typography.eyebrow)
+                .fontWeight(.semibold)
+            Text(Copy.offlineTagDetail)
+                .font(Typography.eyebrow)
+                .opacity(0.7)
+        }
+        .padding(.horizontal, 11)
+        .padding(.vertical, 7)
+        .background(Capsule().fill(.ultraThinMaterial))
+        .overlay(Capsule().strokeBorder(Color.primary.opacity(0.12), lineWidth: 1))
     }
 }
 

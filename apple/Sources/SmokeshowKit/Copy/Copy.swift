@@ -94,6 +94,11 @@ public enum Copy {
     public static let offlineHeadline = "Can't reach the forecast"
     public static let offlineDetail = "Check your connection — we'll try again."
 
+    /// The inline offline tag shown under the explainer when a (stale)
+    /// forecast is still on screen.
+    public static let offlineTag = "OFFLINE"
+    public static let offlineTagDetail = "Check connection"
+
     // MARK: - Notifications posture (platform plan §5, ships as written)
 
     public static let notificationsPosture =
