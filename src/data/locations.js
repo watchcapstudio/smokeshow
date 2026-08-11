@@ -74,6 +74,15 @@ export const LOCATIONS = [
     // Nearby: cities that share this one's weather rather than feed it.
     nearby: ['milwaukee-wi', 'detroit-mi'],
 
+    // Numerically identical to LEVELS, which Chicago inherited before the other
+    // 24 cities existed. Stated explicitly now for one reason: LEVELS writes its
+    // ranges with EN-dashes ("5–10 miles") and every per-city band uses hyphens,
+    // so the inheriting page was the only one on the site rendering a different
+    // character in the same column. Normalising LEVELS instead would reach the
+    // explain sheet and the generated Apple tokens, which is a lot of blast
+    // radius for a dash.
+    bands: ['10+ miles', '5-10 miles', '3-5 miles', '1.5-3 miles', 'under 1.5 miles'],
+
     // Downwind is the mirror of upwind, and only the source-end cities carry it —
     // the ones with nothing upstream that has a page. Winnipeg, Toronto and
     // Chicago's own provenance all describe the chain outward from them, so the

@@ -253,7 +253,7 @@ candidate footer.
 - 1 about page at `/about/`
 - 6 pages carry a "what looks like smoke but isn't" section: Denver, Philadelphia, Pittsburgh, Salt Lake City, Sacramento, Fresno
 - 2 carry valley or gateway prose: Whitefish, Bozeman
-- 24 carry their own distance bands; Chicago inherits the universal ones
+- 25 of 25 state their own distance bands. The fallback to the universal ladder in LEVELS still exists, so a new city can ship before anyone has checked its sightlines
 
 **Verdict block: still client-side.** The static HTML ships `<div id="root"></div>` and carries
 no level, no clear time and no run stamp. You asked me to leave it that way.

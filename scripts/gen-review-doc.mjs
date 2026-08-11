@@ -208,7 +208,7 @@ p(
   `- ${valley.length} carry valley or gateway prose: ${valley.map((l) => l.name).join(', ')}`,
 );
 p(
-  `- ${LOCATIONS.filter((l) => l.bands).length} carry their own distance bands; Chicago inherits the universal ones`,
+  `- ${LOCATIONS.filter((l) => l.bands).length} of ${LOCATIONS.length} state their own distance bands. The fallback to the universal ladder in LEVELS still exists, so a new city can ship before anyone has checked its sightlines`,
 );
 p();
 p('**Verdict block: still client-side.** The static HTML ships `<div id="root"></div>` and carries');

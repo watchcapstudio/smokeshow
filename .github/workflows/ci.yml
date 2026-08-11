@@ -122,10 +122,17 @@ jobs:
       - name: Regenerate the Apple contract fixtures
         run: npm run fixtures:apple
 
+      # docs/city-pages-review.md is generated from src/data/*.js and the vendored
+      # brief in docs/review-src/. It is the document Joe answers, so a stale copy
+      # is worse than none: it still reads as authoritative while describing
+      # coordinates or validate items that have since changed.
+      - name: Regenerate the city-pages review doc
+        run: npm run review
+
       - name: Fail if anything regenerated differently
         run: |
           if ! git diff --quiet; then
-            echo "::error::Generated files are out of date. Run 'npm run tokens && npm run tokens:apple && npm run fixtures:apple' and commit the result."
+            echo "::error::Generated files are out of date. Run 'npm run tokens && npm run tokens:apple && npm run fixtures:apple && npm run review' and commit the result."
             git --no-pager diff --stat
             git --no-pager diff
             exit 1
