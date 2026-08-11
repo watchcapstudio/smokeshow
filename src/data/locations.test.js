@@ -327,10 +327,17 @@ describe('generated location page', () => {
     expect(nasty).not.toContain('<img src=x');
     expect(nasty).not.toContain('</script><img');
     expect(nasty).toContain('&lt;img src=x');
-    // Still valid JSON in both ld+json blocks, and the payload survives intact.
+    // Still valid JSON in every ld+json block, and the payload survives intact.
+    // The count is asserted rather than inferred: adding a block that also
+    // interpolates the place name is exactly the change that needs to come back
+    // through this test, which is how the BreadcrumbList below got here.
     const blocks = jsonLdBlocks(nasty);
-    expect(blocks).toHaveLength(2);
+    expect(blocks).toHaveLength(3);
     expect(blocks.find((b) => b['@type'] === 'WebPage').about.name).toContain('<img src=x');
+    // The breadcrumb is a third sink for the label. Same rule: escaped in the
+    // markup, intact after JSON.parse.
+    const crumb = blocks.find((b) => b['@type'] === 'BreadcrumbList');
+    expect(crumb.itemListElement.at(-1).name).toContain('<img src=x');
   });
 });
 
@@ -401,12 +408,26 @@ describe('per-city landmark bands', () => {
     expect(html).not.toContain('<span class="landmarks__vis">10+ miles</span>');
   });
 
+  // Every city now states its own bands, so the fallback is exercised with a
+  // synthetic one. The path still matters: it is what lets a new city ship
+  // without inventing distances before someone has checked the sightlines.
   it('falls back to the universal band when the city has none', () => {
-    const chicago = locationBySlug('chicago-il');
-    expect(chicago.bands).toBeUndefined();
-    expect(page(chicago)).toContain(
+    const bandless = { ...locationBySlug('chicago-il'), bands: undefined };
+    expect(page(bandless)).toContain(
       `<span class="landmarks__vis">${LEVELS[0].visibility}</span>`,
     );
+  });
+
+  // One separator across the whole site. Chicago inherited LEVELS, which uses
+  // en-dashes for its ranges, and was the only page rendering a different
+  // character in that column.
+  it('writes every band range with the same separator', () => {
+    for (const l of LOCATIONS) {
+      for (const band of l.bands ?? []) {
+        expect(band, `${l.slug}: "${band}"`).not.toContain('\u2013');
+        expect(band, `${l.slug}: "${band}"`).not.toContain('\u2014');
+      }
+    }
   });
 
   it('pairs every band with its level name in order', () => {
@@ -511,6 +532,67 @@ describe('internal links', () => {
       expect(html).toContain('class="site-footer"');
       for (const { href } of FOOTER_LINKS) expect(html).toContain(`href="${href}"`);
     }
+  });
+});
+
+describe('structured data', () => {
+  // Parsing rather than string-matching, so a bad escape throws here instead of
+  // silently shipping an unparseable block.
+  it('gives every page type the right schema', () => {
+    const expected = [
+      [page(locationBySlug('missoula-mt')), ['FAQPage', 'WebPage', 'BreadcrumbList']],
+      [hubPage(), ['CollectionPage', 'BreadcrumbList']],
+      [aboutPage(), ['AboutPage', 'BreadcrumbList']],
+      [corridorPage(CORRIDORS[0]), ['CollectionPage', 'BreadcrumbList']],
+    ];
+    for (const [html, types] of expected) {
+      expect(jsonLdBlocks(html).map((b) => b['@type'])).toEqual(types);
+    }
+  });
+
+  // The URL space is three levels deep and nothing visible states the hierarchy,
+  // so the breadcrumb is the only place it is written down. The last entry
+  // deliberately carries no `item`: it is the page you are on.
+  it('states the hierarchy on every page', () => {
+    const trails = [
+      [hubPage(), ['SMOKESHOW', 'Smoke forecasts by city']],
+      [aboutPage(), ['SMOKESHOW', 'About']],
+      [
+        corridorPage(CORRIDORS[0]),
+        ['SMOKESHOW', 'Smoke forecasts by city', CORRIDORS[0].name],
+      ],
+      [
+        page(locationBySlug('missoula-mt')),
+        ['SMOKESHOW', 'Smoke forecasts by city', 'Missoula, MT'],
+      ],
+    ];
+    for (const [html, names] of trails) {
+      const crumb = jsonLdBlocks(html).find((b) => b['@type'] === 'BreadcrumbList');
+      expect(crumb.itemListElement.map((i) => i.name)).toEqual(names);
+      expect(crumb.itemListElement.map((i) => i.position)).toEqual(
+        names.map((_, i) => i + 1),
+      );
+      expect(crumb.itemListElement.at(-1).item).toBeUndefined();
+      for (const i of crumb.itemListElement.slice(0, -1)) {
+        expect(i.item).toMatch(/^https:\/\/smokeshow\.earth\//);
+      }
+    }
+  });
+
+  // hasPart makes the same claim the visible list makes. If they can disagree,
+  // one of them is lying to a crawler.
+  it('lists the same cities in hasPart as on the page', () => {
+    for (const c of CORRIDORS) {
+      const html = corridorPage(c);
+      const collection = jsonLdBlocks(html).find((b) => b['@type'] === 'CollectionPage');
+      const built = c.cities.filter(isBuilt);
+      expect(collection.hasPart, c.slug).toHaveLength(built.length);
+      for (const slug of built) {
+        expect(collection.hasPart.some((p) => p.url.endsWith(`/${slug}/`)), slug).toBe(true);
+      }
+    }
+    const hub = jsonLdBlocks(hubPage()).find((b) => b['@type'] === 'CollectionPage');
+    expect(hub.hasPart).toHaveLength(LOCATIONS.length);
   });
 });
 

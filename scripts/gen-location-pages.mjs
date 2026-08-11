@@ -287,6 +287,63 @@ function faqJsonLd(loc) {
   );
 }
 
+// BreadcrumbList. The URL space is three levels deep at its deepest
+// (/smoke-forecast/corridor/<slug>/) and nothing else on the page states the
+// hierarchy: there is no visible breadcrumb trail, and the footer's "All cities"
+// link is navigation rather than a claim about where this page sits. So the
+// structured data is the only place the shape is written down.
+//
+// Takes [label, path] pairs, root first, and omits the item URL on the last
+// entry per schema.org's guidance that the current page needs no link.
+function breadcrumbJsonLd(trail) {
+  return jsonForScript(
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: trail.map(([name, path], i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name,
+        ...(i === trail.length - 1 ? {} : { item: `${ORIGIN}${path}` }),
+      })),
+    },
+    null,
+    2,
+  );
+}
+
+// CollectionPage for the hub and the corridors, AboutPage for /about/. The
+// editorial pages shipped with no structured data at all while every city page
+// carried two blocks, which left the four pages that explain the system as the
+// only ones a crawler had to infer from prose.
+//
+// `hasPart` on a collection names the city pages it holds. That is the same claim
+// the visible list makes, which is the point: the machine-readable version should
+// not be able to disagree with the page.
+function collectionJsonLd({ type, name, description, url, parts = [] }) {
+  return jsonForScript(
+    {
+      '@context': 'https://schema.org',
+      '@type': type,
+      name,
+      description,
+      url,
+      isPartOf: { '@type': 'WebSite', name: 'SMOKESHOW', url: `${ORIGIN}/` },
+      ...(parts.length
+        ? {
+            hasPart: parts.map((loc) => ({
+              '@type': 'WebPage',
+              name: `Wildfire smoke forecast for ${loc.label}`,
+              url: `${ORIGIN}/${SECTION}/${loc.slug}/`,
+            })),
+          }
+        : {}),
+    },
+    null,
+    2,
+  );
+}
+
 // WebPage + Place, so the page states which point on earth it is about rather
 // than leaving Google to infer it from the city name in the title.
 function placeJsonLd(loc, url) {
@@ -459,6 +516,13 @@ ${faqJsonLd(loc)}
     </script>
     <script type="application/ld+json">
 ${placeJsonLd(loc, url)}
+    </script>
+    <script type="application/ld+json">
+${breadcrumbJsonLd([
+  ['SMOKESHOW', '/'],
+  ['Smoke forecasts by city', `/${SECTION}/`],
+  [loc.label, `/${SECTION}/${loc.slug}/`],
+])}
     </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
@@ -652,6 +716,21 @@ function hubPage() {
         </div>
       </div>${footer()}
     </div>
+    <script type="application/ld+json">
+${collectionJsonLd({
+  type: 'CollectionPage',
+  name: 'Wildfire smoke forecasts by city',
+  description,
+  url,
+  parts: LOCATIONS,
+})}
+    </script>
+    <script type="application/ld+json">
+${breadcrumbJsonLd([
+  ['SMOKESHOW', '/'],
+  ['Smoke forecasts by city', `/${SECTION}/`],
+])}
+    </script>
     <script type="module" src="/src/editorial.js"></script>
   </body>
 </html>
@@ -767,6 +846,15 @@ function aboutPage() {
         </div>
       </div>${footer()}
     </div>
+    <script type="application/ld+json">
+${collectionJsonLd({ type: 'AboutPage', name: 'Why we made Smokeshow', description, url })}
+    </script>
+    <script type="application/ld+json">
+${breadcrumbJsonLd([
+  ['SMOKESHOW', '/'],
+  ['About', '/about/'],
+])}
+    </script>
     <script type="module" src="/src/editorial.js"></script>
   </body>
 </html>
@@ -836,6 +924,22 @@ ${
         </div>
       </div>${footer()}
     </div>
+    <script type="application/ld+json">
+${collectionJsonLd({
+  type: 'CollectionPage',
+  name: corridor.name,
+  description: corridor.description,
+  url,
+  parts: corridor.cities.map((s) => locationBySlug(s)).filter(Boolean),
+})}
+    </script>
+${'    '}<script type="application/ld+json">
+${breadcrumbJsonLd([
+  ['SMOKESHOW', '/'],
+  ['Smoke forecasts by city', `/${SECTION}/`],
+  [corridor.name, `/${SECTION}/${CORRIDOR_SEGMENT}/${corridor.slug}/`],
+])}
+    </script>
     <script type="module" src="/src/editorial.js"></script>
   </body>
 </html>
