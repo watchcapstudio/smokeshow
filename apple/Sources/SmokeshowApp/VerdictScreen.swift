@@ -200,14 +200,6 @@ struct VerdictScreen: View {
                     )
                 }
 
-                // Only when a stale forecast is on screen: "this is the last
-                // one we had". With no forecast at all, the verdict block above
-                // already carries the loading/offline message.
-                if forecast != nil, let error = model.loadError {
-                    UnavailableBanner(error: error, generatedAt: forecast?.generatedAt)
-                        .padding(.top, 12)
-                }
-
                 if phase == .needsPlace {
                     choosePlaceButton
                 }
@@ -1009,22 +1001,3 @@ struct PulsingDots: View {
     }
 }
 
-struct UnavailableBanner: View {
-    let error: ForecastUnavailable
-    let generatedAt: Date?
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text(error.userFacingMessage).font(Typography.sm).fontWeight(.semibold)
-            if let generatedAt {
-                Text(Copy.asOf(generatedAt)).font(Typography.xs).opacity(0.7)
-            }
-        }
-        .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: Tokens.Radius.md)
-                .fill(Color.black.opacity(0.22))
-        )
-    }
-}
