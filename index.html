@@ -118,7 +118,7 @@
             Smoke forecasts are sharp for about the next one to two days and get fuzzier after
             that. Models must find the fires by satellite, estimate how much smoke each one makes,
             and then ride the wind forecast, and each step adds error (the full explanation is
-            below). Smokeshow shows a detailed two-day window plus a five-day outlook, and tells you when the forecast models agree and when they don't. And we blend a few models to improve our guesses.
+            linked below). Smokeshow shows a detailed two-day window plus a five-day outlook, and tells you when the forecast models agree and when they don't. And we blend a few models to improve our guesses.
           </p>
           </details>
 
@@ -130,34 +130,29 @@
           </details>
         </section>
 
-        <!-- id is a link target: every city page and corridor page points its
-             "Why smoke is hard to forecast" link here, so this is the one
-             explainer the whole site shares. Renaming it breaks ~30 pages. -->
+        <!-- The five paragraphs that used to live here now have their own page at
+             /how-smoke-forecasts-work/, because the footer and all 30 city and
+             corridor pages linked at this anchor and "How smoke forecasts work"
+             should not drop a reader into the middle of the homepage with no
+             title and no context. Moved rather than duplicated: two URLs carrying
+             the same copy is a duplicate-content problem.
+
+             The id stays on this lead so a stale /#how-smoke-forecasts-work link
+             still lands on something that explains itself and points onward. -->
         <div class="explainer" id="how-smoke-forecasts-work">
           <h2>Why is smoke so hard to forecast?</h2>
-          <p>Forecasting smoke is like forecasting weather, with three extra problems stacked on top.</p>
           <p>
-            <strong>First, you have to find the fires.</strong> Satellites spot fires by detecting
-            heat from space. But clouds can hide a fire from the satellite. So can thick smoke from
-            another fire. A fire the satellite can't see is a fire the forecast doesn't know about.
+            Forecasting smoke is like forecasting weather, with three extra problems stacked on top.
+            You have to find the fires, which satellites can miss behind cloud or behind other
+            smoke. You have to guess how much smoke each one is making. Then you ride a wind
+            forecast, and height matters, because smoke high in the sky can pass right over a town
+            whose air stays clean.
           </p>
           <p>
-            <strong>Second, you have to guess the smoke.</strong> Nobody can measure exactly how
-            much smoke a fire makes. Scientists estimate it from how hot the fire looks from space
-            and what's burning underneath. Grass, pine forest, and swampy peat all burn differently
-            and make different amounts of smoke.
-          </p>
-          <p>
-            <strong>Third, you ride the wind.</strong> Smoke goes wherever the wind carries it,
-            sometimes more than a thousand miles. If the wind forecast is off by a little, the
-            smoke ends up somewhere else. And height matters: smoke riding high in the sky might
-            pass right over your town while the air at the ground stays clean. It's the low smoke
-            you actually breathe.
-          </p>
-          <p>
-            Each step adds a little error, and the little errors multiply. That's why smoke forecasts are
-            pretty sharp for the next day or two and get fuzzy after that, and why this page tells
-            you when the models agree and when they don't.
+            Each step adds a little error and the errors multiply, which is why forecasts are sharp
+            for a day or two and fuzzy after that, and why this site tells you when the models
+            disagree instead of averaging them into one confident line.
+            <a href="/how-smoke-forecasts-work/">The long version is here</a>.
           </p>
         </div>
 
@@ -187,7 +182,7 @@
       <footer class="site-footer">
         <nav class="site-footer__nav" aria-label="Site">
           <a href="/smoke-forecast/">All cities</a>
-          <a href="/#how-smoke-forecasts-work">How smoke forecasts work</a>
+          <a href="/how-smoke-forecasts-work/">How smoke forecasts work</a>
           <a href="/smoke-forecast/corridor/canadian-smoke-great-lakes-northeast/"
             >Canadian smoke explained</a
           >
@@ -247,7 +242,7 @@
             "name": "How far ahead can smoke be forecast?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Smoke forecasts are sharp for about the next one to two days and get fuzzier after that. Models must find the fires by satellite, estimate how much smoke each one makes, and then ride the wind forecast, and each step adds error (the full explanation is below). Smokeshow shows a detailed two-day window plus a five-day outlook, and tells you when the forecast models agree and when they don't. And we blend a few models to improve our guesses."
+              "text": "Smoke forecasts are sharp for about the next one to two days and get fuzzier after that. Models must find the fires by satellite, estimate how much smoke each one makes, and then ride the wind forecast, and each step adds error (the full explanation is linked below). Smokeshow shows a detailed two-day window plus a five-day outlook, and tells you when the forecast models agree and when they don't. And we blend a few models to improve our guesses."
             }
           },
           {

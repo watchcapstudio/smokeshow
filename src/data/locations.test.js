@@ -5,8 +5,16 @@ import { SOURCES } from './sources.js';
 import { LEVELS } from '../lib/rating.js';
 import { _internal } from '../../scripts/gen-location-pages.mjs';
 
-const { page, hubPage, corridorPage, aboutPage, sitemap, CORRIDOR_SEGMENT, FOOTER_LINKS } =
-  _internal;
+const {
+  page,
+  hubPage,
+  corridorPage,
+  aboutPage,
+  explainerPage,
+  sitemap,
+  CORRIDOR_SEGMENT,
+  FOOTER_LINKS,
+} = _internal;
 
 // Every page the generator writes. Used by the rules that have to hold across
 // all of them rather than on a spot-checked one.
@@ -14,6 +22,7 @@ const allPages = () => [
   ...LOCATIONS.map((l) => page(l)),
   hubPage(),
   aboutPage(),
+  explainerPage(),
   ...CORRIDORS.map((c) => corridorPage(c)),
 ];
 
@@ -617,22 +626,64 @@ describe('house style', () => {
   });
 });
 
+describe('the explainer page', () => {
+  // It shipped for months as an anchor in the middle of index.html, which every
+  // city page and the footer pointed at. A "How smoke forecasts work" link that
+  // drops a reader mid-homepage with no title is worse than no link.
+  it('is a page, and nothing links at the old anchor', () => {
+    const html = explainerPage();
+    expect(html).toContain('<h1 class="map-intro__title">Why is smoke so hard to forecast?</h1>');
+    expect(html).toContain(
+      '<link rel="canonical" href="https://smokeshow.earth/how-smoke-forecasts-work/" />',
+    );
+    for (const p of allPages()) {
+      expect(p, 'still points at the mid-homepage anchor').not.toContain(
+        'href="/#how-smoke-forecasts-work"',
+      );
+    }
+  });
+
+  it('is linked from the footer and from every city page', () => {
+    expect(FOOTER_LINKS.some((l) => l.href === '/how-smoke-forecasts-work/')).toBe(true);
+    for (const l of LOCATIONS) {
+      expect(page(l), l.slug).toContain('href="/how-smoke-forecasts-work/"');
+    }
+  });
+
+  it('holds to the sitewide copy rules', () => {
+    const html = explainerPage();
+    expect(html).toContain(
+      '<strong>Smokeshow is for informational and educational purposes only.</strong>',
+    );
+    expect(html).toMatch(/model estimate/);
+    expect(html).not.toMatch(/\bobserved\b/i);
+    expect(html).not.toMatch(/\bAQI\b/i);
+    expect(html).not.toContain('\u2014');
+  });
+});
+
 describe('editorial pages', () => {
   // A directory must not answer today's question. This column used to read
   // "All clear: 50+ miles", which put a level name beside 25 city names on a page
   // about smoke, so the list rendered as a status board claiming every city was
   // currently clear. Level names are the one thing on this site that mean "right
   // now"; a static file may never use one.
-  it('never puts a level name in a city list row', () => {
+  // Asserted on the whole row rather than on one span, because the value slot has
+  // been wrong twice and the second fix was to empty it. A row is now a link and
+  // nothing else, so anything that reappears in that position has to come back
+  // through this test.
+  it('never states a condition in a city list row', () => {
     for (const html of [hubPage(), ...CORRIDORS.map((c) => corridorPage(c))]) {
-      const rows = [...html.matchAll(/<span class="citylist__band">([^<]*)<\/span>/g)].map(
+      const rows = [...html.matchAll(/<li class="citylist__item">([\s\S]*?)<\/li>/g)].map(
         (m) => m[1],
       );
       expect(rows.length, 'no rows found, selector drifted').toBeGreaterThan(0);
       for (const row of rows) {
         for (const level of LEVELS) {
-          expect(row, `"${row}" names the level "${level.name}"`).not.toContain(level.name);
+          expect(row, `row names the level "${level.name}"`).not.toContain(level.name);
         }
+        // No distance either. "clean day: 50+ miles" read as a reading too.
+        expect(row, 'row carries a distance').not.toMatch(/\d+\s*\+?\s*(miles|km|mi)\b/i);
       }
     }
   });
@@ -640,10 +691,9 @@ describe('editorial pages', () => {
   // Same rule, stated positively: the directory says outright that it reports
   // nothing, so the numbers on it cannot be mistaken for a reading.
   it('says on its face that it reports no conditions', () => {
-    expect(hubPage()).toContain('reports conditions nowhere');
-    for (const c of CORRIDORS) {
-      expect(corridorPage(c), c.slug).toContain('not a reading\n            for today');
-    }
+    const promise = 'This is a directory and reports conditions nowhere.';
+    expect(hubPage()).toContain(promise);
+    for (const c of CORRIDORS) expect(corridorPage(c), c.slug).toContain(promise);
   });
 
   // A hub has no coordinates. Booting App.jsx there lands in requestLocation()
@@ -751,6 +801,8 @@ describe('sitemap', () => {
     const xml = sitemap(LOCATIONS);
     expect(xml).toContain('<loc>https://smokeshow.earth/</loc>');
     expect(xml).toContain('<loc>https://smokeshow.earth/smoke-forecast/</loc>');
+    expect(xml).toContain('<loc>https://smokeshow.earth/about/</loc>');
+    expect(xml).toContain('<loc>https://smokeshow.earth/how-smoke-forecasts-work/</loc>');
     for (const c of CORRIDORS) {
       expect(xml).toContain(
         `<loc>https://smokeshow.earth/smoke-forecast/corridor/${c.slug}/</loc>`,

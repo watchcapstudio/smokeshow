@@ -82,7 +82,7 @@ const DISCLAIMER = `<strong>Smokeshow is for informational and educational purpo
 const STUDIO_ORIGIN = 'https://watchcapstudio.com';
 const FOOTER_LINKS = [
   { href: `/${SECTION}/`, text: 'All cities' },
-  { href: '/#how-smoke-forecasts-work', text: 'How smoke forecasts work' },
+  { href: '/how-smoke-forecasts-work/', text: 'How smoke forecasts work' },
   {
     href: `/${SECTION}/${CORRIDOR_SEGMENT}/canadian-smoke-great-lakes-northeast/`,
     text: 'Canadian smoke explained',
@@ -103,6 +103,10 @@ function footer() {
         </nav>
       </footer>`;
 }
+
+// Said in the same words on every directory page, so a reader landing on any of
+// them gets the same promise, and one test can check one string.
+const NO_CONDITIONS = 'This is a directory and reports conditions nowhere.';
 
 // Source names as links, comma-joined, read from src/data/sources.js so the
 // About page and the candidate's footer cannot credit different URLs.
@@ -206,7 +210,7 @@ function linkBlock(loc) {
 
   items.push(`
               <li class="citylinks__item">
-                <a class="citylinks__link" href="/#how-smoke-forecasts-work"
+                <a class="citylinks__link" href="/how-smoke-forecasts-work/"
                   >Why smoke is hard to forecast</a
                 >
                 <span class="citylinks__tag">Explainer</span>
@@ -588,24 +592,26 @@ function editorialHead({ title, description, url }) {
   <body>`;
 }
 
-// One row per city, used by the hub and the corridor pages. The number is the
-// city's own top-of-scale distance: how far you can see there on a clean day.
-// It is the fastest way to show that these pages are calibrated locally rather
-// than duplicated, ten miles of Chicago lakefront against fifty of Rainier.
+// One row per city: the link, and nothing else.
 //
-// It does NOT carry the level name, and that is the whole point of this comment.
-// This column used to read "All clear: 50+ miles", which put a LEVEL NAME beside
-// 25 city names on a page about smoke. Level names are the one thing on this site
-// that mean "right now", so 25 rows all reading "All clear" rendered as a status
-// board announcing that every city we cover was currently clear. It was not; the
-// string was a constant. locations.js opens by forbidding precisely that ("nothing
-// in this table describes current conditions, and nothing ever should"), and a
-// directory that quietly answers today's question wrongly is worse than one that
-// does not answer it at all.
+// This column has now been wrong twice, in the same position, for the same
+// reason. First it read "All clear: 50+ miles", which put a LEVEL NAME beside 25
+// city names and rendered as a status board claiming every city was clear.
+// Relabelling it "clean day: 50+ miles" fixed the wording and not the problem:
+// six cities were reading "In the air" on their own pages while the directory
+// showed a number, and a reader compares those two and concludes the directory is
+// stale or lying.
 //
-// If a live per-city status ever belongs here, it has to come from the same live
-// verdict the city pages paint, carry the time it was read, and not be baked into
-// a static file by a build.
+// The lesson is about the POSITION, not the words. A right-aligned value beside a
+// place name on a page about air quality is a status slot, and readers scan it as
+// one no matter what the prose above says. No third phrasing was going to hold.
+// The per-city calibration those numbers carried is worth saying, so it is said in
+// prose in the scale explainer, where it reads as an explanation instead of a
+// reading.
+//
+// The slot is empty on purpose and stays empty until something real can fill it:
+// a live level from the same source the city page reads, carrying the time it was
+// read. Not a constant, and not a value baked in by a build.
 function cityRows(slugs) {
   return slugs
     .map((slug) => locationBySlug(slug))
@@ -616,9 +622,6 @@ function cityRows(slugs) {
               <a class="citylist__link" href="/${SECTION}/${escAttr(loc.slug)}/"
                 >Wildfire smoke in ${esc(loc.label)}</a
               >
-              <span class="citylist__band">clean day: ${esc(
-                loc.bands?.[0] ?? LEVELS[0].visibility,
-              )}</span>
             </li>`,
     )
     .join('');
@@ -653,8 +656,8 @@ function hubPage() {
         <h1 class="map-intro__title">Wildfire smoke forecasts by city</h1>
         <p class="map-intro__sub">
           One page per city, each answering the same question: how bad is the air here, and when
-          does it clear. This page is the directory and reports conditions nowhere. Open a city for
-          today's air. Every hour shown on any of these pages is a model estimate, not a measurement.
+          does it clear. ${NO_CONDITIONS} Open a city for today's air. Every hour shown on any of
+          these pages is a model estimate, not a measurement.
         </p>
       </header>
 
@@ -702,10 +705,11 @@ function hubPage() {
             resolve tells you which level you are in, and it tells you before any app does.
           </p>
           <p>
-            The distance listed beside each city below is the top of its ladder: how far you can see
-            there on a clean day. Fifty miles in Seattle and eight in Detroit describe the same clean
-            air, which is the whole reason the bands are per-city. None of those numbers is a reading
-            for today.
+            The size of that difference is worth stating plainly. A clean day in Seattle shows you
+            Rainier at about sixty miles; a clean day in Detroit reaches Windsor across the river.
+            Both are All clear. That is why each city page carries its own distances, and why this
+            directory carries none: a number next to a city name gets read as today's reading, and
+            the honest place for today's reading is the city's own page.
           </p>
         </section>${groups}
 
@@ -861,6 +865,132 @@ ${breadcrumbJsonLd([
 `;
 }
 
+// /how-smoke-forecasts-work/ — the explainer, as a page.
+//
+// This copy shipped for months as an anchor in the middle of index.html, and the
+// footer plus all 30 city and corridor pages pointed at `/#how-smoke-forecasts-work`.
+// A "How smoke forecasts work" link that drops you into the middle of the
+// homepage is a worse experience than no link: the reader has no title, no
+// context, and no idea whether they are where they meant to go.
+//
+// It is also the best evergreen non-city content on the site and it had no URL of
+// its own, so it could never rank for the question it answers while the homepage
+// chased the head term.
+//
+// The copy is moved rather than duplicated. index.html keeps a short lead and a
+// link, because two URLs carrying the same five paragraphs is a duplicate-content
+// problem the site does not need. The old anchor id stays on that lead, so a
+// stale `/#how-smoke-forecasts-work` link still lands somewhere sensible.
+function explainerPage() {
+  const url = `${ORIGIN}/how-smoke-forecasts-work/`;
+  const title = 'How Smoke Forecasts Work, and Why They Are Hard | SMOKESHOW';
+  const description =
+    'Why forecasting wildfire smoke is harder than forecasting weather: finding the fires, guessing how much smoke they make, and riding the wind.';
+
+  return `${editorialHead({ title, description, url })}
+    <div class="app app--bottom">
+      <header class="map-intro">
+        <h1 class="map-intro__title">Why is smoke so hard to forecast?</h1>
+        <p class="map-intro__sub">
+          Forecasting smoke is like forecasting weather, with three extra problems stacked on top.
+        </p>
+      </header>
+
+      <div class="seo-sheet">
+        <div class="seo-sheet__grab" aria-hidden="true"></div>
+
+        <section class="explainer">
+          <h2>Three extra problems</h2>
+          <p>
+            <strong>First, you have to find the fires.</strong> Satellites spot fires by detecting
+            heat from space. But clouds can hide a fire from the satellite. So can thick smoke from
+            another fire. A fire the satellite can't see is a fire the forecast doesn't know about.
+          </p>
+          <p>
+            <strong>Second, you have to guess the smoke.</strong> Nobody can measure exactly how
+            much smoke a fire makes. Scientists estimate it from how hot the fire looks from space
+            and what's burning underneath. Grass, pine forest, and swampy peat all burn differently
+            and make different amounts of smoke.
+          </p>
+          <p>
+            <strong>Third, you ride the wind.</strong> Smoke goes wherever the wind carries it,
+            sometimes more than a thousand miles. If the wind forecast is off by a little, the
+            smoke ends up somewhere else. And height matters: smoke riding high in the sky might
+            pass right over your town while the air at the ground stays clean. It's the low smoke
+            you actually breathe.
+          </p>
+          <p>
+            Each step adds a little error, and the little errors multiply. That's why smoke forecasts
+            are pretty sharp for the next day or two and get fuzzy after that, and why this site
+            tells you when the models agree and when they don't.
+          </p>
+        </section>
+
+        <section class="explainer">
+          <h2>What that means for the answer you get</h2>
+          <p>
+            It is why the forecast on this site leads with a clear time rather than a single number,
+            and why the clear time requires six straight hours below the Smells-like-fire threshold
+            before it will call anything. One hour of cleaner air inside a bad stretch is well within
+            the error the three problems above produce. Six hours is a claim worth making.
+          </p>
+          <p>
+            It is also why the timeline marks the hours where the models split instead of drawing one
+            confident line through them. Where two models put the smoke in different places at the
+            same hour, that disagreement is the most honest thing we can show you, and hiding it
+            behind an average would make a rough answer look precise.
+          </p>
+          <p>
+            Every hour on every page here is a model estimate, including the hours before now. Those
+            are the model's account of the past, not measurements.
+          </p>
+        </section>
+
+        <section class="explainer">
+          <h2>Where the numbers come from</h2>
+          <p>
+            Forecast: ${sourceLinks('forecast')}. Fires: ${sourceLinks('fires')}. Thermal hotspots:
+            ${sourceLinks('hotspots')}.
+          </p>
+          <p class="colophon">Generated using Copernicus Atmosphere Monitoring Service information.</p>
+        </section>
+
+        <section class="citylinks">
+          <h2>Elsewhere</h2>
+          <ul class="citylinks__list">
+            <li class="citylinks__item">
+              <a class="citylinks__link" href="/${SECTION}/">Every city we cover</a>
+              <span class="citylinks__tag">All cities</span>
+            </li>
+            <li class="citylinks__item">
+              <a class="citylinks__link" href="/about/">Why we made Smokeshow</a>
+              <span class="citylinks__tag">About</span>
+            </li>
+          </ul>
+        </section>
+
+        <div class="disclaimer">
+          <p>
+            ${DISCLAIMER}
+          </p>
+        </div>
+      </div>${footer()}
+    </div>
+    <script type="application/ld+json">
+${collectionJsonLd({ type: 'WebPage', name: 'Why is smoke so hard to forecast?', description, url })}
+    </script>
+    <script type="application/ld+json">
+${breadcrumbJsonLd([
+  ['SMOKESHOW', '/'],
+  ['How smoke forecasts work', '/how-smoke-forecasts-work/'],
+])}
+    </script>
+    <script type="module" src="/src/editorial.js"></script>
+  </body>
+</html>
+`;
+}
+
 function corridorPage(corridor) {
   const url = `${ORIGIN}/${SECTION}/${CORRIDOR_SEGMENT}/${corridor.slug}/`;
   // No separator before SMOKESHOW beyond the pipe: every corridor name already
@@ -890,10 +1020,9 @@ ${
     ? `        <section class="citylist">
           <h2>Cities on this corridor</h2>
           <p>
-            Listed in the order the smoke reaches them, not alphabetically. The distance beside each
-            city is how far you can see there on a clean day, which is why the same five levels
-            describe different views in different places. It is a property of the city, not a reading
-            for today. Open a page for that.
+            Listed in the order the smoke reaches them, not alphabetically. ${NO_CONDITIONS} Each
+            page carries that city's own distances and its own named sightlines, so open one for
+            today's air and for what each level looks like from there.
           </p>
           <ul class="citylist__list">${rows}
           </ul>
@@ -909,7 +1038,7 @@ ${
               <span class="citylinks__tag">Hub</span>
             </li>
             <li class="citylinks__item">
-              <a class="citylinks__link" href="/#how-smoke-forecasts-work"
+              <a class="citylinks__link" href="/how-smoke-forecasts-work/"
                 >Why smoke is hard to forecast</a
               >
               <span class="citylinks__tag">Explainer</span>
@@ -950,6 +1079,7 @@ function sitemap(locations) {
   const urls = [
     `${ORIGIN}/`,
     `${ORIGIN}/about/`,
+    `${ORIGIN}/how-smoke-forecasts-work/`,
     `${ORIGIN}/${SECTION}/`,
     ...CORRIDORS.map((c) => `${ORIGIN}/${SECTION}/${CORRIDOR_SEGMENT}/${c.slug}/`),
     ...locations.map((l) => `${ORIGIN}/${SECTION}/${l.slug}/`),
@@ -990,6 +1120,7 @@ export async function generate() {
   // not reach it. Overwriting is enough: it is one file at a fixed path, with no
   // slug that can be renamed and leave an orphan behind.
   await emit(join(ROOT, 'about'), aboutPage());
+  await emit(join(ROOT, 'how-smoke-forecasts-work'), explainerPage());
 
   await mkdir(join(ROOT, 'public'), { recursive: true });
   await writeFile(join(ROOT, 'public', 'sitemap.xml'), sitemap(LOCATIONS), 'utf8');
@@ -1003,6 +1134,7 @@ export const _internal = {
   hubPage,
   corridorPage,
   aboutPage,
+  explainerPage,
   sitemap,
   esc,
   escAttr,
@@ -1015,6 +1147,6 @@ export const _internal = {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const written = await generate();
   console.log(
-    `pages: ${written.length} written (${LOCATIONS.length} cities, 1 hub, ${CORRIDORS.length} corridors, 1 about), sitemap.xml updated`,
+    `pages: ${written.length} written (${LOCATIONS.length} cities, 1 hub, ${CORRIDORS.length} corridors, 1 about, 1 explainer), sitemap.xml updated`,
   );
 }
