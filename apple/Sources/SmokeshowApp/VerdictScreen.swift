@@ -46,6 +46,27 @@ struct VerdictScreen: View {
     private var forecast: Forecast? { model.forecast }
     private var nowHour: Forecast.Hour? { forecast?.nowHour }
 
+    /// What the screen is: a real forecast, the wait for the first one, an
+    /// offline dead-end, or a prompt to pick a place. Every no-forecast state
+    /// used to collapse into the same "Forecast unavailable" headline, which
+    /// read as broken even while a fetch was in flight.
+    enum Phase { case ready, loading, offline, needsPlace }
+
+    private var phase: Phase {
+        if forecast != nil { return .ready }
+        if model.place == nil { return .needsPlace }
+        if model.isLoading { return .loading }
+        return .offline
+    }
+
+    /// Only a transport failure is "no internet". A service or version error is
+    /// the server's problem, not the connection's, and gets its own in-body
+    /// message rather than the offline bar.
+    private var isOffline: Bool {
+        if case .transport = model.loadError { return true }
+        return false
+    }
+
     /// Where the curve window starts inside `hours`, so a curve index can be
     /// turned back into the hour it belongs to.
     private var curveStart: Int {
@@ -108,6 +129,14 @@ struct VerdictScreen: View {
                     .padding(16)
             }
         }
+        // The offline bar rides above everything, on both canvases and even
+        // over a stale cached forecast — the whole point is that it is visible
+        // when the numbers below it might be old.
+        .overlay(alignment: .top) {
+            if isOffline {
+                OfflineBar()
+            }
+        }
         .foregroundStyle(canvasInk)
         .task(id: isPlaying) { await run() }
         .task(id: mapReloadKey) {
@@ -144,9 +173,15 @@ struct VerdictScreen: View {
         ZStack {
             // Sky and stars, full-bleed. The sun moved into the ridge band
             // below so it can set *behind* the hill, so the backdrop no longer
-            // paints its own disc.
-            SkyBackdrop(sky: sky, showsSun: false)
-                .ignoresSafeArea()
+            // paints its own disc. While the first forecast is loading there is
+            // no server sky yet, so a warm dawn stands in — the screen breathes
+            // instead of sitting dark.
+            if phase == .loading {
+                LoadingSky().ignoresSafeArea()
+            } else {
+                SkyBackdrop(sky: sky, showsSun: false)
+                    .ignoresSafeArea()
+            }
 
             VStack(alignment: .leading, spacing: 0) {
                 header
@@ -173,12 +208,15 @@ struct VerdictScreen: View {
                     )
                 }
 
-                if let error = model.loadError {
+                // Only when a stale forecast is on screen: "this is the last
+                // one we had". With no forecast at all, the verdict block above
+                // already carries the loading/offline message.
+                if forecast != nil, let error = model.loadError {
                     UnavailableBanner(error: error, generatedAt: forecast?.generatedAt)
                         .padding(.top, 12)
                 }
 
-                if model.place == nil {
+                if phase == .needsPlace {
                     choosePlaceButton
                 }
             }
@@ -560,7 +598,49 @@ struct VerdictScreen: View {
         return formatter.string(from: forecast.now.exactUTC).uppercased()
     }
 
+    @ViewBuilder
     private var verdictBlock: some View {
+        if forecast != nil {
+            readyVerdict
+        } else {
+            statusVerdict
+        }
+    }
+
+    /// The verdict area before there is a forecast to show. Never the bare
+    /// "Forecast unavailable" — that read as broken mid-load. Each phase says
+    /// what is actually happening.
+    private var statusVerdict: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            switch phase {
+            case .loading:
+                LoadingHeadline()
+                Text(Copy.loadingDetail)
+                    .font(Typography.base)
+                    .opacity(0.7)
+            case .offline:
+                Text(Copy.offlineHeadline)
+                    .font(Typography.display)
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(2)
+                Text(Copy.offlineDetail)
+                    .font(Typography.base)
+                    .opacity(0.75)
+            case .needsPlace:
+                Text("Choose a place")
+                    .font(Typography.display)
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(2)
+                Text("Smokeshow shows the air where you are.")
+                    .font(Typography.base)
+                    .opacity(0.75)
+            case .ready:
+                EmptyView()
+            }
+        }
+    }
+
+    private var readyVerdict: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(forecast?.nowScaleEntry?.name ?? Copy.unavailable)
                 .font(Typography.display)
@@ -819,6 +899,93 @@ struct FiveDayBlock: View {
         guard !matches.isEmpty else { return nil }
         let worst = matches.max { ($0.element.value ?? -1) < ($1.element.value ?? -1) }
         return worst?.offset
+    }
+}
+
+/// The dawn that stands in for the sky while the first forecast loads. There
+/// is no server sky yet, so the colours are fixed — a slow, warm sunrise that
+/// reads as "on its way" rather than the dark, dead panel a nil sky paints.
+struct LoadingSky: View {
+    @State private var risen = false
+
+    var body: some View {
+        GeometryReader { geo in
+            let size = geo.size
+            ZStack {
+                LinearGradient(
+                    colors: [
+                        Color(.sRGB, red: 0.10, green: 0.14, blue: 0.26, opacity: 1),
+                        Color(.sRGB, red: 0.36, green: 0.29, blue: 0.38, opacity: 1),
+                        Color(.sRGB, red: 0.84, green: 0.55, blue: 0.33, opacity: 1),
+                    ],
+                    startPoint: .top, endPoint: .bottom
+                )
+                // A soft sun low on the horizon, easing up and down so the
+                // screen breathes while the numbers are still on their way.
+                RadialGradient(
+                    colors: [
+                        Color(.sRGB, red: 1.0, green: 0.86, blue: 0.60, opacity: 0.95),
+                        Color(.sRGB, red: 1.0, green: 0.70, blue: 0.40, opacity: 0.45),
+                        .clear,
+                    ],
+                    center: .center, startRadius: 0, endRadius: size.width * 0.45
+                )
+                .frame(width: size.width * 0.9, height: size.width * 0.9)
+                .position(x: size.width * 0.5, y: size.height * (risen ? 0.70 : 0.82))
+                .opacity(risen ? 0.95 : 0.7)
+                .animation(.easeInOut(duration: 2.6).repeatForever(autoreverses: true), value: risen)
+            }
+        }
+        .onAppear { risen = true }
+    }
+}
+
+/// "Pulling forecast" at the display size the verdict normally fills, with an
+/// ellipsis that pulses beneath it so the big headline reads as active.
+struct LoadingHeadline: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(Copy.loadingHeadline)
+                .font(Typography.display)
+                .minimumScaleFactor(0.6)
+                .lineLimit(2)
+            PulsingDots()
+        }
+    }
+}
+
+/// Three dots cycling to signal work, driven off the clock so there is no
+/// animation state to reset between redraws.
+struct PulsingDots: View {
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 0.3)) { context in
+            let active = Int(context.date.timeIntervalSinceReferenceDate / 0.3) % 3
+            HStack(spacing: 6) {
+                ForEach(0..<3, id: \.self) { i in
+                    Circle()
+                        .frame(width: 7, height: 7)
+                        .opacity(i == active ? 1 : 0.3)
+                }
+            }
+        }
+    }
+}
+
+/// A thin, honest strip pinned to the top: the connection is down. It does not
+/// block the screen — a stale forecast underneath is still worth reading — it
+/// just says the numbers might be old.
+struct OfflineBar: View {
+    var body: some View {
+        HStack(spacing: 7) {
+            Image(systemName: "wifi.slash")
+                .font(.system(size: 12, weight: .semibold))
+            Text(Copy.offlineBar)
+                .font(Typography.eyebrow)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
+        .background(.ultraThinMaterial)
     }
 }
 

@@ -76,6 +76,20 @@ public enum Copy {
     public static let unavailableDetail =
         "We couldn't reach the forecast. This is the last one we had — check the time on it."
 
+    // MARK: - Loading / offline states
+
+    /// The verdict-area headline while the first forecast is on its way.
+    public static let loadingHeadline = "Pulling forecast"
+    public static let loadingDetail = "Assembling the sky for this place."
+
+    /// The verdict-area headline when we have a place but can't reach the
+    /// service and have nothing cached to fall back on.
+    public static let offlineHeadline = "Can't reach the forecast"
+    public static let offlineDetail = "Check your connection — we'll try again."
+
+    /// The thin banner pinned to the top when the network is unreachable.
+    public static let offlineBar = "You're offline"
+
     // MARK: - Notifications posture (platform plan §5, ships as written)
 
     public static let notificationsPosture =
