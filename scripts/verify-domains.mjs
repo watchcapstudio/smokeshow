@@ -244,8 +244,26 @@ for (const place of PLACES) {
       `&mockOfficial=${ugm3ToAqi(PM)}`,
     { waitUntil: 'networkidle2' },
   );
+  // The map rides in the top canvas behind a Sky/Map toggle and mounts lazily on
+  // the first flip, so it has to be switched to before the smoke layer exists.
+  // Same three lines as verify-map.mjs, which is in CI and therefore stayed
+  // correct through the redesign; this script is run by hand and did not. Without
+  // the flip the waitForSelector below simply times out after 30s, so this file
+  // has been broken rather than merely stale.
+  await page.waitForSelector('.sbar__seg', { timeout: 30000 });
+  await page.evaluate(() => {
+    const btn = [...document.querySelectorAll('.sbar__seg')].find(
+      (b) => b.textContent.trim() === 'Map',
+    );
+    btn?.click();
+  });
   await page.waitForSelector('.smoke-canvas-layer', { timeout: 30000 });
-  await page.evaluate(() => document.getElementById('map-slot')?.scrollIntoView({ block: 'center' }));
+  // Scroll the thing being measured into view, not the container it used to sit
+  // in. This was `#map-slot`, which no longer exists on any page the site serves,
+  // and optional chaining made its absence silent.
+  await page.evaluate(() =>
+    document.querySelector('.smoke-canvas-layer')?.scrollIntoView({ block: 'center' }),
+  );
   await new Promise((r) => setTimeout(r, 1200));
 
   for (const zoom of ZOOMS) {
