@@ -1,26 +1,45 @@
-// Three screens before the first forecast.
+// Five screens before the first forecast.
 //
-// The order is the argument: what this is, what it isn't, and only then the
-// ask. A location prompt that arrives before the reader knows what the app
-// does is a prompt they decline, and the disclaimer buried under every launch
-// was furniture nobody read. One of each, in the order a person would ask.
+// The order is the argument: what this is, then two screens of what it can do
+// once you pay for it, then what it isn't, and only then the ask. The two value
+// screens run on a canned Bozeman payload (`smoke-now-clearing`) and a bundled
+// map clip, because there is no real forecast yet — the reader has not named a
+// place. They are a tease, deliberately ahead of the paywall the trial exists
+// to reach.
 //
-// The words in step two are `Copy.disclaimer` verbatim — the brief's text,
-// enforced by `ParityTests`. What changed is that it is read once, deliberately,
-// instead of scrolled past daily.
+// The words in the disclaimer screen are `Copy.disclaimer` verbatim — the
+// brief's text, enforced by `ParityTests`. What changed is that it is read once,
+// deliberately, instead of scrolled past daily.
 
 import SwiftUI
 import SmokeshowKit
 
 struct OnboardingFlow: View {
-    /// Called once the reader has been through all three screens. The location
-    /// answer is deliberately not reported: declining is a valid way to finish,
-    /// and the place picker is the other door.
+    /// Called once the reader has been through all screens. The location answer
+    /// is deliberately not reported: declining is a valid way to finish, and the
+    /// place picker is the other door.
     let onFinish: () -> Void
 
     @EnvironmentObject private var model: AppModel
     @State private var step = 0
     @State private var isLocating = false
+
+    private static let lastStep = 4
+
+    /// A canned smoky-then-clearing payload for the two value screens, shifted
+    /// onto today's clock so the widget and curve render like the real thing.
+    /// Decoded once — a struct's body runs often and this parses JSON.
+    private static let mockShowcase: (forecast: Forecast, place: Place)? = {
+        let place = Place(name: "Bozeman, Montana", latitude: 45.6796, longitude: -111.0448)
+        let data = MockForecast.shiftedToNow(.smokeNowClearing)
+        if case .forecast(let forecast)? = try? ForecastDecoder.decode(data) {
+            return (forecast, place)
+        }
+        if let forecast = MockForecast.load(.smokeNowClearing) {
+            return (forecast, place)
+        }
+        return nil
+    }()
 
     var body: some View {
         ZStack {
@@ -33,7 +52,9 @@ struct OnboardingFlow: View {
 
                 switch step {
                 case 0: whatItDoes
-                case 1: whatItIsNot
+                case 1: watchItMove
+                case 2: widgets
+                case 3: whatItIsNot
                 default: theAsk
                 }
 
@@ -46,7 +67,7 @@ struct OnboardingFlow: View {
         }
         .animation(.easeInOut(duration: 0.25), value: step)
         // The edge swipe people already expect from a navigation stack, which
-        // this deliberately is not — it is three states in one view, so the
+        // this deliberately is not — it is five states in one view, so the
         // gesture has to be spelled out.
         .gesture(
             DragGesture(minimumDistance: 30)
@@ -54,22 +75,22 @@ struct OnboardingFlow: View {
                     guard abs(value.translation.height) < 60 else { return }
                     if value.translation.width > 60, step > 0 {
                         step -= 1
-                    } else if value.translation.width < -60, step < 2 {
+                    } else if value.translation.width < -60, step < Self.lastStep {
                         step += 1
                     }
                 }
         )
     }
 
-    /// A calm sky for the first two screens; the third sits under the same one
-    /// so the ask does not feel like a different app.
+    /// A calm sky for the lead-in; the ask sits under the same one so it does
+    /// not feel like a different app.
     private var sky: Forecast.Sky? { model.forecast?.nowHour?.sky }
 
     private var progress: some View {
         HStack(spacing: 12) {
-            // Three screens with no way back is a hallway, not an
-            // introduction. Someone who skimmed the disclaimer should be able
-            // to return to it without deleting the app.
+            // Screens with no way back is a hallway, not an introduction.
+            // Someone who skimmed a screen should be able to return to it
+            // without deleting the app.
             if step > 0 {
                 Button { step -= 1 } label: {
                     Image(systemName: "chevron.left")
@@ -81,7 +102,7 @@ struct OnboardingFlow: View {
             }
 
             HStack(spacing: 6) {
-                ForEach(0..<3, id: \.self) { index in
+                ForEach(0...Self.lastStep, id: \.self) { index in
                     Capsule()
                         .fill(Color.white.opacity(index == step ? 0.75 : 0.22))
                         .frame(width: index == step ? 22 : 8, height: 4)
@@ -93,14 +114,13 @@ struct OnboardingFlow: View {
         .frame(height: 20)
     }
 
-    // MARK: The three screens
+    // MARK: The screens
 
     private var whatItDoes: some View {
         VStack(alignment: .leading, spacing: 16) {
             // The product's own picture, not a stock icon: a smoke event
             // arriving and lifting, drawn by the same view the verdict screen
-            // uses. (`RidgeView` is the other candidate and the wrong one here
-            // — it paints dark haze, which is invisible against this sky.)
+            // uses.
             CurveView(
                 points: Self.exampleCurve,
                 nowIndex: 18,
@@ -120,6 +140,65 @@ struct OnboardingFlow: View {
                 are: how bad is the air, and when does it lift. No accounts, no \
                 feed. Put the widget on your home screen and you never have to \
                 open the app at all.
+                """)
+                .font(Typography.base)
+                .opacity(0.82)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var watchItMove: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // A short, silent, looping clip of the map running its −12h…+48h
+            // sweep. iOS only, which is where the map lives; macOS shows the
+            // curve it already has.
+            Group {
+                #if os(iOS)
+                LoopingVideoView(resource: "onboarding-map", ext: "mp4")
+                #else
+                CurveView(points: Self.exampleCurve, nowIndex: 18, ink: Palette.dark.text, showsNowMark: false)
+                    .padding(.vertical, 20)
+                #endif
+            }
+            .frame(height: 200)
+            .frame(maxWidth: .infinity)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+
+            eyebrow
+
+            Text("Watch it move.")
+                .font(Typography.display)
+                .minimumScaleFactor(0.6)
+                .lineLimit(2)
+
+            Text("""
+                Press play and run the plume forward. Twelve hours back, two \
+                days ahead, in one sweep. See where it is going, not just \
+                where it is.
+                """)
+                .font(Typography.base)
+                .opacity(0.82)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var widgets: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            if let mock = Self.mockShowcase {
+                WidgetShowcase(forecastOverride: mock.forecast, placeOverride: mock.place)
+                    .frame(maxWidth: .infinity)
+            }
+
+            eyebrow
+
+            Text("The answer without opening the app.")
+                .font(Typography.display)
+                .minimumScaleFactor(0.6)
+                .lineLimit(2)
+
+            Text("""
+                Home and lock screen widgets, plus an alert the moment it \
+                changes. Glance down and the answer is already there.
                 """)
                 .font(Typography.base)
                 .opacity(0.82)
@@ -167,16 +246,26 @@ struct OnboardingFlow: View {
         }
     }
 
+    /// The small mono label that marks the two paid screens for what they are.
+    private var eyebrow: some View {
+        Text("With a subscription")
+            .font(Typography.eyebrow)
+            .foregroundStyle(Palette.dark.accent)
+            .opacity(0.9)
+    }
+
     // MARK: Buttons
 
     @ViewBuilder
     private var actions: some View {
         VStack(spacing: 10) {
             switch step {
-            case 0:
-                primary("Continue") { step = 1 }
-            case 1:
-                primary("I understand") { step = 2 }
+            case 0, 1:
+                primary("Continue") { step += 1 }
+            case 2:
+                primary("Continue") { step = 3 }
+            case 3:
+                primary("I understand") { step = 4 }
             default:
                 primary(isLocating ? "Finding you…" : "Use my location") {
                     Task {

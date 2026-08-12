@@ -126,6 +126,8 @@ targets:
       # APIs the app links (UserDefaults, file timestamps). Read by the App
       # Store upload checker and feeds the App Privacy nutrition label.
       - path: Sources/SmokeshowApp/PrivacyInfo.xcprivacy
+      # Onboarding illustration: a short, silent, looping clip of the map sweep.
+      - path: Sources/SmokeshowApp/Resources
     dependencies:
       - target: SmokeshowKit
       - target: SmokeshowWidgets
