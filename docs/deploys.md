@@ -64,6 +64,52 @@ silent and only visible in a deployment list nobody watches:
    from the pushed branch, this is a no-op and (1) does the work. The docs do not
    say which, so both are in.
 
+## A merge to `main` that creates no deployment at all
+
+The two failures above produce a deployment that goes red. This one produces no
+deployment. It is a different tell and it sends you looking in the wrong place,
+because the instinct on "the site is stale" is to blame a cache.
+
+On 2026-08-12, #60 merged to `main` as `42683b8` at 15:49Z. CI was green,
+`vercel.json` was correct, and Settings > Git still showed the repository
+connected. Five minutes later the deployment list had nothing newer than a
+`data` branch build from 15:43Z: no production build, no preview build, no
+errored build, no row of any kind. Production went on serving `9c21863` (#59),
+which had deployed normally about twenty minutes earlier. Nothing was
+misconfigured and nothing was broken. The push event simply did not produce a
+deployment.
+
+**How to tell it apart from a cache.** Look at the deployment list before you
+look at the browser. If the newest production deployment names an older commit
+than `git rev-parse origin/main`, no amount of hard-refreshing or incognito will
+help, because the build does not exist. The deployment detail page will also
+still show the old commit as "Ready / Latest / Production Current".
+
+**The trap on the way to fixing it.** Redeploy on the last good deployment does
+not help. It rebuilds *that deployment's* commit, so you get another build of the
+commit that is already live. If you use it, read the commit named in the modal
+before confirming.
+
+**The recovery.** Settings > Git > Deploy Hooks, create a hook against `main`,
+and POST to it:
+
+```
+curl -X POST "https://api.vercel.com/v1/integrations/deploy/<projectId>/<token>"
+```
+
+It returns a `job` object and builds whatever `main` currently points at, which
+is the merge that was missed. A browser visit will not do it: the hook only
+answers POST. Deployments created this way carry `deployHookName` in their
+metadata, so they are identifiable in the list afterwards.
+
+Delete the hook once it has served its purpose, and make a fresh one next time.
+The URL is a bearer credential: anyone holding it can trigger production builds
+of `main`. It cannot deploy arbitrary code, only what is already on the branch,
+which is why this is a cleanup step rather than an emergency.
+
+No standing hook is kept for this reason. The one used on 2026-08-12 was revoked
+the same day.
+
 ## Deploy failures that are not the code
 
 - **A crashed ignore step.** The tell is a build log that ends at
@@ -73,6 +119,8 @@ silent and only visible in a deployment list nobody watches:
 - **`data` branch deployments**, until (1) above has run at least once. The branch
   is only rewritten when the render jobs fire, so the fix lands on the next
   scheduled run rather than at merge.
+- **A push that produced no deployment**, per the section above. The tell is an
+  empty deployment list rather than a red one, and the fix is a deploy hook.
 
 ## What CI covers before a deploy
 
