@@ -120,19 +120,26 @@ struct OnboardingFlow: View {
             // screen — no per-hour computation, no reinvention.
             LoadingSky()
         case 1:
-            // The map clip running its −12h…+48h sweep. iOS only, which is where
-            // the map lives. The player is warmed at launch and already running,
-            // and the poster frame sits underneath, so there is no wait at all.
-            ZStack {
-                Palette.dark.bg
-                #if os(iOS)
-                if let poster = Self.mapPoster {
-                    Image(uiImage: poster)
-                        .resizable()
-                        .scaledToFill()
+            // The map clip running its −12h…+48h sweep. Shown as a top band at
+            // its native aspect (width-filling, so the labels stay crisp) with a
+            // dark foot for the copy — aspect-filling the whole screen zoomed it
+            // to a dark sliver and buried the place name. The player is warmed at
+            // launch and already running; the poster covers the first instant.
+            GeometryReader { geo in
+                ZStack(alignment: .top) {
+                    Palette.dark.bg
+                    #if os(iOS)
+                    ZStack {
+                        if let poster = Self.mapPoster {
+                            Image(uiImage: poster).resizable().scaledToFill()
+                        }
+                        PlayerLayerView(player: OnboardingVideo.shared.player)
+                    }
+                    .frame(width: geo.size.width,
+                           height: geo.size.width * 1360.0 / 1206.0)
+                    .clipped()
+                    #endif
                 }
-                PlayerLayerView(player: OnboardingVideo.shared.player)
-                #endif
             }
         case 2:
             // Home and lock widgets over a home-screen wash.
