@@ -137,8 +137,8 @@ public enum Copy {
         }
 
         public static let restore = "Restore purchases"
-        public static let termsURL = URL(string: "https://smokeshow.earth/terms")!
-        public static let privacyURL = URL(string: "https://smokeshow.earth/privacy")!
+        public static let termsURL = URL(string: "https://watchcapstudio.com/terms")!
+        public static let privacyURL = URL(string: "https://watchcapstudio.com/privacy")!
         public static let noAccounts = "No account, no email. The subscription is tied to your Apple ID."
     }
 
