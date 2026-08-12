@@ -15,7 +15,7 @@ Companion to `smokeshow-build-brief.md`. These features ship in v1. The product'
 
 When a SMOKESHOW link lands in iMessage/WhatsApp/Slack, the preview must show the actual current verdict for the shared location, e.g.:
 
-> **Cumberland, WI — Smells like fire**
+> **Cumberland, WI — Hazy**
 > Clears Thursday 6 PM · SMOKESHOW
 
 **Constraint:** OG scrapers do not execute JS, so a purely static page cannot do this. Use the lightest serverless option on whatever host is chosen:
@@ -45,7 +45,7 @@ One-tap share button near the rating chip. Flow:
 
 Card variants by state — the copy writes itself from the forecast:
 - Clearing soon: lead with the clear-time.
-- Getting worse: lead with the arrival/peak ("Tastes like fire by Wednesday morning").
+- Getting worse: lead with the arrival/peak ("Heavy haze by Wednesday morning").
 - Top level: the card says **SMOKESHOW** as the rating. The name doing the work.
 
 ## 4. Clear-time as the headline stat

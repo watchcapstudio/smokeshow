@@ -5,6 +5,24 @@
 // reader WILL feel. Noses vary wildly, and fine particles can irritate with
 // no campfire smell at all (dust, exhaust, aged smoke). Visibility is the one
 // objective anchor everyone can check, so each level leads them to the window.
+//
+// The NAMES used to break that rule, and were renamed in August 2026 because of
+// it. Levels 2 and 3 were "Smells like fire" and "Tastes like fire", which
+// asserted a smell the reader often could not find: visibility degrades from
+// scattering well below the concentration where anyone smells anything, and
+// long-transport smoke (Canadian boreal into the Great Lakes, most of what this
+// app forecasts) arrives aged, with the odorous compounds largely stripped and
+// the particles intact. Seeing it before smelling it is the normal case here.
+// A NOSE_CAVEAT constant used to sit below, rendered on the chip at every level
+// at or above 1, whose only job was to walk those two names back. Naming the
+// levels for what the sky does deletes the apology instead of extending it.
+//
+// The KEYS did not change and must not. `Forecast.ScaleEntry.Key` in the Apple
+// client is a wire enum with cases `smells` and `tastes` and an `.unknown`
+// fallback, and `LEVEL_ACCENTS` in shareCard.js is keyed the same way. Renaming
+// a key makes shipped builds decode `.unknown` and lose their accent colour.
+// The names ride the forecast payload, so a rename reaches installed clients
+// with no app update; the keys are the half that cannot move without a version.
 export const LEVELS = [
   {
     index: 0,
@@ -21,25 +39,27 @@ export const LEVELS = [
     max: 35,
     visibility: '5–10 miles',
     notice:
-      'A faint campfire whiff for sensitive noses. Most people just see distant treelines go soft, roughly 5 to 10 miles of visibility.',
+      'Distant treelines go soft and the horizon loses its edge, roughly 5 to 10 miles of visibility.',
   },
   {
     index: 2,
+    // Key stays `smells` on purpose. See the note above LEVELS.
     key: 'smells',
-    name: 'Smells like fire',
+    name: 'Hazy',
     max: 55,
     visibility: '3–5 miles',
     notice:
-      'Most people smell smoke outdoors, though not everyone. The sun can look orange at the edges, and visibility drops to roughly 3 to 5 miles. Long stretches outside may leave a scratchy throat.',
+      'Haze reads plainly against the sky. The sun can look orange at the edges, and visibility drops to roughly 3 to 5 miles. Long stretches outside may leave a scratchy throat.',
   },
   {
     index: 3,
+    // Key stays `tastes` on purpose. See the note above LEVELS.
     key: 'tastes',
-    name: 'Tastes like fire',
+    name: 'Heavy haze',
     max: 150,
     visibility: '1.5–3 miles',
     notice:
-      'Smoke often reaches indoors near windows. Eyes can sting. Visibility runs roughly 1.5 to 3 miles. A full day breathing this is on the order of smoking a few cigarettes.',
+      'Visibility runs roughly 1.5 to 3 miles, and the haze reaches indoors near windows. Eyes can sting. A full day breathing this is on the order of smoking a few cigarettes.',
   },
   {
     index: 4,
@@ -48,15 +68,9 @@ export const LEVELS = [
     max: Infinity,
     visibility: 'under 1.5 miles',
     notice:
-      'Visibility under about 1.5 miles. Everything smells like a doused campfire, and fine ash is possible. Everyone inside, windows closed, run filtration if you have it.',
+      'Visibility under about 1.5 miles, and fine ash is possible. Everyone inside, windows closed, run filtration if you have it.',
   },
 ];
-
-// Shown at the lower smoke levels, where a reader's nose is most likely to
-// disagree with the number. Turns a potential mismatch into a check they can
-// run themselves instead of an argument.
-export const NOSE_CAVEAT =
-  'Noses differ, and fine particles can irritate without any smell. The honest test is visibility: how far can you see?';
 
 // Explain-sheet ladder ranges, derived from LEVELS so the printed numbers
 // can't drift from the thresholds that actually gate each level.
@@ -69,18 +83,18 @@ export const RANGES = LEVELS.map((l, i) => {
 // "What this is not" — one reassurance line per level, read in the explain
 // sheet under the ladder.
 //
-// Cigarette framing appears at "Tastes like fire" only, per the rule at
+// Cigarette framing appears at "Heavy haze" only, per the rule at
 // cigaretteEquivalent() below. It used to appear at levels 1 and 2 as well,
 // where it was not just off-policy but arithmetically wrong: against the
 // Berkeley Earth ratio a full day at the top of "In the air" is ~1.6
-// cigarettes, and the whole of "Smells like fire" runs 1.6–2.5 — so
-// "nowhere near a cigarette" and "well short of one cigarette" understated
-// the exposure by roughly 2x, in the reassuring direction. Those two lines
-// now reassure without quantifying. If you reintroduce a dose number at any
-// level, check it against cigaretteEquivalent() at BOTH ends of the band.
+// cigarettes, and the whole of "Hazy" runs 1.6–2.5 — so "nowhere near a
+// cigarette" and "well short of one cigarette" understated the exposure by
+// roughly 2x, in the reassuring direction. Those two lines now reassure
+// without quantifying. If you reintroduce a dose number at any level, check
+// it against cigaretteEquivalent() at BOTH ends of the band.
 export const NOT_LINES = [
   'No smoke story today. This is normal, clean air.',
-  'A faint whiff is the whole event for most people. Nothing here needs a change of plan.',
+  'Softer horizons are the whole event for most people. Nothing here needs a change of plan.',
   'Most people notice it outdoors, and most plans can carry on. Long stretches outside are where it starts to add up.',
   'Now it adds up: a full day breathing this is on the order of a few cigarettes. Worth moving the run indoors.',
   'The heaviest level we track. Everyone inside, windows closed, filtration on if you have it.',
@@ -107,8 +121,12 @@ export const EPA_SENS = [
   'stay inside, windows closed, filtration on. This level is for no one.',
 ];
 
-export const ARRIVAL_THRESHOLD = 35; // "Smells like fire" — the forecast-text anchor point
-export const OLFACTORY_FATIGUE_LEVEL_INDEX = 3; // show the nose-fatigue caveat at "Tastes like fire" and above
+export const ARRIVAL_THRESHOLD = 35; // "Hazy" — the forecast-text anchor point
+// Show the nose-fatigue caveat at "Heavy haze" and above. This one is still a
+// claim about smell and stays that way on purpose: it tells the reader NOT to
+// trust their nose, which is the same argument the visibility-anchored names
+// make. It is the only smell sentence left on the chip.
+export const OLFACTORY_FATIGUE_LEVEL_INDEX = 3;
 
 export function levelForPM25(pm25) {
   if (pm25 == null || Number.isNaN(pm25)) return null;
@@ -116,7 +134,7 @@ export function levelForPM25(pm25) {
 }
 
 // Berkeley Earth rule of thumb: ~22 µg/m³ sustained over 24h ≈ one cigarette.
-// Only meaningful — and only surfaced in the UI — at "Tastes like fire" and above.
+// Only meaningful — and only surfaced in the UI — at "Heavy haze" and above.
 export function cigaretteEquivalent(pm25Over24h) {
   return pm25Over24h / 22;
 }

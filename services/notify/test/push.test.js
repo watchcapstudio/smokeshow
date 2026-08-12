@@ -8,7 +8,7 @@ import { appleProviderToken, googleAssertion } from '../src/push/jwt.js';
 import { createMemoryStore } from '../src/store.js';
 import { buildDeviceRecord } from '../src/store.js';
 
-const message = { title: 'Tastes like fire in Home', body: 'Clears Thursday ~6 PM', urgent: true, collapseId: 'k', data: {} };
+const message = { title: 'Heavy haze in Home', body: 'Clears Thursday ~6 PM', urgent: true, collapseId: 'k', data: {} };
 
 function decode(token) {
   const [header, claims, signature] = token.split('.');

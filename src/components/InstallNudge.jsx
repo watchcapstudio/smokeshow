@@ -28,7 +28,7 @@ function ShareGlyph() {
 }
 
 // Bad-air visits get the live-verdict pitch; everyone else gets the
-// save-the-tap pitch. levelIndex >= 2 is "Smells like fire" or worse.
+// save-the-tap pitch. levelIndex >= 2 is "Hazy" or worse.
 function pitch(levelIndex, headline) {
   if (levelIndex >= 2 && headline) {
     return `${headline}. Keep watch, put SMOKESHOW one tap away.`;

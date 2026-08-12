@@ -109,11 +109,18 @@ export default function ExplainSheet({
           ))}
         </div>
         <p className="explain-sheet__p">{NOT_LINES[level.index]}</p>
+        {/* One sentence, then a link. The longer version of this argument (how
+            the ladder is anchored to visibility, and how it lines up against
+            EPA's categories) lives on the hub and is not repeated here. A
+            sheet that explains itself at length is a sheet nobody finishes. */}
         <p className="explain-sheet__p">
           <span className="explain-sheet__lead">
             {sensitive ? 'For your household (EPA sensitive-groups guidance):' : "EPA's guidance at this level:"}
           </span>{' '}
-          {sensitive ? EPA_SENS[level.index] : EPA_LINES[level.index]}
+          {sensitive ? EPA_SENS[level.index] : EPA_LINES[level.index]}{' '}
+          <a className="explain-sheet__more" href="/smoke-forecast/#visibility-scale">
+            Learn more
+          </a>
         </p>
         <p className="explain-sheet__p">
           <span className="explain-sheet__lead">The plan:</span> {planLine(level, days)}

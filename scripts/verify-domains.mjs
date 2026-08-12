@@ -62,7 +62,7 @@ const PLACES = [
   { key: 'madrid', name: 'Madrid', lat: 40.42, lon: -3.7, expect: { 9: 'cams', 4: 'cams' } },
 ];
 
-const PM = 45; // "Smells like fire" — mid-scale, so the ramp is clearly painting
+const PM = 45; // "Hazy" — mid-scale, so the ramp is clearly painting
 
 // ------------------------------------------------------------- the data tree
 //

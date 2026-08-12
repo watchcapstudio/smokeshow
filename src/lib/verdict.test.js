@@ -110,6 +110,6 @@ describe('computeVerdict — trend + headline', () => {
     expect(verdictHeadline(allClear, () => '???')).toBe('Stays clear for the next 5 days');
 
     const elevatedButBelow = computeVerdict({ pm25: series(20), nowIndex: 12 });
-    expect(verdictHeadline(elevatedButBelow, () => '???')).toBe("Doesn't reach Smells-like-fire in 5 days");
+    expect(verdictHeadline(elevatedButBelow, () => '???')).toBe("Doesn't reach Hazy in 5 days");
   });
 });

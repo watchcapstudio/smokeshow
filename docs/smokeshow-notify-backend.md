@@ -30,7 +30,7 @@ decision, not an implementation detail:
 
 | Type | Fires when | Urgent? |
 | --- | --- | --- |
-| `threshold-crossed` | The air rises across *the subscriber's* threshold | At `Tastes like fire` (level 3), or level 2 for a sensitive household |
+| `threshold-crossed` | The air rises across *the subscriber's* threshold | At `Heavy haze` (level 3), or level 2 for a sensitive household |
 | `cleared` | The air falls back below their threshold | Never — good news can wait until morning |
 | `peak-reached` | The forecast peak stops being ahead of us: this is as bad as it gets | Never |
 | `incoming` | An arrival newly appears within 36 hours, and it will cross their threshold | Never |

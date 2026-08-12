@@ -208,3 +208,33 @@ If the category is named in the UI at all, it must be derived from the value via
 the existing `aqiCategory()` and never from the level index. The rungs do not
 sit 1:1 on EPA's categories: "Tastes like fire" (55 - 150) spans EPA *Unhealthy*
 and *Very Unhealthy*, which split at 125.5.
+
+## Outcome
+
+**Set B shipped, August 2026.** "Smells like fire" became **Hazy**, "Tastes like
+fire" became **Heavy haze**. Thresholds were not touched; the 125 floor argued
+for above remains unmade and stands on its own whenever the scale is reopened.
+
+What went with the rename:
+
+- `NOSE_CAVEAT` is deleted. It existed only to walk the smell names back, and
+  the names no longer need walking back. The olfactory-fatigue caveat at level 3
+  and above stays, because it tells the reader *not* to trust their nose, which
+  is the same argument the new names make.
+- `notice` and `NOT_LINES` copy lead with visibility at every level. No line
+  tells a reader what they will smell.
+- The explain sheet's guidance is one sentence plus a "Learn more" link to
+  `/smoke-forecast/#visibility-scale`, rather than more paragraphs in the sheet.
+  The hub section gained a paragraph on why the names track sight and not smell,
+  and an `id` to link to.
+- `api/og.js` kept a hand-typed copy of the five names, used for the 5-day strip
+  in link previews. It now derives from `LEVELS`. Left alone, the rename would
+  have shipped previews naming levels the app no longer used, and nothing would
+  have caught it: no test covers that file's copy.
+- The two renamed art states and their SVGs follow the names
+  (`smokeshow-3-hazy.svg`, `smokeshow-4-heavy-haze.svg`).
+
+Known and deliberately not updated: `public/ifhghs/demo/index.html` is a frozen
+`noindex` prototype carrying its own hardcoded ladder. It was already out of
+sync before this change (it still says "Something's in the air"), and syncing it
+is a separate decision about whether that demo is still live at all.

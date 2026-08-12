@@ -668,7 +668,7 @@ function hubPage() {
           <h2>What a clear time is</h2>
           <p>
             Every city page leads with one answer: the clear time. It is the first stretch of at
-            least six straight hours where the forecast drops below the Smells-like-fire threshold
+            least six straight hours where the forecast drops below the Hazy threshold
             and stays there. The six-hour hold is the whole point of the rule. Smoke does not leave
             cleanly. It thins for an hour, comes back, thins again, and a forecast that announced
             the first dip as the all-clear would be wrong within the hour and right about nothing.
@@ -683,11 +683,19 @@ function hubPage() {
         </section>
 
         <section class="explainer">
-          <h2>How the visibility scale works</h2>
+          <h2 id="visibility-scale">How the visibility scale works</h2>
           <p>
-            There are five levels, and they run All clear, In the air, Smells like fire, Tastes like
-            fire, Smokeshow. Each one is a concentration threshold, and the names never move: All
-            clear means the same air in Fresno as it does in Toronto.
+            There are five levels, and they run All clear, In the air, Hazy, Heavy haze, Smokeshow.
+            Each one is a concentration threshold, and the names never move: All clear means the
+            same air in Fresno as it does in Toronto.
+          </p>
+          <p>
+            Every one of those names describes what the sky is doing rather than what you will
+            smell, and that is deliberate. Fine particles scatter light long before anyone catches a
+            campfire note, and smoke that has travelled for a day or more arrives with most of what
+            you could have smelled already stripped out of it and the particles still there. Plenty
+            of people have stepped outside into a genuinely smoky afternoon and smelled nothing at
+            all. What they could do was see less far, which is why that is what these names track.
           </p>
           <p>
             What changes city to city is what that air looks like out your window, and that is
@@ -930,7 +938,7 @@ function explainerPage() {
           <h2>What that means for the answer you get</h2>
           <p>
             It is why the forecast on this site leads with a clear time rather than a single number,
-            and why the clear time requires six straight hours below the Smells-like-fire threshold
+            and why the clear time requires six straight hours below the Hazy threshold
             before it will call anything. One hour of cleaner air inside a bad stretch is well within
             the error the three problems above produce. Six hours is a claim worth making.
           </p>

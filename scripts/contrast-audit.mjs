@@ -32,8 +32,8 @@ const verbose = process.argv.includes('--verbose');
 const LEVELS = [
   { name: 'All clear', pm: 6 },
   { name: 'In the air', pm: 23 },
-  { name: 'Smells like fire', pm: 45 },
-  { name: 'Tastes like fire', pm: 100 },
+  { name: 'Hazy', pm: 45 },
+  { name: 'Heavy haze', pm: 100 },
   { name: 'Smokeshow', pm: 220 },
 ];
 const EDGES = [12, 35, 55, 150];

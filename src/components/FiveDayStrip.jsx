@@ -4,7 +4,7 @@ import { levelForPM25 } from '../lib/rating.js';
 import { ugm3ToAqi, aqiToUgm3 } from '../lib/aqi.js';
 import './FiveDayStrip.css';
 
-// Cigarette equivalence only surfaces at "Tastes like fire" and above (brief rule).
+// Cigarette equivalence only surfaces at "Heavy haze" and above (brief rule).
 const CIG_THRESHOLD = 55;
 
 // Ports glideTo() (demo ~line 1306): 650ms cubic ease-out, straight jump

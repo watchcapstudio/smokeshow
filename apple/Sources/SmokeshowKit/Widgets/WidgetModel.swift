@@ -60,7 +60,8 @@ public struct WidgetEntryModel: Sendable, Equatable {
     public let placeName: String
 
     // — the verdict, as the server said it —
-    /// `scale[levelIndex].name`, e.g. "Smells like fire". Server copy.
+    /// `scale[levelIndex].name`, e.g. "Hazy". Server copy, so a rename on the
+    /// server reaches this build without an app update.
     public let levelName: String?
     public let levelIndex: Int?
     public let levelKey: Forecast.ScaleEntry.Key?

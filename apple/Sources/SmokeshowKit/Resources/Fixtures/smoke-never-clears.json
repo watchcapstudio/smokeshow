@@ -49,8 +49,8 @@
       "rangeUg": "12 – 35",
       "maxUg": 35,
       "visibility": "5–10 miles",
-      "notice": "A faint campfire whiff for sensitive noses. Most people just see distant treelines go soft, roughly 5 to 10 miles of visibility.",
-      "notLine": "A faint whiff is the whole event for most people. Nothing here needs a change of plan.",
+      "notice": "Distant treelines go soft and the horizon loses its edge, roughly 5 to 10 miles of visibility.",
+      "notLine": "Softer horizons are the whole event for most people. Nothing here needs a change of plan.",
       "guidance": {
         "general": "unusually sensitive people should consider easing off long, hard exertion. Everyone else, carry on as usual.",
         "sensitive": "consider easing off long or hard exertion, and watch for symptoms."
@@ -59,11 +59,11 @@
     {
       "index": 2,
       "key": "smells",
-      "name": "Smells like fire",
+      "name": "Hazy",
       "rangeUg": "35 – 55",
       "maxUg": 55,
       "visibility": "3–5 miles",
-      "notice": "Most people smell smoke outdoors, though not everyone. The sun can look orange at the edges, and visibility drops to roughly 3 to 5 miles. Long stretches outside may leave a scratchy throat.",
+      "notice": "Haze reads plainly against the sky. The sun can look orange at the edges, and visibility drops to roughly 3 to 5 miles. Long stretches outside may leave a scratchy throat.",
       "notLine": "Most people notice it outdoors, and most plans can carry on. Long stretches outside are where it starts to add up.",
       "guidance": {
         "general": "sensitive groups should cut back on long or heavy exertion. Everyone else, your usual outdoor plans are okay.",
@@ -73,11 +73,11 @@
     {
       "index": 3,
       "key": "tastes",
-      "name": "Tastes like fire",
+      "name": "Heavy haze",
       "rangeUg": "55 – 150",
       "maxUg": 150,
       "visibility": "1.5–3 miles",
-      "notice": "Smoke often reaches indoors near windows. Eyes can sting. Visibility runs roughly 1.5 to 3 miles. A full day breathing this is on the order of smoking a few cigarettes.",
+      "notice": "Visibility runs roughly 1.5 to 3 miles, and the haze reaches indoors near windows. Eyes can sting. A full day breathing this is on the order of smoking a few cigarettes.",
       "notLine": "Now it adds up: a full day breathing this is on the order of a few cigarettes. Worth moving the run indoors.",
       "guidance": {
         "general": "sensitive groups should avoid prolonged exertion; everyone else, cut back on it.",
@@ -91,7 +91,7 @@
       "rangeUg": "150+",
       "maxUg": null,
       "visibility": "under 1.5 miles",
-      "notice": "Visibility under about 1.5 miles. Everything smells like a doused campfire, and fine ash is possible. Everyone inside, windows closed, run filtration if you have it.",
+      "notice": "Visibility under about 1.5 miles, and fine ash is possible. Everyone inside, windows closed, run filtration if you have it.",
       "notLine": "The heaviest level we track. Everyone inside, windows closed, filtration on if you have it.",
       "guidance": {
         "general": "everyone should avoid outdoor exertion.",

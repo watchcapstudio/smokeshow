@@ -5,7 +5,7 @@ import './Scrubber.css';
 const CHART_W = 600;
 const CHART_H = 64;
 const CHART_PAD = 4;
-const THRESHOLD_PM25 = 35; // "Smells like fire" — the line worth marking on the curve
+const THRESHOLD_PM25 = 35; // "Hazy" — the line worth marking on the curve
 
 function isNightHour(timeUTCStr, tz) {
   const hour = Number(

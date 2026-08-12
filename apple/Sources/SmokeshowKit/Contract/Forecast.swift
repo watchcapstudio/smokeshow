@@ -293,7 +293,7 @@ public struct Forecast: Decodable, Sendable, Equatable {
             }
         }
 
-        /// PM2.5 at `now` is ≥ 35 µg/m³ ("Smells like fire").
+        /// PM2.5 at `now` is ≥ 35 µg/m³ ("Hazy").
         public let above: Bool
         public let levelIndex: Int
         public let trend: Trend

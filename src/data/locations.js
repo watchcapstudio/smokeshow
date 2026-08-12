@@ -20,8 +20,12 @@
 // check the reader can actually run.
 
 // Level indices match LEVELS in lib/rating.js: 0 all-clear (10+ mi), 1 in the
-// air (5-10 mi), 2 smells like fire (3-5 mi), 3 tastes like fire (1.5-3 mi),
-// 4 smokeshow (under 1.5 mi).
+// air (5-10 mi), 2 hazy (3-5 mi), 3 heavy haze (1.5-3 mi), 4 smokeshow
+// (under 1.5 mi).
+//
+// The level KEYS are still `smells` and `tastes` for wire-compatibility with
+// shipped clients; only the display names changed. Do not read the keys as
+// descriptions of anything.
 //
 // `bands` overrides those universal distances per city, and is the reason these
 // pages are not one page repeated. The LEVEL NAMES map to PM2.5 thresholds and
@@ -116,11 +120,11 @@ export const LOCATIONS = [
     questions: [
       {
         q: 'Is there wildfire smoke in Chicago right now?',
-        a: 'The verdict at the top of this page answers that for Chicago specifically. It reads the forecast model over the city and states the level in plain language, from All clear through Smokeshow, alongside what that level typically looks and smells like. Everything shown is a model estimate rather than a measurement at your address.',
+        a: 'The verdict at the top of this page answers that for Chicago specifically. It reads the forecast model over the city and states the level in plain language, from All clear through Smokeshow, alongside how far you can typically see at that level. Everything shown is a model estimate rather than a measurement at your address.',
       },
       {
         q: 'When will the smoke clear in Chicago?',
-        a: "That is the headline answer above. Smokeshow reports a clear time: the first stretch of at least six straight hours where the forecast drops below the Smells-like-fire threshold and stays there. The six-hour rule exists so a single hour's dip does not get announced as the all-clear.",
+        a: "That is the headline answer above. Smokeshow reports a clear time: the first stretch of at least six straight hours where the forecast drops below the Hazy threshold and stays there. The six-hour rule exists so a single hour's dip does not get announced as the all-clear.",
       },
       {
         q: "Why is Chicago's air quality bad today?",
@@ -189,7 +193,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Missoula?',
-        a: "That is the headline answer above: the clear time, meaning the first stretch of at least six straight hours where the forecast drops below the Smells-like-fire threshold and stays there. The six-hour rule matters more in Missoula than in most places, because a valley that has capped itself will give up an hour of cleaner air and then take it straight back. What the model has to show before it calls an all-clear here is the valley actually flushing, not the wind upwind changing its mind.",
+        a: "That is the headline answer above: the clear time, meaning the first stretch of at least six straight hours where the forecast drops below the Hazy threshold and stays there. The six-hour rule matters more in Missoula than in most places, because a valley that has capped itself will give up an hour of cleaner air and then take it straight back. What the model has to show before it calls an all-clear here is the valley actually flushing, not the wind upwind changing its mind.",
       },
       {
         q: "Why is Missoula's air quality bad today?",
@@ -257,7 +261,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Whitefish?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours where the forecast drops below the Smells-like-fire threshold and stays there. The Flathead is slow to give that up. The lake and the ranges around it mean smoke that settles into this basin tends to stay in this basin, so the clear time here can land well after the flow over British Columbia has already turned.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours where the forecast drops below the Hazy threshold and stays there. The Flathead is slow to give that up. The lake and the ranges around it mean smoke that settles into this basin tends to stay in this basin, so the clear time here can land well after the flow over British Columbia has already turned.',
       },
       {
         q: "Why is Whitefish's air quality bad today?",
@@ -329,7 +333,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Bozeman?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Bozeman has a neighbour worth comparing it against. Paradise Valley, twenty-six miles east, is wind country, and the wind that scours Livingston most of the year can flush a plume out faster than it leaves the Gallatin, so a clear time there is not a clear time here, and the difference is the basin.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. Bozeman has a neighbour worth comparing it against. Paradise Valley, twenty-six miles east, is wind country, and the wind that scours Livingston most of the year can flush a plume out faster than it leaves the Gallatin, so a clear time there is not a clear time here, and the difference is the basin.',
       },
       {
         q: "Why is Bozeman's air quality bad today?",
@@ -396,7 +400,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Jackson?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. The hole is why the six-hour hold matters here. Cold air settles into the valley overnight and holds smoke at the floor into the morning, so a forecast that dipped for one hour and called it clear would be describing the passes, not the Town Square.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. The hole is why the six-hour hold matters here. Cold air settles into the valley overnight and holds smoke at the floor into the morning, so a forecast that dipped for one hour and called it clear would be describing the passes, not the Town Square.',
       },
       {
         q: "Why is Jackson's air quality bad today?",
@@ -479,7 +483,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Winnipeg?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Winnipeg has no valley to flush and no lake breeze to fight, so a clear time here is mostly a wind question and it tends to be a cleaner answer than the same forecast further down the corridor. What it does not tell you is what is still burning to the north.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. Winnipeg has no valley to flush and no lake breeze to fight, so a clear time here is mostly a wind question and it tends to be a cleaner answer than the same forecast further down the corridor. What it does not tell you is what is still burning to the north.',
       },
       {
         q: "Why is Winnipeg's air quality bad today?",
@@ -546,7 +550,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Minneapolis?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Being near the front of this corridor makes that answer more volatile than it is on the East Coast. Smoke that reaches New York has spent two days spreading out and arrives as a broad haze; smoke that reaches the Twin Cities is still shaped like a plume, so it can leave as sharply as it came.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. Being near the front of this corridor makes that answer more volatile than it is on the East Coast. Smoke that reaches New York has spent two days spreading out and arrives as a broad haze; smoke that reaches the Twin Cities is still shaped like a plume, so it can leave as sharply as it came.',
       },
       {
         q: "Why is Minneapolis's air quality bad today?",
@@ -613,7 +617,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Seattle?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Seattle produces two very different versions of that answer. Smoke pushed west through the Cascade passes on easterly flow arrives fast and leaves fast. Smoke that settled into the Puget Sound basin from Oregon or California can sit for a week, because the marine geography that keeps the city mild also keeps its air from moving.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. Seattle produces two very different versions of that answer. Smoke pushed west through the Cascade passes on easterly flow arrives fast and leaves fast. Smoke that settled into the Puget Sound basin from Oregon or California can sit for a week, because the marine geography that keeps the city mild also keeps its air from moving.',
       },
       {
         q: "Why is Seattle's air quality bad today?",
@@ -683,7 +687,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Denver?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Smoke and the brown cloud clear on completely different schedules, and confusing them is the standard Denver mistake. Smoke arrives and leaves with the wind, so a clear time is a wind forecast. The brown cloud builds through the day and breaks with a front, which no clear time on this page is describing.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. Smoke and the brown cloud clear on completely different schedules, and confusing them is the standard Denver mistake. Smoke arrives and leaves with the wind, so a clear time is a wind forecast. The brown cloud builds through the day and breaks with a front, which no clear time on this page is describing.',
       },
       {
         q: "Why is Denver's air quality bad today?",
@@ -750,7 +754,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Spokane?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. The Columbia Basin is the complication. It funnels westerly and southwesterly flow straight into the valley, which means the wind that would clear another city is also the wind that delivers the next wave, and a clear time here can be a genuinely short window.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. The Columbia Basin is the complication. It funnels westerly and southwesterly flow straight into the valley, which means the wind that would clear another city is also the wind that delivers the next wave, and a clear time here can be a genuinely short window.',
       },
       {
         q: "Why is Spokane's air quality bad today?",
@@ -813,7 +817,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Detroit?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Detroit is far enough down the Ontario corridor that plumes tend to arrive as broad haze rather than sharp fronts, which usually makes the clear time a steadier answer here than it is in Winnipeg or Minneapolis, and a slower one.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. Detroit is far enough down the Ontario corridor that plumes tend to arrive as broad haze rather than sharp fronts, which usually makes the clear time a steadier answer here than it is in Winnipeg or Minneapolis, and a slower one.',
       },
       {
         q: "Why is Detroit's air quality bad today?",
@@ -876,7 +880,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Milwaukee?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Milwaukee has a local reason that answer can wobble. The lake breeze turns through the day, so a plume can be pinned against the shore in the afternoon and released in the evening without anything upwind changing at all, which is exactly the kind of hour-long dip the six-hour hold exists to ignore.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. Milwaukee has a local reason that answer can wobble. The lake breeze turns through the day, so a plume can be pinned against the shore in the afternoon and released in the evening without anything upwind changing at all, which is exactly the kind of hour-long dip the six-hour hold exists to ignore.',
       },
       {
         q: "Why is Milwaukee's air quality bad today?",
@@ -943,7 +947,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Cleveland?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Lake Erie complicates it at the back end as much as the front. The lake breeze can pin a plume against the shoreline through the afternoon, so the Edgewater lakefront can stay bad while the air a few miles south has already turned, and a clear time is a forecast for the point, not for the county.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. Lake Erie complicates it at the back end as much as the front. The lake breeze can pin a plume against the shoreline through the afternoon, so the Edgewater lakefront can stay bad while the air a few miles south has already turned, and a clear time is a forecast for the point, not for the county.',
       },
       {
         q: "Why is Cleveland's air quality bad today?",
@@ -1024,7 +1028,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Toronto?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Proximity makes it a more volatile answer here than downwind. Smoke that reaches Boston has spent two days spreading into a broad haze; smoke over Toronto is still shaped like a plume, so it can clear as sharply as it arrived and come back the same way.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. Proximity makes it a more volatile answer here than downwind. Smoke that reaches Boston has spent two days spreading into a broad haze; smoke over Toronto is still shaped like a plume, so it can clear as sharply as it arrived and come back the same way.',
       },
       {
         q: "Why is Toronto's air quality bad today?",
@@ -1087,7 +1091,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Boston?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Being far downwind makes it a steadier answer than it is in Toronto. An aged plume is broad rather than sharp, so it comes and goes slowly. The trade is that it also lingers, which is what June 2023 looked like here: multiple days rather than one bad afternoon.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. Being far downwind makes it a steadier answer than it is in Toronto. An aged plume is broad rather than sharp, so it comes and goes slowly. The trade is that it also lingers, which is what June 2023 looked like here: multiple days rather than one bad afternoon.',
       },
       {
         q: "Why is Boston's air quality bad today?",
@@ -1150,7 +1154,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in New York?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. The mixing-down pattern is why the six-hour hold earns its keep here. Smoke sitting aloft can leave the surface air briefly clean while the plume is still overhead, and a forecast that called that the all-clear would be reversed by mid-afternoon.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. The mixing-down pattern is why the six-hour hold earns its keep here. Smoke sitting aloft can leave the surface air briefly clean while the plume is still overhead, and a forecast that called that the all-clear would be reversed by mid-afternoon.',
       },
       {
         q: "Why is New York's air quality bad today?",
@@ -1220,7 +1224,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Philadelphia?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. It is a smoke clear time and nothing else. Humid haze runs on its own schedule and a muggy Philadelphia afternoon can stay soft for a week regardless of what this page says, because moisture scatters light the same way fine particles do without being fine particles.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. It is a smoke clear time and nothing else. Humid haze runs on its own schedule and a muggy Philadelphia afternoon can stay soft for a week regardless of what this page says, because moisture scatters light the same way fine particles do without being fine particles.',
       },
       {
         q: "Why is Philadelphia's air quality bad today?",
@@ -1290,7 +1294,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Pittsburgh?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Pittsburgh is the eastern city where that answer is least about the wind. The valleys cap themselves overnight and hold whatever is in them well into the morning, so a plume that would have passed over a flatter city sits here, and the clear time has to wait for the cap to break, not just for the flow to change.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. Pittsburgh is the eastern city where that answer is least about the wind. The valleys cap themselves overnight and hold whatever is in them well into the morning, so a plume that would have passed over a flatter city sits here, and the clear time has to wait for the cap to break, not just for the flow to change.',
       },
       {
         q: "Why is Pittsburgh's air quality bad today?",
@@ -1357,7 +1361,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Portland?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Portland has the least reliable version of that answer on this corridor, and the gorge is why. East-wind events are fast, concentrated, and hard to forecast more than a day out, so the page shows the model disagreement rather than pretending to a confidence it does not have.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. Portland has the least reliable version of that answer on this corridor, and the gorge is why. East-wind events are fast, concentrated, and hard to forecast more than a day out, so the page shows the model disagreement rather than pretending to a confidence it does not have.',
       },
       {
         q: "Why is Portland's air quality bad today?",
@@ -1424,7 +1428,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Bend?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. The overnight settling is why the six-hour hold is worth its cost here. Bend can improve through an afternoon and then fill again after dark without a single thing changing upwind, so a one-hour dip is a very poor guide to the next day in this basin.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. The overnight settling is why the six-hour hold is worth its cost here. Bend can improve through an afternoon and then fill again after dark without a single thing changing upwind, so a one-hour dip is a very poor guide to the next day in this basin.',
       },
       {
         q: "Why is Bend's air quality bad today?",
@@ -1491,7 +1495,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Boise?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. The Treasure Valley’s geometry is the reason it can lag. Smoke gets held against the foothills for days after the flow that delivered it has shifted, so the clear time here is a forecast about the valley emptying rather than about the wind turning.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. The Treasure Valley’s geometry is the reason it can lag. Smoke gets held against the foothills for days after the flow that delivered it has shifted, so the clear time here is a forecast about the valley emptying rather than about the wind turning.',
       },
       {
         q: "Why is Boise's air quality bad today?",
@@ -1561,7 +1565,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Salt Lake City?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. A bowl between two ranges is slow to give that up. Once smoke is in this valley the mountains keep it there, so the clear time is usually a forecast about the bowl emptying rather than about the flow off the Sierra turning, and 2021 ran long stretches where it did not empty at all.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. A bowl between two ranges is slow to give that up. Once smoke is in this valley the mountains keep it there, so the clear time is usually a forecast about the bowl emptying rather than about the flow off the Sierra turning, and 2021 ran long stretches where it did not empty at all.',
       },
       {
         q: "Why is Salt Lake City's air quality bad today?",
@@ -1628,7 +1632,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Reno?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. Reno gets the worst of both halves. Smoke crosses the Sierra crest on westerly flow, and then the ridges ringing the Truckee Meadows hold it, so the arrival is fast and the departure is not. The 2021 Dixie Fire ran weeks of degraded air here, with repeated school and event cancellations.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. Reno gets the worst of both halves. Smoke crosses the Sierra crest on westerly flow, and then the ridges ringing the Truckee Meadows hold it, so the arrival is fast and the departure is not. The 2021 Dixie Fire ran weeks of degraded air here, with repeated school and event cancellations.',
       },
       {
         q: "Why is Reno's air quality bad today?",
@@ -1694,7 +1698,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Sacramento?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. In Sacramento the answer is very often a question about the Delta breeze, which is the valley’s only reliable flush. When it runs, the valley empties. When it fails, whatever is in the valley stays in the valley, and the clear time slides out with it.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. In Sacramento the answer is very often a question about the Delta breeze, which is the valley’s only reliable flush. When it runs, the valley empties. When it fails, whatever is in the valley stays in the valley, and the clear time slides out with it.',
       },
       {
         q: "Why is Sacramento's air quality bad today?",
@@ -1773,7 +1777,7 @@ export const LOCATIONS = [
       },
       {
         q: 'When will the smoke clear in Fresno?',
-        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Smells-like-fire threshold. It is worth being precise about what that promises in Fresno. It is the point at which the smoke component drops, not the point at which the valley is clean. The baseline this city starts from does not go anywhere, and a clear time here often arrives with the mountains still missing.',
+        a: 'That is the headline answer above: the clear time, the first stretch of at least six straight hours below the Hazy threshold. It is worth being precise about what that promises in Fresno. It is the point at which the smoke component drops, not the point at which the valley is clean. The baseline this city starts from does not go anywhere, and a clear time here often arrives with the mountains still missing.',
       },
       {
         q: "Why is Fresno's air quality bad today?",

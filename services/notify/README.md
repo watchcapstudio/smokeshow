@@ -112,7 +112,7 @@ All responses are JSON and `no-store`.
   "platform": "ios",                       // ios | ipados | macos | android
   "pushToken": "…",
   "timezone": "America/Denver",            // IANA; used for quiet hours
-  "threshold": 2,                          // rating index 0-4 — 2 is "Smells like fire"
+  "threshold": 2,                          // rating index 0-4 — 2 is "Hazy"
   "quietHours": { "enabled": true, "startHour": 22, "endHour": 7 },
   "notificationTypes": { "inbound": true, "peak": true, "clear": true },
   "sensitiveHousehold": false,             // urgent one level earlier

@@ -49,8 +49,8 @@ mkdirSync(OUT, { recursive: true });
 const LEVELS = [
   { key: 'all-clear', name: 'All clear', pm: 6 },
   { key: 'in-the-air', name: 'In the air', pm: 23 },
-  { key: 'smells', name: 'Smells like fire', pm: 45 },
-  { key: 'tastes', name: 'Tastes like fire', pm: 100 },
+  { key: 'smells', name: 'Hazy', pm: 45 },
+  { key: 'tastes', name: 'Heavy haze', pm: 100 },
   { key: 'smokeshow', name: 'Smokeshow', pm: 220 },
 ];
 

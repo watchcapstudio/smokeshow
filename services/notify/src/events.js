@@ -12,7 +12,7 @@ import { levelForPM25 } from '../../../src/lib/rating.js';
 
 // A subscriber is notified when the air crosses *their* threshold, but the
 // urgency that overrides quiet hours is fixed by the scale, not by preference:
-// "Tastes like fire" is where smoke reaches indoors, one level earlier for a
+// "Heavy haze" is where smoke reaches indoors, one level earlier for a
 // sensitive household.
 export const URGENT_LEVEL = 3;
 export const URGENT_LEVEL_SENSITIVE = 2;
