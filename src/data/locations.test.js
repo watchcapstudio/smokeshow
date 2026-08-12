@@ -690,10 +690,30 @@ describe('editorial pages', () => {
 
   // Same rule, stated positively: the directory says outright that it reports
   // nothing, so the numbers on it cannot be mistaken for a reading.
-  it('says on its face that it reports no conditions', () => {
-    const promise = 'This is a directory and reports conditions nowhere.';
+  // The page now reports a condition, so the promise changed with it: a dated
+  // reading, described as dated. Same sentence everywhere.
+  it('says on its face that the levels are read at load and stamped', () => {
+    const promise =
+      'Each level here is read when this page loads and carries the time it was read.';
     expect(hubPage()).toContain(promise);
     for (const c of CORRIDORS) expect(corridorPage(c), c.slug).toContain(promise);
+  });
+
+  // The honesty invariant that survived adding live levels: the STATIC html still
+  // claims nothing. Crawlers, JS-off readers and stale CDN copies see a link list.
+  it('ships the level slot empty, with a hook per city', () => {
+    for (const html of [hubPage(), ...CORRIDORS.map((c) => corridorPage(c))]) {
+      const slots = [...html.matchAll(/data-city-level="([^"]+)"><\/span>/g)].map((m) => m[1]);
+      expect(slots.length, 'no empty slots found').toBeGreaterThan(0);
+      for (const slug of slots) expect(isBuilt(slug), slug).toBe(true);
+    }
+    // Every city on the hub, and only this corridor's cities on a corridor page.
+    const hubSlots = [...hubPage().matchAll(/data-city-level="([^"]+)"/g)].map((m) => m[1]);
+    expect(hubSlots.sort()).toEqual(LOCATIONS.map((l) => l.slug).sort());
+    for (const c of CORRIDORS) {
+      const got = [...corridorPage(c).matchAll(/data-city-level="([^"]+)"/g)].map((m) => m[1]);
+      expect(got.sort(), c.slug).toEqual(c.cities.filter(isBuilt).sort());
+    }
   });
 
   // A hub has no coordinates. Booting App.jsx there lands in requestLocation()

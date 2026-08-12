@@ -6,6 +6,7 @@ dist
 # Same generator, same reason: /about/ is written by scripts/gen-location-pages.mjs.
 /about
 /how-smoke-forecasts-work
+/404.html
 /public/sitemap.xml
 .DS_Store
 *.local
