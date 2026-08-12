@@ -47,17 +47,27 @@ export function computeVerdict({ pm25, nowIndex }) {
   return { above, clearIdx, arrivalIdx, peakIdx, trend, nowLevelIndex };
 }
 
+// A headline names a number only when the model FOUND one. The three
+// no-crossing headlines below used to count the window instead ("for the next
+// 5 days", "in 5 days"), and readers cannot tell that number apart from the
+// one in "Clears Thursday ~6 PM" — so they read the 5 as a finding about day 5
+// and infer that day 6 goes bad. It never was a finding: it is
+// FORECAST_DAYS in forecast.js, the edge of what we can see. Every
+// no-crossing case therefore names the horizon rather than counting it, and
+// they share one tail so the set reads as a single voice.
+const HORIZON = 'as far as the forecast goes';
+
 // formatIdx(i) -> "Thursday ~6 PM" (the ~ is the caller's responsibility to include)
 export function verdictHeadline(verdict, formatIdx) {
   if (verdict.above) {
     return verdict.clearIdx != null
       ? `Clears ${formatIdx(verdict.clearIdx)}`
-      : 'No clear air in the 5-day window';
+      : `No clear air ${HORIZON}`;
   }
   if (verdict.arrivalIdx != null) return `Smoke arrives ${formatIdx(verdict.arrivalIdx)}`;
   // "No smoke" would contradict a Something's-in-the-air rating — phrase the
   // promise as what it actually is: never crossing the fire threshold.
   return verdict.nowLevelIndex === 0
-    ? 'Stays clear for the next 5 days'
-    : "Doesn't reach Smells-like-fire in 5 days";
+    ? `Clear ${HORIZON}`
+    : `Below Smells-like-fire ${HORIZON}`;
 }

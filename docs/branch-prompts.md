@@ -88,7 +88,8 @@ Every prompt assumes the agent reads `CLAUDE.md`,
 >      lookahead, ±4 µg/m³ deadband, suppressed below 12. Guard it against
 >      contradicting `computeVerdict()`'s trend, which answers a different
 >      question (threshold crossings, not slope): the chip must never read
->      "Improving" while the headline reads "No clear air in the 5-day window".
+>      "Improving" while the headline reads "No clear air as far as the
+>      forecast goes".
 >    - Tests for both: sky output at the five level anchors × four times of day,
 >      and trend deadband edges.
 >

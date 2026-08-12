@@ -191,7 +191,7 @@ and shared.
   ±4 µg/m³ deadband, suppressed below 12. Guard against contradicting
   `computeVerdict()`'s trend, which answers a different question (threshold
   crossings, not slope) — the chip must not say "Improving" while the headline
-  says "No clear air in the 5-day window."
+  says "No clear air as far as the forecast goes."
 - **Tests** — sky output at five level anchors × four times of day; trend
   deadband edges. No test runner exists today; either add Vitest or extend the
   `scripts/verify-*.mjs` Puppeteer pattern (open question §7).

@@ -997,7 +997,7 @@
       return `Smoke in ${dp}h · peaks ${localDate(L.nowT + L.peakH*3600, L.offset).label} at ${ratingFor(L.peakPM).word}`;
     }
     const allClear = L.days.every(d => d.max < 35);
-    return allClear ? "Stays clear for the next 5 days" : "Stays clear from here";
+    return allClear ? "Clear as far as the forecast goes" : "Stays clear from here";
   }
 
   function trendAt(h){
