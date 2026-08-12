@@ -83,11 +83,6 @@ struct PaywallView: View {
                     if let message {
                         Text(message).font(Typography.sm).opacity(0.8)
                     }
-
-                    Text(Copy.disclaimer)
-                        .font(.system(size: 10))
-                        .opacity(0.45)
-                        .padding(.top, 8)
                 }
                 .padding(22)
             }
@@ -103,7 +98,7 @@ struct PaywallView: View {
         VStack(alignment: .leading, spacing: 8) {
             bullet("Home and lock-screen widgets", "The answer without opening anything.")
             bullet("Alerts when it changes", Copy.notificationsPosture)
-            bullet("iPhone, iPad, and Mac", "One subscription, every device you own.")
+            bullet("No account, no tracking", "Your air, and nothing else about you.")
         }
     }
 

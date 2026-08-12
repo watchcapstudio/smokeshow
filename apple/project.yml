@@ -120,6 +120,12 @@ targets:
     supportedDestinations: [iOS, macOS]
     sources:
       - path: Sources/SmokeshowApp
+    resources:
+      # Apple's privacy manifest: declares collected data (location, device ID,
+      # all for app functionality, none for tracking) and the required-reason
+      # APIs the app links (UserDefaults, file timestamps). Read by the App
+      # Store upload checker and feeds the App Privacy nutrition label.
+      - path: Sources/SmokeshowApp/PrivacyInfo.xcprivacy
     dependencies:
       - target: SmokeshowKit
       - target: SmokeshowWidgets
@@ -152,8 +158,10 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLName: earth.smokeshow.deeplink
             CFBundleURLSchemes: [smokeshow]
-        # Injected at build time; empty in CI, where the stub entitlement
-        # provider takes over so the app still runs.
+        # RevenueCat's public SDK key. Publishable (it ships in every binary
+        # and is extractable from any build), so it lives in REVENUECAT_API_KEY
+        # in settings.base below rather than being injected. Empty resolves to
+        # the stub entitlement provider, which is what keeps tests/CI running.
         RevenueCatAPIKey: $(REVENUECAT_API_KEY)
         # May point at a separately deployed notification service. An empty
         # value falls back to https://smokeshow.earth for same-origin routing.
@@ -162,6 +170,7 @@ targets:
         UILaunchScreen: {}
     settings:
       base:
+        REVENUECAT_API_KEY: appl_MFZkxeiJmmLRxVzceofABUPgWyS
         CURRENT_PROJECT_VERSION: "7"
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.app
         CODE_SIGN_ENTITLEMENTS: Configuration/App.entitlements
