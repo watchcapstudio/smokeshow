@@ -51,12 +51,12 @@ describe('selectEvent — the per-subscriber gate', () => {
     const event = pick(diffCellState(stateFor(flat(4)), next), next);
 
     expect(event.type).toBe('threshold-crossed');
-    expect(event.title).toBe('Tastes like fire in Home');
+    expect(event.title).toBe('Heavy haze in Home');
     expect(event.body).toBe(next.headline);
   });
 
   it('stays silent for a change that never reaches the subscriber threshold', () => {
-    // 4 -> 20 µg/m³ is level 0 -> 1. Someone watching for "Smells like fire"
+    // 4 -> 20 µg/m³ is level 0 -> 1. Someone watching for "Hazy"
     // (level 2) hears nothing, which is the whole point of a threshold.
     const next = stateFor(step(4, 20));
     expect(pick(diffCellState(stateFor(flat(4)), next), next)).toBeNull();
@@ -68,7 +68,7 @@ describe('selectEvent — the per-subscriber gate', () => {
     expect(event.type).toBe('threshold-crossed');
   });
 
-  it('marks a Tastes-like-fire crossing urgent, and a lesser one not', () => {
+  it('marks a Heavy-haze crossing urgent, and a lesser one not', () => {
     const bad = stateFor(step(4, 60));
     expect(pick(diffCellState(stateFor(flat(4)), bad), bad).urgent).toBe(true);
 
@@ -93,7 +93,7 @@ describe('selectEvent — the per-subscriber gate', () => {
   it('drops the label when the location has no name', () => {
     const next = stateFor(step(4, 60));
     const event = pick(diffCellState(stateFor(flat(4)), next), next, { label: null });
-    expect(event.title).toBe('Tastes like fire');
+    expect(event.title).toBe('Heavy haze');
   });
 
   it('gives one event per run even when several changes land together', () => {

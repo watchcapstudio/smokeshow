@@ -136,6 +136,16 @@
   font-weight: 700;
 }
 
+/* Sits inline at the end of the guidance sentence, so it reads as the next
+   word rather than as a button competing with "What this means". */
+.explain-sheet__more {
+  white-space: nowrap;
+  font-weight: 600;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
 .explain-sheet__measured {
   margin-top: 0.9rem;
   border-top: 1px solid var(--border);

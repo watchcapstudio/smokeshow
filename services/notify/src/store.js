@@ -20,7 +20,7 @@ import { hashSecret } from './ids.js';
 // entitled, and hold a push token. A lapsed subscriber alone in a cell costs
 // zero fetches, not one.
 
-export const DEFAULT_THRESHOLD = 2; // "Smells like fire" — the forecast-text anchor
+export const DEFAULT_THRESHOLD = 2; // "Hazy" — the forecast-text anchor
 
 export const DEFAULT_QUIET_HOURS = Object.freeze({
   enabled: true,

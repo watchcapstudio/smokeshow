@@ -10,7 +10,6 @@
 // the Swift side. Copy pasted into a component is copy that drifts.
 
 import { useEffect, useRef } from 'react';
-import { NOSE_CAVEAT } from '../lib/rating.js';
 
 export default function ExplainSheet({ open, onClose, level, scale, measured, agreement }) {
   const closeRef = useRef(null);
@@ -58,13 +57,6 @@ export default function ExplainSheet({ open, onClose, level, scale, measured, ag
             <p className="proto-sheet__dim">EPA guidance: {entry.guidance.general}</p>
           </section>
         )}
-
-        {/* Moved off the verdict. It is a caveat about the reading, which is
-            what this sheet is for. */}
-        <section className="proto-sheet__section">
-          <h3>Trust your eyes over the number</h3>
-          <p>{NOSE_CAVEAT}</p>
-        </section>
 
         <section className="proto-sheet__section">
           <h3>The scale</h3>

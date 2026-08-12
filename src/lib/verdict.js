@@ -1,7 +1,7 @@
 import { ARRIVAL_THRESHOLD, levelForPM25 } from './rating.js';
 
 // "Clears Thursday ~6 PM" must survive one-hour head-fake dips (share spec):
-// a clearing only counts if PM2.5 stays below the Smells-like-fire threshold
+// a clearing only counts if PM2.5 stays below the Hazy threshold
 // for 6+ consecutive hours. Arrivals use a shorter 3-hour hold — a brief
 // spike still matters more than a brief dip.
 const CLEAR_HOLD_HOURS = 6;
@@ -65,9 +65,9 @@ export function verdictHeadline(verdict, formatIdx) {
       : `No clear air ${HORIZON}`;
   }
   if (verdict.arrivalIdx != null) return `Smoke arrives ${formatIdx(verdict.arrivalIdx)}`;
-  // "No smoke" would contradict a Something's-in-the-air rating — phrase the
-  // promise as what it actually is: never crossing the fire threshold.
+  // "No smoke" would contradict an In-the-air rating — phrase the promise as
+  // what it actually is: never crossing the ARRIVAL_THRESHOLD level.
   return verdict.nowLevelIndex === 0
     ? `Clear ${HORIZON}`
-    : `Below Smells-like-fire ${HORIZON}`;
+    : `Below Hazy ${HORIZON}`;
 }

@@ -111,7 +111,7 @@ describe('computeVerdict — trend + headline', () => {
 
     const elevatedButBelow = computeVerdict({ pm25: series(20), nowIndex: 12 });
     expect(verdictHeadline(elevatedButBelow, () => '???')).toBe(
-      'Below Smells-like-fire as far as the forecast goes'
+      'Below Hazy as far as the forecast goes'
     );
   });
 

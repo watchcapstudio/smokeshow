@@ -53,8 +53,8 @@ exclusive and the boundary value belongs to the level above.
 |---|-------|-------|
 | 0 | All clear | 0 to <12 |
 | 1 | In the air | 12 to <35 |
-| 2 | Smells like fire | 35 to <55 |
-| 3 | Tastes like fire | 55 to <150 |
+| 2 | Hazy | 35 to <55 |
+| 3 | Heavy haze | 55 to <150 |
 | 4 | Smokeshow | 150+ |
 
 HARD COPY RULE: never cite an AQI number anywhere in page copy, FAQ, or meta.
@@ -70,7 +70,7 @@ reference it in copy.
 ## The landmark scale
 
 Level NAMES are universal and map to concentration thresholds, not distance:
-All clear / In the air / Smells like fire / Tastes like fire / Smokeshow
+All clear / In the air / Hazy / Heavy haze / Smokeshow
 
 Distance BANDS are per-city and live in the JSON. This is deliberate.
 Chicago's "All clear = 10+ miles" describes what All clear looks like in

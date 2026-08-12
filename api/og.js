@@ -1,4 +1,5 @@
 import { ImageResponse } from '@vercel/og';
+import { LEVELS } from '../src/lib/rating.js';
 
 export const config = { runtime: 'edge' };
 
@@ -10,13 +11,11 @@ const LEVEL_ACCENTS = {
   smokeshow: '#a04a34',
 };
 
-const LEVEL_NAMES = [
-  'All clear',
-  'In the air',
-  'Smells like fire',
-  'Tastes like fire',
-  'Smokeshow',
-];
+// Derived, not retyped. This list used to be a hand-kept copy of the ladder,
+// which meant the August 2026 rename would have left link previews naming
+// levels the app itself no longer used. api/s.js already imports from src/lib,
+// so there was never a reason for the duplicate.
+const LEVEL_NAMES = LEVELS.map((l) => l.name);
 
 // Plain element objects instead of JSX — satori accepts {type, props} trees,
 // and a .js file keeps Vercel's zero-config function detection happy.

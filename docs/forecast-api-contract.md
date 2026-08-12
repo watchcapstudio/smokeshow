@@ -164,7 +164,7 @@ drifts.
 {
   "index": 2,
   "key": "smells",
-  "name": "Smells like fire",
+  "name": "Hazy",
   "rangeUg": "35 – 55",
   "maxUg": 55,                      // null on the top entry (unbounded)
   "visibility": "3–5 miles",
@@ -329,7 +329,7 @@ The full `computeVerdict()` result plus its rendered strings.
 
 ```jsonc
 "verdict": {
-  "above": true,              // pm25 at now is >= 35 µg/m³ ("Smells like fire")
+  "above": true,              // pm25 at now is >= 35 µg/m³ ("Hazy")
   "levelIndex": 2,
   "trend": "clearing",        // clearing | stuck | worsening | steady
   "headline": "Clears Thursday ~6 PM",

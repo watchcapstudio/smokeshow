@@ -47,7 +47,7 @@ describe('one state change, one notification per device', () => {
     expect(seed.seeded).toBe(1);
     expect(h.dispatcher.sent).toHaveLength(0);
 
-    // Run 2: the air crosses from All clear (4 µg/m³) to Tastes like fire (60).
+    // Run 2: the air crosses from All clear (4 µg/m³) to Heavy haze (60).
     h.setSeries(step(4, 60));
     const changed = await h.run();
 
@@ -62,7 +62,7 @@ describe('one state change, one notification per device', () => {
     // Every message carries the server's verdict verbatim — no clear-time is
     // recomputed here (contract §6).
     for (const { message } of h.dispatcher.sent) {
-      expect(message.title).toBe('Tastes like fire in Home');
+      expect(message.title).toBe('Heavy haze in Home');
       expect(message.body).toMatch(/^(Clears |No clear air)/);
       expect(message.data.type).toBe('threshold-crossed');
       expect(message.data.levelIndex).toBe(3);

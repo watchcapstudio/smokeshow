@@ -83,7 +83,7 @@ describe('applied at fan-out, in a real run', () => {
   }
 
   it('suppresses a middling 3 AM crossing entirely — no queue, no digest', async () => {
-    // 4 -> 45 µg/m³: "Smells like fire". Worth a banner at noon, not at 3 AM.
+    // 4 -> 45 µg/m³: "Hazy". Worth a banner at noon, not at 3 AM.
     const { summary, dispatcher } = await run({ nowMs: THREE_AM_DENVER, series: step(4, 45) });
 
     expect(summary.matched).toBe(1);
@@ -92,7 +92,7 @@ describe('applied at fan-out, in a real run', () => {
     expect(dispatcher.sent).toHaveLength(0);
   });
 
-  it('wakes the subscriber for a Tastes-like-fire crossing at 3 AM', async () => {
+  it('wakes the subscriber for a Heavy-haze crossing at 3 AM', async () => {
     const { summary, dispatcher } = await run({ nowMs: THREE_AM_DENVER, series: step(4, 60) });
 
     expect(summary.sent).toBe(1);

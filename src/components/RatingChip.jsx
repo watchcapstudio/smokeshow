@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { OLFACTORY_FATIGUE_LEVEL_INDEX, NOSE_CAVEAT } from '../lib/rating.js';
+import { OLFACTORY_FATIGUE_LEVEL_INDEX } from '../lib/rating.js';
 import { ugm3ToAqi, aqiCategory } from '../lib/aqi.js';
 import { getJSON, setJSON } from '../lib/storage.js';
 import './RatingChip.css';
@@ -132,12 +132,14 @@ export default function RatingChip({
           )}
         </div>
       )}
-      {level.index >= OLFACTORY_FATIGUE_LEVEL_INDEX ? (
+      {/* The nose caveat that used to sit here at every level at or above 1 is
+          gone with the smell-based names it existed to walk back. This one
+          stays: it warns against trusting a nose rather than describing what
+          one will find, which is the same argument the level names now make. */}
+      {level.index >= OLFACTORY_FATIGUE_LEVEL_INDEX && (
         <div className="rating-chip__caveat">
           Your nose stops noticing smoke after a while. The smoke doesn't stop.
         </div>
-      ) : (
-        level.index >= 1 && <div className="rating-chip__caveat">{NOSE_CAVEAT}</div>
       )}
     </div>
   );

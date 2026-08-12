@@ -82,7 +82,7 @@ describe('applyCityLevels', () => {
       asOf: '2026-08-11T14:00:00.000Z',
       cities: [
         { slug: 'a', key: 'something', name: 'In the air' },
-        { slug: 'zz', key: 'smells', name: 'Smells like fire' },
+        { slug: 'zz', key: 'smells', name: 'Hazy' },
       ],
     }, { timeZone: 'UTC' });
     expect(filled).toBe(1);

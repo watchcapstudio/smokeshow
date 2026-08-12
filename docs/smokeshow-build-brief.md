@@ -1,17 +1,17 @@
 # SMOKESHOW — Build Brief (v3)
 
-Single-page web app. On load, the browser asks for the user's location (with permission). The page shows: an animated smoke map covering the recent past and the next two days, an experience-based rating ("Smells like fire"), a model-agreement indicator, forecast text, a middle-school explainer, and a disclaimer.
+Single-page web app. On load, the browser asks for the user's location (with permission). The page shows: an animated smoke map covering the recent past and the next two days, an experience-based rating ("Hazy"), a model-agreement indicator, forecast text, a middle-school explainer, and a disclaimer.
 
 ## Locked decisions
 - Name: **SMOKESHOW**. The worst rating level is also "Smokeshow" — the app's name is the condition you're trying to avoid.
 - Location: browser geolocation with permission grant, cached; no pins, no repeated entry. Manual search only as denied-permission fallback.
 - Timeline: past ~12 hours through next 48 hours as the primary scrubbable window; compact 5-day strip below for "when does it actually clear."
-- Ratings describe **experience, not color codes**: what you smell, what you can see, what your body notices. Numbers (µg/m³, AQI) available small, for those who want them.
+- Ratings describe **experience, not color codes**: what you can see, and what your body notices. Numbers (µg/m³, AQI) available small, for those who want them.
 - Architecture: static first, backend upgrade later.
 
 ## Page layout, top to bottom
 1. Location banner: resolved place name + "update location."
-2. **Rating chip** — big, plain words from the experience scale, with one supporting line ("You'll smell it the moment you step outside. Visibility around 4 miles.").
+2. **Rating chip** — big, plain words from the experience scale, with one supporting line ("Haze reads plainly against the sky. Visibility around 4 miles.").
 3. Animated smoke map, play/pause, **scrubber -12hr to +48hr**, "Now" marker, night hours shaded, day + time-of-day labels large ("Tue 7:00 AM").
 4. **Model agreement band** under the scrubber.
 5. 5-day strip: one rating word per day — "clears Thursday" legible at a glance.
@@ -24,17 +24,26 @@ Each level = a name + what you'd notice. Thresholds in PM2.5 µg/m³, aligned to
 
 | PM2.5 | Name | What you'd notice |
 |---|---|---|
-| < 12 | **All clear** | No smell. Sky looks normal. You can see 10+ miles. |
-| 12 – 35 | **Something's in the air** | Faint campfire smell outdoors. Distant treelines look soft. Roughly 5–10 miles of visibility. |
-| 35 – 55 | **Smells like fire** | You smell it the moment you step outside. Sun looks orange at the edges. Roughly 3–5 miles of visibility. Scratchy throat after a long stretch outdoors. |
-| 55 – 150 | **Tastes like fire** | Smell reaches you indoors near windows. Eyes sting. Roughly 1.5–3 miles of visibility. A full day breathing this is on the order of smoking a few cigarettes. |
-| 150+ | **Smokeshow** | Visibility under ~1.5 miles. Everything smells like a doused campfire. Fine ash possible. Everyone inside, windows closed, run filtration if you have it. |
+| < 12 | **All clear** | Sky looks normal. You can see 10+ miles. |
+| 12 – 35 | **In the air** | Distant treelines look soft and the horizon loses its edge. Roughly 5–10 miles of visibility. |
+| 35 – 55 | **Hazy** | Haze reads plainly against the sky. Sun looks orange at the edges. Roughly 3–5 miles of visibility. Scratchy throat after a long stretch outdoors. |
+| 55 – 150 | **Heavy haze** | Roughly 1.5–3 miles of visibility, and the haze reaches indoors near windows. Eyes sting. A full day breathing this is on the order of smoking a few cigarettes. |
+| 150+ | **Smokeshow** | Visibility under ~1.5 miles. Fine ash possible. Everyone inside, windows closed, run filtration if you have it. |
+
+The middle three names were **renamed in August 2026**, from "Something's in the
+air", "Smells like fire" and "Tastes like fire". The originals asserted a smell
+the reader often could not find: fine particles scatter light well below the
+concentration at which anyone smells anything, and long-transport smoke arrives
+aged, with the odorous compounds largely stripped and the particles intact. The
+names now track what the sky does, which is what the visibility anchor below was
+always for. The level *keys* in the payload (`something`, `smells`, `tastes`)
+were deliberately left alone; they are a wire enum read by shipped clients.
 
 Notes for implementation:
 - The visibility anchor is the trust-builder: the user can look out the window and check the model against reality. Surface it in the chip's supporting line.
-- Cigarette equivalence uses the published Berkeley Earth rule of thumb (~22 µg/m³ over 24 hours ≈ one cigarette). Use it only at "Tastes like fire" and above, phrased as "on the order of" — never a precise count.
+- Cigarette equivalence uses the published Berkeley Earth rule of thumb (~22 µg/m³ over 24 hours ≈ one cigarette). Use it only at "Heavy haze" and above, phrased as "on the order of" — never a precise count.
 - One-line truth worth showing at higher levels: "Your nose stops noticing smoke after a while. The smoke doesn't stop." (Olfactory fatigue — people under-react on day two.)
-- Do NOT invent symptom dose-response ("X minutes outside = Z coughs"). No literature supports that mapping and it turns the disclaimer into a fig leaf. Smell, visibility, and the cigarette heuristic are the defensible experience anchors.
+- Do NOT invent symptom dose-response ("X minutes outside = Z coughs"). No literature supports that mapping and it turns the disclaimer into a fig leaf. Visibility and the cigarette heuristic are the defensible experience anchors; smell is not, because it varies too much between people and fades out of transported smoke.
 
 ## Data sources (v1, all free, no server, no keys)
 - **Browser Geolocation API** — `getCurrentPosition` on first load; cache coords + grant in localStorage.
@@ -57,8 +66,8 @@ UI unchanged from v2: an hour-aligned **agreement band** under the scrubber — 
 - Standing caveat, always visible small: "All smoke models depend on satellites seeing the fires. Clouds or thick smoke can hide fires, and hidden fires aren't in any forecast."
 
 ## Forecast text (rule-based, no LLM)
-- Arrival/clearing at the "Smells like fire" threshold (35 µg/m³); peak level + timing; cleanest stretch in 5 days.
-- Written in the rating language: "Back to Smells-like-fire by Tuesday afternoon, peaks Wednesday morning at Tastes-like-fire, drops to Something's-in-the-air Thursday evening. Cleanest stretch: Friday."
+- Arrival/clearing at the "Hazy" threshold (35 µg/m³); peak level + timing; cleanest stretch in 5 days.
+- Written in the rating language: "Back to Hazy by Tuesday afternoon, peaks Wednesday morning at Heavy haze, drops to In the air Thursday evening. Cleanest stretch: Friday."
 - Honesty rule: trust timing and geography over exact numbers; models underestimate surface PM2.5 in extreme events.
 
 ## Stack

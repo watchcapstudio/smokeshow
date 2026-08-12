@@ -18,7 +18,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 const VIEW_W = 600;
 const VIEW_H = 150;
 const PAD_Y = 6;
-// "Smells like fire" — the one line on the chart worth marking, and the same
+// "Hazy" — the one line on the chart worth marking, and the same
 // threshold the headline's clear-time is computed against.
 const THRESHOLD_PM25 = 35;
 

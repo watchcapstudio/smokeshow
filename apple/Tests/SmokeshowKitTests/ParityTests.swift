@@ -96,7 +96,7 @@ final class ParityTests: XCTestCase {
     func testNoSourceFileReimplementsTheThresholds() throws {
         let sourcesRoot = repositoryRoot.appendingPathComponent("apple/Sources")
         let forbidden = [
-            "35",   // the "Smells like fire" threshold
+            "35",   // the "Hazy" threshold
             "12.1", // the AQI breakpoint table
             "55.4",
             "150.4",
