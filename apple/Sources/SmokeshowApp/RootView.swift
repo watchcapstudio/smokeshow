@@ -106,7 +106,10 @@ struct RootView: View {
             TrialInstrumentation.record(.widgetPromptShown)
             showsWidgetOnboarding = true
         case .subscribe:
-            guard !model.entitlement.status.isActive else { return }
+            // Only nudge an *active* trial that is nearing expiry. When the
+            // reader is not subscribed, `content` is already the hard paywall
+            // gate, so a second modal over it is just a doubled paywall.
+            guard model.entitlement.status.isActive else { return }
             showsPaywall = true
         case nil:
             break
