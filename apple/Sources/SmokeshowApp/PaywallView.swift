@@ -83,6 +83,18 @@ struct PaywallView: View {
                     if let message {
                         Text(message).font(Typography.sm).opacity(0.8)
                     }
+
+                    #if DEBUG
+                    // Debug builds only: a way past the gate without a sandbox
+                    // purchase, so the app behind it can be reviewed.
+                    Button("Unlock (debug)") {
+                        model.debugUnlock()
+                        if isModal { dismiss() }
+                    }
+                    .font(Typography.xs)
+                    .opacity(0.5)
+                    .padding(.top, 8)
+                    #endif
                 }
                 .padding(22)
             }

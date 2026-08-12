@@ -148,6 +148,17 @@ public final class AppModel: ObservableObject {
         reloadWidgets()
     }
 
+    #if DEBUG
+    /// Grant a trial locally so the paywall can be walked past on a build
+    /// without a StoreKit sandbox purchase. Debug builds only — never shipped.
+    /// A real `refreshEntitlement()` will overwrite this from the store.
+    public func debugUnlock() {
+        entitlement = EntitlementSnapshot(status: .trial(endsAt: Date().addingTimeInterval(14 * 86400)))
+        EntitlementCache.shared.snapshot = entitlement
+        reloadWidgets()
+    }
+    #endif
+
     public func product() async -> PaywallProduct? {
         await entitlementProvider.product()
     }

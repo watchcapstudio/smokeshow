@@ -47,16 +47,6 @@ struct OnboardingFlow: View {
         ).entries.first ?? TimelineBuilder.placeholder(place: mock.place)
     }()
 
-    /// A warm, low-sun hour from the fixture rather than the midday haze at
-    /// `now` — the app's own sky, at its best-looking time of day.
-    private static let mockSky: Forecast.Sky? = {
-        guard let forecast = mock?.forecast else { return nil }
-        let lowSun = forecast.hours.compactMap(\.sky)
-            .filter { $0.sun.visible }
-            .max { $0.sun.yFrac < $1.sun.yFrac }
-        return lowSun ?? forecast.nowHour?.sky
-    }()
-
     /// The video's first frame, shown instantly so the map card never flashes
     /// black while AVPlayer spins up.
     #if os(iOS)
@@ -126,12 +116,13 @@ struct OnboardingFlow: View {
     private var media: some View {
         switch step {
         case 0:
-            // The app's own sky, at a warm hour.
-            SkyBackdrop(sky: Self.mockSky, showsSun: true)
+            // The app's own dusk sky, already built and used on the loading
+            // screen — no per-hour computation, no reinvention.
+            LoadingSky()
         case 1:
-            // A short, silent, looping clip of the map running its −12h…+48h
-            // sweep. iOS only, which is where the map lives. The poster frame
-            // sits underneath so there is no black while the player loads.
+            // The map clip running its −12h…+48h sweep. iOS only, which is where
+            // the map lives. The player is warmed at launch and already running,
+            // and the poster frame sits underneath, so there is no wait at all.
             ZStack {
                 Palette.dark.bg
                 #if os(iOS)
@@ -140,7 +131,7 @@ struct OnboardingFlow: View {
                         .resizable()
                         .scaledToFill()
                 }
-                LoopingVideoView(resource: "onboarding-map", ext: "mp4")
+                PlayerLayerView(player: OnboardingVideo.shared.player)
                 #endif
             }
         case 2:

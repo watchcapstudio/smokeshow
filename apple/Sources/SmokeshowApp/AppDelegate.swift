@@ -21,6 +21,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         // Registration is cheap and silent; the *permission* prompt is not
         // shown here — it waits until the user asks for alerts.
         application.registerForRemoteNotifications()
+        // Cock the onboarding map clip now, at launch, so the walkthrough is
+        // ready to fire the moment it opens. No thinking on arrival.
+        _ = OnboardingVideo.shared
         return true
     }
 
