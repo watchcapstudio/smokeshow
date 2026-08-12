@@ -62,13 +62,11 @@ struct OnboardingFlow: View {
 
             if hasMedia(step) {
                 // The opacity view Kelly wanted back: media reads clean up top,
-                // the copy reads clean over the dark foot.
+                // the copy reads clean over the foot. On the map screen the foot
+                // is the same dusk gradient as the first screen, so it is not a
+                // slab of black under a full-bleed map.
                 LinearGradient(
-                    stops: [
-                        .init(color: .clear, location: 0),
-                        .init(color: Palette.dark.bg.opacity(0.62), location: 0.42),
-                        .init(color: Palette.dark.bg, location: 0.86),
-                    ],
+                    stops: footStops,
                     startPoint: .top,
                     endPoint: .bottom
                 )
@@ -120,13 +118,12 @@ struct OnboardingFlow: View {
             // screen — no per-hour computation, no reinvention.
             LoadingSky()
         case 1:
-            // The map clip running its −12h…+48h sweep. Shown as a top band at
-            // its native aspect (width-filling, so the labels stay crisp) with a
-            // dark foot for the copy — aspect-filling the whole screen zoomed it
-            // to a dark sliver and buried the place name. The player is warmed at
-            // launch and already running; the poster covers the first instant.
+            // The map clip running its −12h…+48h sweep, full-bleed. The copy
+            // sits over the dusk-gradient foot below (see `footGradient`) rather
+            // than flat black. The player is warmed at launch and already
+            // running; the poster covers the first instant.
             GeometryReader { geo in
-                ZStack(alignment: .top) {
+                ZStack {
                     Palette.dark.bg
                     #if os(iOS)
                     ZStack {
@@ -135,11 +132,18 @@ struct OnboardingFlow: View {
                         }
                         PlayerLayerView(player: OnboardingVideo.shared.player)
                     }
-                    .frame(width: geo.size.width,
-                           height: geo.size.width * 1360.0 / 1206.0)
-                    .clipped()
+                    .frame(width: geo.size.width, height: geo.size.height)
+                    // Zoom out 10% so Great Falls drops clear of the notch and
+                    // Bozeman lifts out of the gradient foot. The clip is already
+                    // wider than the phone, so this only insets top and bottom.
+                    .scaleEffect(0.9)
                     #endif
                 }
+                // Clip to the screen: scaledToFill on its own reports a size
+                // wider than the phone, which stretched the whole ZStack and
+                // unwrapped the copy.
+                .frame(width: geo.size.width, height: geo.size.height)
+                .clipped()
             }
         case 2:
             // Home and lock widgets over a home-screen wash.
@@ -177,6 +181,24 @@ struct OnboardingFlow: View {
                 #endif
             }
         }
+    }
+
+    /// The foot behind the copy. The map screen fades into the same dusk
+    /// gradient as the first screen so a full-bleed map does not sit on a slab
+    /// of black; every other media screen keeps the plain dark foot.
+    private var footStops: [Gradient.Stop] {
+        if step == 1 {
+            return [
+                .init(color: .clear, location: 0),
+                .init(color: Color(.sRGB, red: 0.24, green: 0.21, blue: 0.31, opacity: 0.82), location: 0.44),
+                .init(color: Color(.sRGB, red: 0.10, green: 0.11, blue: 0.19, opacity: 1), location: 0.9),
+            ]
+        }
+        return [
+            .init(color: .clear, location: 0),
+            .init(color: Palette.dark.bg.opacity(0.62), location: 0.42),
+            .init(color: Palette.dark.bg, location: 0.86),
+        ]
     }
 
     // MARK: Copy (over the scrim / on the dark foot)
