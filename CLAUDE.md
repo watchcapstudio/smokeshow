@@ -26,11 +26,22 @@ because a red build tells you *what* broke and not *why* it matters.
   thresholds in `lib/rating.js` are rounder than the EPA breakpoints and the chip
   the app paints comes from `ugm3ToAqi()`, a third scale, so any sentence naming a
   value eventually contradicts the chip above it on the same page.
-- **A static page may never assert a current condition.** This includes putting a
-  level name anywhere a reader could read it as today's answer. The hub once
-  listed 25 cities as "All clear: N miles" and rendered as a status board claiming
-  every city was clear; the string was a constant. Live answers come only from the
-  verdict the app paints into `#root`.
+- **The static payload may never assert a current condition.** Not a level name,
+  and not a number, anywhere a reader could take it for today's answer. The hub
+  learned this twice: it listed 25 cities as "All clear: N miles", which read as a
+  status board claiming every city was clear, and then as "clean day: N miles",
+  which still read as a reading while six cities said "In the air" on their own
+  pages. **The position is the trap, not the wording** — a value beside a place
+  name gets scanned as status whatever the prose above it says.
+  A live condition IS allowed, and the directory now shows one, under three
+  conditions that are what separate it from the two failures: the static HTML ships
+  the slot **empty**, so crawlers and JS-off readers see a plain link list; the
+  value is fetched at load from `/api/levels` and **stamped with the time it was
+  read**; and it comes from `levelForPM25`, the same function the city page and the
+  native clients call, so the two cannot disagree about the same air. See
+  `src/lib/cityLevels.js`. Never bake a condition in at build time, and never
+  default a missing reading — omit the chip, because an absent one reads as "not
+  known" and a defaulted one reads as All clear.
 - **Distance bands are per-city, level names are universal.** A level name is a
   concentration threshold and never moves. What that air looks like out the window
   is local: ten miles of Chicago lakefront, fifty of Rainier. That difference is
