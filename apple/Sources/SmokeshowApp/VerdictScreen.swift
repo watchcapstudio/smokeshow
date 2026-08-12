@@ -642,7 +642,7 @@ struct VerdictScreen: View {
             // accent, because "when does it clear" is the whole question.
             Text(forecast?.verdict.headline ?? "")
                 .font(Typography.md)
-                .foregroundStyle(Palette.dark.accent)
+                .foregroundStyle(sky?.accent ?? Palette.dark.accent)
 
             Text(forecast?.nowScaleEntry?.notice ?? "")
                 .font(Typography.base)
@@ -650,7 +650,7 @@ struct VerdictScreen: View {
 
             Text(readingLine)
                 .font(Typography.eyebrow)
-                .opacity(0.55)
+                .opacity(0.72)
 
             explainButton
                 .padding(.top, 6)
