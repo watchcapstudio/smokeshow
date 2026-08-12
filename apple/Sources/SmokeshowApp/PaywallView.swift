@@ -83,6 +83,18 @@ struct PaywallView: View {
                     if let message {
                         Text(message).font(Typography.sm).opacity(0.8)
                     }
+
+                    #if DEBUG
+                    // Debug builds only: a way past the gate without a sandbox
+                    // purchase, so the app behind it can be reviewed.
+                    Button("Unlock (debug)") {
+                        model.debugUnlock()
+                        if isModal { dismiss() }
+                    }
+                    .font(Typography.xs)
+                    .opacity(0.5)
+                    .padding(.top, 8)
+                    #endif
                 }
                 .padding(22)
             }
@@ -165,9 +177,16 @@ struct PaywallView: View {
 struct WidgetShowcase: View {
     @EnvironmentObject private var model: AppModel
 
+    /// Onboarding shows this before any real forecast exists, so it can hand in
+    /// a mock payload and place. Both default to the live model.
+    var forecastOverride: Forecast? = nil
+    var placeOverride: Place? = nil
+
     private var entry: WidgetEntryModel {
-        guard let forecast = model.forecast, let place = model.place else {
-            return TimelineBuilder.placeholder()
+        let forecast = forecastOverride ?? model.forecast
+        let place = placeOverride ?? model.place
+        guard let forecast, let place else {
+            return TimelineBuilder.placeholder(place: placeOverride ?? .preview)
         }
         return TimelineBuilder.build(
             forecast: forecast,

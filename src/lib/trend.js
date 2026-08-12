@@ -8,8 +8,8 @@
 // the fire line in the 5-day window"). They can legitimately disagree —
 // PM2.5 can dip locally while still never sustaining a real clear — and a UI
 // that surfaces trendAt's raw slope next to computeVerdict's headline can
-// end up contradicting itself ("Improving" next to "No clear air in the
-// 5-day window"). trendAt() takes the verdict and mutes exactly that case.
+// end up contradicting itself ("Improving" next to "No clear air as far as
+// the forecast goes"). trendAt() takes the verdict and mutes exactly that case.
 
 const LOOKAHEAD_HOURS = 6;
 const DEADBAND = 4;

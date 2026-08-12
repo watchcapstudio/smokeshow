@@ -94,7 +94,7 @@ describe('computeVerdict — trend + headline', () => {
 
   it('headline: "No clear air" only when above with no clearIdx', () => {
     const v = computeVerdict({ pm25: series(200), nowIndex: 12 });
-    expect(verdictHeadline(v, () => '???')).toBe('No clear air in the 5-day window');
+    expect(verdictHeadline(v, () => '???')).toBe('No clear air as far as the forecast goes');
   });
 
   it('headline: clear/arrival format the crossing index via formatIdx', () => {
@@ -105,11 +105,29 @@ describe('computeVerdict — trend + headline', () => {
     expect(verdictHeadline(arriving, (i) => `IDX${i}`)).toBe(`Smoke arrives IDX${arriving.arrivalIdx}`);
   });
 
-  it('headline: distinguishes "stays clear" (already all-clear) from "doesn\'t reach fire" (elevated but sub-threshold)', () => {
+  it('headline: distinguishes "clear" (already all-clear) from "below the fire line" (elevated but sub-threshold)', () => {
     const allClear = computeVerdict({ pm25: series(5), nowIndex: 12 });
-    expect(verdictHeadline(allClear, () => '???')).toBe('Stays clear for the next 5 days');
+    expect(verdictHeadline(allClear, () => '???')).toBe('Clear as far as the forecast goes');
 
     const elevatedButBelow = computeVerdict({ pm25: series(20), nowIndex: 12 });
-    expect(verdictHeadline(elevatedButBelow, () => '???')).toBe("Doesn't reach Hazy in 5 days");
+    expect(verdictHeadline(elevatedButBelow, () => '???')).toBe(
+      'Below Hazy as far as the forecast goes'
+    );
+  });
+
+  // The bug these strings were rewritten to fix: a reader cannot tell a number
+  // the model found ("Clears Thursday ~6 PM") from a number that is just the
+  // width of the window, so the second one gets read as an event.
+  it('headline: no-crossing verdicts never count the window', () => {
+    const noCrossing = [
+      computeVerdict({ pm25: series(200), nowIndex: 12 }),
+      computeVerdict({ pm25: series(5), nowIndex: 12 }),
+      computeVerdict({ pm25: series(20), nowIndex: 12 }),
+    ];
+    for (const v of noCrossing) {
+      const headline = verdictHeadline(v, () => '???');
+      expect(headline).toContain('as far as the forecast goes');
+      expect(headline).not.toMatch(/\d/);
+    }
   });
 });

@@ -642,7 +642,7 @@ struct VerdictScreen: View {
             // accent, because "when does it clear" is the whole question.
             Text(forecast?.verdict.headline ?? "")
                 .font(Typography.md)
-                .foregroundStyle(Palette.dark.accent)
+                .foregroundStyle(sky?.accent ?? Palette.dark.accent)
 
             Text(forecast?.nowScaleEntry?.notice ?? "")
                 .font(Typography.base)
@@ -650,7 +650,7 @@ struct VerdictScreen: View {
 
             Text(readingLine)
                 .font(Typography.eyebrow)
-                .opacity(0.55)
+                .opacity(0.72)
 
             explainButton
                 .padding(.top, 6)
@@ -698,7 +698,7 @@ struct VerdictScreen: View {
 
 /// `hours[].trend` is already verdict-guarded server-side: it is muted to
 /// "steady" wherever it would contradict the headline, so the chip can never
-/// read "Improving" next to "No clear air in the 5-day window" (contract §4).
+/// read "Improving" next to "No clear air as far as the forecast goes" (contract §4).
 struct TrendChip: View {
     let trend: Forecast.HourTrend
 

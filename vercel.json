@@ -1,6 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "ignoreCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" = \"data\" ]; then exit 0; else exit 1; fi",
+  "git": {
+    "deploymentEnabled": {
+      "data": false
+    }
+  },
   "rewrites": [
     { "source": "/s", "destination": "/api/s" },
     { "source": "/healthz", "destination": "/api/notify?__notify_path=healthz" },

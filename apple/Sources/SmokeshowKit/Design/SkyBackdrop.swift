@@ -122,4 +122,14 @@ public extension Forecast.Sky {
     var secondaryInk: Color {
         isDark ? Color(Tokens.Color.Dark.textDim) : Color(Tokens.Color.Light.textDim)
     }
+
+    /// The ember accent for text on this sky. It flips with the ink: the bright
+    /// token orange reads on a dark smoke sky but washes out on pale blue, so on
+    /// a light sky it deepens to a burnt ember that keeps the clear-time line's
+    /// pop while staying legible.
+    var accent: Color {
+        isDark
+            ? Color(Tokens.Color.Dark.accent)
+            : Color(.sRGB, red: 0.624, green: 0.263, blue: 0.055, opacity: 1)
+    }
 }

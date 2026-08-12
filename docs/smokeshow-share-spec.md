@@ -52,7 +52,7 @@ Card variants by state — the copy writes itself from the forecast:
 
 - "When does it end" is the question. Compute first crossing below the Smells-like-fire threshold (35 µg/m³) that HOLDS for 6+ consecutive hours (prevents "clears at 3 AM" head-fakes from one-hour dips).
 - Display prominently in the rating chip area: "Clears Thursday ~6 PM" with the ~ always present.
-- If no clearing within 5 days: "No clear air in the 5-day window" — that's a shareable verdict too.
+- If no clearing anywhere in the window: "No clear air as far as the forecast goes" — that's a shareable verdict too. The headline never counts the window's width; a number in it means the model found a crossing (see the headline table in `docs/forecast-api-contract.md`).
 - This same string feeds the OG description and the share card. One function, three surfaces: `getVerdict(location) → { rating, clearTime, trend }`.
 
 ## 5. Zero-friction rules (constraints)

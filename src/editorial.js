@@ -16,3 +16,21 @@ import './styles/tokens.css';
 import './styles/sky.css';
 import './styles/shell.css';
 import './styles/seo.css';
+
+// The directory's live levels. Additive by design: the pages ship as plain link
+// lists and stay that way if this fetch fails, if the endpoint is down, or if
+// JS never runs. Nothing below throws into the page.
+//
+// Only the hub and the corridor pages carry [data-city-level] slots, so this
+// no-ops on /about/ and /how-smoke-forecasts-work/ without a branch.
+import { applyCityLevels } from './lib/cityLevels.js';
+
+if (document.querySelector('[data-city-level]')) {
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  fetch('/api/levels')
+    .then((r) => (r.ok ? r.json() : null))
+    .then((payload) => {
+      if (payload) applyCityLevels(document, payload, { timeZone });
+    })
+    .catch(() => {});
+}

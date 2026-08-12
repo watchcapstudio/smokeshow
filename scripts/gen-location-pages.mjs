@@ -106,7 +106,14 @@ function footer() {
 
 // Said in the same words on every directory page, so a reader landing on any of
 // them gets the same promise, and one test can check one string.
-const NO_CONDITIONS = 'This is a directory and reports conditions nowhere.';
+//
+// This replaced "This is a directory and reports conditions nowhere", which was
+// true when the rows were bare links and became false the moment they carried a
+// live level. The sentence has to describe what the page does, and the honest
+// description of a dated reading is that it is dated: read at load, stamped, and
+// not the whole forecast.
+const LIVE_NOTE =
+  'Each level here is read when this page loads and carries the time it was read. Open a city for its clear time and the rest of the forecast.';
 
 // Source names as links, comma-joined, read from src/data/sources.js so the
 // About page and the candidate's footer cannot credit different URLs.
@@ -592,7 +599,8 @@ function editorialHead({ title, description, url }) {
   <body>`;
 }
 
-// One row per city: the link, and nothing else.
+// One row per city: the link, and an EMPTY slot the browser fills with a live
+// level (src/lib/cityLevels.js).
 //
 // This column has now been wrong twice, in the same position, for the same
 // reason. First it read "All clear: 50+ miles", which put a LEVEL NAME beside 25
@@ -609,9 +617,12 @@ function editorialHead({ title, description, url }) {
 // prose in the scale explainer, where it reads as an explanation instead of a
 // reading.
 //
-// The slot is empty on purpose and stays empty until something real can fill it:
-// a live level from the same source the city page reads, carrying the time it was
-// read. Not a constant, and not a value baked in by a build.
+// The slot now has something real in it, and note what did NOT change: the static
+// HTML still ships it empty, so a crawler, a JS-off reader, and a stale CDN copy
+// all see a plain link list that claims nothing. The level arrives at load, from
+// the same levelForPM25 the city page calls, stamped with the time it was read.
+// That is the difference between this and the two attempts above: not a constant,
+// not baked by a build, and dated so a reader can judge it.
 function cityRows(slugs) {
   return slugs
     .map((slug) => locationBySlug(slug))
@@ -621,7 +632,7 @@ function cityRows(slugs) {
             <li class="citylist__item">
               <a class="citylist__link" href="/${SECTION}/${escAttr(loc.slug)}/"
                 >Wildfire smoke in ${esc(loc.label)}</a
-              >
+              ><span class="citylist__band" data-city-level="${escAttr(loc.slug)}"></span>
             </li>`,
     )
     .join('');
@@ -656,8 +667,8 @@ function hubPage() {
         <h1 class="map-intro__title">Wildfire smoke forecasts by city</h1>
         <p class="map-intro__sub">
           One page per city, each answering the same question: how bad is the air here, and when
-          does it clear. ${NO_CONDITIONS} Open a city for today's air. Every hour shown on any of
-          these pages is a model estimate, not a measurement.
+          does it clear. ${LIVE_NOTE} Every hour shown on any of these pages is a model estimate,
+          not a measurement.
         </p>
       </header>
 
@@ -999,6 +1010,77 @@ ${breadcrumbJsonLd([
 `;
 }
 
+// 404. Vercel serves dist/404.html for any path that matches nothing, so this is
+// the page a reader lands on after a typo or a guessed slug — and guessed slugs
+// are a real case here: "air quality kalispell" outranks Whitefish on volume and
+// Kalispell has no page of its own, so /smoke-forecast/kalispell-mt/ is a URL
+// people will type. Vercel's default 404 is a dead end; this one hands them the
+// directory.
+function notFoundPage() {
+  const title = 'Page not found | SMOKESHOW';
+  return `${editorialHead({
+    title,
+    description: 'That page does not exist. Every city we cover is listed here.',
+    url: `${ORIGIN}/404`,
+  })}
+    <div class="app app--bottom">
+      <header class="map-intro">
+        <h1 class="map-intro__title">That page does not exist</h1>
+        <p class="map-intro__sub">
+          Probably a city we do not cover yet, or a typo in the address. Both are fixable from here.
+        </p>
+      </header>
+
+      <div class="seo-sheet">
+        <div class="seo-sheet__grab" aria-hidden="true"></div>
+
+        <section class="explainer">
+          <h2>Where to go instead</h2>
+          <p>
+            The forecast for wherever you are is on the front page, and it needs no address: allow
+            location access, or search for a city. Every city with a page of its own is listed in the
+            directory, grouped by the corridor its smoke travels down.
+          </p>
+          <p>
+            If you were looking for a city that is not there, it does not have a page yet. The front
+            page still forecasts it: the city pages exist to describe what each level looks like from
+            a particular set of windows, and that has to be written by hand for each one.
+          </p>
+        </section>
+
+        <section class="citylinks">
+          <h2>Try one of these</h2>
+          <ul class="citylinks__list">
+            <li class="citylinks__item">
+              <a class="citylinks__link" href="/">Smoke where you are</a>
+              <span class="citylinks__tag">Forecast</span>
+            </li>
+            <li class="citylinks__item">
+              <a class="citylinks__link" href="/${SECTION}/">Every city we cover</a>
+              <span class="citylinks__tag">All cities</span>
+            </li>
+            <li class="citylinks__item">
+              <a class="citylinks__link" href="/how-smoke-forecasts-work/"
+                >Why smoke is hard to forecast</a
+              >
+              <span class="citylinks__tag">Explainer</span>
+            </li>
+          </ul>
+        </section>
+
+        <div class="disclaimer">
+          <p>
+            ${DISCLAIMER}
+          </p>
+        </div>
+      </div>${footer()}
+    </div>
+    <script type="module" src="/src/editorial.js"></script>
+  </body>
+</html>
+`;
+}
+
 function corridorPage(corridor) {
   const url = `${ORIGIN}/${SECTION}/${CORRIDOR_SEGMENT}/${corridor.slug}/`;
   // No separator before SMOKESHOW beyond the pipe: every corridor name already
@@ -1028,9 +1110,9 @@ ${
     ? `        <section class="citylist">
           <h2>Cities on this corridor</h2>
           <p>
-            Listed in the order the smoke reaches them, not alphabetically. ${NO_CONDITIONS} Each
-            page carries that city's own distances and its own named sightlines, so open one for
-            today's air and for what each level looks like from there.
+            Listed in the order the smoke reaches them, not alphabetically. ${LIVE_NOTE} Each page
+            also carries that city's own distances and its own named sightlines, so you can check a
+            level against what you can actually see from there.
           </p>
           <ul class="citylist__list">${rows}
           </ul>
@@ -1130,6 +1212,13 @@ export async function generate() {
   await emit(join(ROOT, 'about'), aboutPage());
   await emit(join(ROOT, 'how-smoke-forecasts-work'), explainerPage());
 
+  // 404.html sits at the output root rather than in a directory: that exact path
+  // is what Vercel serves for an unmatched route. It is deliberately absent from
+  // the sitemap.
+  await mkdir(ROOT, { recursive: true });
+  await writeFile(join(ROOT, '404.html'), notFoundPage(), 'utf8');
+  written.push(join(ROOT, '404.html'));
+
   await mkdir(join(ROOT, 'public'), { recursive: true });
   await writeFile(join(ROOT, 'public', 'sitemap.xml'), sitemap(LOCATIONS), 'utf8');
 
@@ -1143,6 +1232,7 @@ export const _internal = {
   corridorPage,
   aboutPage,
   explainerPage,
+  notFoundPage,
   sitemap,
   esc,
   escAttr,
@@ -1155,6 +1245,6 @@ export const _internal = {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const written = await generate();
   console.log(
-    `pages: ${written.length} written (${LOCATIONS.length} cities, 1 hub, ${CORRIDORS.length} corridors, 1 about, 1 explainer), sitemap.xml updated`,
+    `pages: ${written.length} written (${LOCATIONS.length} cities, 1 hub, ${CORRIDORS.length} corridors, 1 about, 1 explainer, 1 404), sitemap.xml updated`,
   );
 }

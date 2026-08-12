@@ -257,6 +257,13 @@
   color: var(--accent);
 }
 
+/* The live level chip. Empty in the shipped HTML and hidden while empty, so the
+   row is a clean link until a reading actually arrives: no skeleton, no dash, no
+   placeholder that could be mistaken for a value. */
+.citylist__band:empty {
+  display: none;
+}
+
 .citylinks__tag,
 .citylist__band {
   font-family: var(--font-mono);
