@@ -165,9 +165,16 @@ struct PaywallView: View {
 struct WidgetShowcase: View {
     @EnvironmentObject private var model: AppModel
 
+    /// Onboarding shows this before any real forecast exists, so it can hand in
+    /// a mock payload and place. Both default to the live model.
+    var forecastOverride: Forecast? = nil
+    var placeOverride: Place? = nil
+
     private var entry: WidgetEntryModel {
-        guard let forecast = model.forecast, let place = model.place else {
-            return TimelineBuilder.placeholder()
+        let forecast = forecastOverride ?? model.forecast
+        let place = placeOverride ?? model.place
+        guard let forecast, let place else {
+            return TimelineBuilder.placeholder(place: placeOverride ?? .preview)
         }
         return TimelineBuilder.build(
             forecast: forecast,
