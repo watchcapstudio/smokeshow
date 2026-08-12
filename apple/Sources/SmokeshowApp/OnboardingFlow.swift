@@ -181,7 +181,10 @@ struct OnboardingFlow: View {
                 primary(isLocating ? "Finding you…" : "Use my location") {
                     Task {
                         isLocating = true
-                        await model.useCurrentLocation()
+                        // Resolve the place here, but let the main screen run
+                        // the first forecast fetch so its loading screen is
+                        // actually seen (not spent behind "Finding you…").
+                        await model.useCurrentLocation(fetch: false)
                         isLocating = false
                         onFinish()
                     }

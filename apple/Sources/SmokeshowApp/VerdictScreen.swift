@@ -55,8 +55,11 @@ struct VerdictScreen: View {
     private var phase: Phase {
         if forecast != nil { return .ready }
         if model.place == nil { return .needsPlace }
-        if model.isLoading { return .loading }
-        return .offline
+        // No forecast yet: offline only once a load has actually failed.
+        // Before/while the first fetch runs there is no error, so this reads as
+        // loading rather than flashing "Can't reach the forecast".
+        if model.loadError != nil { return .offline }
+        return .loading
     }
 
     /// Only a transport failure is "no internet". A service or version error is

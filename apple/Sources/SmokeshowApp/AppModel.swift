@@ -86,8 +86,11 @@ public final class AppModel: ObservableObject {
             return
         }
         // Only the empty-handed case earns the hold; if we already have a
-        // forecast on screen, a refresh must never blank or stall it.
+        // forecast on screen, a refresh must never blank or stall it. Clearing
+        // the error means an empty (re)load reads as "loading", not a stale
+        // "offline", while it is in flight.
         let showsLoadingScreen = forecast == nil
+        if showsLoadingScreen { loadError = nil }
         let startedAt = Date()
         isLoading = true
         defer { isLoading = false }
@@ -117,18 +120,23 @@ public final class AppModel: ObservableObject {
         #endif
     }
 
-    public func select(_ newPlace: Place) async {
+    /// - Parameter fetch: when false, sets the place but leaves the forecast
+    ///   fetch to a later `refresh()`. Onboarding uses this so the very first
+    ///   fetch runs while the main screen is on-screen — otherwise the loading
+    ///   screen's minimum hold burns behind the "Finding you…" button and the
+    ///   forecast is already loaded by the time the screen appears.
+    public func select(_ newPlace: Place, fetch: Bool = true) async {
         place = newPlace
         PlaceStore.shared.upsert(newPlace)
         PlaceStore.shared.selected = newPlace
-        await refresh()
+        if fetch { await refresh() }
         reloadWidgets()
         await push.syncRegistration()
     }
 
-    public func useCurrentLocation() async {
+    public func useCurrentLocation(fetch: Bool = true) async {
         guard let resolved = await locationProvider.currentPlace() else { return }
-        await select(resolved)
+        await select(resolved, fetch: fetch)
     }
 
     // MARK: Entitlement
