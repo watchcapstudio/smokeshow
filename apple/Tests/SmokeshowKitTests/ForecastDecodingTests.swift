@@ -26,12 +26,12 @@ final class ForecastDecodingTests: XCTestCase {
         XCTAssertTrue(try XCTUnwrap(clearing.verdict.clearLabel).contains("~"))
 
         let stuck = try XCTUnwrap(MockForecast.load(.smokeNeverClears))
-        XCTAssertEqual(stuck.verdict.headline, "No clear air in the 5-day window")
+        XCTAssertEqual(stuck.verdict.headline, "No clear air as far as the forecast goes")
         XCTAssertNil(stuck.verdict.clearIndex)
         XCTAssertNil(stuck.verdict.clearLabel)
 
         let clear = try XCTUnwrap(MockForecast.load(.clearStayingClear))
-        XCTAssertEqual(clear.verdict.headline, "Stays clear for the next 5 days")
+        XCTAssertEqual(clear.verdict.headline, "Clear as far as the forecast goes")
         XCTAssertFalse(clear.verdict.above)
     }
 

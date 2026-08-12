@@ -4,8 +4,8 @@
   "fixtures": [
     {
       "name": "clear-staying-clear",
-      "note": "verdict.above=false, every index null, headline \"Stays clear for the next 5 days\".",
-      "summary": "192h · Stays clear for the next 5 days"
+      "note": "verdict.above=false, every index null, headline \"Clear as far as the forecast goes\".",
+      "summary": "192h · Clear as far as the forecast goes"
     },
     {
       "name": "smoke-now-clearing",
@@ -14,8 +14,8 @@
     },
     {
       "name": "smoke-never-clears",
-      "note": "above=true, all clear fields null, headline \"No clear air in the 5-day window\".",
-      "summary": "192h · No clear air in the 5-day window"
+      "note": "above=true, all clear fields null, headline \"No clear air as far as the forecast goes\".",
+      "summary": "192h · No clear air as far as the forecast goes"
     },
     {
       "name": "clean-smoke-arriving",
@@ -30,7 +30,7 @@
     {
       "name": "sensors-diverge",
       "note": "Official and local far apart — the case the explainer copy exists to justify.",
-      "summary": "192h · Doesn't reach Smells-like-fire in 5 days"
+      "summary": "192h · Below Smells-like-fire as far as the forecast goes"
     },
     {
       "name": "model-gaps",

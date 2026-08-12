@@ -122,7 +122,7 @@ const SENSORS_APART = {
 const FIXTURES = [
   {
     name: 'clear-staying-clear',
-    note: 'verdict.above=false, every index null, headline "Stays clear for the next 5 days".',
+    note: 'verdict.above=false, every index null, headline "Clear as far as the forecast goes".',
     build: () =>
       buildForecastPayload({
         raw: raw('clear'),
@@ -148,7 +148,7 @@ const FIXTURES = [
   },
   {
     name: 'smoke-never-clears',
-    note: 'above=true, all clear fields null, headline "No clear air in the 5-day window".',
+    note: 'above=true, all clear fields null, headline "No clear air as far as the forecast goes".',
     build: () =>
       buildForecastPayload({
         raw: raw('stuck'),

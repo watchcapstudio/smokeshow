@@ -698,7 +698,7 @@ struct VerdictScreen: View {
 
 /// `hours[].trend` is already verdict-guarded server-side: it is muted to
 /// "steady" wherever it would contradict the headline, so the chip can never
-/// read "Improving" next to "No clear air in the 5-day window" (contract §4).
+/// read "Improving" next to "No clear air as far as the forecast goes" (contract §4).
 struct TrendChip: View {
     let trend: Forecast.HourTrend
 

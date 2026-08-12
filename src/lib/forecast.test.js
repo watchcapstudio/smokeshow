@@ -185,7 +185,7 @@ describe('verdict', () => {
     const v = build(STUCK).verdict;
     expect([v.clearIndex, v.clearAtUTC, v.clearLabel]).toEqual([null, null, null]);
     expect(v.trend).toBe('stuck');
-    expect(v.headline).toBe('No clear air in the 5-day window');
+    expect(v.headline).toBe('No clear air as far as the forecast goes');
   });
 
   it('an arrival fills the arrival fields and leaves the clear fields null', () => {
@@ -200,7 +200,7 @@ describe('verdict', () => {
     const v = build(CLEAR).verdict;
     expect(Number.isInteger(v.peakIndex)).toBe(true);
     expect(v.peakAtUTC).toMatch(/Z$/);
-    expect(v.headline).toBe('Stays clear for the next 5 days');
+    expect(v.headline).toBe('Clear as far as the forecast goes');
   });
 });
 

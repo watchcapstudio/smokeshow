@@ -225,8 +225,8 @@ mid-array: a widget renders that hour as unknown, it does not render zero. Zero
 `trend` is `src/lib/trend.js`: a 6-hour lookahead slope with a ±4 µg/m³
 deadband, suppressed below 12 µg/m³, and then muted to `steady` wherever it
 would contradict `verdict.trend`. A client that renders both a trend chip and
-the headline will therefore never show "Improving" beside "No clear air in the
-5-day window". Do not recompute this — the guard is the point.
+the headline will therefore never show "Improving" beside "No clear air as far
+as the forecast goes". Do not recompute this — the guard is the point.
 
 `agreement` is `src/lib/agreement.js` and in v1 carries **lead-time fade only**:
 `fade` past +36 h, `agree` otherwise. `diverge` is defined and reserved for the
@@ -385,13 +385,21 @@ is one of exactly five sentences:
 | Condition | `headline` |
 | --- | --- |
 | `above`, clear found | `Clears {clearLabel}` |
-| `above`, no clear | `No clear air in the 5-day window` |
+| `above`, no clear | `No clear air as far as the forecast goes` |
 | not `above`, arrival found | `Smoke arrives {arrivalLabel}` |
-| not `above`, level 0 | `Stays clear for the next 5 days` |
-| not `above`, level 1+ | `Doesn't reach Smells-like-fire in 5 days` |
+| not `above`, level 0 | `Clear as far as the forecast goes` |
+| not `above`, level 1+ | `Below Smells-like-fire as far as the forecast goes` |
 
 Render `headline` as-is. It is the sentence the product promises, and it is the
 one string guaranteed identical on a user's phone and their laptop.
+
+**A headline names a number only when the model found one.** The two crossing
+cases name a time because a crossing is a finding. The three no-crossing cases
+name the horizon instead, and never count it. Earlier versions said "for the
+next 5 days" and "in 5 days", and that number is not a finding: it is
+`FORECAST_DAYS`, the edge of the window. Readers could not tell it apart from
+the time in `Clears {clearLabel}`, read it as a claim about day 5, and inferred
+that day 6 turned bad. Any future headline added here follows the same rule.
 
 ---
 
@@ -505,9 +513,9 @@ Cases every client should be built against before the real endpoint exists:
 
 | Case | How to build it |
 | --- | --- |
-| Clear, staying clear | `verdict.above=false`, all indices null, `headline: "Stays clear for the next 5 days"` |
+| Clear, staying clear | `verdict.above=false`, all indices null, `headline: "Clear as far as the forecast goes"` |
 | Smoke now, clears Thursday | `above=true`, `clearIndex` set, `arrivalIndex` null |
-| Smoke now, never clears | `above=true`, all clear fields null, `headline: "No clear air in the 5-day window"` |
+| Smoke now, never clears | `above=true`, all clear fields null, `headline: "No clear air as far as the forecast goes"` |
 | Clean now, smoke arriving | `above=false`, `arrivalIndex` set |
 | No sensors anywhere | `measured.official` and `measured.local` both null, `anchor.source: "model"`, `offsetUg: 0` |
 | Official and local far apart | both rows present, `local.ug` ≈ 2× `official.ug` — the case the explainer copy exists to justify |

@@ -95,10 +95,16 @@ struct LockScreenLiveActivityView: View {
                     .font(.system(size: 19, weight: .bold))
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
+                // One line, sharing the row with the countdown column. The
+                // activity only runs while above=true, so the longest sentence
+                // that can land here is "No clear air as far as the forecast
+                // goes" — scale it down rather than clip the sentence that
+                // matters most in exactly that state.
                 Text(state.headline)
                     .font(.system(size: 12, weight: .semibold))
                     .opacity(0.7)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                 Text("\(state.readingText) \(state.unitLabel) · \(Copy.modelEstimate)")
                     .font(.system(size: 9, weight: .medium, design: .monospaced))
                     .opacity(0.45)
