@@ -969,7 +969,7 @@ struct OfflineTag: View {
 /// reads as work in progress. Driven off the clock; crossfades on each change.
 struct RotatingLine: View {
     let phrases: [String]
-    private let period: Double = 1.6
+    private let period: Double = 1.2
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: period)) { context in

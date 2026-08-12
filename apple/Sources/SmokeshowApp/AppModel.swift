@@ -75,16 +75,32 @@ public final class AppModel: ObservableObject {
 
     // MARK: Forecast
 
+    /// The first load, with nothing cached, gets a deliberate loading screen
+    /// rather than a sub-second flash of one. A cached load never waits — it
+    /// paints instantly — so this only ever costs the very first open.
+    static let minimumFirstLoadDuration: TimeInterval = 2.5
+
     public func refresh(force: Bool = false) async {
         guard let place else {
             loadError = .noLocation
             return
         }
+        // Only the empty-handed case earns the hold; if we already have a
+        // forecast on screen, a refresh must never blank or stall it.
+        let showsLoadingScreen = forecast == nil
+        let startedAt = Date()
         isLoading = true
         defer { isLoading = false }
 
         let request = ForecastRequest(place: place, source: preferences.source)
         let result = await repository.load(request, force: force)
+
+        if showsLoadingScreen {
+            let elapsed = Date().timeIntervalSince(startedAt)
+            let remaining = Self.minimumFirstLoadDuration - elapsed
+            if remaining > 0 { try? await Task.sleep(for: .seconds(remaining)) }
+        }
+
         forecast = result.forecast
         loadError = result.error
         isStale = result.isStale
