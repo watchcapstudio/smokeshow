@@ -46,6 +46,29 @@ done
 
 python scripts/render/assemble_manifest.py "$WORK"
 
+# The data branch must never trigger a Vercel deployment. It carries published
+# frames and no application, so a build has nothing to build.
+#
+# Vercel reads its ignore step from the vercel.json ON THE BRANCH BEING PUSHED,
+# which is why the rule in main's vercel.json has never applied here and every
+# frame push kept showing up as a failed deployment. This branch needs its own
+# copy, so the publisher writes one.
+#
+# `exit 0` unconditionally, with no test on the ref: on this branch there is no
+# case where a build is wanted. Written on every publish rather than committed
+# once, because the branch is force-pushed as a fresh orphan and a file that
+# survives only because the clone above happened to carry it forward is a file
+# that goes missing the first time someone changes how this script works.
+#
+# assemble_manifest.py ignores root entries without <name>/domain.json, so this
+# file does not read as a domain.
+cat > "$WORK/vercel.json" <<'JSON'
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "ignoreCommand": "exit 0"
+}
+JSON
+
 cd "$WORK"
 git init --quiet -b data
 git config user.name "smokeshow-bot"
