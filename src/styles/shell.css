@@ -241,26 +241,31 @@ body {
    cream .seo-sheet, not inside it), so it reads --text / --text-dim and
    rides the global scrim like the rest of the shell — same as .app-header. */
 .map-intro {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 2rem 1rem 0.75rem;
+  /* Fills the column and left-aligns with the sheet below it, matching the
+     /guides/ header. It used to shrink to its content and center (a flex-item
+     quirk with auto margins), which floated the title off the sheet's left
+     edge once the sheet became a floating card. */
+  align-self: stretch;
+  padding: clamp(3rem, 8vh, 5.5rem) 0 clamp(1.4rem, 4vh, 2.4rem);
 }
 
 .map-intro__title {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  letter-spacing: -0.015em;
+  line-height: 1.07;
   text-wrap: balance;
+  max-width: 20ch;
   color: var(--text);
 }
 
 .map-intro__sub {
-  margin: 0.5rem 0 0;
-  max-width: 46ch;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  margin: 1rem 0 0;
+  max-width: 44ch;
+  font-size: clamp(1.1rem, 2.3vw, 1.35rem);
+  line-height: 1.45;
+  font-weight: 450;
   color: var(--text-dim);
 }
 
@@ -523,4 +528,51 @@ body {
   right: 12px;
   bottom: 210px;
   z-index: 3;
+}
+
+/* ---------------------------------------------------------- masthead sky */
+
+/* The static masthead sky, shared by the guides and the directory / corridor /
+   about pages — the ones with no live SkyBackdrop. A resting clear-midday
+   gradient, a soft sun, and a feathered ridge, fixed behind the whole page so
+   the cream sheet scrolls over it and the sky shows in the margins. It is a
+   masthead, not an instrument: no reading, no location, no condition asserted.
+   Rendered via mastheadSky() in scripts/lib/page.mjs. */
+.masthead-sky {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.masthead-sky__gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--sky-zen) 0%, var(--sky-mid) 52%, var(--sky-hor) 100%);
+}
+.masthead-sky__sun {
+  position: absolute;
+  left: 78%;
+  top: 15%;
+  width: min(38vw, 220px);
+  height: min(38vw, 220px);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff6e0 0%, #fff6e0 18%, transparent 46%);
+  opacity: 0.9;
+}
+.masthead-sky__ridge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 38vh;
+  min-height: 220px;
+}
+.masthead-sky__ridge-far {
+  fill: rgba(38, 34, 27, 0.1);
+}
+.masthead-sky__ridge-near {
+  fill: rgba(38, 34, 27, 0.16);
 }

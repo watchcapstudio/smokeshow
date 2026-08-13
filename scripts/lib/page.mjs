@@ -109,6 +109,24 @@ export function footer() {
       </footer>`;
 }
 
+// The static masthead sky: a resting clear-midday gradient, a soft sun, and a
+// feathered ridge, drawn in CSS (styled by .masthead-sky in shell.css). It is a
+// masthead, not an instrument — no reading, no location, no condition asserted —
+// so the pages that have no live SkyBackdrop (the guides and the directory /
+// corridor / about editorial pages) still sit on the app's sky rather than a flat
+// panel. City pages do NOT use this: they boot the live SkyBackdrop instead.
+export function mastheadSky() {
+  return `
+      <div class="masthead-sky" aria-hidden="true">
+        <div class="masthead-sky__gradient"></div>
+        <div class="masthead-sky__sun"></div>
+        <svg class="masthead-sky__ridge" viewBox="0 0 1440 300" preserveAspectRatio="none">
+          <path d="M0,300 L0,150 C160,120 300,175 470,150 C640,125 760,80 940,110 C1120,140 1280,130 1440,105 L1440,300 Z" class="masthead-sky__ridge-far" />
+          <path d="M0,300 L0,200 C200,175 360,215 560,195 C760,175 900,140 1120,165 C1280,183 1360,180 1440,170 L1440,300 Z" class="masthead-sky__ridge-near" />
+        </svg>
+      </div>`;
+}
+
 // Source names as links, comma-joined, read from src/data/sources.js so no two
 // pages can credit different URLs for the same role.
 export function sourceLinks(role) {
