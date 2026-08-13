@@ -1,11 +1,16 @@
 import { useId, useLayoutEffect, useRef } from 'react';
 import './Ridgeline.css';
 
-// Ported from public/ifhghs/demo/index.html ~line 1051 (RIDGE_FAR / RIDGE_NEAR / setRidge()).
+// Smoothed from the demo's ridgeline (public/ifhghs/demo/index.html ~line 1051).
+// The demo chained quadratics whose control points did not share a tangent at
+// the joins, so a couple of hills grew a visible corner — a little peak poking
+// off a smooth slope. These are cubics between the same peaks and valleys with a
+// horizontal tangent at every knot, so each hill is a clean arch and the joins
+// are C1-smooth: same landscape, no cusps.
 const RIDGE_FAR =
-  'M0,40 L0,26 Q12,13 22,20 Q32,27 44,11 Q56,1 68,16 Q79,27 88,17 Q95,12 100,20 L100,40 Z';
+  'M0,40 L0,25 C7,25 7,16 14,16 C22,16 22,22 30,22 C41,22 41,6 52,6 C65.5,6 65.5,22 79,22 C85.5,22 85.5,15 92,15 C96,15 96,19 100,19 L100,40 Z';
 const RIDGE_NEAR =
-  'M0,40 L0,33 Q18,24 34,30 Q48,36 62,26 Q76,17 88,28 Q95,34 100,30 L100,40 Z';
+  'M0,40 L0,33 C8,33 8,27 16,27 C30,27 30,32 44,32 C59,32 59,22 74,22 C84.5,22 84.5,31 95,31 C97.5,31 97.5,30 100,30 L100,40 Z';
 // The demo hardcodes this haze tint (#1E1A14) because it always sits on a
 // rendered sky gradient. Production's shell is flat until SkyBackdrop lands
 // (branch B2), so the silhouette reads in --ink instead — dark on the cream
