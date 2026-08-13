@@ -51,10 +51,58 @@
     var(--sun-core, #fff6e0) var(--sun-r0, 20%),
     transparent var(--sun-r1, 46%)
   );
+  /* Position is linear so consecutive hours flow as one continuous glide during
+     playback instead of easing to a stop at every step. --sun-move is normally
+     --duration-base, but SkyBackdrop drops it to 0s across a horizon crossing so
+     the sun snaps to the far side rather than sliding back across a dark sky. */
   transition:
     opacity var(--duration-base) linear,
-    left var(--duration-base) linear,
-    top var(--duration-base) linear;
+    left var(--sun-move, var(--duration-base)) linear,
+    top var(--sun-move, var(--duration-base)) linear;
+}
+
+/* A shooting star: a small head with a trailing streak that falls once and
+   fades. SkyBackdrop mounts it with a fresh key on a clear night, which restarts
+   the animation; the element sits invisible between runs. */
+.sky__meteor {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 7px 1px rgba(233, 240, 255, 0.9);
+  opacity: 0;
+  pointer-events: none;
+  animation: meteor-fall 1100ms ease-in forwards;
+}
+/* The streak trails behind the head, up and to the left of its travel. */
+.sky__meteor::before {
+  content: '';
+  position: absolute;
+  right: 1px;
+  top: 50%;
+  width: 130px;
+  height: 1.5px;
+  background: linear-gradient(to left, rgba(233, 240, 255, 0.85), transparent);
+  transform: translateY(-50%);
+}
+@keyframes meteor-fall {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(20deg);
+  }
+  8% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(170px, 62px) rotate(20deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sky__meteor {
+    display: none;
+  }
 }
 
 /* The contrast scrim (lib/ink.js). Alpha per gradient stop, usually zero —
@@ -100,8 +148,8 @@
   filter: drop-shadow(0 0 14px rgba(240, 242, 235, 0.5));
   transition:
     opacity var(--duration-base) linear,
-    left var(--duration-base) linear,
-    top var(--duration-base) linear;
+    left var(--moon-move, var(--duration-base)) linear,
+    top var(--moon-move, var(--duration-base)) linear;
 }
 .sky__moon svg {
   width: 100%;

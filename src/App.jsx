@@ -675,6 +675,8 @@ export default function App() {
           date={selectedDate}
           lat={location.lat}
           lon={location.lon}
+          playing={playing}
+          frameMs={PLAY_INTERVAL_MS}
         />
 
         {/* The sky window: verdict on the sky, the horizon with sun and moon,

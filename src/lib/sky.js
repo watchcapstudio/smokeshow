@@ -83,7 +83,7 @@ export function solarPosition(date, latDeg, lonDeg) {
   if (Math.abs(sinZenith) < 1e-6 || Math.abs(Math.cos(latRad)) < 1e-6) {
     azimuthDeg = 180; // sun (near) directly overhead, or observer at a pole — direction is undefined
   } else {
-    const cosAz = clampUnit((Math.sin(latRad) * Math.cos(zenithRad) - Math.sin(declRad)) / (Math.cos(latRad) * sinZenith));
+    const cosAz = clampUnit((Math.sin(declRad) - Math.sin(latRad) * Math.cos(zenithRad)) / (Math.cos(latRad) * sinZenith));
     azimuthDeg = rad2deg(Math.acos(cosAz));
     if (hourAngleDeg > 0) azimuthDeg = 360 - azimuthDeg;
   }
@@ -217,7 +217,11 @@ export function skyFor(pm25, date, lat, lon) {
   // simplification the demo made by driving position off elapsed daytime
   // hours, just keyed off true azimuth instead of a fixed schedule.
   const xFrac = clamp01((azimuthDeg - 90) / 180);
-  const yFrac = clamp01(1 - clamp01(altSin * 1.4)) * 0.4 + 0.12;
+  // Height off true altitude, not a boosted-then-clamped one: the old
+  // `altSin * 1.4` saturated near noon, pinning any sun past ~46 deg to the top
+  // rail so the path read as a flat line across the sky instead of an arc. A
+  // gentle gamma keeps the horizon reads low while letting midday dome.
+  const yFrac = (1 - clamp01(altSin) ** 0.85) * 0.46 + 0.1;
 
   // The moon rides the same band the sun does, mapped the same way, so the
   // renderer can place it with the shared azimuth/altitude math. Below the
@@ -246,7 +250,7 @@ export function skyFor(pm25, date, lat, lon) {
       azimuthDeg: moonPos.azimuthDeg,
       visible: moonPos.altitudeDeg > -2, // the fade-in window opens just under the horizon
       xFrac: clamp01((moonPos.azimuthDeg - 90) / 180),
-      yFrac: clamp01(1 - clamp01(moonAltSin * 1.4)) * 0.4 + 0.12,
+      yFrac: (1 - clamp01(moonAltSin) ** 0.85) * 0.46 + 0.1,
       phaseFraction: moonPhaseFraction(date), // 0 new, 0.5 full
     },
     starOpacity: (1 - day) * (1 - s1) * 0.9,
