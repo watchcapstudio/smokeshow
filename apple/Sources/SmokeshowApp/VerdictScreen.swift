@@ -50,7 +50,7 @@ struct VerdictScreen: View {
     /// offline dead-end, or a prompt to pick a place. Every no-forecast state
     /// used to collapse into the same "Forecast unavailable" headline, which
     /// read as broken even while a fetch was in flight.
-    enum Phase { case ready, loading, offline, needsPlace }
+    enum Phase: Equatable { case ready, loading, offline, needsPlace }
 
     private var phase: Phase {
         if forecast != nil { return .ready }
@@ -173,9 +173,11 @@ struct VerdictScreen: View {
             // instead of sitting dark.
             if phase == .loading {
                 LoadingSky().ignoresSafeArea()
+                    .transition(.opacity)
             } else {
                 SkyBackdrop(sky: sky, showsSun: false)
                     .ignoresSafeArea()
+                    .transition(.opacity)
             }
 
             VStack(alignment: .leading, spacing: 0) {
@@ -211,6 +213,10 @@ struct VerdictScreen: View {
             // Reserve the pinned scrubber's footprint so the days clear it.
             .padding(.bottom, forecast == nil ? 20 : 224)
         }
+        // The first forecast dissolves in over the loading dawn instead of
+        // cutting hard: the standby sky crossfades to the real one and the
+        // verdict fades up with it. Quick and soft, not a jump.
+        .animation(.easeInOut(duration: 0.55), value: phase)
     }
 
     private var choosePlaceButton: some View {
