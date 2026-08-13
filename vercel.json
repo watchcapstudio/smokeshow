@@ -6,6 +6,18 @@
       "data": false
     }
   },
+  "redirects": [
+    {
+      "source": "/how-smoke-forecasts-work",
+      "destination": "/guides/how-smoke-forecasts-work/",
+      "permanent": true
+    },
+    {
+      "source": "/how-smoke-forecasts-work/",
+      "destination": "/guides/how-smoke-forecasts-work/",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     { "source": "/s", "destination": "/api/s" },
     { "source": "/healthz", "destination": "/api/notify?__notify_path=healthz" },
