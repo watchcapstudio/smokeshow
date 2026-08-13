@@ -22,7 +22,9 @@
 }
 
 .guide__header {
-  padding: clamp(3rem, 9vh, 6.5rem) 0 clamp(1.8rem, 5vh, 3.2rem);
+  /* Full-bleed page: the sky runs under the status bar and notch, and the
+     safe-area inset keeps the heading clear of them. */
+  padding: calc(env(safe-area-inset-top) + clamp(2rem, 7vh, 5rem)) 0 clamp(1.8rem, 5vh, 3.2rem);
 }
 .guide__header .eyebrow {
   margin-bottom: 1rem;

@@ -246,7 +246,9 @@ body {
      quirk with auto margins), which floated the title off the sheet's left
      edge once the sheet became a floating card. */
   align-self: stretch;
-  padding: clamp(3rem, 8vh, 5.5rem) 0 clamp(1.4rem, 4vh, 2.4rem);
+  /* The page is full-bleed (viewport-fit=cover), so the sky runs under the
+     status bar and notch. The safe-area inset keeps the title below them. */
+  padding: calc(env(safe-area-inset-top) + clamp(2rem, 6vh, 4rem)) 0 clamp(1.4rem, 4vh, 2.4rem);
 }
 
 .map-intro__title {

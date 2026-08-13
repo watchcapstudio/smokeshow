@@ -20,6 +20,10 @@ dist
 # the four clients must not drift silently.
 apple/Smokeshow.xcodeproj/
 apple/.build/
+# Xcode DerivedData written to custom -derivedDataPath names during device/sim
+# builds. Build output, never committed.
+apple/.build-device/
+apple/.build-sim/
 apple/.swiftpm/
 apple/DerivedData/
 xcuserdata/
