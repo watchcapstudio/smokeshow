@@ -148,7 +148,7 @@ describe('lunarPosition / moonPhaseFraction — the moon in the payload', () => 
   it("moon.yFrac is the sun's screen mapping applied to the moon's altitude", () => {
     const sky = skyFor(6, TIMES_OF_DAY[0].date, LAT, LON);
     const altSin = Math.sin((sky.moon.altitudeDeg * Math.PI) / 180);
-    const expected = clamp01(1 - clamp01(altSin * 1.4)) * 0.4 + 0.12;
+    const expected = (1 - clamp01(altSin) ** 0.85) * 0.46 + 0.1;
     expect(sky.moon.yFrac).toBeCloseTo(expected, 6);
     expect(sky.moon.xFrac).toBeGreaterThanOrEqual(0);
     expect(sky.moon.xFrac).toBeLessThanOrEqual(1);
