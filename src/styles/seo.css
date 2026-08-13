@@ -58,10 +58,15 @@
   color: var(--ink);
   background: rgba(251, 247, 238, 0.97);
   /* Closed on all four corners: each is a card that ends, not a surface the
-     page continues on. */
-  border-radius: var(--radius-lg);
-  padding: 1.25rem 1.25rem 1.5rem;
+     page continues on. Same floating-card treatment as the /guides/ sheet —
+     20px radius and a soft lift shadow — so the reference material reads as the
+     one design across the site. */
+  border-radius: 20px;
+  padding: clamp(1.6rem, 4vw, 3rem) clamp(1.4rem, 4vw, 3.2rem) clamp(2rem, 4vw, 3rem);
   margin: 1rem 0 0;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 18px 50px -28px rgba(38, 34, 27, 0.5);
 }
 
 .seo-sheet {
@@ -71,14 +76,6 @@
   /* Sky between the two sheets. This is the break: the reference material
      starts here, and it starts on its own. */
   margin-top: 2.5rem;
-}
-
-.seo-sheet__grab {
-  width: 36px;
-  height: 4px;
-  border-radius: 2px;
-  background: #c9bfac;
-  margin: -0.35rem auto 0.25rem;
 }
 
 /* FAQ */

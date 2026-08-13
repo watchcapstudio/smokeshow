@@ -29,6 +29,7 @@ import {
   footer,
   sourceLinks,
   breadcrumbJsonLd,
+  mastheadSky,
 } from './lib/page.mjs';
 
 // Body token: {{sources:forecast}} expands to the credited source links for a
@@ -245,21 +246,6 @@ ${APP_ICON_HEAD}
   <body>`;
 }
 
-// The decorative masthead sky. A static resting sky (clear midday, the same
-// palette the live SkyBackdrop paints before any air arrives), plus a soft sun
-// and a feathered ridge. It carries no reading and no location — it is a
-// masthead, not an instrument — so it never asserts a condition. The live
-// SkyBackdrop is a later upgrade; this is the resting frame, drawn in CSS.
-const MASTHEAD_SKY = `
-      <div class="guide-sky" aria-hidden="true">
-        <div class="guide-sky__gradient"></div>
-        <div class="guide-sky__sun"></div>
-        <svg class="guide-sky__ridge" viewBox="0 0 1440 300" preserveAspectRatio="none">
-          <path d="M0,300 L0,150 C160,120 300,175 470,150 C640,125 760,80 940,110 C1120,140 1280,130 1440,105 L1440,300 Z" class="guide-sky__ridge-far" />
-          <path d="M0,300 L0,200 C200,175 360,215 560,195 C760,175 900,140 1120,165 C1280,183 1360,180 1440,170 L1440,300 Z" class="guide-sky__ridge-near" />
-        </svg>
-      </div>`;
-
 // Short answer, style A (default): a larger, quieter lead bracketed by two
 // hairlines under a mono kicker. No box, no accent bar — that pattern reads as
 // generic AI house style. Works for any article, including ones whose answer is
@@ -359,7 +345,7 @@ function articlePage(a) {
   const dateLabel = formatDate(a.datePublished);
   return `${articleHead(a)}
     <div class="guide">
-${MASTHEAD_SKY}
+${mastheadSky()}
       <header class="guide__header">
         <p class="eyebrow">${esc(a.eyebrow)}</p>
         <h1 class="guide__title">${esc(a.heading)}</h1>
@@ -417,7 +403,7 @@ function hubPage(articles) {
 
   return `${head}
     <div class="guide">
-${MASTHEAD_SKY}
+${mastheadSky()}
       <header class="guide__header">
         <p class="eyebrow">Guides</p>
         <h1 class="guide__title">Wildfire smoke, explained</h1>

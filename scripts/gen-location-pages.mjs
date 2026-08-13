@@ -28,6 +28,7 @@ import {
   FOOTER_LINKS,
   sourceLinks,
   breadcrumbJsonLd,
+  mastheadSky,
 } from './lib/page.mjs';
 import { generateArticles, articleRoutes } from './gen-articles.mjs';
 
@@ -396,7 +397,6 @@ function page(loc) {
            Links are navigation rather than content, so they come after the
            reading and before the fine print. The disclaimer is always last. -->
       <div class="seo-sheet">
-        <div class="seo-sheet__grab" aria-hidden="true"></div>
 
         <section class="landmarks">
           <h2>What each level looks like from ${esc(loc.name)}</h2>
@@ -500,7 +500,7 @@ function editorialHead({ title, description, url }) {
     <meta name="apple-mobile-web-app-title" content="SMOKESHOW" />
     <link rel="manifest" href="/site.webmanifest" />
   </head>
-  <body>`;
+  <body>${mastheadSky()}`;
 }
 
 // One row per city: the link, and an EMPTY slot the browser fills with a live
@@ -577,7 +577,6 @@ function hubPage() {
       </header>
 
       <div class="seo-sheet">
-        <div class="seo-sheet__grab" aria-hidden="true"></div>
 
         <section class="explainer">
           <h2>What a clear time is</h2>
@@ -688,7 +687,6 @@ function aboutPage() {
       </header>
 
       <div class="seo-sheet">
-        <div class="seo-sheet__grab" aria-hidden="true"></div>
 
         <section class="explainer">
           <h2>We wanted to go outside</h2>
@@ -818,7 +816,6 @@ function notFoundPage() {
       </header>
 
       <div class="seo-sheet">
-        <div class="seo-sheet__grab" aria-hidden="true"></div>
 
         <section class="explainer">
           <h2>Where to go instead</h2>
@@ -886,7 +883,6 @@ function corridorPage(corridor) {
       </header>
 
       <div class="seo-sheet">
-        <div class="seo-sheet__grab" aria-hidden="true"></div>
 
         <section class="explainer">
           <h2>How this corridor works</h2>${body}

@@ -9,50 +9,9 @@
  * reads them instead of the live sky's.
  */
 
-/* -------------------------------------------------------------- masthead sky */
-
-/* A resting clear-midday sky, drawn in CSS so the article does not need the live
- * SkyBackdrop (which wants a location and would prompt). Fixed behind the whole
- * page: the cream sheet scrolls over it, the sky shows in the margins. It is a
- * masthead, not a reading — no value, no location, no condition asserted. */
-.guide-sky {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-  pointer-events: none;
-}
-.guide-sky__gradient {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, var(--sky-zen) 0%, var(--sky-mid) 52%, var(--sky-hor) 100%);
-}
-.guide-sky__sun {
-  position: absolute;
-  left: 78%;
-  top: 15%;
-  width: min(38vw, 220px);
-  height: min(38vw, 220px);
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: radial-gradient(circle, #fff6e0 0%, #fff6e0 18%, transparent 46%);
-  opacity: 0.9;
-}
-.guide-sky__ridge {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 38vh;
-  min-height: 220px;
-}
-.guide-sky__ridge-far {
-  fill: rgba(38, 34, 27, 0.1);
-}
-.guide-sky__ridge-near {
-  fill: rgba(38, 34, 27, 0.16);
-}
+/* The masthead sky (.masthead-sky) is shared with the directory / corridor /
+ * about pages and lives in shell.css. The guides render it via mastheadSky()
+ * from scripts/lib/page.mjs. */
 
 /* ------------------------------------------------------------------- column */
 
