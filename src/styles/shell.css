@@ -291,19 +291,20 @@ body {
 /* The forecast dissolves in over the sky instead of cutting hard from the
    loading screen. The sky itself is excluded — its colours already carry over
    on the shared :root variables, so only the content over it fades up. Plays
-   once on mount; toggling a canvas hidden does not replay it. */
+   once on mount; toggling a canvas hidden does not replay it.
+   Opacity only, deliberately: several of these children (the scrubber, the day
+   pills) centre themselves with `transform: translateX(-50%)`, and animating
+   `transform` here would end at `none` and knock them off-centre. */
 @keyframes forecast-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: none;
   }
 }
 .app--stage .stage > :not(.sky) {
-  animation: forecast-in 0.7s var(--easing-base) both;
+  animation: forecast-in 0.6s var(--easing-base) both;
 }
 
 /* The stage is a centred column that grows with the screen — the phone view on
