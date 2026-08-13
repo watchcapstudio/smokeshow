@@ -33,7 +33,7 @@ options:
 settings:
   base:
     MARKETING_VERSION: "0.1.1"
-    CURRENT_PROJECT_VERSION: "10"
+    CURRENT_PROJECT_VERSION: "11"
     SWIFT_VERSION: "5.9"
     DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM}
     CODE_SIGN_STYLE: Automatic
@@ -89,7 +89,7 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
     settings:
       base:
-        CURRENT_PROJECT_VERSION: "10"
+        CURRENT_PROJECT_VERSION: "11"
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.kit
         SKIP_INSTALL: YES
 
@@ -108,7 +108,7 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
     settings:
       base:
-        CURRENT_PROJECT_VERSION: "10"
+        CURRENT_PROJECT_VERSION: "11"
         # Same module name as the iOS/macOS build — the watch sources import
         # SmokeshowKit, not SmokeshowKitWatch.
         PRODUCT_NAME: SmokeshowKit
@@ -173,7 +173,7 @@ targets:
     settings:
       base:
         REVENUECAT_API_KEY: appl_MFZkxeiJmmLRxVzceofABUPgWyS
-        CURRENT_PROJECT_VERSION: "10"
+        CURRENT_PROJECT_VERSION: "11"
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.app
         CODE_SIGN_ENTITLEMENTS: Configuration/App.entitlements
         ENABLE_PREVIEWS: YES
@@ -213,7 +213,7 @@ targets:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
       base:
-        CURRENT_PROJECT_VERSION: "10"
+        CURRENT_PROJECT_VERSION: "11"
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.app.widgets
         CODE_SIGN_ENTITLEMENTS: Configuration/Widgets.entitlements
 
@@ -236,7 +236,7 @@ targets:
         WKCompanionAppBundleIdentifier: earth.smokeshow.app
     settings:
       base:
-        CURRENT_PROJECT_VERSION: "10"
+        CURRENT_PROJECT_VERSION: "11"
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.app.watchkitapp
         CODE_SIGN_ENTITLEMENTS: Configuration/Watch.entitlements
 
@@ -257,7 +257,7 @@ targets:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
       base:
-        CURRENT_PROJECT_VERSION: "10"
+        CURRENT_PROJECT_VERSION: "11"
         PRODUCT_BUNDLE_IDENTIFIER: earth.smokeshow.app.watchkitapp.widgets
         CODE_SIGN_ENTITLEMENTS: Configuration/Watch.entitlements
 

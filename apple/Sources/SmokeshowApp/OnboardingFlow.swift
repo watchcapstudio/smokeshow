@@ -133,10 +133,13 @@ struct OnboardingFlow: View {
                         PlayerLayerView(player: OnboardingVideo.shared.player)
                     }
                     .frame(width: geo.size.width, height: geo.size.height)
-                    // Zoom out 10% so Great Falls drops clear of the notch and
-                    // Bozeman lifts out of the gradient foot. The clip is already
-                    // wider than the phone, so this only insets top and bottom.
-                    .scaleEffect(0.9)
+                    // Zoom out 10% so Bozeman lifts out of the gradient foot. The
+                    // clip is wider than the phone, so this only insets top and
+                    // bottom — and anchoring to the top keeps the map bleeding to
+                    // the top edge, sending the whole inset to the bottom where
+                    // the gradient foot already covers it. A centred scale left a
+                    // dark band under the notch (shipped in build 10).
+                    .scaleEffect(0.9, anchor: .top)
                     #endif
                 }
                 // Clip to the screen: scaledToFill on its own reports a size
