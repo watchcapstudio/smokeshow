@@ -17,7 +17,11 @@ const locationPages = [
   'smoke-forecast/*/index.html',
   'smoke-forecast/corridor/*/index.html',
   'about/index.html',
-  'how-smoke-forecasts-work/index.html',
+  // The /guides/ articles and their hub, emitted by gen-articles.mjs. The
+  // explainer used to live at /how-smoke-forecasts-work/ and is now the first
+  // guide; its old path is a 301 in vercel.json, not a built page.
+  'guides/index.html',
+  'guides/*/index.html',
   '404.html',
 ].flatMap((pattern) => globSync(pattern, { cwd: import.meta.dirname }).map((p) => `./${p}`));
 

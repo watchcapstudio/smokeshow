@@ -1,0 +1,442 @@
+/* The /guides/ article surface: a masthead sky, a cream reading sheet, and the
+ * prose inside it. The design language is the app's own — the sky gradient and
+ * feathered ridge, the cream sheet the demo uses as a bottom sheet, the mono
+ * eyebrow — used here as a page rather than an instrument.
+ *
+ * The sheet carries fixed ink, like the editorial sheets: reference material
+ * sits on paper and does not flip with the air. Fixed colours mean fixed
+ * contrast. The scoped block below re-points the ink tokens so everything inside
+ * reads them instead of the live sky's.
+ */
+
+/* -------------------------------------------------------------- masthead sky */
+
+/* A resting clear-midday sky, drawn in CSS so the article does not need the live
+ * SkyBackdrop (which wants a location and would prompt). Fixed behind the whole
+ * page: the cream sheet scrolls over it, the sky shows in the margins. It is a
+ * masthead, not a reading — no value, no location, no condition asserted. */
+.guide-sky {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.guide-sky__gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--sky-zen) 0%, var(--sky-mid) 52%, var(--sky-hor) 100%);
+}
+.guide-sky__sun {
+  position: absolute;
+  left: 78%;
+  top: 15%;
+  width: min(38vw, 220px);
+  height: min(38vw, 220px);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff6e0 0%, #fff6e0 18%, transparent 46%);
+  opacity: 0.9;
+}
+.guide-sky__ridge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 38vh;
+  min-height: 220px;
+}
+.guide-sky__ridge-far {
+  fill: rgba(38, 34, 27, 0.1);
+}
+.guide-sky__ridge-near {
+  fill: rgba(38, 34, 27, 0.16);
+}
+
+/* ------------------------------------------------------------------- column */
+
+.guide {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 4vw, 40px) 3rem;
+}
+
+.guide__header {
+  padding: clamp(3rem, 9vh, 6.5rem) 0 clamp(1.8rem, 5vh, 3.2rem);
+}
+.guide__header .eyebrow {
+  margin-bottom: 1rem;
+}
+.guide__title {
+  font-size: clamp(2rem, 5.2vw, 3.2rem);
+  line-height: 1.07;
+  letter-spacing: -0.015em;
+  font-weight: 800;
+  margin: 0 0 1rem;
+  max-width: 20ch;
+  color: var(--ink);
+}
+.guide__lead {
+  font-size: clamp(1.1rem, 2.3vw, 1.35rem);
+  line-height: 1.45;
+  color: var(--text-dim);
+  margin: 0;
+  max-width: 44ch;
+  font-weight: 450;
+}
+.guide__meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin: 1.5rem 0 0;
+}
+
+/* -------------------------------------------------------------- cream sheet */
+
+.guide__sheet {
+  /* Scoped fixed ink, matching the editorial sheets. Everything inside reads
+     these, not the live sky's tokens. */
+  --ink: #26221b;
+  --accent: #8c3e10;
+  --rule: rgba(38, 34, 27, 0.16);
+  --panel-tint: 244, 238, 226;
+  color: var(--ink);
+  background: rgba(251, 247, 238, 0.97);
+  border-radius: 20px;
+  padding: clamp(1.6rem, 4vw, 3rem) clamp(1.4rem, 4vw, 3.2rem) clamp(2rem, 4vw, 3rem);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 18px 50px -28px rgba(38, 34, 27, 0.5);
+}
+
+/* Reading measure, tighter than the app's 720px column: running prose reads
+   better at roughly 66 characters. */
+.prose {
+  max-width: 66ch;
+}
+
+.prose h2 {
+  font-size: clamp(1.35rem, 2.6vw, 1.7rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  font-weight: 750;
+  margin: 2.4rem 0 0.8rem;
+  color: var(--ink);
+}
+.prose > h2:first-child {
+  margin-top: 0.3rem;
+}
+.prose p {
+  font-size: 1.06rem;
+  line-height: 1.62;
+  margin: 0 0 1.15rem;
+  color: var(--ink);
+}
+.prose strong {
+  font-weight: 650;
+}
+.prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+.prose ul,
+.prose ol {
+  margin: 0 0 1.15rem;
+  padding-left: 1.2rem;
+}
+.prose li {
+  font-size: 1.06rem;
+  line-height: 1.6;
+  margin: 0.3rem 0;
+}
+
+/* ---------------------------------------------------- short answer (style A) */
+
+/* No box, no accent bar — that pattern reads as generic AI. Two hairlines and a
+   larger, quieter lead under a mono kicker. */
+.short-answer {
+  max-width: 66ch;
+  margin: 0 0 2.4rem;
+}
+.short-answer__kicker {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #8a7c64;
+  margin: 0 0 1rem;
+}
+.short-answer__body {
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: 1.4rem 0;
+}
+.short-answer__body p {
+  font-size: 1.3rem;
+  line-height: 1.42;
+  margin: 0;
+  font-weight: 450;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+}
+
+/* --------------------------------------- smoke-verdict component (style B) */
+
+/* Reusable: one row per air level, dotted with that level's real rating color
+   (keyed by level key so it reads the same token the map and chips do) and
+   named with the level's canonical name. Not article-only by design. */
+.short-answer--verdict .smoke-verdict {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 66ch;
+}
+.smoke-verdict__row {
+  display: grid;
+  grid-template-columns: minmax(8.5rem, auto) 1fr;
+  gap: 0.9rem;
+  align-items: baseline;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+.smoke-verdict__row:last-child {
+  border-bottom: 0;
+}
+.smoke-verdict__level {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.smoke-verdict__dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--text-dim);
+}
+.smoke-verdict__dot[data-level='all-clear'] {
+  background: var(--all-clear);
+}
+.smoke-verdict__dot[data-level='something'] {
+  background: var(--something);
+}
+.smoke-verdict__dot[data-level='smells'] {
+  background: var(--smells);
+}
+.smoke-verdict__dot[data-level='tastes'] {
+  background: var(--tastes);
+}
+.smoke-verdict__dot[data-level='smokeshow'] {
+  background: var(--smokeshow);
+}
+.smoke-verdict__call {
+  font-size: 1.05rem;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.smoke-verdict__why {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin: 1.1rem 0 0;
+  max-width: 66ch;
+  color: var(--text-dim);
+}
+
+/* --------------------------------------------------------------------- faq */
+
+.faq {
+  margin-top: 2.8rem;
+  max-width: 66ch;
+}
+.faq > h2,
+.related > h2 {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a7c64;
+  margin: 0 0 0.4rem;
+}
+.faq__item {
+  border-bottom: 1px solid var(--rule);
+}
+.faq__item summary {
+  cursor: pointer;
+  padding: 0.95rem 0;
+  list-style: none;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+.faq__item summary::-webkit-details-marker {
+  display: none;
+}
+.faq__item summary h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.faq__item summary::after {
+  content: '+';
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.faq__item[open] summary::after {
+  content: '\2013'; /* en-dash, not em; the site serves no em-dashes */
+}
+.faq__item p {
+  margin: 0 0 1rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  font-size: 1.02rem;
+}
+
+/* ----------------------------------------------------------------- related */
+
+.related {
+  margin-top: 2.8rem;
+}
+.related__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+.related__item a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 0.85rem 1.1rem;
+  font-weight: 550;
+  transition: border-color 0.15s;
+}
+.related__item a:hover,
+.related__item a:focus-visible {
+  border-color: var(--accent);
+}
+.related__tag {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* -------------------------------------------------------------- disclaimer */
+
+.guide__sheet .disclaimer {
+  margin-top: 2.4rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--rule);
+}
+.guide__sheet .disclaimer p {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--text-dim);
+  max-width: 66ch;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------- hub index */
+
+.guide-index {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+.guide-index__item a {
+  display: block;
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 1.1rem 1.3rem;
+  transition: border-color 0.15s;
+}
+.guide-index__item a:hover,
+.guide-index__item a:focus-visible {
+  border-color: var(--accent);
+}
+.guide-index__title {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.3rem;
+}
+.guide-index__desc {
+  display: block;
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+/* ------------------------------------------------------------------ footer */
+
+/* The site footer, styled here because the article entry does not pull seo.css.
+   Same rules as the editorial pages' footer. */
+.site-footer {
+  margin-top: 2.5rem;
+  padding: 0 clamp(20px, 4vw, 40px);
+}
+.site-footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.4rem;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.site-footer__nav a {
+  color: var(--text-dim);
+  text-decoration: none;
+}
+.site-footer__nav a:hover,
+.site-footer__nav a:focus-visible {
+  color: var(--text);
+  text-decoration: underline;
+}
+
+/* ------------------------------------------------------------- responsive */
+
+@media (max-width: 640px) {
+  .guide__header {
+    padding-top: 2.4rem;
+  }
+  .short-answer__body p {
+    font-size: 1.15rem;
+  }
+  .smoke-verdict__row {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+}

@@ -6,6 +6,9 @@ dist
 # Same generator, same reason: /about/ is written by scripts/gen-location-pages.mjs.
 /about
 /how-smoke-forecasts-work
+# The /guides/ articles are generated from content/articles/*.md by
+# scripts/gen-articles.mjs. The markdown is the source; these are output.
+/guides
 /404.html
 /public/sitemap.xml
 .DS_Store

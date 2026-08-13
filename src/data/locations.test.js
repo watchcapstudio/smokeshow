@@ -10,19 +10,18 @@ const {
   hubPage,
   corridorPage,
   aboutPage,
-  explainerPage,
   sitemap,
   CORRIDOR_SEGMENT,
   FOOTER_LINKS,
 } = _internal;
 
 // Every page the generator writes. Used by the rules that have to hold across
-// all of them rather than on a spot-checked one.
+// all of them rather than on a spot-checked one. The /guides/ articles are a
+// separate generator with its own test (scripts/articles.test.js).
 const allPages = () => [
   ...LOCATIONS.map((l) => page(l)),
   hubPage(),
   aboutPage(),
-  explainerPage(),
   ...CORRIDORS.map((c) => corridorPage(c)),
 ];
 
@@ -626,39 +625,25 @@ describe('house style', () => {
   });
 });
 
-describe('the explainer page', () => {
-  // It shipped for months as an anchor in the middle of index.html, which every
-  // city page and the footer pointed at. A "How smoke forecasts work" link that
-  // drops a reader mid-homepage with no title is worse than no link.
-  it('is a page, and nothing links at the old anchor', () => {
-    const html = explainerPage();
-    expect(html).toContain('<h1 class="map-intro__title">Why is smoke so hard to forecast?</h1>');
-    expect(html).toContain(
-      '<link rel="canonical" href="https://smokeshow.earth/how-smoke-forecasts-work/" />',
-    );
+describe('the explainer link', () => {
+  // The explainer moved out of this generator: it is now the first /guides/
+  // article (content/articles/how-smoke-forecasts-work.md, rendered by
+  // gen-articles.mjs, tested in scripts/articles.test.js). What this generator
+  // still owns is the links to it. They must point at the /guides/ home, and no
+  // page may point at the old mid-homepage anchor.
+  it('points every city page and the footer at the /guides/ home', () => {
+    expect(FOOTER_LINKS.some((l) => l.href === '/guides/how-smoke-forecasts-work/')).toBe(true);
+    for (const l of LOCATIONS) {
+      expect(page(l), l.slug).toContain('href="/guides/how-smoke-forecasts-work/"');
+    }
+  });
+
+  it('links nothing at the old mid-homepage anchor', () => {
     for (const p of allPages()) {
       expect(p, 'still points at the mid-homepage anchor').not.toContain(
         'href="/#how-smoke-forecasts-work"',
       );
     }
-  });
-
-  it('is linked from the footer and from every city page', () => {
-    expect(FOOTER_LINKS.some((l) => l.href === '/how-smoke-forecasts-work/')).toBe(true);
-    for (const l of LOCATIONS) {
-      expect(page(l), l.slug).toContain('href="/how-smoke-forecasts-work/"');
-    }
-  });
-
-  it('holds to the sitewide copy rules', () => {
-    const html = explainerPage();
-    expect(html).toContain(
-      '<strong>Smokeshow is for informational and educational purposes only.</strong>',
-    );
-    expect(html).toMatch(/model estimate/);
-    expect(html).not.toMatch(/\bobserved\b/i);
-    expect(html).not.toMatch(/\bAQI\b/i);
-    expect(html).not.toContain('\u2014');
   });
 });
 
@@ -822,7 +807,6 @@ describe('sitemap', () => {
     expect(xml).toContain('<loc>https://smokeshow.earth/</loc>');
     expect(xml).toContain('<loc>https://smokeshow.earth/smoke-forecast/</loc>');
     expect(xml).toContain('<loc>https://smokeshow.earth/about/</loc>');
-    expect(xml).toContain('<loc>https://smokeshow.earth/how-smoke-forecasts-work/</loc>');
     for (const c of CORRIDORS) {
       expect(xml).toContain(
         `<loc>https://smokeshow.earth/smoke-forecast/corridor/${c.slug}/</loc>`,
@@ -831,5 +815,21 @@ describe('sitemap', () => {
     for (const l of LOCATIONS) {
       expect(xml).toContain(`<loc>https://smokeshow.earth/smoke-forecast/${l.slug}/</loc>`);
     }
+  });
+
+  // The old /how-smoke-forecasts-work/ URL 301s to its /guides/ home, so a
+  // redirected URL must not appear in the sitemap. The /guides/ routes are
+  // passed in from generate() and are exercised in scripts/articles.test.js.
+  it('does not list the old explainer URL', () => {
+    expect(sitemap(LOCATIONS)).not.toContain('/how-smoke-forecasts-work/');
+  });
+
+  it('lists the /guides/ routes it is given', () => {
+    const xml = sitemap(LOCATIONS, [
+      'https://smokeshow.earth/guides/',
+      'https://smokeshow.earth/guides/how-smoke-forecasts-work/',
+    ]);
+    expect(xml).toContain('<loc>https://smokeshow.earth/guides/</loc>');
+    expect(xml).toContain('<loc>https://smokeshow.earth/guides/how-smoke-forecasts-work/</loc>');
   });
 });

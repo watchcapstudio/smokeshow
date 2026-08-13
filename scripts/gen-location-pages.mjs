@@ -16,93 +16,30 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { LOCATIONS, locationBySlug } from '../src/data/locations.js';
 import { CORRIDORS, corridorBySlug } from '../src/data/corridors.js';
-import { sourcesByRole } from '../src/data/sources.js';
 import { LEVELS } from '../src/lib/rating.js';
+import {
+  ORIGIN,
+  STUDIO_ORIGIN,
+  esc,
+  escAttr,
+  jsonForScript,
+  DISCLAIMER,
+  footer,
+  FOOTER_LINKS,
+  sourceLinks,
+  breadcrumbJsonLd,
+} from './lib/page.mjs';
+import { generateArticles, articleRoutes } from './gen-articles.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SECTION = 'smoke-forecast'; // URL segment: /smoke-forecast/<slug>/
 const CORRIDOR_SEGMENT = 'corridor'; // /smoke-forecast/corridor/<slug>/
-const ORIGIN = 'https://smokeshow.earth';
 
-// Text -> HTML text node. Attributes get the same treatment plus quotes.
-function esc(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
-function escAttr(s) {
-  return esc(s).replace(/"/g, '&quot;');
-}
-
-// JSON destined for a <script> body. JSON.stringify does not escape '<', so a
-// value containing "</script>" would close the block and everything after it
-// would parse as markup. The HTML parser does not decode entities inside
-// script elements either, which rules out esc() here — the fix has to be a
-// JSON-level escape that survives JSON.parse unchanged.
-function jsonForScript(value, indent) {
-  return JSON.stringify(value, null, indent)
-    .replace(/</g, '\\u003c')
-    .replace(/>/g, '\\u003e')
-    .replace(/&/g, '\\u0026');
-}
-
-// The disclaimer is reproduced verbatim from the brief, exactly as index.html
-// carries it. It is not paraphrased per city and must not be.
-const DISCLAIMER = `<strong>Smokeshow is for informational and educational purposes only.</strong> It is
-            not health, medical, or safety advice. Forecasts are model estimates and can be wrong,
-            sometimes by a lot. Descriptions of what you might smell, see, or feel are
-            generalizations, not predictions about your body. For decisions about your health,
-            outdoor activity, or air quality safety, rely on official sources like AirNow.gov, the
-            National Weather Service, and your local health authorities, and talk to a medical
-            professional about your own situation.`;
-
-// The shared footer. Five links, sitewide, and deliberately NOT 25 city links: a
-// footer that lists every city on every city page dilutes the one signal these
-// pages have, which is that each of them links a small number of places for a
-// stated reason. The hub is where the full list lives.
-//
-// Privacy and Terms point OFF-SITE, to watchcapstudio.com, and that is on
-// purpose. Those documents cover every product the studio ships and say so
-// themselves — "We keep one privacy page rather than one per app, so there is a
-// single place to check." Copying them onto this domain would create a second
-// copy of a legal document that drifts from the canonical one, which is worse
-// than an external link in every way that matters. The studio is BTTY LLC dba
-// WatchCap Studio; the Terms' section on what the software is not is written
-// squarely at products like this one.
-//
-// Six rather than the spec's five, which is a deliberate overrun. The spec's five
-// were hub, how-it-works, about, privacy and the Canadian explainer, written
-// before Terms was in the picture; Terms is not optional furniture. Dropping the
-// Canadian explainer instead would have got back to five, but it would also cost
-// that page an internal link from all 30 pages, and "five" was a rule against
-// dumping 25 city links here, not against six pieces of named furniture.
-//
-// Hand-mirrored in index.html, same as the FAQ already is. Keep them in sync.
-const STUDIO_ORIGIN = 'https://watchcapstudio.com';
-const FOOTER_LINKS = [
-  { href: `/${SECTION}/`, text: 'All cities' },
-  { href: '/how-smoke-forecasts-work/', text: 'How smoke forecasts work' },
-  {
-    href: `/${SECTION}/${CORRIDOR_SEGMENT}/canadian-smoke-great-lakes-northeast/`,
-    text: 'Canadian smoke explained',
-  },
-  { href: '/about/', text: 'About' },
-  { href: `${STUDIO_ORIGIN}/privacy`, text: 'Privacy' },
-  { href: `${STUDIO_ORIGIN}/terms`, text: 'Terms' },
-];
-
-function footer() {
-  const links = FOOTER_LINKS.map(
-    ({ href, text }) => `
-          <a href="${escAttr(href)}">${esc(text)}</a>`,
-  ).join('');
-  return `
-      <footer class="site-footer">
-        <nav class="site-footer__nav" aria-label="Site">${links}
-        </nav>
-      </footer>`;
-}
+// The shared footer, its link list, esc/escAttr, jsonForScript, the disclaimer,
+// sourceLinks and breadcrumbJsonLd now live in scripts/lib/page.mjs — the pieces
+// that have to be byte-identical across every page the site serves, including
+// the /guides/ articles, which is why they moved to one home. FOOTER_LINKS' "How
+// smoke forecasts work" link points at /guides/how-smoke-forecasts-work/ there.
 
 // Said in the same words on every directory page, so a reader landing on any of
 // them gets the same promise, and one test can check one string.
@@ -114,14 +51,6 @@ function footer() {
 // not the whole forecast.
 const LIVE_NOTE =
   'Each level here is read when this page loads and carries the time it was read. Open a city for its clear time and the rest of the forecast.';
-
-// Source names as links, comma-joined, read from src/data/sources.js so the
-// About page and the candidate's footer cannot credit different URLs.
-function sourceLinks(role) {
-  return sourcesByRole(role)
-    .map((s) => `<a href="${escAttr(s.href)}">${esc(s.name)}</a>`)
-    .join(', ');
-}
 
 function landmarkRows(loc) {
   return loc.landmarks
@@ -217,7 +146,7 @@ function linkBlock(loc) {
 
   items.push(`
               <li class="citylinks__item">
-                <a class="citylinks__link" href="/how-smoke-forecasts-work/"
+                <a class="citylinks__link" href="/guides/how-smoke-forecasts-work/"
                   >Why smoke is hard to forecast</a
                 >
                 <span class="citylinks__tag">Explainer</span>
@@ -291,31 +220,6 @@ function faqJsonLd(loc) {
         '@type': 'Question',
         name: q,
         acceptedAnswer: { '@type': 'Answer', text: a },
-      })),
-    },
-    null,
-    2,
-  );
-}
-
-// BreadcrumbList. The URL space is three levels deep at its deepest
-// (/smoke-forecast/corridor/<slug>/) and nothing else on the page states the
-// hierarchy: there is no visible breadcrumb trail, and the footer's "All cities"
-// link is navigation rather than a claim about where this page sits. So the
-// structured data is the only place the shape is written down.
-//
-// Takes [label, path] pairs, root first, and omits the item URL on the last
-// entry per schema.org's guidance that the current page needs no link.
-function breadcrumbJsonLd(trail) {
-  return jsonForScript(
-    {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: trail.map(([name, path], i) => ({
-        '@type': 'ListItem',
-        position: i + 1,
-        name,
-        ...(i === trail.length - 1 ? {} : { item: `${ORIGIN}${path}` }),
       })),
     },
     null,
@@ -884,131 +788,13 @@ ${breadcrumbJsonLd([
 `;
 }
 
-// /how-smoke-forecasts-work/ — the explainer, as a page.
-//
-// This copy shipped for months as an anchor in the middle of index.html, and the
-// footer plus all 30 city and corridor pages pointed at `/#how-smoke-forecasts-work`.
-// A "How smoke forecasts work" link that drops you into the middle of the
-// homepage is a worse experience than no link: the reader has no title, no
-// context, and no idea whether they are where they meant to go.
-//
-// It is also the best evergreen non-city content on the site and it had no URL of
-// its own, so it could never rank for the question it answers while the homepage
-// chased the head term.
-//
-// The copy is moved rather than duplicated. index.html keeps a short lead and a
-// link, because two URLs carrying the same five paragraphs is a duplicate-content
-// problem the site does not need. The old anchor id stays on that lead, so a
-// stale `/#how-smoke-forecasts-work` link still lands somewhere sensible.
-function explainerPage() {
-  const url = `${ORIGIN}/how-smoke-forecasts-work/`;
-  const title = 'How Smoke Forecasts Work, and Why They Are Hard | SMOKESHOW';
-  const description =
-    'Why forecasting wildfire smoke is harder than forecasting weather: finding the fires, guessing how much smoke they make, and riding the wind.';
-
-  return `${editorialHead({ title, description, url })}
-    <div class="app app--bottom">
-      <header class="map-intro">
-        <h1 class="map-intro__title">Why is smoke so hard to forecast?</h1>
-        <p class="map-intro__sub">
-          Forecasting smoke is like forecasting weather, with three extra problems stacked on top.
-        </p>
-      </header>
-
-      <div class="seo-sheet">
-        <div class="seo-sheet__grab" aria-hidden="true"></div>
-
-        <section class="explainer">
-          <h2>Three extra problems</h2>
-          <p>
-            <strong>First, you have to find the fires.</strong> Satellites spot fires by detecting
-            heat from space. But clouds can hide a fire from the satellite. So can thick smoke from
-            another fire. A fire the satellite can't see is a fire the forecast doesn't know about.
-          </p>
-          <p>
-            <strong>Second, you have to guess the smoke.</strong> Nobody can measure exactly how
-            much smoke a fire makes. Scientists estimate it from how hot the fire looks from space
-            and what's burning underneath. Grass, pine forest, and swampy peat all burn differently
-            and make different amounts of smoke.
-          </p>
-          <p>
-            <strong>Third, you ride the wind.</strong> Smoke goes wherever the wind carries it,
-            sometimes more than a thousand miles. If the wind forecast is off by a little, the
-            smoke ends up somewhere else. And height matters: smoke riding high in the sky might
-            pass right over your town while the air at the ground stays clean. It's the low smoke
-            you actually breathe.
-          </p>
-          <p>
-            Each step adds a little error, and the little errors multiply. That's why smoke forecasts
-            are pretty sharp for the next day or two and get fuzzy after that, and why this site
-            tells you when the models agree and when they don't.
-          </p>
-        </section>
-
-        <section class="explainer">
-          <h2>What that means for the answer you get</h2>
-          <p>
-            It is why the forecast on this site leads with a clear time rather than a single number,
-            and why the clear time requires six straight hours below the Hazy threshold
-            before it will call anything. One hour of cleaner air inside a bad stretch is well within
-            the error the three problems above produce. Six hours is a claim worth making.
-          </p>
-          <p>
-            It is also why the timeline marks the hours where the models split instead of drawing one
-            confident line through them. Where two models put the smoke in different places at the
-            same hour, that disagreement is the most honest thing we can show you, and hiding it
-            behind an average would make a rough answer look precise.
-          </p>
-          <p>
-            Every hour on every page here is a model estimate, including the hours before now. Those
-            are the model's account of the past, not measurements.
-          </p>
-        </section>
-
-        <section class="explainer">
-          <h2>Where the numbers come from</h2>
-          <p>
-            Forecast: ${sourceLinks('forecast')}. Fires: ${sourceLinks('fires')}. Thermal hotspots:
-            ${sourceLinks('hotspots')}.
-          </p>
-          <p class="colophon">Generated using Copernicus Atmosphere Monitoring Service information.</p>
-        </section>
-
-        <section class="citylinks">
-          <h2>Elsewhere</h2>
-          <ul class="citylinks__list">
-            <li class="citylinks__item">
-              <a class="citylinks__link" href="/${SECTION}/">Every city we cover</a>
-              <span class="citylinks__tag">All cities</span>
-            </li>
-            <li class="citylinks__item">
-              <a class="citylinks__link" href="/about/">Why we made Smokeshow</a>
-              <span class="citylinks__tag">About</span>
-            </li>
-          </ul>
-        </section>
-
-        <div class="disclaimer">
-          <p>
-            ${DISCLAIMER}
-          </p>
-        </div>
-      </div>${footer()}
-    </div>
-    <script type="application/ld+json">
-${collectionJsonLd({ type: 'WebPage', name: 'Why is smoke so hard to forecast?', description, url })}
-    </script>
-    <script type="application/ld+json">
-${breadcrumbJsonLd([
-  ['SMOKESHOW', '/'],
-  ['How smoke forecasts work', '/how-smoke-forecasts-work/'],
-])}
-    </script>
-    <script type="module" src="/src/editorial.js"></script>
-  </body>
-</html>
-`;
-}
+// The explainer moved out of this file. It shipped for months as an anchor in
+// index.html, then briefly as /how-smoke-forecasts-work/ generated here; it now
+// lives as the first post in the /guides/ article system
+// (content/articles/how-smoke-forecasts-work.md, rendered by gen-articles.mjs)
+// at /guides/how-smoke-forecasts-work/, inside the topic cluster with the rest
+// of the evergreen content. A 301 in vercel.json redirects the old URL, and the
+// internal links above and in the footer point at the new one.
 
 // 404. Vercel serves dist/404.html for any path that matches nothing, so this is
 // the page a reader lands on after a typo or a guessed slug — and guessed slugs
@@ -1060,7 +846,7 @@ function notFoundPage() {
               <span class="citylinks__tag">All cities</span>
             </li>
             <li class="citylinks__item">
-              <a class="citylinks__link" href="/how-smoke-forecasts-work/"
+              <a class="citylinks__link" href="/guides/how-smoke-forecasts-work/"
                 >Why smoke is hard to forecast</a
               >
               <span class="citylinks__tag">Explainer</span>
@@ -1128,7 +914,7 @@ ${
               <span class="citylinks__tag">Hub</span>
             </li>
             <li class="citylinks__item">
-              <a class="citylinks__link" href="/how-smoke-forecasts-work/"
+              <a class="citylinks__link" href="/guides/how-smoke-forecasts-work/"
                 >Why smoke is hard to forecast</a
               >
               <span class="citylinks__tag">Explainer</span>
@@ -1165,14 +951,18 @@ ${breadcrumbJsonLd([
 `;
 }
 
-function sitemap(locations) {
+// `guides` is the list of /guides/ URLs (the hub plus each article), passed in
+// from generate() so the two generators keep one sitemap between them. The old
+// /how-smoke-forecasts-work/ URL is gone: it 301s to its /guides/ home, and a
+// redirected URL does not belong in the sitemap.
+function sitemap(locations, guides = []) {
   const urls = [
     `${ORIGIN}/`,
     `${ORIGIN}/about/`,
-    `${ORIGIN}/how-smoke-forecasts-work/`,
     `${ORIGIN}/${SECTION}/`,
     ...CORRIDORS.map((c) => `${ORIGIN}/${SECTION}/${CORRIDOR_SEGMENT}/${c.slug}/`),
     ...locations.map((l) => `${ORIGIN}/${SECTION}/${l.slug}/`),
+    ...guides,
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -1210,7 +1000,12 @@ export async function generate() {
   // not reach it. Overwriting is enough: it is one file at a fixed path, with no
   // slug that can be renamed and leave an orphan behind.
   await emit(join(ROOT, 'about'), aboutPage());
-  await emit(join(ROOT, 'how-smoke-forecasts-work'), explainerPage());
+
+  // The /guides/ articles are a separate generator with its own content source
+  // and its own wipe. Run here so one `npm run pages` builds everything and the
+  // sitemap below can name the article routes.
+  const articleFiles = await generateArticles();
+  written.push(...articleFiles);
 
   // 404.html sits at the output root rather than in a directory: that exact path
   // is what Vercel serves for an unmatched route. It is deliberately absent from
@@ -1220,7 +1015,7 @@ export async function generate() {
   written.push(join(ROOT, '404.html'));
 
   await mkdir(join(ROOT, 'public'), { recursive: true });
-  await writeFile(join(ROOT, 'public', 'sitemap.xml'), sitemap(LOCATIONS), 'utf8');
+  await writeFile(join(ROOT, 'public', 'sitemap.xml'), sitemap(LOCATIONS, await articleRoutes()), 'utf8');
 
   return written;
 }
@@ -1231,7 +1026,6 @@ export const _internal = {
   hubPage,
   corridorPage,
   aboutPage,
-  explainerPage,
   notFoundPage,
   sitemap,
   esc,
@@ -1245,6 +1039,6 @@ export const _internal = {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const written = await generate();
   console.log(
-    `pages: ${written.length} written (${LOCATIONS.length} cities, 1 hub, ${CORRIDORS.length} corridors, 1 about, 1 explainer, 1 404), sitemap.xml updated`,
+    `pages: ${written.length} written (${LOCATIONS.length} cities, 1 hub, ${CORRIDORS.length} corridors, 1 about, /guides/, 1 404), sitemap.xml updated`,
   );
 }
