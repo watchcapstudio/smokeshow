@@ -7,8 +7,13 @@
 }
 
 html {
-  /* Only ever seen in overscroll, where it should read as more sky. */
-  background: var(--sky-hor);
+  /* iOS Safari paints this color in the status-bar strip above the content and
+     in overscroll. It has to be the TOP of the sky, not the bottom: --sky-hor
+     (the horizon) rendered as a greige band on the light pages and a brown one
+     on the app at dusk, seamed against the real sky below it. --sky-zen is the
+     zenith the gradient actually starts from, and it is a live variable the
+     SkyBackdrop updates, so the strip tracks the sky instead of fighting it. */
+  background: var(--sky-zen);
 }
 
 html,
