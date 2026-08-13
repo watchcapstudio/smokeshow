@@ -322,7 +322,7 @@ function page(loc) {
       async
     ></script>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#8ba9c4" />
     <title>${escAttr(title)}</title>
     <meta name="description" content="${escAttr(description)}" />
@@ -481,7 +481,7 @@ function editorialHead({ title, description, url }) {
       async
     ></script>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#8ba9c4" />
     <title>${escAttr(title)}</title>
     <meta name="description" content="${escAttr(description)}" />

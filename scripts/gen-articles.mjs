@@ -226,7 +226,7 @@ function articleHead(a) {
     <meta charset="UTF-8" />
 ${ANALYTICS_HEAD}
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#8ba9c4" />
     <title>${escAttr(title)}</title>
     <meta name="description" content="${escAttr(a.description)}" />
@@ -448,7 +448,7 @@ function articleHeadForHub({ title, description, url }) {
     <meta charset="UTF-8" />
 ${ANALYTICS_HEAD}
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#8ba9c4" />
     <title>${escAttr(title)}</title>
     <meta name="description" content="${escAttr(description)}" />
