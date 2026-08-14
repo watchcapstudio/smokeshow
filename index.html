@@ -59,6 +59,20 @@
           <path d="M0,300 L0,200 C200,175 360,215 560,195 C760,175 900,140 1120,165 C1280,183 1360,180 1440,170 L1440,300 Z" class="ridge-near" />
         </svg>
       </div>
+      <!-- The homepage's h1. The live map rides in the top canvas (Sky/Map
+           toggle), so this header is the only thing naming it: without it the
+           page shipped with no h1 at all and the map went unlabelled to
+           crawlers and screen readers alike. Same idiom as the city pages so
+           the two templates keep reading as one site. -->
+      <header class="map-intro">
+        <p class="eyebrow">Smoke forecast</p>
+        <h1 class="map-intro__title">Wildfire smoke map and forecast</h1>
+        <p class="map-intro__sub">
+          Where the smoke was, and where the model sends it next. Scrub back 12 hours or forward 48.
+          Every hour shown is a model estimate, not a measurement.
+        </p>
+      </header>
+
       <div id="cta-slot"></div>
 
       <!-- The reference material rides on the demo's bottom sheet rather than

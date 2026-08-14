@@ -397,3 +397,23 @@
 .smoke-map .fire-popup a.leaflet-popup-close-button {
   color: var(--map-chrome-text);
 }
+
+/* Map chrome, not a caption under the map. Same family as the coverage badge,
+   one size up in padding because this is a sentence rather than a label. */
+.smoke-map .smoke-map__notice {
+  /* A control, so Leaflet owns its placement in the top-right corner. The top
+     margin drops it clear of the verdict card, which is pinned over the map's
+     top-left at a steady 51px and reaches past the middle at every level. The
+     --fail-tiles check hit-tests this element, so a verdict that grows a line
+     shows up as a CI failure rather than as a notice nobody can read. */
+  max-width: min(320px, calc(100vw - 4rem));
+  margin: 46px 6px 0 0;
+  padding: 5px 9px;
+  border-radius: 10px;
+  background: var(--map-chrome);
+  border: 1px solid var(--map-chrome-edge);
+  color: var(--map-chrome-text);
+  font-size: 11px;
+  line-height: 1.45;
+  pointer-events: none;
+}
