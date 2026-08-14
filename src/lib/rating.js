@@ -159,6 +159,19 @@ export const SMOKE_BASEMAP_BACKDROPS = [
 // The headline backdrop — Positron's land fill, what most of the map is.
 export const SMOKE_BASEMAP_RGB = SMOKE_BASEMAP_BACKDROPS[0].rgb;
 
+// The dark twin: CARTO dark-matter (dark_nolabels), the basemap the web map
+// draws since it went dark to match iOS. Same idea, opposite direction: the
+// dark ramp BRIGHTENS with concentration, so its hardest backdrop is the
+// LIGHTEST tone the style paints, not the darkest — a brightening ramp that
+// clears the lightest fill clears every darker one. Sampled from live tiles
+// (z4/z7/z10/z12, land/urban/coast): land #262626, water #090909, and the
+// road-and-urban fills that top out around #2c2c2c.
+export const SMOKE_BASEMAP_BACKDROPS_DARK = [
+  { key: 'land', rgb: [38, 38, 38] },
+  { key: 'water', rgb: [9, 9, 9] },
+  { key: 'lightest fill', rgb: [44, 44, 44] },
+];
+
 // Translucent gray -> brown -> near-black ramp, opacity rising with
 // concentration. Not an AQI rainbow: this is meant to look like smoke, not a
 // legend.
@@ -195,23 +208,50 @@ const SMOKE_STOPS = [
   { pm25: 300, rgb: [20, 16, 15], alpha: 0.9 },
 ];
 
+// The dark-basemap ramp: pale on dark, intensity riding BRIGHTNESS — the same
+// field rendered for the opposite backdrop, exactly the direction that was
+// wrong on Positron. Neutral grey where the air is only slightly off, warming
+// to a light amber as it thickens: on black tiles a warm high end reads as
+// smoke lit from somewhere, where a neutral one reads as fog. Same stops, so
+// the perceptual weighting below 55 µg/m³ carries over unchanged.
+//
+// Hand-mirror of DARK_RAMP_* in scripts/render/ramp.py, the same way
+// SMOKE_STOPS mirrors RAMP_*; `npm run ramp` fails if either pair drifts.
+const SMOKE_STOPS_DARK = [
+  { pm25: 0, rgb: [96, 98, 102], alpha: 0 },
+  { pm25: 3, rgb: [122, 122, 124], alpha: 0.08 },
+  { pm25: 8, rgb: [150, 148, 144], alpha: 0.2 },
+  { pm25: 12, rgb: [172, 166, 152], alpha: 0.3 },
+  { pm25: 20, rgb: [196, 182, 152], alpha: 0.42 },
+  { pm25: 35, rgb: [216, 196, 148], alpha: 0.55 },
+  { pm25: 55, rgb: [232, 206, 140], alpha: 0.68 },
+  { pm25: 150, rgb: [244, 220, 150], alpha: 0.82 },
+  { pm25: 300, rgb: [252, 234, 176], alpha: 0.92 },
+];
+
 export const SMOKE_STOPS_FOR_AUDIT = SMOKE_STOPS;
+export const SMOKE_STOPS_DARK_FOR_AUDIT = SMOKE_STOPS_DARK;
+
+const stopsFor = (theme) => (theme === 'dark' ? SMOKE_STOPS_DARK : SMOKE_STOPS);
 
 // Numeric variant for per-pixel field rendering: [r, g, b, alpha 0-255].
-export function smokeRGBA(pm25) {
+// `theme` picks the ramp for the basemap actually under it — 'light'
+// (Positron, ramp darkens) or 'dark' (dark-matter, ramp brightens).
+export function smokeRGBA(pm25, theme = 'light') {
+  const stops = stopsFor(theme);
   const v = Math.max(0, pm25 ?? 0);
-  let lo = SMOKE_STOPS[0];
-  let hi = SMOKE_STOPS[SMOKE_STOPS.length - 1];
-  for (let i = 0; i < SMOKE_STOPS.length - 1; i++) {
-    if (v >= SMOKE_STOPS[i].pm25 && v <= SMOKE_STOPS[i + 1].pm25) {
-      lo = SMOKE_STOPS[i];
-      hi = SMOKE_STOPS[i + 1];
+  let lo = stops[0];
+  let hi = stops[stops.length - 1];
+  for (let i = 0; i < stops.length - 1; i++) {
+    if (v >= stops[i].pm25 && v <= stops[i + 1].pm25) {
+      lo = stops[i];
+      hi = stops[i + 1];
       break;
     }
   }
-  if (v >= SMOKE_STOPS[SMOKE_STOPS.length - 1].pm25) {
-    lo = SMOKE_STOPS[SMOKE_STOPS.length - 2];
-    hi = SMOKE_STOPS[SMOKE_STOPS.length - 1];
+  if (v >= stops[stops.length - 1].pm25) {
+    lo = stops[stops.length - 2];
+    hi = stops[stops.length - 1];
   }
   const span = hi.pm25 - lo.pm25 || 1;
   const t = Math.min(1, Math.max(0, (v - lo.pm25) / span));
@@ -223,8 +263,8 @@ export function smokeRGBA(pm25) {
   ];
 }
 
-export function smokeColorForPM25(pm25) {
-  const [r, g, b, a] = smokeRGBA(pm25);
+export function smokeColorForPM25(pm25, theme = 'light') {
+  const [r, g, b, a] = smokeRGBA(pm25, theme);
   return `rgba(${r}, ${g}, ${b}, ${(a / 255).toFixed(3)})`;
 }
 
@@ -234,13 +274,17 @@ export function smokeColorForPM25(pm25) {
 // the SAME direction the ramp does — a speck that runs the other way reads as
 // a hole punched in the plume. The ramp darkens, so the speck darkens.
 const ASH_SPECK_RGB = [12, 9, 8]; // the ramp's own dark end, pushed one notch
+// The dark ramp brightens, so its speck brightens: the bright end pushed one
+// notch, the same warm cast. Direction is the whole contract — see above.
+const ASH_SPECK_RGB_DARK = [255, 244, 190];
 const ASH_SPECK_MIX = 0.22; // how far toward it a speck travels
 const ASH_SPECK_ALPHA_GAIN = 1.3;
 const ASH_SPECK_ALPHA_FLOOR = 18; // keeps a speck visible in thin haze
 
-export function smokeSpeckRGBA(pm25) {
-  const [r, g, b, a] = smokeRGBA(pm25);
-  const lift = (c, i) => Math.round(c + (ASH_SPECK_RGB[i] - c) * ASH_SPECK_MIX);
+export function smokeSpeckRGBA(pm25, theme = 'light') {
+  const [r, g, b, a] = smokeRGBA(pm25, theme);
+  const target = theme === 'dark' ? ASH_SPECK_RGB_DARK : ASH_SPECK_RGB;
+  const lift = (c, i) => Math.round(c + (target[i] - c) * ASH_SPECK_MIX);
   return [
     lift(r, 0),
     lift(g, 1),
@@ -258,6 +302,13 @@ export function smokeSpeckRGBA(pm25) {
 // would read as dirt rather than texture.
 const ASH_GRAIN_RGB = [45, 35, 28];
 export const ASH_GRAIN_FILL = `rgba(${ASH_GRAIN_RGB.join(', ')}, 0.5)`;
+// Dark-theme grain: toward the bright end, and for the same reason the light
+// grain is not near-black, this is a warm pale amber rather than near-white —
+// 'source-atop' lands it on thin haze too, where white would read as glare.
+const ASH_GRAIN_RGB_DARK = [228, 210, 172];
+export const ASH_GRAIN_FILL_DARK = `rgba(${ASH_GRAIN_RGB_DARK.join(', ')}, 0.5)`;
+export const ashGrainFill = (theme = 'light') =>
+  theme === 'dark' ? ASH_GRAIN_FILL_DARK : ASH_GRAIN_FILL;
 
 // Fraction of stipple cells that become specks at a given field opacity
 // (0-1). Shared with the audit so the monotonicity proof measures the mix

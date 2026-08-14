@@ -6,15 +6,17 @@
 // a tile stub, because map tiles are the thing under test and a capture rig
 // that depends on CARTO being reachable is a capture rig that stops working.
 //
-// THE TILES ARE SYNTHETIC. `light_nolabels` is stubbed with a flat field at
-// SMOKE_BASEMAP_RGB — the tone SMOKE_STOPS is validated against — plus faint
-// vector furniture so the stack order is visible, including a fill at the
-// darkest tone in SMOKE_BASEMAP_BACKDROPS so the hardest backdrop for the
-// ramp is actually present in the capture. `light_only_labels` is stubbed with
-// dark place names on a transparent tile. That makes the composite arithmetic
-// in these captures real (the smoke really is being drawn over the basemap
-// tone and under the labels) while the cartography is not. Judge the ramp and
-// the layer order here; judge the cartography against the live site.
+// THE TILES ARE SYNTHETIC. The base tile is stubbed with a flat field at the
+// land tone of whichever band matches BASEMAP_THEME — the tones the theme's
+// ramp is validated against — plus faint vector furniture so the stack order
+// is visible, including a fill at the band's HARDEST tone for that ramp (the
+// darkest on a light basemap, the lightest on a dark one) so the hardest
+// backdrop is actually present in the capture. The labels tile is stubbed
+// with place names on a transparent tile, in the theme's own polarity. That
+// makes the composite arithmetic in these captures real (the smoke really is
+// being drawn over the basemap tone and under the labels) while the
+// cartography is not. Judge the ramp and the layer order here; judge the
+// cartography against the live site.
 //
 // Reads back, per level:
 //   - the smoke canvas's own pixels (mean RGBA of the covered field)
@@ -26,12 +28,17 @@
 import puppeteer from 'puppeteer-core';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { ugm3ToAqi } from '../src/lib/aqi.js';
-import { SMOKE_BASEMAP_BACKDROPS } from '../src/lib/rating.js';
+import { SMOKE_BASEMAP_BACKDROPS, SMOKE_BASEMAP_BACKDROPS_DARK } from '../src/lib/rating.js';
+import { BASEMAP_THEME } from '../src/lib/frames.js';
 
-// Imported, not transcribed: the stub tiles and the contrast columns below
-// both have to be the tones the ramp was validated against, or this rig
-// measures a map that doesn't exist.
-const [LAND, WATER, DARKEST] = SMOKE_BASEMAP_BACKDROPS.map((b) => b.rgb);
+// Imported, not transcribed: the theme, the stub tiles, and the contrast
+// columns below all have to be what the app actually draws and the tones its
+// ramp was validated against, or this rig measures a map that doesn't exist.
+const DARK = BASEMAP_THEME === 'dark';
+const BAND = DARK ? SMOKE_BASEMAP_BACKDROPS_DARK : SMOKE_BASEMAP_BACKDROPS;
+// Band entry 2 is the ramp's hardest backdrop either way — the darkest fill
+// under a darkening ramp, the lightest under a brightening one.
+const [LAND, WATER, HARDEST] = BAND.map((b) => b.rgb);
 const rgbCss = (c) => `rgb(${c.join(',')})`;
 
 const CHROME =
@@ -71,22 +78,28 @@ function series(pm) {
 const svg = (body) =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">${body}</svg>`;
 
-// CARTO light_nolabels (Positron): pale land, a water body, and a patch at the
-// darkest tone the ramp is audited against — the backdrop where a ramp running
-// the wrong way shows itself first. Everything here is below the smoke.
-const LIGHT_NOLABELS = svg(
+// The base tile: land, a water body, and a patch at the hardest tone the ramp
+// is audited against — the backdrop where a ramp running the wrong way shows
+// itself first. Road furniture sits a step off the land tone in the theme's
+// own direction (lighter roads on dark-matter, paler-than-land on Positron).
+// Everything here is below the smoke.
+const ROADS = DARK ? '#323232' : '#e2e0dc';
+const BASE_TILE = svg(
   `<rect width="256" height="256" fill="${rgbCss(LAND)}"/>` +
     `<path d="M0 176 C 60 150, 120 200, 256 168 L256 256 L0 256Z" fill="${rgbCss(WATER)}"/>` +
-    `<rect x="150" y="24" width="86" height="64" rx="4" fill="${rgbCss(DARKEST)}"/>` +
-    `<g stroke="#e2e0dc" stroke-width="3" fill="none">` +
+    `<rect x="150" y="24" width="86" height="64" rx="4" fill="${rgbCss(HARDEST)}"/>` +
+    `<g stroke="${ROADS}" stroke-width="3" fill="none">` +
     `<path d="M-10 60 L266 92"/><path d="M40 -10 L72 266"/><path d="M-10 210 L266 190"/>` +
     `</g>`,
 );
-// CARTO light_only_labels: dark place names with a pale halo, transparent
-// elsewhere. Drawn ABOVE the smoke, which is the point of the sandwich.
-const LIGHT_ONLY_LABELS = svg(
+// The labels tile: place names with a halo, transparent elsewhere, in the
+// theme's polarity — dark ink with a pale halo on Positron, pale ink with a
+// dark halo on dark-matter. Drawn ABOVE the smoke, which is the point of the
+// sandwich.
+const LABELS_TILE = svg(
   `<g font-family="Helvetica,Arial" font-size="11" text-anchor="middle" ` +
-    `paint-order="stroke" stroke="#fff" stroke-width="3" stroke-opacity="0.8" fill="#43484b">` +
+    `paint-order="stroke" stroke="${DARK ? '#000' : '#fff'}" stroke-width="3" ` +
+    `stroke-opacity="0.8" fill="${DARK ? '#c8cbcd' : '#43484b'}">` +
     `<text x="64" y="48">RIVERTON</text><text x="180" y="120">ASHFIELD</text>` +
     `<text x="96" y="212">LAKE BEND</text></g>`,
 );
@@ -168,8 +181,8 @@ for (const level of LEVELS) {
         body,
       });
 
-    if (url.includes('only_labels')) return tile(LIGHT_ONLY_LABELS);
-    if (url.includes('basemaps.cartocdn.com')) return tile(LIGHT_NOLABELS);
+    if (url.includes('only_labels')) return tile(LABELS_TILE);
+    if (url.includes('basemaps.cartocdn.com')) return tile(BASE_TILE);
     if (url.includes('air-quality')) {
       const n = (new URL(url).searchParams.get('latitude') || '').split(',').length;
       const one = { hourly: series(level.pm) };
@@ -304,7 +317,7 @@ const contrast = (a, b) => {
 const over = (fg, bg, a) => fg.map((c, i) => c * a + bg[i] * (1 - a));
 
 const pad = (s, w) => String(s).padEnd(w);
-console.log(`\nSMOKESHOW map verify — tag "${TAG}", ${BASE}`);
+console.log(`\nSMOKESHOW map verify — tag "${TAG}", ${BASE}, theme "${BASEMAP_THEME}"`);
 console.log(`  tiles are STUBBED (see header); ramp and layer order are real\n`);
 console.log(
   pad('level', 20) +
@@ -313,7 +326,7 @@ console.log(
     pad('cover', 8) +
     pad('vs land', 10) +
     pad('vs water', 10) +
-    'vs darkest',
+    `vs ${BAND[2].key}`,
 );
 console.log('-'.repeat(98));
 for (const r of rows) {
@@ -327,7 +340,7 @@ for (const r of rows) {
       pad(`${(r.cover * 100).toFixed(0)}%`, 8) +
       pad(vs(LAND), 10) +
       pad(vs(WATER), 10) +
-      vs(DARKEST),
+      vs(HARDEST),
   );
 }
 
@@ -352,7 +365,7 @@ console.log(`marker label: ${first.markerLabel ?? '(none)'}`);
 // measured on pixels a browser actually painted.
 let rising = true;
 console.log(`\nmeasured on the painted canvas:`);
-for (const { key, rgb: bg } of SMOKE_BASEMAP_BACKDROPS) {
+for (const { key, rgb: bg } of BAND) {
   const ratios = rows.map((r) =>
     r.rgba ? contrast(over(r.rgba.slice(0, 3), bg, r.rgba[3]), bg) : 0,
   );

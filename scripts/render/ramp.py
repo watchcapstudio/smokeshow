@@ -1,9 +1,10 @@
 """The smoke ramp, in Python. THE one Python copy — do not add another.
 
-`src/lib/rating.js` SMOKE_STOPS is the JS copy; these four arrays are its
-hand-mirror. `npm run ramp` (scripts/smoke-ramp-audit.mjs) parses THIS file
-and fails if the two disagree, so both renderers import from here rather than
-each carrying their own transcription.
+`src/lib/rating.js` SMOKE_STOPS is the JS copy of RAMP_*, and its
+SMOKE_STOPS_DARK is the JS copy of DARK_RAMP_*; these arrays are the
+hand-mirrors. `npm run ramp` (scripts/smoke-ramp-audit.mjs) parses THIS file
+and fails if either pair disagrees, so both renderers import from here rather
+than each carrying their own transcription.
 
 The default ramp DARKENS with concentration, because the basemap it sits on is
 CARTO Positron (light_nolabels) on the web and MapKit's light standard style in

@@ -1,5 +1,5 @@
 import L from 'leaflet';
-import { ASH_GRAIN_FILL, ashSpeckFraction, smokeRGBA, smokeSpeckRGBA } from '../lib/rating.js';
+import { ashGrainFill, ashSpeckFraction, smokeRGBA, smokeSpeckRGBA } from '../lib/rating.js';
 
 // Sample resolution: one field sample per BLOCK px, scaled up with canvas
 // smoothing. Small enough to look continuous, cheap enough for 60fps.
@@ -15,6 +15,10 @@ export class SmokeCanvasLayer extends L.Layer {
     super(options);
     this._field = null;
     this._image = null;
+    // The basemap theme the ramp must run opposite to. SmokeMap passes
+    // BASEMAP_THEME; the light default matches rating.js's, for anything
+    // (tests, rigs) that constructs the layer bare.
+    this._theme = options?.theme ?? 'light';
   }
 
   // meta: { lat0, lon0, latStep, lonStep, size }; valuesA/valuesB: flat
@@ -65,10 +69,11 @@ export class SmokeCanvasLayer extends L.Layer {
       for (let cx = 0; cx < 32; cx++) {
         const h = ((((cx * 73856093) ^ (cy * 19349663)) >>> 0) % 1000) / 1000;
         if (h < 0.14) {
-          // Pale, not dark: source-atop below keeps each speck's alpha equal to
-          // the plume's own, so a speck reads as denser smoke only if it moves
-          // toward the ramp's bright end. See ASH_GRAIN_FILL in rating.js.
-          tctx.fillStyle = ASH_GRAIN_FILL;
+          // source-atop below keeps each speck's alpha equal to the plume's
+          // own, so a speck reads as denser smoke only if it moves the same
+          // direction the ramp does. ashGrainFill() owns that direction per
+          // theme — see the pair of fills in rating.js.
+          tctx.fillStyle = ashGrainFill(this._theme);
           tctx.fillRect(cx * CELL, cy * CELL, 2, 2);
         }
       }
@@ -181,7 +186,7 @@ export class SmokeCanvasLayer extends L.Layer {
           valuesB[k10 + 1] * fi * fj;
         const v = a + (b - a) * t;
 
-        const [r, g, bl, al] = smokeRGBA(v);
+        const [r, g, bl, al] = smokeRGBA(v, this._theme);
         // Soften the grid's outer boundary so the field doesn't end in a wall.
         const edge = Math.min(ci, cj, n - ci, n - cj);
         const fade = Math.min(1, (edge + 0.5) / 1.25);
@@ -197,7 +202,7 @@ export class SmokeCanvasLayer extends L.Layer {
         const hash = ((((bx * 73856093) ^ (by * 19349663)) >>> 0) % 1000) / 1000;
         const p = (by * bw + bx) * 4;
         if (hash < ashSpeckFraction(a01)) {
-          const [sr, sg, sb, sa] = smokeSpeckRGBA(v);
+          const [sr, sg, sb, sa] = smokeSpeckRGBA(v, this._theme);
           data[p] = sr;
           data[p + 1] = sg;
           data[p + 2] = sb;

@@ -28,13 +28,21 @@ function withURLs(domain) {
   };
 }
 
+// THE basemap theme knob. The tiles SmokeMap draws, the pre-rendered domains
+// this module accepts, and the ramp the fallback painter uses all key off this
+// one constant — CLAUDE.md's rule is that the ramp always runs opposite the
+// tiles, and the two flips that broke it were both a theme changing in one
+// place and not the others. Flip it here and everything follows.
+export const BASEMAP_THEME = 'dark';
+
 function usable(domain) {
-  // Domains are published per basemap theme. This map draws CARTO dark-matter,
-  // so it takes the dark ones (hrrr-dark, cams-dark) — the amber ramp lightens
-  // with concentration, the way it must on dark tiles. Light and theme-less
-  // domains are for a light basemap and would sink the pale end of the ramp
-  // into pale tiles, the convergence the ramp exists to avoid.
-  if (domain?.theme !== 'dark') return false;
+  // Domains are published per basemap theme. This map draws CARTO dark-matter
+  // (BASEMAP_THEME), so it takes the dark ones (hrrr-dark, cams-dark) — the
+  // amber ramp lightens with concentration, the way it must on dark tiles.
+  // A domain with no theme predates the field and is light by definition;
+  // painting a mismatched domain here converges the ramp with the tiles, the
+  // exact thing it exists to avoid.
+  if ((domain?.theme ?? 'light') !== BASEMAP_THEME) return false;
   return (
     domain &&
     typeof domain.id === 'string' &&

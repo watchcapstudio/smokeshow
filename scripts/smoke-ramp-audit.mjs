@@ -1,16 +1,19 @@
-// Smoke-ramp audit — the check that gates SMOKE_STOPS.
+// Smoke-ramp audit — the check that gates SMOKE_STOPS and SMOKE_STOPS_DARK.
 //
 // The ramp has to run OPPOSITE the tiles it sits on, or the worst air on the
-// map converges with the basemap and disappears. The map runs CARTO Positron
-// (light_nolabels), so the ramp darkens with concentration. This script is the
-// proof, and it exists rather than a comment because the pair has been wrong
-// in both directions: a darkening ramp shipped on dark tiles once, and the
-// pale ramp that fixed that is now on light tiles and would be wrong again.
+// map converges with the basemap and disappears. Two ramps are published: the
+// darkening one for CARTO Positron (light_nolabels), the brightening amber one
+// for CARTO dark-matter (dark_nolabels, what the web map draws today). Each is
+// proved here against its own basemap's band. The proof is a script rather
+// than a comment because the pair has been wrong in both directions: a
+// darkening ramp shipped on dark tiles once, and the pale ramp that fixed
+// that shipped on light tiles next.
 //
-// A light basemap is not one colour — Positron runs from near-white land down
-// through water to its darkest fills — so everything below is measured against
-// the whole band (SMOKE_BASEMAP_BACKDROPS). Those are the style's nominal
-// tones, not sampled pixels; proving the property across a band rather than a
+// A basemap is not one colour — Positron runs from near-white land down
+// through water to its darkest fills, dark-matter from near-black water up to
+// its road fills — so everything below is measured against the whole band
+// (SMOKE_BASEMAP_BACKDROPS / _DARK). Those are nominal tones (the dark band
+// sampled from live tiles); proving the property across a band rather than a
 // point is what makes that acceptable.
 //
 // Three things are proved here, and any one of them failing exits non-zero:
@@ -45,10 +48,12 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import {
-  ASH_GRAIN_FILL,
   LEVELS,
   SMOKE_BASEMAP_BACKDROPS,
-  SMOKE_STOPS_FOR_AUDIT as STOPS,
+  SMOKE_BASEMAP_BACKDROPS_DARK,
+  SMOKE_STOPS_FOR_AUDIT,
+  SMOKE_STOPS_DARK_FOR_AUDIT,
+  ashGrainFill,
   ashSpeckFraction,
   smokeRGBA,
   smokeSpeckRGBA,
@@ -71,28 +76,44 @@ const ratioOfLum = (a, b) => {
 const contrast = (fg, bg) => ratioOfLum(luminance(fg), luminance(bg));
 const over = (fg, bg, a) => fg.map((c, i) => c * a + bg[i] * (1 - a));
 
-const BACKDROPS = SMOKE_BASEMAP_BACKDROPS;
-const PRIMARY = BACKDROPS[0];
+// Both published themes, each audited against its own basemap band. `py`
+// names the arrays in scripts/render/ramp.py this theme's JS stops must match.
+const THEMES = [
+  {
+    key: 'light',
+    basemap: 'CARTO Positron (light_nolabels)',
+    stops: SMOKE_STOPS_FOR_AUDIT,
+    backdrops: SMOKE_BASEMAP_BACKDROPS,
+    py: { stops: 'STOPS', r: 'RAMP_R', g: 'RAMP_G', b: 'RAMP_B', a: 'RAMP_A' },
+  },
+  {
+    key: 'dark',
+    basemap: 'CARTO dark-matter (dark_nolabels)',
+    stops: SMOKE_STOPS_DARK_FOR_AUDIT,
+    backdrops: SMOKE_BASEMAP_BACKDROPS_DARK,
+    py: { stops: 'STOPS', r: 'DARK_RAMP_R', g: 'DARK_RAMP_G', b: 'DARK_RAMP_B', a: 'DARK_RAMP_A' },
+  },
+];
 
 // ------------------------------------------------------- the paths that paint
 
 // Each path takes the backdrop it is painted on, because "does this read"
 // depends on both. 1. Flat: the ramp alone, which is what the HRRR PNGs carry
 // and what the field renders between specks.
-function flatLum(pm, base) {
-  const [r, g, b, a] = smokeRGBA(pm);
+function flatLum(pm, base, theme) {
+  const [r, g, b, a] = smokeRGBA(pm, theme);
   return luminance(over([r, g, b], base, a / 255));
 }
 
 // 2. Field stipple (SmokeCanvasLayer._redraw): a fraction of block samples are
 //    replaced wholesale by the speck colour+alpha. Mean luminance over a patch
 //    is what the eye integrates at this scale.
-function fieldLum(pm, base) {
-  const [, , , a] = smokeRGBA(pm);
+function fieldLum(pm, base, theme) {
+  const [, , , a] = smokeRGBA(pm, theme);
   const f = ashSpeckFraction(a / 255);
-  const [sr, sg, sb, sa] = smokeSpeckRGBA(pm);
+  const [sr, sg, sb, sa] = smokeSpeckRGBA(pm, theme);
   const speck = luminance(over([sr, sg, sb], base, sa / 255));
-  return (1 - f) * flatLum(pm, base) + f * speck;
+  return (1 - f) * flatLum(pm, base, theme) + f * speck;
 }
 
 // 3. Screen-space grain over a domain frame (SmokeCanvasLayer._redrawImage): a repeating
@@ -100,18 +121,19 @@ function fieldLum(pm, base) {
 //    keeps the destination's alpha and blends colour by the SOURCE alpha, so a
 //    speck is the plume colour pulled toward the grain fill — at the plume's
 //    own opacity. Coverage is 14% of 3x3 cells, each filled 2x2.
-const GRAIN = (() => {
-  const m = ASH_GRAIN_FILL.match(/rgba\(([^)]+)\)/);
+const grainFor = (theme) => {
+  const m = ashGrainFill(theme).match(/rgba\(([^)]+)\)/);
   const [r, g, b, a] = m[1].split(',').map(Number);
   return { rgb: [r, g, b], alpha: a };
-})();
+};
 const GRAIN_COVERAGE = 0.14 * (4 / 9);
 
-function grainLum(pm, base) {
-  const [r, g, b, a] = smokeRGBA(pm);
-  const blended = [r, g, b].map((c, i) => c * (1 - GRAIN.alpha) + GRAIN.rgb[i] * GRAIN.alpha);
+function grainLum(pm, base, theme) {
+  const grain = grainFor(theme);
+  const [r, g, b, a] = smokeRGBA(pm, theme);
+  const blended = [r, g, b].map((c, i) => c * (1 - grain.alpha) + grain.rgb[i] * grain.alpha);
   const speck = luminance(over(blended, base, a / 255));
-  return (1 - GRAIN_COVERAGE) * flatLum(pm, base) + GRAIN_COVERAGE * speck;
+  return (1 - GRAIN_COVERAGE) * flatLum(pm, base, theme) + GRAIN_COVERAGE * speck;
 }
 
 const PATHS = [
@@ -172,7 +194,7 @@ const COLUMNS = [0, 5, 12, 20, 35, 55, 150, 250, 300, 400, 600, 1000];
 
 const pad = (s, w) => String(s).padEnd(w);
 const col = (x) => x.toFixed(2).padStart(7);
-const ratioAt = (lum, base) => (pm) => ratioOfLum(lum(pm, base), luminance(base));
+const ratioAt = (lum, base, theme) => (pm) => ratioOfLum(lum(pm, base, theme), luminance(base));
 
 // Measured against the RUNNING MAXIMUM, not the previous sample, and gated on
 // magnitude rather than on exact numerical monotonicity. The question that
@@ -192,12 +214,12 @@ const ratioAt = (lum, base) => (pm) => ratioOfLum(lum(pm, base), luminance(base)
 // less than moderate air.
 const MONO_TOLERANCE = 0.02;
 
-function monotonicity(lum, base) {
+function monotonicity(lum, base, theme) {
   let peak = -Infinity;
   let worst = 0;
   let firstAt = null;
   let breaks = 0;
-  const r = ratioAt(lum, base);
+  const r = ratioAt(lum, base, theme);
   for (let v = 0; v <= SWEEP_MAX; v = Number((v + SWEEP_STEP).toFixed(4))) {
     const cur = r(v);
     peak = Math.max(peak, cur);
@@ -215,24 +237,26 @@ function monotonicity(lum, base) {
 
 const RAMP_PY = join(here, 'render', 'ramp.py');
 
-function pythonRamp() {
+function pythonRamp(names) {
   const src = readFileSync(RAMP_PY, 'utf8');
   const grab = (name) => {
-    const m = src.match(new RegExp(`${name}\\s*=\\s*np\\.array\\(\\[([^\\]]*)\\]`));
+    // \b anchors the name: RAMP_R must not match inside DARK_RAMP_R.
+    const m = src.match(new RegExp(`\\b${name}\\s*=\\s*np\\.array\\(\\[([^\\]]*)\\]`));
     if (!m) throw new Error(`render/ramp.py: could not find ${name}`);
     return m[1].split(',').map((s) => Number(s.trim()));
   };
   return {
-    stops: grab('STOPS'),
-    r: grab('RAMP_R'),
-    g: grab('RAMP_G'),
-    b: grab('RAMP_B'),
-    a: grab('RAMP_A'),
+    stops: grab(names.stops),
+    r: grab(names.r),
+    g: grab(names.g),
+    b: grab(names.b),
+    a: grab(names.a),
   };
 }
 
-function syncReport() {
-  const py = pythonRamp();
+function syncReport(theme) {
+  const STOPS = theme.stops;
+  const py = pythonRamp(theme.py);
   const problems = [];
   if (py.stops.length !== STOPS.length) {
     problems.push(`stop count: js ${STOPS.length}, py ${py.stops.length}`);
@@ -253,79 +277,102 @@ function syncReport() {
 
 // ----------------------------------------------------------------- the report
 
-console.log(`\nSMOKESHOW smoke-ramp audit`);
-console.log(`  basemap: CARTO Positron (light_nolabels)`);
-console.log(
-  `  backdrops: ` + BACKDROPS.map((b) => `${b.key} rgb(${b.rgb.join(',')})`).join(' · '),
-);
-console.log(`  sweep:   0-${SWEEP_MAX} µg/m³ at ${SWEEP_STEP} steps\n`);
+console.log(`\nSMOKESHOW smoke-ramp audit — both published themes`);
+console.log(`  sweep: 0-${SWEEP_MAX} µg/m³ at ${SWEEP_STEP} steps`);
 
-console.log(`composited contrast against ${PRIMARY.key}, rgb(${PRIMARY.rgb.join(',')})`);
-console.log(pad('ramp', 22) + COLUMNS.map((p) => String(p).padStart(7)).join(''));
-console.log('-'.repeat(22 + 7 * COLUMNS.length));
-console.log(
-  pad('previous (replaced)', 22) +
-    COLUMNS.map((p) => col(ratioAt(prevLum, PRIMARY.rgb)(p))).join(''),
-);
-for (const p of PATHS) {
-  console.log(
-    pad(`shipped · ${p.key}`, 22) + COLUMNS.map((c) => col(ratioAt(p.lum, PRIMARY.rgb)(c))).join(''),
-  );
-}
-
-console.log(`\n1. monotonicity, every path on every backdrop`);
-const monoFails = [];
-for (const base of BACKDROPS) {
-  for (const p of PATHS) {
-    const m = monotonicity(p.lum, base.rgb);
-    const ok = m.breaks === 0;
-    if (!ok) monoFails.push(`${p.key} on ${base.key}`);
-    const r = ratioAt(p.lum, base.rgb);
-    console.log(
-      `   ${ok ? 'PASS' : 'FAIL'}  ${pad(base.key, 14)}${pad(p.key, 18)} ` +
-        (ok
-          ? `rises ${r(0).toFixed(2)} -> ${r(SWEEP_MAX).toFixed(2)}` +
-            `, worst dip ${m.worst.toFixed(4)} (tolerance ${MONO_TOLERANCE})`
-          : `dips ${m.worst.toFixed(4)} below its running peak, first past tolerance at ${m.firstAt} µg/m³`),
-    );
-  }
-}
-// The same sweep on what we replaced, so the failure mode stays on the record.
-const prevMono = monotonicity(prevLum, PRIMARY.rgb);
-console.log(
-  `   ----  previous ramp on ${PRIMARY.key}: dips ${prevMono.worst.toFixed(4)} below its peak` +
-    (prevMono.breaks ? `, first past tolerance at ${prevMono.firstAt} µg/m³` : '') +
-    ` — the pale ramp, measured where it would now be sitting`,
-);
-
-console.log(`\n2. rating thresholds separate (flat ramp on ${PRIMARY.key})`);
 // Each level's ceiling, plus a mid-band probe, must clear the one below it by a
 // margin the eye can find. 15% of the ratio is roughly a just-noticeable step
 // at these luminances.
 const MIN_STEP = 1.15;
-const probes = LEVELS.filter((l) => l.max !== Infinity).map((l) => ({ name: l.name, pm: l.max }));
-probes.push({ name: 'Smokeshow', pm: 300 });
-let sepFails = 0;
-const flatOnPrimary = ratioAt(flatLum, PRIMARY.rgb);
-let prevRatio = flatOnPrimary(0);
-let prevName = 'clean air (0)';
-for (const p of probes) {
-  const r = flatOnPrimary(p.pm);
-  const step = r / prevRatio;
-  const ok = step >= MIN_STEP;
-  if (!ok) sepFails++;
-  console.log(
-    `   ${ok ? 'PASS' : 'FAIL'}  ${pad(`${p.name} @ ${p.pm}`, 26)} ${r.toFixed(2)}:1` +
-      `  (x${step.toFixed(2)} over ${prevName})`,
-  );
-  prevRatio = r;
-  prevName = p.name;
-}
 
-console.log(`\n3. scripts/render/ramp.py in sync with SMOKE_STOPS`);
-const drift = syncReport();
-if (drift.length) for (const d of drift) console.log(`   FAIL  ${d}`);
-else console.log(`   PASS  all ${STOPS.length} stops match`);
+const monoFails = [];
+let sepFails = 0;
+const driftFails = [];
+let palFail = 0;
+
+for (const theme of THEMES) {
+  const BACKDROPS = theme.backdrops;
+  const PRIMARY = BACKDROPS[0];
+  const t = theme.key;
+
+  console.log(`\n${'='.repeat(78)}`);
+  console.log(`${t.toUpperCase()} ramp — ${theme.basemap}`);
+  console.log(
+    `  backdrops: ` + BACKDROPS.map((b) => `${b.key} rgb(${b.rgb.join(',')})`).join(' · '),
+  );
+
+  console.log(`\ncomposited contrast against ${PRIMARY.key}, rgb(${PRIMARY.rgb.join(',')})`);
+  console.log(pad('ramp', 22) + COLUMNS.map((p) => String(p).padStart(7)).join(''));
+  console.log('-'.repeat(22 + 7 * COLUMNS.length));
+  if (t === 'light') {
+    console.log(
+      pad('previous (replaced)', 22) +
+        COLUMNS.map((p) => col(ratioAt(prevLum, PRIMARY.rgb, t)(p))).join(''),
+    );
+  }
+  for (const p of PATHS) {
+    console.log(
+      pad(`shipped · ${p.key}`, 22) +
+        COLUMNS.map((c) => col(ratioAt(p.lum, PRIMARY.rgb, t)(c))).join(''),
+    );
+  }
+
+  console.log(`\n1. monotonicity, every path on every backdrop`);
+  for (const base of BACKDROPS) {
+    for (const p of PATHS) {
+      const m = monotonicity(p.lum, base.rgb, t);
+      const ok = m.breaks === 0;
+      if (!ok) monoFails.push(`${t}: ${p.key} on ${base.key}`);
+      const r = ratioAt(p.lum, base.rgb, t);
+      console.log(
+        `   ${ok ? 'PASS' : 'FAIL'}  ${pad(base.key, 14)}${pad(p.key, 18)} ` +
+          (ok
+            ? `rises ${r(0).toFixed(2)} -> ${r(SWEEP_MAX).toFixed(2)}` +
+              `, worst dip ${m.worst.toFixed(4)} (tolerance ${MONO_TOLERANCE})`
+            : `dips ${m.worst.toFixed(4)} below its running peak, first past tolerance at ${m.firstAt} µg/m³`),
+      );
+    }
+  }
+  if (t === 'light') {
+    // The same sweep on what we replaced, so the failure mode stays on the record.
+    const prevMono = monotonicity(prevLum, PRIMARY.rgb, t);
+    console.log(
+      `   ----  previous ramp on ${PRIMARY.key}: dips ${prevMono.worst.toFixed(4)} below its peak` +
+        (prevMono.breaks ? `, first past tolerance at ${prevMono.firstAt} µg/m³` : '') +
+        ` — the pale ramp, measured where it would now be sitting`,
+    );
+  }
+
+  console.log(`\n2. rating thresholds separate (flat ramp on ${PRIMARY.key})`);
+  const probes = LEVELS.filter((l) => l.max !== Infinity).map((l) => ({ name: l.name, pm: l.max }));
+  probes.push({ name: 'Smokeshow', pm: 300 });
+  const flatOnPrimary = ratioAt(flatLum, PRIMARY.rgb, t);
+  let prevRatio = flatOnPrimary(0);
+  let prevName = 'clean air (0)';
+  for (const p of probes) {
+    const r = flatOnPrimary(p.pm);
+    const step = r / prevRatio;
+    const ok = step >= MIN_STEP;
+    if (!ok) sepFails++;
+    console.log(
+      `   ${ok ? 'PASS' : 'FAIL'}  ${pad(`${p.name} @ ${p.pm}`, 26)} ${r.toFixed(2)}:1` +
+        `  (x${step.toFixed(2)} over ${prevName})`,
+    );
+    prevRatio = r;
+    prevName = p.name;
+  }
+
+  console.log(`\n3. scripts/render/ramp.py ${theme.py.r.replace(/_R$/, '_*')} in sync with the JS stops`);
+  const drift = syncReport(theme);
+  if (drift.length) {
+    for (const d of drift) console.log(`   FAIL  ${d}`);
+    driftFails.push(t);
+  } else {
+    console.log(`   PASS  all ${theme.stops.length} stops match`);
+  }
+
+  palFail += paletteCheck(theme);
+}
 
 // --------------------------------------------------------- the shipped palette
 
@@ -333,13 +380,13 @@ else console.log(`   PASS  all ${STOPS.length} stops match`);
 // check them against this file's own smokeRGBA(). This closes the loop the
 // text-diff above cannot: the arrays could match perfectly and the palette
 // still be sampled along a curve that skips part of the ramp.
-function shippedPalette() {
+function shippedPalette(themeKey) {
   const py = `
 import sys, json
 sys.path.insert(0, ${JSON.stringify(join(here, 'render', '..'))})
 from render.ramp import palette, index_to_pm25, PALETTE_N
 import numpy as np
-rgb, alpha = palette()
+rgb, alpha = palette(${JSON.stringify(themeKey)})
 print(json.dumps({
   "pm": [float(x) for x in index_to_pm25(np.arange(PALETTE_N))],
   "rgb": list(rgb), "alpha": list(alpha),
@@ -349,18 +396,22 @@ print(json.dumps({
   return JSON.parse(r.stdout);
 }
 
-console.log(`\n4. shipped PNG-8 palette is the ramp`);
-const pal = shippedPalette();
-let palFail = 0;
-if (pal.skip) {
-  console.log(`   SKIP  could not run python3 + numpy (${pal.skip})`);
-  console.log(`         the frames' actual encoding is UNVERIFIED in this run`);
-} else {
+// Check 4 for one theme; returns the number of failed sub-checks. Hoisted —
+// the theme loop above calls it.
+function paletteCheck(theme) {
+  console.log(`\n4. shipped PNG-8 palette is the ramp`);
+  const pal = shippedPalette(theme.key);
+  let fails = 0;
+  if (pal.skip) {
+    console.log(`   SKIP  could not run python3 + numpy (${pal.skip})`);
+    console.log(`         the frames' actual encoding is UNVERIFIED in this run`);
+    return fails;
+  }
   let worstRGB = 0;
   let worstA = 0;
   let worstStep = 0;
   for (let i = 0; i < pal.pm.length; i++) {
-    const [r, g, b, a] = smokeRGBA(pal.pm[i]);
+    const [r, g, b, a] = smokeRGBA(pal.pm[i], theme.key);
     worstRGB = Math.max(
       worstRGB,
       Math.abs(r - pal.rgb[i * 3]),
@@ -387,7 +438,7 @@ if (pal.skip) {
       luminance(base.rgb),
     );
 
-  const palMono = BACKDROPS.map((base) => {
+  const palMono = theme.backdrops.map((base) => {
     let peak = -Infinity;
     let worst = 0;
     for (let i = 0; i < pal.pm.length; i++) {
@@ -405,9 +456,9 @@ if (pal.skip) {
   // A palette step bigger than a few alpha units would band visibly on a
   // smooth plume — the reason the index curve is quadratic, not linear.
   const okStep = worstStep <= 4;
-  if (!okMatch) palFail++;
-  if (!okMono) palFail++;
-  if (!okStep) palFail++;
+  if (!okMatch) fails++;
+  if (!okMono) fails++;
+  if (!okStep) fails++;
   console.log(
     `   ${okMatch ? 'PASS' : 'FAIL'}  ${pad('matches smokeRGBA', 18)} ` +
       `worst rgb ${worstRGB}, worst alpha ${worstA} (of 255)`,
@@ -424,14 +475,15 @@ if (pal.skip) {
     `   ${okStep ? 'PASS' : 'FAIL'}  ${pad('no banding', 18)} ` +
       `largest alpha step between adjacent indices: ${worstStep}/255`,
   );
+  return fails;
 }
 
 // Not a gate, but the number a reader will ask about: above the top stop the
 // ramp is flat, so the map stops differentiating there. Printed so the ceiling
 // is a decision on the record rather than a surprise during a smoke event.
-const top = STOPS[STOPS.length - 1];
+const top = SMOKE_STOPS_FOR_AUDIT[SMOKE_STOPS_FOR_AUDIT.length - 1];
 console.log(
-  `\nceiling: the ramp saturates at ${top.pm25} µg/m³ (alpha ${top.alpha}); above that the map` +
+  `\nceiling: both ramps saturate at ${top.pm25} µg/m³; above that the map` +
     `\n  reads one flat tone and the verdict text carries the number. Every ramp this map` +
     `\n  has shipped saturated the same way, so this is unchanged behaviour.`,
 );
@@ -439,9 +491,11 @@ console.log(
 const failures = [];
 if (monoFails.length) failures.push(`monotonicity (${monoFails.join(', ')})`);
 if (sepFails) failures.push(`threshold separation (${sepFails})`);
-if (drift.length) failures.push('render/ramp.py drift');
+if (driftFails.length) failures.push(`render/ramp.py drift (${driftFails.join(', ')})`);
 if (palFail) failures.push(`shipped palette (${palFail})`);
 console.log(
-  failures.length ? `\nFAIL: ${failures.join('; ')}\n` : `\nPASS: ramp is monotonic, separated, and in sync\n`,
+  failures.length
+    ? `\nFAIL: ${failures.join('; ')}\n`
+    : `\nPASS: both ramps are monotonic, separated, and in sync\n`,
 );
 process.exit(failures.length ? 1 : 0);
