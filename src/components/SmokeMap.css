@@ -33,7 +33,12 @@
  * the pill measured over each backdrop in turn.
  */
 .smoke-map {
-  --map-surface: #f2f0ec;
+  /* The tile background, not the paper tone. The basemap is CARTO dark-matter
+     (#262626 land over #090909 ocean); this paints wherever tiles are not —
+     before the first tile lands, while a resize streams new edge tiles in, and
+     beyond the world at min zoom. Cream here framed the map in white every
+     time coverage lagged the container. */
+  --map-surface: #090909;
   --map-chrome: rgba(250, 249, 246, 0.86);
   --map-chrome-edge: rgba(24, 26, 28, 0.14); /* the pill is 1.07:1 on bare tiles — without this it has no edge */
   --map-chrome-text: #3a4042; /* 9.9:1 on the pill over tiles, 7.6:1 over heavy smoke */
@@ -45,8 +50,6 @@
   border-radius: 1rem;
   overflow: hidden;
   border: 1px solid var(--border);
-  /* Painted before the first tile lands, so the map fades up out of the paper
-     tone instead of flashing Leaflet's default gray. */
   background: var(--map-surface);
 }
 
