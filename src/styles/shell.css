@@ -7,13 +7,18 @@
 }
 
 html {
-  /* iOS Safari paints this color in the status-bar strip above the content and
-     in overscroll. It has to be the TOP of the sky, not the bottom: --sky-hor
-     (the horizon) rendered as a greige band on the light pages and a brown one
-     on the app at dusk, seamed against the real sky below it. --sky-zen is the
-     zenith the gradient actually starts from, and it is a live variable the
-     SkyBackdrop updates, so the strip tracks the sky instead of fighting it. */
-  background: var(--sky-zen);
+  /* iOS Safari paints this colour into every strip no element can reach: behind
+     the status bar, behind the bottom toolbar, and in overscroll. It must be
+     the top of the sky AS PAINTED — --sky-canvas, which SkyBackdrop composites
+     from the zenith and the contrast scrim over it (lib/ink.js).
+
+     --sky-zen, the raw zenith, is the wrong colour and is why the blue band
+     above and below the sky kept coming back: the scrim runs up to 0.36 of
+     cream, which moves the sky ~60 levels off the zenith it was authored from,
+     so the strip banded against the sky it was supposed to continue. The
+     fallback is only for the static pages, which ship before any JS runs and
+     carry no scrim. */
+  background: var(--sky-canvas, var(--sky-zen));
 }
 
 html,
@@ -342,10 +347,11 @@ body {
   container-name: stage;
 }
 
-/* The sky fills the whole stage (which is now full width). */
-.app--stage .sky {
-  position: absolute;
-}
+/* The sky is NOT anchored to the stage. It used to be absolute inside it, which
+   tied the backdrop to a 100dvh box and left the page canvas showing behind
+   Safari's bars and below the fold. It is a fixed, full-screen layer now (see
+   SkyBackdrop.css) and renders as a sibling of .stage so the stage's overflow
+   and container-type cannot clip or contain it. */
 
 /* The sky window: a centred content column over the full-bleed backdrop. */
 .window {

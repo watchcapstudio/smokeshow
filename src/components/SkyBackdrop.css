@@ -3,7 +3,16 @@
    except the values behind those variables. */
 .sky {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  /* NOT inset: 0. A fixed element sized to the layout viewport stops at
+     Safari's bars, and the flat page canvas behind them read as blue strips
+     above and below the sky — the bug that kept coming back. 100lvh is the
+     viewport with the bars retracted, i.e. the whole screen, so the sky runs
+     behind the status bar and the toolbar at every scroll position and there
+     is no canvas left to show. Full bleed, always. */
+  height: 100lvh;
   z-index: -1; /* behind the app, above the page canvas */
   overflow: hidden;
   pointer-events: none;

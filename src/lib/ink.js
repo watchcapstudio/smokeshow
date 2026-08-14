@@ -194,6 +194,14 @@ export function inkPlan(sky, target = AA_BODY) {
     onAccent: isDark ? INK_ON_LIGHT_AIR : INK_ON_DARK_AIR,
     scrim: [a0, a1, a2],
     scrimPeak: Math.max(a0, a1, a2),
+    // The colour the sky IS at its top edge, scrim included — not the colour it
+    // was authored as. iOS paints the page canvas into every strip no element
+    // can reach: behind the status bar, behind the toolbar, in the rubber band.
+    // That canvas has to carry this composited colour. Painted with the raw
+    // zenith instead, it sat a full veil away from the sky it was supposed to
+    // continue (0.36 of cream is ~60 levels), which is the blue band above and
+    // below the sky that kept coming back every time the scrim moved.
+    canvasTop: a0 > 0 ? composite(veil, zen, a0) : [...zen],
     worstRatio,
   };
 }

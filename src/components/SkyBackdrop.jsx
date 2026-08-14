@@ -110,6 +110,10 @@ export default function SkyBackdrop({ pm25, date, lat, lon, showsSun = true, pla
       root.classList.toggle('dark-air', plan.isDark);
 
       const veil = hexToRgb(plan.inkInverse);
+      // The canvas colour behind Safari's bars: the sky as painted, scrim and
+      // all, so those strips continue the sky instead of banding against it.
+      set('--sky-canvas', rgbCss(plan.canvasTop));
+
       set('--scrim-zen', rgbaCss(veil, plan.scrim[0]));
       set('--scrim-mid', rgbaCss(veil, plan.scrim[1]));
       set('--scrim-hor', rgbaCss(veil, plan.scrim[2]));

@@ -92,6 +92,27 @@ describe('inkPlan', () => {
     }
   });
 
+  // The canvas colour is what iOS paints behind its bars, so it has to be the
+  // sky as painted, not as authored. When the scrim is doing real work, the two
+  // are far enough apart to read as a band.
+  it('reports the top of the sky with the scrim already composited in', () => {
+    for (const [lat, lon] of [
+      [41.54, -73.3],
+      [64.84, -147.72],
+    ]) {
+      for (const pm of [0, 20, 100]) {
+        for (let h = 0; h < 24; h += 3) {
+          const sky = skyFor(pm, new Date(Date.UTC(2026, 7, 14, h)), lat, lon);
+          const plan = inkPlan(sky);
+          const veil = hexToRgb(plan.inkInverse);
+          const expected =
+            plan.scrim[0] > 0 ? composite(veil, sky.zenithRGB, plan.scrim[0]) : sky.zenithRGB;
+          expect(plan.canvasTop).toEqual([...expected]);
+        }
+      }
+    }
+  });
+
   // The invariant the whole module exists for. scripts/contrast-audit.mjs
   // runs the wide version of this; here it is small enough to be a unit test.
   it('holds 4.5:1 for every level at every hour, at both extremes of latitude', () => {
