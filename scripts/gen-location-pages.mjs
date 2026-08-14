@@ -29,6 +29,8 @@ import {
   sourceLinks,
   breadcrumbJsonLd,
   mastheadSky,
+  sheetRidge,
+  pageHead,
 } from './lib/page.mjs';
 import { generateArticles, articleRoutes } from './gen-articles.mjs';
 
@@ -294,59 +296,11 @@ function page(loc) {
   // a share card, because it does not know one.
   const ogImage = `${ORIGIN}/api/og?place=${encodeURIComponent(loc.label)}`;
 
-  return `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
+  // The place script is read by App.jsx before geolocation is requested: this
+  // page already knows which place it is about, so it must never prompt for
+  // location. A reader who landed on a city page asked for that city.
+  const placeScript = `
 
-    <!-- Google tag (gtag.js). Charset stays first so it lands well inside the
-         first 1024 bytes the HTML spec requires; the tag is otherwise as early
-         as it can be. \`async\` keeps it off the critical path, because the verdict must
-         still paint in under 3 seconds on cellular. -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XTJYZ1SJCE"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag('js', new Date());
-
-      gtag('config', 'G-XTJYZ1SJCE');
-    </script>
-
-    <!-- Ahrefs Web Analytics. Same deal as gtag above: \`async\` so it never
-         blocks the verdict paint. -->
-    <script
-      src="https://analytics.ahrefs.com/analytics.js"
-      data-key="xS18hHzOPE0qaqi0SF8mDA"
-      async
-    ></script>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#8ba9c4" />
-    <title>${escAttr(title)}</title>
-    <meta name="description" content="${escAttr(description)}" />
-    <link rel="canonical" href="${escAttr(url)}" />
-
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="SMOKESHOW" />
-    <meta property="og:title" content="${escAttr(title)}" />
-    <meta property="og:description" content="${escAttr(description)}" />
-    <meta property="og:url" content="${escAttr(url)}" />
-    <meta property="og:image" content="${escAttr(ogImage)}" />
-    <meta name="twitter:card" content="summary_large_image" />
-
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="apple-mobile-web-app-title" content="SMOKESHOW" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="manifest" href="/site.webmanifest" />
-
-    <!-- Read by App.jsx before geolocation is requested: this page already
-         knows which place it is about, so it must never prompt for location.
-         A reader who landed on a ${esc(loc.name)} page asked for ${esc(loc.name)}. -->
     <script>
       window.__SMOKESHOW_PLACE__ = ${jsonForScript({
         lat: loc.lat,
@@ -354,15 +308,19 @@ function page(loc) {
         label: loc.label,
         slug: loc.slug,
       })};
-    </script>
-  </head>
-  <body>
+    </script>`;
+
+  return `${pageHead({ title, description, url, ogImage, webApp: true, extraHead: placeScript })}
     <div id="root"></div>
 
     <!-- Server-delivered SEO content. Deliberately static HTML (not
-         React-rendered) so crawlers see it in the initial payload. -->
-    <div class="app app--bottom">
+         React-rendered) so crawlers see it in the initial payload. The ridge is
+         the masthead's hills without its sky: the live sky above stays the
+         instrument, and the hills keep the reading half on the same horizon as
+         the guides at any hour. -->
+    <div class="app app--bottom">${sheetRidge()}
       <header class="map-intro">
+        <p class="eyebrow">Smoke forecast</p>
         <h1 class="map-intro__title">Wildfire smoke in ${esc(loc.label)}</h1>
         <p class="map-intro__sub">
           Where the smoke over ${esc(loc.name)} was, and where the model sends it next. Scrub back 12
@@ -457,50 +415,7 @@ ${breadcrumbJsonLd([
 // ---------------------------------------------------------------------------
 
 function editorialHead({ title, description, url }) {
-  return `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-
-    <!-- Same analytics tags, same reasoning, as index.html and the city pages:
-         charset first, both async so neither is ever on a critical path. -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XTJYZ1SJCE"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag('js', new Date());
-
-      gtag('config', 'G-XTJYZ1SJCE');
-    </script>
-
-    <script
-      src="https://analytics.ahrefs.com/analytics.js"
-      data-key="xS18hHzOPE0qaqi0SF8mDA"
-      async
-    ></script>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#8ba9c4" />
-    <title>${escAttr(title)}</title>
-    <meta name="description" content="${escAttr(description)}" />
-    <link rel="canonical" href="${escAttr(url)}" />
-
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="SMOKESHOW" />
-    <meta property="og:title" content="${escAttr(title)}" />
-    <meta property="og:description" content="${escAttr(description)}" />
-    <meta property="og:url" content="${escAttr(url)}" />
-    <meta property="og:image" content="${escAttr(`${ORIGIN}/api/og`)}" />
-    <meta name="twitter:card" content="summary_large_image" />
-
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="apple-mobile-web-app-title" content="SMOKESHOW" />
-    <link rel="manifest" href="/site.webmanifest" />
-  </head>
-  <body>${mastheadSky()}`;
+  return `${pageHead({ title, description, url })}${mastheadSky()}`;
 }
 
 // One row per city: the link, and an EMPTY slot the browser fills with a live
@@ -568,6 +483,7 @@ function hubPage() {
   return `${editorialHead({ title, description, url })}
     <div class="app app--bottom">
       <header class="map-intro">
+        <p class="eyebrow">Directory</p>
         <h1 class="map-intro__title">Wildfire smoke forecasts by city</h1>
         <p class="map-intro__sub">
           One page per city, each answering the same question: how bad is the air here, and when
@@ -680,6 +596,7 @@ function aboutPage() {
   return `${editorialHead({ title, description, url })}
     <div class="app app--bottom">
       <header class="map-intro">
+        <p class="eyebrow">About</p>
         <h1 class="map-intro__title">Why we made Smokeshow</h1>
         <p class="map-intro__sub">
           One page, one question. How bad is the air here, and when does it clear.
@@ -809,6 +726,7 @@ function notFoundPage() {
   })}
     <div class="app app--bottom">
       <header class="map-intro">
+        <p class="eyebrow">Not found</p>
         <h1 class="map-intro__title">That page does not exist</h1>
         <p class="map-intro__sub">
           Probably a city we do not cover yet, or a typo in the address. Both are fixable from here.
@@ -878,6 +796,7 @@ function corridorPage(corridor) {
   return `${editorialHead({ title, description: corridor.description, url })}
     <div class="app app--bottom">
       <header class="map-intro">
+        <p class="eyebrow">Corridor</p>
         <h1 class="map-intro__title">${esc(corridor.name)}</h1>
         <p class="map-intro__sub">${esc(corridor.lede)}</p>
       </header>

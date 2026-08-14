@@ -98,6 +98,8 @@ cream sheet. Hub, corridors, about, 404, guides hub, articles. No third
 template; the corridor/hub/about pages are reading pages that happen to be
 generated from data instead of markdown.
 
+Status: moves 1 through 3 are implemented on this branch. Move 4 remains open.
+
 Getting there is four moves, ordered by value:
 
 1. **Give the city pages' bottom half the ridge.** Render the masthead ridge

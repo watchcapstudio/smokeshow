@@ -24,12 +24,11 @@ import {
   escAttr,
   jsonForScript,
   DISCLAIMER,
-  ANALYTICS_HEAD,
-  APP_ICON_HEAD,
   footer,
   sourceLinks,
   breadcrumbJsonLd,
   mastheadSky,
+  pageHead,
 } from './lib/page.mjs';
 
 // Body token: {{sources:forecast}} expands to the credited source links for a
@@ -215,35 +214,19 @@ function faqJsonLd(faq) {
 
 // ---------------------------------------------------------------- fragments
 
-// The shared document head. og:type is "article" here (the editorial pages use
-// "website"), which is the pairing Google and the social unfurlers expect for a
-// dated post carrying BlogPosting data.
+// The shared document head, from pageHead() like every other page. og:type is
+// "article" here (the editorial pages use "website"), which is the pairing
+// Google and the social unfurlers expect for a dated post carrying BlogPosting
+// data; og:title drops the tab suffix so the unfurl reads as the headline.
 function articleHead(a) {
-  const title = `${a.title}${SITE_SUFFIX}`;
-  return `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-${ANALYTICS_HEAD}
-
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#8ba9c4" />
-    <title>${escAttr(title)}</title>
-    <meta name="description" content="${escAttr(a.description)}" />
-    <link rel="canonical" href="${escAttr(a.url)}" />
-
-    <meta property="og:type" content="article" />
-    <meta property="og:site_name" content="SMOKESHOW" />
-    <meta property="og:title" content="${escAttr(a.title)}" />
-    <meta property="og:description" content="${escAttr(a.description)}" />
-    <meta property="og:url" content="${escAttr(a.url)}" />
-    <meta property="og:image" content="${escAttr(`${ORIGIN}/api/og`)}" />
-    <meta property="article:published_time" content="${escAttr(a.datePublished)}" />
-    <meta property="article:modified_time" content="${escAttr(a.dateModified)}" />
-    <meta name="twitter:card" content="summary_large_image" />
-${APP_ICON_HEAD}
-  </head>
-  <body>`;
+  return pageHead({
+    title: `${a.title}${SITE_SUFFIX}`,
+    ogTitle: a.title,
+    description: a.description,
+    url: a.url,
+    ogType: 'article',
+    article: { published: a.datePublished, modified: a.dateModified },
+  });
 }
 
 // Short answer, style A (default): a larger, quieter lead bracketed by two
@@ -439,31 +422,10 @@ ${breadcrumbJsonLd([
 `;
 }
 
-// The hub head reuses the article head shape but with og:type website — it is a
+// The hub head is pageHead's default shape: og:type website — it is a
 // directory, not a post.
 function articleHeadForHub({ title, description, url }) {
-  return `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-${ANALYTICS_HEAD}
-
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#8ba9c4" />
-    <title>${escAttr(title)}</title>
-    <meta name="description" content="${escAttr(description)}" />
-    <link rel="canonical" href="${escAttr(url)}" />
-
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="SMOKESHOW" />
-    <meta property="og:title" content="${escAttr(title)}" />
-    <meta property="og:description" content="${escAttr(description)}" />
-    <meta property="og:url" content="${escAttr(url)}" />
-    <meta property="og:image" content="${escAttr(`${ORIGIN}/api/og`)}" />
-    <meta name="twitter:card" content="summary_large_image" />
-${APP_ICON_HEAD}
-  </head>
-  <body>`;
+  return pageHead({ title, description, url });
 }
 
 function formatDate(iso) {
