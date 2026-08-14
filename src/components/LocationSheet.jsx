@@ -74,6 +74,48 @@ export default function LocationSheet({
     if (open) inputRef.current?.focus();
   }, [open]);
 
+  // Pin the sheet to the VISUAL viewport, not the layout one. iOS does not
+  // shrink the layout viewport for the keyboard; it scrolls the visual viewport
+  // instead. A sheet fixed to the layout viewport therefore slides its head and
+  // search field off the top of the screen the moment the keyboard opens, and
+  // the reader is left staring at the sheet's empty lower half with no way to
+  // type without scrolling back up. Tracking visualViewport keeps the search
+  // field parked directly above the keyboard, where it was tapped.
+  //
+  // Lock the document while it is open, too: a stray page scroll behind a
+  // fixed backdrop is what lets the page bleed through at the edges.
+  useEffect(() => {
+    if (!open) return undefined;
+    const vv = window.visualViewport;
+    const body = document.body;
+    const priorOverflow = body.style.overflow;
+    body.style.overflow = 'hidden';
+    if (!vv) {
+      return () => {
+        body.style.overflow = priorOverflow;
+      };
+    }
+    // Write straight through rather than through rAF: the keyboard slide fires a
+    // stream of scroll/resize events, and a frame of lag between them and the
+    // sheet is a frame of the page showing at the seam.
+    const sync = () => {
+      const root = sheetRef.current;
+      if (!root) return;
+      root.style.setProperty('--vv-top', `${vv.offsetTop}px`);
+      root.style.setProperty('--vv-height', `${vv.height}px`);
+      const keyboard = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      root.style.setProperty('--vv-keyboard', `${keyboard}px`);
+    };
+    sync();
+    vv.addEventListener('resize', sync);
+    vv.addEventListener('scroll', sync);
+    return () => {
+      vv.removeEventListener('resize', sync);
+      vv.removeEventListener('scroll', sync);
+      body.style.overflow = priorOverflow;
+    };
+  }, [open]);
+
   // Debounced type-ahead.
   useEffect(() => {
     const q = query.trim();
