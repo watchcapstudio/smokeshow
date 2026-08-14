@@ -688,15 +688,18 @@ export default function App() {
 
   return (
     <div className={'app app--stage' + (playing ? ' is-playing' : '')}>
+      {/* Outside .stage on purpose: the stage is a 100dvh box with overflow
+          hidden and a container-type, either of which would clip or contain a
+          fixed child. The sky has to be free to paint the whole screen. */}
+      <SkyBackdrop
+        pm25={selectedPM25}
+        date={selectedDate}
+        lat={location.lat}
+        lon={location.lon}
+        playing={playing}
+        frameMs={PLAY_INTERVAL_MS}
+      />
       <div className="stage" data-canvas={canvas}>
-        <SkyBackdrop
-          pm25={selectedPM25}
-          date={selectedDate}
-          lat={location.lat}
-          lon={location.lon}
-          playing={playing}
-          frameMs={PLAY_INTERVAL_MS}
-        />
 
         {/* The sky window: verdict on the sky, the horizon with sun and moon,
             the five days. Hidden (not unmounted) under the map so the CSS

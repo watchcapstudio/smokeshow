@@ -4,7 +4,12 @@
 
 .place-sheet-backdrop {
   position: fixed;
-  inset: 0;
+  /* Overhangs the viewport on purpose. A fixed element stops at the layout
+     viewport, but the page keeps painting behind Safari's bars, so a scrim cut
+     to inset: 0 leaves the page showing undimmed in those bands. Overflow of a
+     fixed box is not clipped to the viewport, so the overhang simply covers
+     them. */
+  inset: -240px 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 1300;
 }
@@ -36,24 +41,60 @@
   box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* On a phone the keyboard overlays the layout viewport (iOS doesn't shrink it),
-   so a short bottom sheet leaves a gap of page bleeding through between the card
-   and the keyboard. Fill from near the top down to bottom: 0 instead. Content
-   still sits at the top; the empty area below it is the sheet's OWN background,
-   and the keyboard simply overlays the lower part of it. No page can show
-   through, at any keyboard height, on any iOS version. This is how the native
-   iOS picker behaves. Desktop keeps the content-height roll-up. */
+/* On a phone the keyboard overlays the layout viewport — iOS doesn't shrink it,
+   it scrolls the VISUAL viewport instead. So a sheet fixed to the layout
+   viewport gets its head and search field pushed off the top of the screen the
+   moment the keyboard opens, leaving the reader looking at the sheet's empty
+   lower half and having to scroll back up to type. Filling top: 3.5rem to
+   bottom: 0 only made that worse: the taller the sheet, the more of it is empty.
+
+   Fix: the sheet tracks the visual viewport. LocationSheet writes --vv-top and
+   --vv-height from window.visualViewport, so the sheet always spans exactly the
+   area the reader can see, ending at the top of the keyboard. Search field sits
+   right where it was tapped; no gap can open below it. Browsers without the
+   API fall back to the dynamic viewport height. Desktop keeps the
+   content-height roll-up. */
 @media (max-width: 720px) {
   .place-sheet {
-    top: max(3.5rem, env(safe-area-inset-top));
+    --sheet-inset: max(3.5rem, env(safe-area-inset-top));
+    /* Top from the VISUAL viewport, bottom from the LAYOUT one. The top anchor
+       is the fix — it keeps the head and the search field on screen when the
+       keyboard scrolls the visual viewport. The bottom is deliberately not
+       --vv-height: the visual viewport stops at Safari's toolbar, and the page
+       goes on painting behind that toolbar, so a sheet cut to the visible area
+       leaves a band of page showing between it and the keyboard. Running to
+       bottom: 0 and letting the keyboard overlay the surplus means no gap can
+       open at any keyboard height, on any iOS version. */
+    top: calc(var(--vv-top, 0px) + var(--sheet-inset));
+    bottom: 0;
+    height: auto;
     max-height: none;
+    /* The home-indicator gutter is only real when the keyboard is down; with the
+       keyboard up the sheet stops at the keyboard, so subtract it back out. */
+    padding-bottom: calc(
+      1.25rem + max(0px, env(safe-area-inset-bottom) - var(--vv-keyboard, 0px))
+    );
   }
-  /* Fill the tall sheet and scroll internally; the empty area under the content
-     is the body's own background, which is what covers the old gap. */
+  /* Fill the sheet and scroll internally. */
   .place-sheet__body {
     flex: 1 1 auto;
     min-height: 0;
   }
+}
+
+/* The same overhang for the sheet itself: its own surface, continuing below the
+   layout viewport, so the band behind the toolbar and the keyboard's accessory
+   bar is sheet and not a slice of the page. bottom: 0 alone cannot reach it —
+   iOS pulls the fixed viewport up above the keyboard, and the bars sit in the
+   space between that edge and the keyboard. */
+.place-sheet::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 240px;
+  background-color: rgb(var(--panel-tint));
 }
 
 .place-sheet:focus {
