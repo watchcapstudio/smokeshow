@@ -81,6 +81,11 @@ jobs:
       - run: npm run verify:map
       - run: npm run verify:fires
 
+      # The same rig with CARTO returning 403, which is what a block looks like
+      # from the browser. Separate tag so its captures do not overwrite the
+      # healthy ones when both are uploaded on failure.
+      - run: npm run verify:map -- --fail-tiles --tag=no-tiles
+
       # The captures are the point when one of these fails.
       - if: failure()
         uses: actions/upload-artifact@v4

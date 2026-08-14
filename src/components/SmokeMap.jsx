@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
+import { track } from '@vercel/analytics';
 import 'leaflet/dist/leaflet.css';
 import { SmokeCanvasLayer } from './SmokeLayer.js';
 import { FireLayer } from './FireLayer.js';
@@ -12,6 +13,12 @@ import { levelForPM25 } from '../lib/rating.js';
 import { fetchFires, fireCard, fireRadius } from '../lib/fires.js';
 import { fetchHotspots } from '../lib/hotspots.js';
 import { BASEMAP_THEME, candidatesForView, domainFrameURL, pickForView } from '../lib/frames.js';
+import {
+  CARTO_ATTRIBUTION,
+  CARTO_BASE_URL,
+  CARTO_LABELS_URL,
+  createTileHealth,
+} from '../lib/basemap.js';
 import { getJSON, setJSON } from '../lib/storage.js';
 import './SmokeMap.css';
 
@@ -182,17 +189,20 @@ export default function SmokeMap({
     // labels baked into the basemap would be buried exactly when a reader most
     // needs to know which city is under the plume. Splitting them is the only
     // way to keep the place names above the weather.
-    // The tile set is derived from BASEMAP_THEME, not written out, so the
-    // tiles, the accepted frame domains, and the fallback ramp can only ever
-    // flip together.
-    L.tileLayer(`https://{s}.basemaps.cartocdn.com/${BASEMAP_THEME}_nolabels/{z}/{x}/{y}{r}.png`, {
+    // The tile set is derived from BASEMAP_THEME in basemap.js, not written
+    // out, so the tiles, the accepted frame domains, and the fallback ramp can
+    // only ever flip together.
+    //
+    // CARTO's basemaps are free to use with attribution; both credits are
+    // required and must stay visible. They ride this layer, and they leave with
+    // it: if the tiles drop out below, Leaflet drops the attribution too, which
+    // is correct, we should not credit a provider we have stopped using. The
+    // smoke credits are added to the control directly, so they survive that
+    // removal, as they must.
+    const baseLayer = L.tileLayer(CARTO_BASE_URL, {
       maxZoom: 12,
       detectRetina: true,
-      // CARTO's basemaps are free to use with attribution; both credits are
-      // required and must stay visible.
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors ' +
-        '&copy; <a href="https://carto.com/attributions">CARTO</a>',
+      attribution: CARTO_ATTRIBUTION,
     }).addTo(map);
 
     // The smoke is not CARTO's. Both feeds are credited unconditionally rather
@@ -219,13 +229,47 @@ export default function SmokeMap({
     // "you are here" marker still sits over the labels.
     map.createPane('labels').style.zIndex = 450;
     map.getPane('labels').style.pointerEvents = 'none';
-    L.tileLayer(`https://{s}.basemaps.cartocdn.com/${BASEMAP_THEME}_only_labels/{z}/{x}/{y}{r}.png`, {
+    const labelLayer = L.tileLayer(CARTO_LABELS_URL, {
       maxZoom: 12,
       pane: 'labels',
       detectRetina: true,
       // Attribution rides the base layer — same source, and Leaflet would
       // otherwise print the pair twice.
     }).addTo(map);
+
+    // The tiles are keyless, so there is no quota to watch approach: the only
+    // warning we get is the tiles themselves failing. When they do, drop both
+    // CARTO layers to the bare surface (smoke, fires and marker keep working,
+    // and that surface is the tone the ramp is audited against), say so, and
+    // fire one event. Once per session, on trip only.
+    const health = createTileHealth(({ errors, loads }) => {
+      map.removeLayer(baseLayer);
+      map.removeLayer(labelLayer);
+      // The notice is a Leaflet control, not a sibling of the map, for the same
+      // reason the coverage badge is: the map is the top canvas and everything
+      // around it is spoken for. Below the map is off-screen, the bottom edge
+      // is under the scrubber card and the attribution, and a sibling with a
+      // z-index still loses to .leaflet-container's own stacking context. In
+      // the control corner it rides under the coverage badge, where map chrome
+      // already lives. Both failures are asserted in verify-map --fail-tiles.
+      const Notice = L.Control.extend({
+        options: { position: 'topright' },
+        onAdd() {
+          const el = L.DomUtil.create('div', 'smoke-map__notice');
+          el.setAttribute('role', 'status');
+          el.textContent =
+            'The base map is unavailable right now. The smoke forecast, the fires and your ' +
+            'location are unaffected.';
+          return el;
+        },
+      });
+      new Notice().addTo(map);
+      track('basemap_unavailable', { provider: 'carto', errors, loads });
+    });
+    for (const layer of [baseLayer, labelLayer]) {
+      layer.on('tileerror', health.onError);
+      layer.on('tileload', health.onLoad);
+    }
 
     // Fires sit above the labels — a city name printed through a fire dot
     // makes the dot look like cartography — but below the "you are here"

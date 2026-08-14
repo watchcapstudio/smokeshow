@@ -45,6 +45,10 @@ const CHROME =
   process.env.CHROME_PATH ||
   ['/opt/pw-browsers/chromium', '/usr/bin/chromium', '/usr/bin/google-chrome'].find(Boolean);
 const OUT = process.env.SCRATCH || 'scratch';
+// --fail-tiles serves 403 for every CARTO request, which is what a referrer
+// block or a revoked entitlement looks like from the browser. Proves the
+// fallback in lib/basemap.js actually fires rather than trusting its unit test.
+const FAIL_TILES = process.argv.includes('--fail-tiles');
 const arg = (k, d) => process.argv.find((a) => a.startsWith(`--${k}=`))?.slice(k.length + 3) ?? d;
 const TAG = arg('tag', 'after');
 const BASE = arg('base', process.env.BASE_URL || 'http://localhost:5173');
@@ -163,6 +167,14 @@ const rows = [];
 for (const level of LEVELS) {
   const page = await browser.newPage();
   await page.setViewport({ width: 430, height: 932, deviceScaleFactor: 2 });
+  // @vercel/analytics has no transport on localhost, so it announces custom
+  // events on the console instead. That plus window.vaq is the only place the
+  // alert is observable from here.
+  const analytics = [];
+  page.on('console', (m) => {
+    const t = m.text();
+    if (/Vercel Web Analytics/i.test(t)) analytics.push(t);
+  });
   await page.setRequestInterception(true);
   page.on('request', (req) => {
     const url = req.url();
@@ -181,6 +193,8 @@ for (const level of LEVELS) {
         body,
       });
 
+    if (url.includes('basemaps.cartocdn.com') && FAIL_TILES)
+      return req.respond({ status: 403, contentType: 'text/plain', body: 'forbidden' });
     if (url.includes('only_labels')) return tile(LABELS_TILE);
     if (url.includes('basemaps.cartocdn.com')) return tile(BASE_TILE);
     if (url.includes('air-quality')) {
@@ -283,6 +297,35 @@ for (const level of LEVELS) {
         ? getComputedStyle(document.querySelector('.leaflet-control-attribution')).color
         : null,
       markerLabel: document.querySelector('.user-marker__label')?.textContent,
+      tilesInDom: document.querySelectorAll('.leaflet-tile').length,
+      notice: document.querySelector('.smoke-map__notice')?.textContent?.trim() ?? null,
+      // In the DOM is not the same as on the screen. The notice sits under a
+      // map that now rides in the top canvas, so it has to be proved laid out,
+      // inside the viewport, and not painted over by the chrome above it.
+      noticeVisible: (() => {
+        const n = document.querySelector('.smoke-map__notice');
+        if (!n) return null;
+        const r = n.getBoundingClientRect();
+        const cs = getComputedStyle(n);
+        if (!r.width || !r.height) return 'zero-size';
+        if (cs.visibility === 'hidden' || cs.display === 'none' || Number(cs.opacity) === 0)
+          return 'hidden-by-style';
+        if (r.bottom <= 0 || r.top >= window.innerHeight) return 'off-screen';
+        const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        if (!hit || !(hit === n || n.contains(hit) || hit.contains(n)))
+          return `covered by ${hit ? `${hit.tagName.toLowerCase()}.${hit.className.toString().trim().split(/\s+/).slice(0, 3).join('.')}` : 'nothing'}`;
+        return 'visible';
+      })(),
+      queuedEvents: (window.vaq || []).map((e) => JSON.stringify(e)),
+      geom: Object.fromEntries(
+        ['.smoke-map__notice', '.stage__map-verdict', '.smoke-coverage', '.sbar__foot', '.smoke-map']
+          .map((sel) => {
+            const el = document.querySelector(sel);
+            if (!el) return [sel, null];
+            const r = el.getBoundingClientRect();
+            return [sel, [r.top, r.right, r.bottom, r.left].map(Math.round)];
+          }),
+      ),
       firesZ: paneZ('.leaflet-pane.leaflet-fires-pane'),
       fireDots: document.querySelectorAll('.fire-dot').length,
       fireCard: [...document.querySelectorAll('.fire-card > *')].map((n) =>
@@ -297,7 +340,7 @@ for (const level of LEVELS) {
   await el.screenshot({ path: `${OUT}/map-${TAG}-${level.key}.png` });
   await page.screenshot({ path: `${OUT}/page-${TAG}-${level.key}.png` });
 
-  rows.push({ ...level, ...measured, fireHint: hint });
+  rows.push({ ...level, ...measured, fireHint: hint, analytics });
   await page.close();
 }
 
@@ -378,5 +421,36 @@ for (const { key, rgb: bg } of BAND) {
 }
 
 writeFileSync(`${OUT}/map-${TAG}.json`, JSON.stringify({ tag: TAG, base: BASE, rows }, null, 2));
+
+if (FAIL_TILES) {
+  // The event is only observable through what @vercel/analytics does with no
+  // transport: it queues onto window.vaq and narrates to the console. Match on
+  // either, but report WHICH — an assertion that can pass on an unrelated
+  // console line is not an assertion.
+  const alertOf = (r) =>
+    r.queuedEvents.find((e) => /basemap_unavailable/.test(e)) ??
+    r.analytics.find((a) => /basemap_unavailable/.test(a)) ??
+    null;
+  const checks = [
+    ['tile layers dropped', rows.every((r) => r.tilesInDom === 0)],
+    ['notice shown', rows.every((r) => r.notice)],
+    ['notice actually on screen', rows.every((r) => r.noticeVisible === 'visible')],
+    ['CARTO no longer credited', rows.every((r) => !/CARTO/.test(r.attribution ?? ''))],
+    ['smoke credits survive', rows.every((r) => /Copernicus/.test(r.attribution ?? ''))],
+    ['smoke still painting', rows.every((r) => r.cover > 0)],
+    ['alert fired', rows.every((r) => alertOf(r) !== null)],
+  ];
+  console.log(`\nfallback (--fail-tiles: CARTO returning 403):`);
+  for (const [name, ok] of checks) console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${name}`);
+  console.log(`  notice: "${rows[0].notice ?? '(none)'}" (${rows[0].noticeVisible ?? 'absent'})`);
+  console.log(`  event:  ${alertOf(rows[0]) ?? '(none observed)'}`);
+  const bad = checks.filter(([, ok]) => !ok);
+  console.log(
+    bad.length
+      ? `\nFAIL: ${bad.map(([n]) => n).join(', ')}\n`
+      : `\nPASS: map survives losing CARTO\n`,
+  );
+  process.exit(bad.length ? 1 : 0);
+}
 console.log(`\ncaptures: ${OUT}/map-${TAG}-<level>.png, page-${TAG}-<level>.png\n`);
 process.exit(rising ? 0 : 1);

@@ -769,6 +769,20 @@ function homePage() {
          sky stays the instrument, the hills keep the reading half on the
          same horizon as the rest of the site. -->
     <div class="app app--bottom">${sheetRidge()}
+      <!-- The homepage's h1. The live map rides in the top canvas (Sky/Map
+           toggle), so this header is the only thing naming it: without it the
+           page shipped with no h1 at all and the map went unlabelled to
+           crawlers and screen readers alike. Same idiom as the city pages so
+           the two templates keep reading as one site. -->
+      <header class="map-intro">
+        <p class="eyebrow">Smoke forecast</p>
+        <h1 class="map-intro__title">Wildfire smoke map and forecast</h1>
+        <p class="map-intro__sub">
+          Where the smoke was, and where the model sends it next. Scrub back 12 hours or forward 48.
+          Every hour shown is a model estimate, not a measurement.
+        </p>
+      </header>
+
       <div id="cta-slot"></div>
 
       <!-- The reference material rides on the demo's bottom sheet rather than
