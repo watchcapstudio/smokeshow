@@ -98,7 +98,10 @@ cream sheet. Hub, corridors, about, 404, guides hub, articles. No third
 template; the corridor/hub/about pages are reading pages that happen to be
 generated from data instead of markdown.
 
-Status: moves 1 through 3 are implemented on this branch. Move 4 remains open.
+Status: all four moves are implemented on this branch, and the strays from
+section 4's coda are deleted. The system as it now stands is described in
+`docs/live-and-reading-pages.md`, which supersedes this doc as the working
+reference; this one stays as the record of what was found and why.
 
 Getting there is four moves, ordered by value:
 

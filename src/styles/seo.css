@@ -19,15 +19,9 @@
   gap: 0;
 }
 
-/* #map-slot is NOT dead, though it looks it. No page the site serves emits that
-   id any more: the Sky/Map redesign moved the live map into the top canvas, and
-   both templates dropped the slot. The one page that still has it is the
-   front-end candidate at /asdfasdf/, which holds a placeholder there and imports
-   this stylesheet (src/proto/Proto.jsx). So these rules are what give that
-   placeholder its cream sheet.
-   Deleting them therefore restyles a page under review rather than removing dead
-   weight. They go when asdfasdf/ goes, along with its line in vite.config.js. */
-#map-slot:empty,
+/* The #map-slot rules that used to sit here served the front-end review
+   candidate at /asdfasdf/; both are gone now (the Sky/Map redesign it proposed
+   shipped, the review page went with it). */
 #cta-slot:empty {
   display: none;
 }
@@ -39,7 +33,6 @@
   margin-top: 2.5rem;
 }
 
-#map-slot,
 .seo-sheet {
   /* Scoped ink: everything inside reads these instead of the live ones. */
   --ink: #26221b;
@@ -290,7 +283,6 @@
 }
 
 @supports not (color: color-mix(in srgb, red 50%, transparent)) {
-  #map-slot,
   .seo-sheet {
     --text-dim: #3b352c;
     --border: #6b6559;

@@ -84,7 +84,8 @@ export const APP_ICON_HEAD = `
 // — those documents cover every product the studio ships, and a second copy on
 // this domain would drift from the canonical one.
 //
-// Hand-mirrored in index.html, same as the FAQ already is. Keep them in sync.
+// Every page the site serves gets this from footer(), the homepage included —
+// no hand-mirrored copies remain.
 export const FOOTER_LINKS = [
   { href: '/smoke-forecast/', text: 'All cities' },
   { href: '/guides/how-smoke-forecasts-work/', text: 'How smoke forecasts work' },
