@@ -120,6 +120,7 @@ export default function SmokeMap({
   frameMs,
   frames,
   verdictPm25, // sensor-anchored series — marker must agree with the chip
+  zoomRef, // filled with { in, out } for the scrubber card's zoom buttons
 }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
@@ -170,7 +171,9 @@ export default function SmokeMap({
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-    const map = L.map(containerRef.current, { zoomControl: true, minZoom: MIN_ZOOM }).setView(
+    // No Leaflet zoom control: buttons live in the scrubber card (via zoomRef)
+    // where the rest of the chrome is; touch keeps pinch.
+    const map = L.map(containerRef.current, { zoomControl: false, minZoom: MIN_ZOOM }).setView(
       [center.lat, center.lon],
       DEFAULT_ZOOM,
     );
@@ -290,10 +293,12 @@ export default function SmokeMap({
     ro.observe(containerRef.current);
 
     mapRef.current = map;
+    if (zoomRef) zoomRef.current = { in: () => map.zoomIn(), out: () => map.zoomOut() };
     return () => {
       ro.disconnect();
       map.remove();
       mapRef.current = null;
+      if (zoomRef) zoomRef.current = null;
       // Layers die with the map — a stale ref here would leave the remounted
       // map (StrictMode, location change) updating orphaned layers forever.
       smokeLayerRef.current = null;

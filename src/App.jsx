@@ -122,6 +122,9 @@ export default function App() {
   const [mapEverShown, setMapEverShown] = useState(false); // mount the map lazily, keep it after
   const [savedTick, setSavedTick] = useState(0); // bump to re-read the saved-places list
   const playIntervalRef = useRef(null);
+  // Imperative zoom handle SmokeMap fills in ({ in, out }) — the scrubber
+  // card's zoom buttons live outside the map component.
+  const mapZoomRef = useRef(null);
 
   useEffect(() => {
     const shared = parseSharedParams() ?? presetPlace();
@@ -330,6 +333,22 @@ export default function App() {
     }, PLAY_INTERVAL_MS);
     return () => clearInterval(playIntervalRef.current);
   }, [playing, windowStart, windowEnd, centerData]);
+
+  // The map is a screen, not a card: while it is up, the document must not
+  // scroll. A zoom gesture that lands beside the canvas would otherwise shove
+  // the stage up and reveal the sky filler below it. The sky view keeps its
+  // scroll; the SEO sheet below the stage is its designed reveal.
+  // (Lives up here with the other effects — hooks after the early returns
+  // below would change count between renders.)
+  useEffect(() => {
+    if (canvas !== 'map') return undefined;
+    window.scrollTo(0, 0);
+    const prev = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.documentElement.style.overflow = prev;
+    };
+  }, [canvas]);
 
   // The agreement band's second model. Only one domain publishes a point
   // series (HRRR), and it is a 2 MB file, so it is fetched lazily and only for
@@ -758,6 +777,7 @@ export default function App() {
                   frameMs={PLAY_INTERVAL_MS}
                   frames={frames}
                   verdictPm25={anchoredPm25}
+                  zoomRef={mapZoomRef}
                 />
               </Suspense>
             ) : (
@@ -787,6 +807,8 @@ export default function App() {
         <ScrubberBar
           canvas={canvas}
           onCanvas={handleCanvas}
+          onZoomIn={() => mapZoomRef.current?.in()}
+          onZoomOut={() => mapZoomRef.current?.out()}
           places={chips}
           currentPlaceId={currentPlace.id}
           onSelectPlace={handleSelectPlace}

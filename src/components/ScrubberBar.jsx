@@ -37,6 +37,8 @@ function buildCurve(pm25, windowStart, windowEnd, nowIndex, selectedIndex) {
 export default function ScrubberBar({
   canvas,
   onCanvas,
+  onZoomIn,
+  onZoomOut,
   places,
   currentPlaceId,
   onSelectPlace,
@@ -69,6 +71,19 @@ export default function ScrubberBar({
 
   return (
     <div className="sbar">
+      {/* Map zoom, riding just outside the card's left edge. Pointer-fine
+          screens only (see CSS): touch has pinch, and the iOS app has no
+          buttons either. */}
+      {canvas === 'map' && (
+        <div className="sbar__zoom" role="group" aria-label="Map zoom">
+          <button type="button" className="sbar__zoom-btn" aria-label="Zoom in" onClick={onZoomIn}>
+            +
+          </button>
+          <button type="button" className="sbar__zoom-btn" aria-label="Zoom out" onClick={onZoomOut}>
+            −
+          </button>
+        </div>
+      )}
       <div className="sbar__top">
         <div className="sbar__toggle" role="tablist" aria-label="Sky or map">
           <button

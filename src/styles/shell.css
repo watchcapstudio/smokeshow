@@ -498,6 +498,13 @@ body {
 .stage__map > :first-child {
   height: 100%;
 }
+/* On the stage the map is a screen, not a card: the card's rounded corner and
+   hairline border let the sky read through at the edges, which on a dark map
+   looks like a chipped corner. */
+.stage__map .smoke-map {
+  border-radius: 0;
+  border: none;
+}
 .map-placeholder {
   display: grid;
   place-items: center;

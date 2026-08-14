@@ -57,8 +57,9 @@
   background: var(--map-surface);
 }
 
-/* Leaflet's controls ship white-on-white, which vanishes on light tiles and
-   glows on a heavy plume. Both get the same pill treatment as the marker. */
+/* Leaflet's attribution ships white-on-white, which vanishes on light tiles
+   and glows on a heavy plume. It gets the same pill treatment as the marker.
+   (The zoom control is gone — zoom buttons live in the scrubber card.) */
 .smoke-map .leaflet-control-attribution {
   background: var(--map-chrome);
   color: var(--map-chrome-text);
@@ -67,21 +68,6 @@
 
 .smoke-map .leaflet-control-attribution a {
   color: var(--map-chrome-text-strong);
-}
-
-.smoke-map .leaflet-bar a,
-.smoke-map .leaflet-bar a:hover {
-  background: var(--map-chrome);
-  color: var(--map-chrome-text-strong);
-  border-bottom-color: var(--map-chrome-edge);
-}
-
-.smoke-map .leaflet-bar a:hover {
-  background: rgba(255, 255, 255, 0.95);
-}
-
-.smoke-map .leaflet-bar {
-  border-color: var(--map-chrome-edge);
 }
 
 /* Coverage badge — which field is on screen and how sharp it is.

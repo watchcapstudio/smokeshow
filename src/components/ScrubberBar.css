@@ -27,6 +27,44 @@
   gap: 8px;
 }
 
+/* Map zoom — a little stack just off the card's left edge, wearing the card's
+   own frosted finish. Hidden on coarse pointers (pinch does this job there)
+   and on windows too narrow to hold it beside the card without clipping. */
+.sbar__zoom {
+  display: none;
+  position: absolute;
+  right: 100%;
+  bottom: 0;
+  margin-right: 10px;
+  flex-direction: column;
+  gap: 6px;
+}
+
+@media (hover: hover) and (pointer: fine) and (min-width: 880px) {
+  .sbar__zoom {
+    display: flex;
+  }
+}
+
+.sbar__zoom-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  font-size: 19px;
+  line-height: 1;
+  color: var(--ink);
+  cursor: pointer;
+  background: color-mix(in srgb, var(--ink-inverse, #fff) 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.18);
+}
+
+.sbar__zoom-btn:hover {
+  background: color-mix(in srgb, var(--ink-inverse, #fff) 55%, transparent);
+}
+
 .sbar__toggle {
   display: inline-flex;
   gap: 2px;
