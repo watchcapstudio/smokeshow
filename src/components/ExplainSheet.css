@@ -14,7 +14,11 @@
   width: 100%;
   max-width: 720px;
   box-sizing: border-box;
-  background: var(--bg-panel);
+  /* --bg-panel is translucent by design (0.72 alpha, sky tints through cards),
+     but a full sheet over the hero lets the page's own type read through and
+     collide with the sheet copy. Paint opaque, same as LocationSheet: --panel-tint
+     flips with the air, so panel and text can never diverge. */
+  background: rgb(var(--panel-tint));
   border: 1px solid var(--border);
   border-bottom: none;
   border-radius: 1.25rem 1.25rem 0 0;
