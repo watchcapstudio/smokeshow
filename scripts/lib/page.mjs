@@ -84,7 +84,8 @@ export const APP_ICON_HEAD = `
 // — those documents cover every product the studio ships, and a second copy on
 // this domain would drift from the canonical one.
 //
-// Hand-mirrored in index.html, same as the FAQ already is. Keep them in sync.
+// Every page the site serves gets this from footer(), the homepage included —
+// no hand-mirrored copies remain.
 export const FOOTER_LINKS = [
   { href: '/smoke-forecast/', text: 'All cities' },
   { href: '/guides/how-smoke-forecasts-work/', text: 'How smoke forecasts work' },
@@ -109,6 +110,13 @@ export function footer() {
       </footer>`;
 }
 
+// The ridge paths, one copy. mastheadSky() and sheetRidge() below draw the
+// same two hills; keeping the geometry here means the reading pages and the
+// city pages cannot drift onto different horizons.
+const RIDGE_PATHS = `
+          <path d="M0,300 L0,150 C160,120 300,175 470,150 C640,125 760,80 940,110 C1120,140 1280,130 1440,105 L1440,300 Z" class="ridge-far" />
+          <path d="M0,300 L0,200 C200,175 360,215 560,195 C760,175 900,140 1120,165 C1280,183 1360,180 1440,170 L1440,300 Z" class="ridge-near" />`;
+
 // The static masthead sky: a resting clear-midday gradient, a soft sun, and a
 // feathered ridge, drawn in CSS (styled by .masthead-sky in shell.css). It is a
 // masthead, not an instrument — no reading, no location, no condition asserted —
@@ -120,11 +128,82 @@ export function mastheadSky() {
       <div class="masthead-sky" aria-hidden="true">
         <div class="masthead-sky__gradient"></div>
         <div class="masthead-sky__sun"></div>
-        <svg class="masthead-sky__ridge" viewBox="0 0 1440 300" preserveAspectRatio="none">
-          <path d="M0,300 L0,150 C160,120 300,175 470,150 C640,125 760,80 940,110 C1120,140 1280,130 1440,105 L1440,300 Z" class="masthead-sky__ridge-far" />
-          <path d="M0,300 L0,200 C200,175 360,215 560,195 C760,175 900,140 1120,165 C1280,183 1360,180 1440,170 L1440,300 Z" class="masthead-sky__ridge-near" />
+        <svg class="masthead-sky__ridge" viewBox="0 0 1440 300" preserveAspectRatio="none">${RIDGE_PATHS}
         </svg>
       </div>`;
+}
+
+// The hills alone, for the city pages: the masthead's ridge without its midday
+// gradient or sun. A city page's sky is a live instrument and must keep telling
+// the truth about the hour, but the reading half below the stage should still
+// look like the same site as the guides. The hills are that shared identity.
+// The fills ride --ink (see .sheet-ridge in seo.css), so on dark night air the
+// hills lighten with the rest of the ink system instead of vanishing.
+export function sheetRidge() {
+  return `
+      <div class="sheet-ridge" aria-hidden="true">
+        <svg viewBox="0 0 1440 300" preserveAspectRatio="none">${RIDGE_PATHS}
+        </svg>
+      </div>`;
+}
+
+// The one document head, used by every page both generators emit. Before this,
+// the head was assembled in three places (the city template, the editorial
+// pages, the article pages), and every head decision had to be made three
+// times; the mobile-web-app metas existed on one of them and not the others.
+// Options:
+//   ogType      - "website" (default) or "article"
+//   ogImage     - defaults to the wordmark endpoint; pass a place-stamped URL
+//   article     - { published, modified } adds the article:*_time metas
+//   webApp      - adds the standalone/status-bar metas (pages that boot the app)
+//   extraHead   - trailing markup (e.g. the __SMOKESHOW_PLACE__ script)
+// Returns everything through the opening <body> tag.
+export function pageHead({
+  title,
+  description,
+  url,
+  ogType = 'website',
+  ogTitle = title, // articles unfurl without the "| SMOKESHOW" tab suffix
+  ogImage = `${ORIGIN}/api/og`,
+  article = null,
+  webApp = false,
+  extraHead = '',
+}) {
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+${ANALYTICS_HEAD}
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#8ba9c4" />
+    <title>${escAttr(title)}</title>
+    <meta name="description" content="${escAttr(description)}" />
+    <link rel="canonical" href="${escAttr(url)}" />
+
+    <meta property="og:type" content="${escAttr(ogType)}" />
+    <meta property="og:site_name" content="SMOKESHOW" />
+    <meta property="og:title" content="${escAttr(ogTitle)}" />
+    <meta property="og:description" content="${escAttr(description)}" />
+    <meta property="og:url" content="${escAttr(url)}" />
+    <meta property="og:image" content="${escAttr(ogImage)}" />${
+      article
+        ? `
+    <meta property="article:published_time" content="${escAttr(article.published)}" />
+    <meta property="article:modified_time" content="${escAttr(article.modified)}" />`
+        : ''
+    }
+    <meta name="twitter:card" content="summary_large_image" />
+${APP_ICON_HEAD}${
+    webApp
+      ? `
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />`
+      : ''
+  }${extraHead}
+  </head>
+  <body>`;
 }
 
 // Source names as links, comma-joined, read from src/data/sources.js so no two

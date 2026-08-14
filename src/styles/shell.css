@@ -252,13 +252,19 @@ body {
      edge once the sheet became a floating card. */
   align-self: stretch;
   /* The page is full-bleed (viewport-fit=cover), so the sky runs under the
-     status bar and notch. The safe-area inset keeps the title below them. */
-  padding: calc(env(safe-area-inset-top) + clamp(2rem, 6vh, 4rem)) 0 clamp(1.4rem, 4vh, 2.4rem);
+     status bar and notch. The safe-area inset keeps the title below them.
+     The ramps are the /guides/ header's, measured against .guide__header in
+     article.css: one header scale sitewide, whatever the page type. */
+  padding: calc(env(safe-area-inset-top) + clamp(2rem, 7vh, 5rem)) 0 clamp(1.8rem, 5vh, 3.2rem);
+}
+
+.map-intro .eyebrow {
+  margin-bottom: 1rem;
 }
 
 .map-intro__title {
   margin: 0;
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(2rem, 5.2vw, 3.2rem);
   font-weight: 800;
   letter-spacing: -0.015em;
   line-height: 1.07;
@@ -544,6 +550,102 @@ body {
   z-index: 3;
 }
 
+/* ------------------------------------------------- shared reading furniture */
+
+/* The FAQ and the sitewide footer, styled ONCE for every page that serves
+   them: the homepage, the city pages (seo.css surfaces), the editorial pages
+   and the /guides/ articles (article.css surfaces). They used to be styled
+   twice, at slightly different sizes and in the footer's case two genuinely
+   different looks, which is exactly the drift a shared template exists to
+   prevent. Both read the scoped ink tokens, so they sit correctly on a cream
+   sheet and on the live sky alike. */
+
+.faq > h2 {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a7c64;
+  margin: 0 0 0.6rem;
+}
+
+.faq__item {
+  border-bottom: 1px solid var(--rule);
+}
+
+.faq__item summary {
+  cursor: pointer;
+  padding: 0.95rem 0;
+  list-style: none;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.faq__item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq__item summary h3 {
+  margin: 0;
+  display: inline;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.faq__item summary::after {
+  content: '+';
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 1.2rem;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+.faq__item[open] summary::after {
+  content: '\2013'; /* en-dash, not em; the site serves no em-dashes */
+}
+
+.faq__item p {
+  margin: 0 0 1rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+/* The footer rides whatever surface the page ends on — the live sky on app
+   pages, the masthead sky on reading pages — reading the live ink there, so
+   it flips with the air while the sheets above it do not. Centered mono,
+   the guides' look, everywhere. */
+.site-footer {
+  margin-top: 2.5rem;
+}
+
+.site-footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.4rem;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.site-footer__nav a {
+  color: var(--text-dim);
+  text-decoration: none;
+}
+
+.site-footer__nav a:hover,
+.site-footer__nav a:focus-visible {
+  color: var(--text);
+  text-decoration: underline;
+}
+
 /* ---------------------------------------------------------- masthead sky */
 
 /* The static masthead sky, shared by the guides and the directory / corridor /
@@ -584,9 +686,18 @@ body {
   height: 38vh;
   min-height: 220px;
 }
-.masthead-sky__ridge-far {
+
+/* The ridge fills, shared by the masthead (reading pages) and the sheet ridge
+   (city pages, .sheet-ridge in seo.css). They ride --ink rather than a fixed
+   dark: on the static pages --ink's initial value IS the fixed dark, so nothing
+   changes there, and on a live page the hills lighten with the rest of the ink
+   system when the air goes dark instead of vanishing into a night sky. The
+   plain rgba line is the no-color-mix fallback. */
+.ridge-far {
   fill: rgba(38, 34, 27, 0.1);
+  fill: color-mix(in srgb, var(--ink) 10%, transparent);
 }
-.masthead-sky__ridge-near {
+.ridge-near {
   fill: rgba(38, 34, 27, 0.16);
+  fill: color-mix(in srgb, var(--ink) 16%, transparent);
 }

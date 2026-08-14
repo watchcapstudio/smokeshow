@@ -19,15 +19,9 @@
   gap: 0;
 }
 
-/* #map-slot is NOT dead, though it looks it. No page the site serves emits that
-   id any more: the Sky/Map redesign moved the live map into the top canvas, and
-   both templates dropped the slot. The one page that still has it is the
-   front-end candidate at /asdfasdf/, which holds a placeholder there and imports
-   this stylesheet (src/proto/Proto.jsx). So these rules are what give that
-   placeholder its cream sheet.
-   Deleting them therefore restyles a page under review rather than removing dead
-   weight. They go when asdfasdf/ goes, along with its line in vite.config.js. */
-#map-slot:empty,
+/* The #map-slot rules that used to sit here served the front-end review
+   candidate at /asdfasdf/; both are gone now (the Sky/Map redesign it proposed
+   shipped, the review page went with it). */
 #cta-slot:empty {
   display: none;
 }
@@ -39,7 +33,6 @@
   margin-top: 2.5rem;
 }
 
-#map-slot,
 .seo-sheet {
   /* Scoped ink: everything inside reads these instead of the live ones. */
   --ink: #26221b;
@@ -78,8 +71,34 @@
   margin-top: 2.5rem;
 }
 
-/* FAQ */
-.faq h2,
+/* The masthead's hills without its sky, on the city pages (sheetRidge() in
+   scripts/lib/page.mjs). Fixed to the viewport bottom exactly like
+   .masthead-sky__ridge, so scrolling from a guide to a city page keeps the
+   same horizon in the same place. z-index -1 puts it behind the page: while
+   the live stage fills the first viewport its own sky covers these hills
+   entirely, and they surface only once the reader scrolls into the reading
+   half, standing between the cream sheet and the live sky. The fills are
+   .ridge-far/.ridge-near in shell.css, ink-derived so night air lightens
+   them instead of swallowing them. */
+.sheet-ridge {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 38vh;
+  min-height: 220px;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.sheet-ridge svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Section eyebrows. The FAQ's rules, its h2 included, live in shell.css now —
+   one FAQ ruleset for the city pages, the homepage and the guides. */
 .explainer h2,
 .landmarks h2,
 .citylinks h2,
@@ -93,49 +112,6 @@
   margin: 0 0 0.6rem;
 }
 
-.faq__item {
-  border-bottom: 1px solid var(--rule);
-}
-
-.faq__item summary {
-  cursor: pointer;
-  padding: 0.8rem 0;
-  list-style: none;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.6rem;
-}
-
-.faq__item summary::-webkit-details-marker {
-  display: none;
-}
-
-.faq__item summary::after {
-  content: '+';
-  color: var(--accent);
-  font-weight: 700;
-  font-size: 1.1rem;
-  line-height: 1;
-  flex: 0 0 auto;
-}
-
-.faq__item[open] summary::after {
-  content: '–';
-}
-
-.faq h3 {
-  font-size: 0.95rem;
-  font-weight: 650;
-  margin: 0;
-  display: inline;
-}
-
-.faq__item p {
-  padding-bottom: 0.9rem;
-}
-
-.faq p,
 .explainer p,
 .landmarks > p,
 .citylinks > p,
@@ -279,36 +255,8 @@
   font-size: 0.9rem;
 }
 
-/* Sitewide footer. Five links at most, and it rides on the live sky rather than
-   on the cream sheet: the reference material above ends at the disclaimer, and
-   the footer is navigation, not reference. That means it reads --ink like the
-   rest of the shell and flips with the air. */
-.site-footer {
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
-}
-
-.site-footer__nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 1.1rem;
-}
-
-.site-footer__nav a {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.04em;
-  color: var(--text-dim);
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-}
-
-.site-footer__nav a:hover,
-.site-footer__nav a:focus-visible {
-  color: var(--text);
-  border-bottom-color: currentColor;
-}
+/* The sitewide footer's one ruleset lives in shell.css: same markup, same
+   look, on the app pages, the editorial pages and the guides alike. */
 
 /* The Copernicus licence line. Fine print by rank, not by importance: the CAMS
    terms require the sentence wherever the data is shown, so it has to be legible,
@@ -335,7 +283,6 @@
 }
 
 @supports not (color: color-mix(in srgb, red 50%, transparent)) {
-  #map-slot,
   .seo-sheet {
     --text-dim: #3b352c;
     --border: #6b6559;

@@ -8,8 +8,8 @@
 // same reason index.html carries its FAQ as literal HTML.
 //
 // The FAQ copy and the FAQPage JSON-LD below are both generated from the SAME
-// questions array. index.html hand-mirrors those two and has to be kept in sync
-// by hand; here they cannot drift, because there is only one copy.
+// questions array, so they cannot drift. The homepage works the same way now
+// (homePage() below): its last hand-mirrored copy is gone.
 
 import { mkdir, writeFile, rm } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
@@ -29,6 +29,8 @@ import {
   sourceLinks,
   breadcrumbJsonLd,
   mastheadSky,
+  sheetRidge,
+  pageHead,
 } from './lib/page.mjs';
 import { generateArticles, articleRoutes } from './gen-articles.mjs';
 
@@ -294,59 +296,11 @@ function page(loc) {
   // a share card, because it does not know one.
   const ogImage = `${ORIGIN}/api/og?place=${encodeURIComponent(loc.label)}`;
 
-  return `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
+  // The place script is read by App.jsx before geolocation is requested: this
+  // page already knows which place it is about, so it must never prompt for
+  // location. A reader who landed on a city page asked for that city.
+  const placeScript = `
 
-    <!-- Google tag (gtag.js). Charset stays first so it lands well inside the
-         first 1024 bytes the HTML spec requires; the tag is otherwise as early
-         as it can be. \`async\` keeps it off the critical path, because the verdict must
-         still paint in under 3 seconds on cellular. -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XTJYZ1SJCE"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag('js', new Date());
-
-      gtag('config', 'G-XTJYZ1SJCE');
-    </script>
-
-    <!-- Ahrefs Web Analytics. Same deal as gtag above: \`async\` so it never
-         blocks the verdict paint. -->
-    <script
-      src="https://analytics.ahrefs.com/analytics.js"
-      data-key="xS18hHzOPE0qaqi0SF8mDA"
-      async
-    ></script>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#8ba9c4" />
-    <title>${escAttr(title)}</title>
-    <meta name="description" content="${escAttr(description)}" />
-    <link rel="canonical" href="${escAttr(url)}" />
-
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="SMOKESHOW" />
-    <meta property="og:title" content="${escAttr(title)}" />
-    <meta property="og:description" content="${escAttr(description)}" />
-    <meta property="og:url" content="${escAttr(url)}" />
-    <meta property="og:image" content="${escAttr(ogImage)}" />
-    <meta name="twitter:card" content="summary_large_image" />
-
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="apple-mobile-web-app-title" content="SMOKESHOW" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="manifest" href="/site.webmanifest" />
-
-    <!-- Read by App.jsx before geolocation is requested: this page already
-         knows which place it is about, so it must never prompt for location.
-         A reader who landed on a ${esc(loc.name)} page asked for ${esc(loc.name)}. -->
     <script>
       window.__SMOKESHOW_PLACE__ = ${jsonForScript({
         lat: loc.lat,
@@ -354,15 +308,19 @@ function page(loc) {
         label: loc.label,
         slug: loc.slug,
       })};
-    </script>
-  </head>
-  <body>
+    </script>`;
+
+  return `${pageHead({ title, description, url, ogImage, webApp: true, extraHead: placeScript })}
     <div id="root"></div>
 
     <!-- Server-delivered SEO content. Deliberately static HTML (not
-         React-rendered) so crawlers see it in the initial payload. -->
-    <div class="app app--bottom">
+         React-rendered) so crawlers see it in the initial payload. The ridge is
+         the masthead's hills without its sky: the live sky above stays the
+         instrument, and the hills keep the reading half on the same horizon as
+         the guides at any hour. -->
+    <div class="app app--bottom">${sheetRidge()}
       <header class="map-intro">
+        <p class="eyebrow">Smoke forecast</p>
         <h1 class="map-intro__title">Wildfire smoke in ${esc(loc.label)}</h1>
         <p class="map-intro__sub">
           Where the smoke over ${esc(loc.name)} was, and where the model sends it next. Scrub back 12
@@ -457,50 +415,7 @@ ${breadcrumbJsonLd([
 // ---------------------------------------------------------------------------
 
 function editorialHead({ title, description, url }) {
-  return `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-
-    <!-- Same analytics tags, same reasoning, as index.html and the city pages:
-         charset first, both async so neither is ever on a critical path. -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XTJYZ1SJCE"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag('js', new Date());
-
-      gtag('config', 'G-XTJYZ1SJCE');
-    </script>
-
-    <script
-      src="https://analytics.ahrefs.com/analytics.js"
-      data-key="xS18hHzOPE0qaqi0SF8mDA"
-      async
-    ></script>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#8ba9c4" />
-    <title>${escAttr(title)}</title>
-    <meta name="description" content="${escAttr(description)}" />
-    <link rel="canonical" href="${escAttr(url)}" />
-
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="SMOKESHOW" />
-    <meta property="og:title" content="${escAttr(title)}" />
-    <meta property="og:description" content="${escAttr(description)}" />
-    <meta property="og:url" content="${escAttr(url)}" />
-    <meta property="og:image" content="${escAttr(`${ORIGIN}/api/og`)}" />
-    <meta name="twitter:card" content="summary_large_image" />
-
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="apple-mobile-web-app-title" content="SMOKESHOW" />
-    <link rel="manifest" href="/site.webmanifest" />
-  </head>
-  <body>${mastheadSky()}`;
+  return `${pageHead({ title, description, url })}${mastheadSky()}`;
 }
 
 // One row per city: the link, and an EMPTY slot the browser fills with a live
@@ -568,6 +483,7 @@ function hubPage() {
   return `${editorialHead({ title, description, url })}
     <div class="app app--bottom">
       <header class="map-intro">
+        <p class="eyebrow">Directory</p>
         <h1 class="map-intro__title">Wildfire smoke forecasts by city</h1>
         <p class="map-intro__sub">
           One page per city, each answering the same question: how bad is the air here, and when
@@ -680,6 +596,7 @@ function aboutPage() {
   return `${editorialHead({ title, description, url })}
     <div class="app app--bottom">
       <header class="map-intro">
+        <p class="eyebrow">About</p>
         <h1 class="map-intro__title">Why we made Smokeshow</h1>
         <p class="map-intro__sub">
           One page, one question. How bad is the air here, and when does it clear.
@@ -786,6 +703,132 @@ ${breadcrumbJsonLd([
 `;
 }
 
+// ---------------------------------------------------------------------------
+// The homepage. The last page the generator did not write: it lived as a
+// hand-maintained index.html whose FAQ was hand-mirrored into its own FAQPage
+// JSON-LD and whose footer was hand-mirrored from FOOTER_LINKS, each with a
+// keep-in-sync comment. Both mirrors are gone now — the FAQ HTML and its
+// JSON-LD come from the one array below, the footer from footer(), the head
+// from pageHead(), exactly like every other page. index.html stays committed
+// because Vite dev serves it directly; `npm run pages` rewrites it, and the
+// build always runs pages first, so a stale committed copy can never deploy.
+// ---------------------------------------------------------------------------
+
+const HOME_QUESTIONS = [
+  {
+    q: 'Why does it smell like smoke outside today?',
+    a: "If it smells like smoke outside and there's no fire nearby, you're almost certainly smelling wildfire smoke that traveled, often hundreds or thousands of miles. Wind carries smoke from large wildfires across entire regions, so the air can smell like a campfire even when the nearest fire is in another state or another country. The map above shows the smoke over your location right now and where it's headed.",
+  },
+  {
+    q: 'Where is the smoke coming from?',
+    a: 'Most smoke events in the Upper Midwest and eastern US come from Canadian wildfires, whose smoke rides the wind south and east for days. Western states in the US more often see smoke from fires in California, Oregon, Washington, and the Rockies. Variations exist across the globe. Scrub the timeline backward to watch where the smoke over you came from.',
+  },
+  {
+    q: 'Is there smoke in the air near me right now?',
+    a: "Allow location access and smokeshow will show the smoke in the air near you, what you'd likely smell and see, based on current forecast models. No account, or app required.",
+  },
+  {
+    q: 'When will the smoke go away?',
+    a: "It depends on the wind and the fires, but for any single location, smoke usually arrives and clears in waves over hours to a few days rather than sitting for weeks. Smokeshow's headline answer is the clear time: the first stretch of at least six straight hours of cleaner air in the forecast. Check the verdict above for your location's clear time.",
+  },
+  {
+    q: 'How long does wildfire smoke stay in the air?',
+    a: "Smoke particles are so small they can stay suspended for days to weeks and travel across continents. What matters locally is the wind: a shift can clear a smoky sky in hours or bring a fresh wave just as fast. That's why this page shows the past 12 hours and a few days ahead, direction matters more than the moment.",
+  },
+  {
+    q: 'How far ahead can smoke be forecast?',
+    a: "Smoke forecasts are sharp for about the next one to two days and get fuzzier after that. Models must find the fires by satellite, estimate how much smoke each one makes, and then ride the wind forecast, and each step adds error (the full explanation is linked below). Smokeshow shows a detailed two-day window plus a five-day outlook, and tells you when the forecast models agree and when they don't. And we blend a few models to improve our guesses.",
+  },
+  {
+    q: "Is it safe to be outside when there's smoke in the air?",
+    a: "Smokeshow can't answer that for you, this tool just describes what the air is like, not what your body can handle. Sensitivity varies a lot with age, health, and activity from person to person. For health guidance during wildfire smoke, consider AirNow.gov and your local health authorities, and/or talk to a medical professional about your situation.",
+  },
+];
+
+function homePage() {
+  const url = `${ORIGIN}/`;
+  const title = 'SMOKESHOW: Wildfire Smoke Map & Forecast. When Will It Clear?';
+  const description =
+    "Live wildfire smoke forecast for your location. See the smoke in the air right now, where it's coming from, and when it clears, in plain language.";
+
+  const faqItems = HOME_QUESTIONS.map(
+    ({ q, a }) => `
+          <details class="faq__item">
+            <summary><h3>${esc(q)}</h3></summary>
+            <p>${esc(a)}</p>
+          </details>`,
+  ).join('');
+
+  return `${pageHead({ title, description, url, webApp: true })}
+    <div id="root"></div>
+
+    <!-- Server-delivered SEO content: FAQ -> explainer -> disclaimer.
+         Deliberately static HTML (not React-rendered) so crawlers see it in
+         the initial payload. The app renders above in #root and portals the
+         app CTA into the slot below. Same ridge as the city pages: the live
+         sky stays the instrument, the hills keep the reading half on the
+         same horizon as the rest of the site. -->
+    <div class="app app--bottom">${sheetRidge()}
+      <div id="cta-slot"></div>
+
+      <!-- The reference material rides on the demo's bottom sheet rather than
+           on the live sky: fixed cream, fixed ink, no flip. -->
+      <div class="seo-sheet">
+
+        <section class="faq">
+          <h2>Smoke in the air? Common questions.</h2>${faqItems}
+        </section>
+
+        <!-- The five paragraphs that used to live here now have their own page
+             at /guides/how-smoke-forecasts-work/. The id stays on this lead so
+             a stale /#how-smoke-forecasts-work link still lands on something
+             that explains itself and points onward. -->
+        <div class="explainer" id="how-smoke-forecasts-work">
+          <h2>Why is smoke so hard to forecast?</h2>
+          <p>
+            Forecasting smoke is like forecasting weather, with three extra problems stacked on top.
+            You have to find the fires, which satellites can miss behind cloud or behind other
+            smoke. You have to guess how much smoke each one is making. Then you ride a wind
+            forecast, and height matters, because smoke high in the sky can pass right over a town
+            whose air stays clean.
+          </p>
+          <p>
+            Each step adds a little error and the errors multiply, which is why forecasts are sharp
+            for a day or two and fuzzy after that, and why this site tells you when the models
+            disagree instead of averaging them into one confident line.
+            <a href="/guides/how-smoke-forecasts-work/">The long version is here</a>.
+          </p>
+        </div>
+
+        <div class="disclaimer">
+          <p>
+            ${DISCLAIMER}
+          </p>
+        </div>
+      </div>${footer()}
+    </div>
+
+    <script type="application/ld+json">
+${jsonForScript(
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: HOME_QUESTIONS.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
+  },
+  null,
+  2,
+)}
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+`;
+}
+
 // The explainer moved out of this file. It shipped for months as an anchor in
 // index.html, then briefly as /how-smoke-forecasts-work/ generated here; it now
 // lives as the first post in the /guides/ article system
@@ -809,6 +852,7 @@ function notFoundPage() {
   })}
     <div class="app app--bottom">
       <header class="map-intro">
+        <p class="eyebrow">Not found</p>
         <h1 class="map-intro__title">That page does not exist</h1>
         <p class="map-intro__sub">
           Probably a city we do not cover yet, or a typo in the address. Both are fixable from here.
@@ -878,6 +922,7 @@ function corridorPage(corridor) {
   return `${editorialHead({ title, description: corridor.description, url })}
     <div class="app app--bottom">
       <header class="map-intro">
+        <p class="eyebrow">Corridor</p>
         <h1 class="map-intro__title">${esc(corridor.name)}</h1>
         <p class="map-intro__sub">${esc(corridor.lede)}</p>
       </header>
@@ -1010,6 +1055,11 @@ export async function generate() {
   await writeFile(join(ROOT, '404.html'), notFoundPage(), 'utf8');
   written.push(join(ROOT, '404.html'));
 
+  // The homepage. Committed (Vite dev serves it directly) and rewritten here,
+  // so the build's copy always comes from this generator.
+  await writeFile(join(ROOT, 'index.html'), homePage(), 'utf8');
+  written.push(join(ROOT, 'index.html'));
+
   await mkdir(join(ROOT, 'public'), { recursive: true });
   await writeFile(join(ROOT, 'public', 'sitemap.xml'), sitemap(LOCATIONS, await articleRoutes()), 'utf8');
 
@@ -1023,6 +1073,7 @@ export const _internal = {
   corridorPage,
   aboutPage,
   notFoundPage,
+  homePage,
   sitemap,
   esc,
   escAttr,
@@ -1035,6 +1086,6 @@ export const _internal = {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const written = await generate();
   console.log(
-    `pages: ${written.length} written (${LOCATIONS.length} cities, 1 hub, ${CORRIDORS.length} corridors, 1 about, /guides/, 1 404), sitemap.xml updated`,
+    `pages: ${written.length} written (${LOCATIONS.length} cities, 1 hub, ${CORRIDORS.length} corridors, 1 about, /guides/, 1 404, index.html), sitemap.xml updated`,
   );
 }
