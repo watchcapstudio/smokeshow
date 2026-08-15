@@ -1,0 +1,1375 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Unlisted internal review page, same posture as /uotwqtoovu/: not in the
+         sitemap, noindex here, and deliberately NOT carrying the Smart App
+         Banner meta it is reviewing. A mock of a store pitch has no business
+         drawing a real one over itself. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <title>The app CTA, before it goes live</title>
+    <style>
+      :root {
+        --sky-high: #b3b0ac;
+        --sky-low: #c9a274;
+        --sheet: #f8f4ed;
+        --sheet-edge: #e6ded1;
+        --ground: #dfe6ee;
+        --ink: #1c2024;
+        --ink-mid: #4a5158;
+        --ink-dim: #767d85;
+        --ember: #b8400c;
+        --rule: #ded5c7;
+        --chip: #ece5d8;
+        --was: #8a7f70;
+        --shadow: 0 18px 40px -24px rgba(28, 32, 36, 0.5);
+        --sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+        --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --sky-high: #1a1712;
+          --sky-low: #3a2a1a;
+          --sheet: #191d21;
+          --sheet-edge: #2a3037;
+          --ground: #0c1015;
+          --ink: #e9e5dd;
+          --ink-mid: #b3aca1;
+          --ink-dim: #8b8579;
+          --ember: #e46a33;
+          --rule: #2e343b;
+          --chip: #242a30;
+          --was: #7e766a;
+          --shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.8);
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--ground);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 17px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      /* ------------------------------------------------------------ head */
+
+      .masthead {
+        background: linear-gradient(180deg, var(--sky-high) 0%, var(--sky-low) 100%);
+        padding: 60px 0 88px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .masthead svg {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1px;
+        width: 100%;
+        height: 90px;
+        display: block;
+      }
+
+      .masthead .wrap {
+        position: relative;
+        z-index: 1;
+      }
+
+      .kicker {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: rgba(20, 16, 12, 0.62);
+        margin: 0 0 10px;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        .kicker {
+          color: rgba(240, 232, 220, 0.62);
+        }
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(30px, 5vw, 44px);
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        font-weight: 800;
+        color: #14100c;
+        max-width: 20ch;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        h1 {
+          color: #f2ece2;
+        }
+      }
+
+      .standfirst {
+        margin: 14px 0 0;
+        max-width: 60ch;
+        color: rgba(20, 16, 12, 0.78);
+        font-size: 18px;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        .standfirst {
+          color: rgba(238, 230, 218, 0.8);
+        }
+      }
+
+      /* --------------------------------------------------------- sections */
+
+      main {
+        padding: 0 0 90px;
+        margin-top: -46px;
+        position: relative;
+        z-index: 2;
+      }
+
+      section {
+        background: var(--sheet);
+        border: 1px solid var(--sheet-edge);
+        border-radius: 20px;
+        padding: 30px clamp(20px, 4vw, 38px) 34px;
+        box-shadow: var(--shadow);
+        margin-bottom: 26px;
+      }
+
+      h2 {
+        margin: 0 0 6px;
+        font-size: 25px;
+        letter-spacing: -0.015em;
+        line-height: 1.2;
+      }
+
+      h3 {
+        margin: 0;
+        font-size: 16px;
+        letter-spacing: -0.005em;
+      }
+
+      .sub {
+        margin: 0 0 24px;
+        color: var(--ink-mid);
+        max-width: 68ch;
+      }
+
+      p {
+        max-width: 70ch;
+      }
+
+      .num {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ember);
+        margin: 0 0 8px;
+      }
+
+      /* ----------------------------------------------------- before/after */
+
+      .ba {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 22px;
+        margin-top: 6px;
+      }
+
+      .colhead {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--rule);
+      }
+
+      .colhead b {
+        font-size: 13px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        font-family: var(--mono);
+        font-weight: 600;
+      }
+
+      .colhead.was b {
+        color: var(--was);
+      }
+
+      .colhead.now b {
+        color: var(--ember);
+      }
+
+      .colhead .where {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-dim);
+      }
+
+      .note {
+        margin: 12px 0 0;
+        font-size: 14.5px;
+        line-height: 1.55;
+        color: var(--ink-mid);
+      }
+
+      .note b {
+        color: var(--ink);
+      }
+
+      /* -------------------------------------------- the CTA panel, mocked */
+
+      /* A faithful-enough reproduction of src/components/AppWidgetCTA.jsx:
+         same sky gradient the widgets paint, same lock-screen chrome, same
+         type scale. The forecast numbers are FIXED SAMPLE DATA for one
+         scenario (Missoula, heavy haze, clearing Thursday). Nothing here
+         reads a live feed, which is the one way this page differs from the
+         real component. */
+      .panel {
+        background: var(--sheet);
+        border: 1px solid var(--rule);
+        border-radius: 16px;
+        padding: 18px 18px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .panel .eyebrow {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+        margin: 0;
+      }
+
+      .panel h4 {
+        margin: 0;
+        font-size: 25px;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        line-height: 1.15;
+      }
+
+      .panel .lead,
+      .panel .secondary {
+        margin: 0;
+        color: var(--ink-mid);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+
+      .panel .secondary {
+        font-size: 13.5px;
+      }
+
+      .home {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+        padding: 18px;
+        border-radius: 20px;
+        background: radial-gradient(120% 90% at 85% 0%, #3d4e57 0%, #2e3d46 45%, #151c22 100%);
+      }
+
+      .w {
+        position: relative;
+        overflow: hidden;
+        border-radius: 20px;
+        box-shadow: 0 16px 34px -16px rgba(0, 0, 0, 0.6);
+        color: #241d15;
+        background: linear-gradient(180deg, #c9c3b8 0%, #d6b183 52%, #d99b5c 100%);
+      }
+
+      .w--s {
+        width: 136px;
+        height: 136px;
+      }
+
+      .w--m {
+        width: 272px;
+        height: 130px;
+      }
+
+      .w__loc {
+        position: absolute;
+        top: 10px;
+        left: 14px;
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.09em;
+        opacity: 0.55;
+        font-weight: 500;
+      }
+
+      .w__over {
+        position: absolute;
+        inset: 0;
+        padding: 12px 14px 46px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+      }
+
+      .w--m .w__over {
+        padding-bottom: 42px;
+      }
+
+      .w__word {
+        font-weight: 800;
+        font-size: 16px;
+        line-height: 1.05;
+        letter-spacing: -0.01em;
+      }
+
+      .w--m .w__word {
+        font-size: 20px;
+      }
+
+      .w__sub {
+        font-size: 10.5px;
+        font-weight: 600;
+        margin-top: 2px;
+        opacity: 0.72;
+      }
+
+      .w__art {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        display: block;
+      }
+
+      .w--s .w__art {
+        height: 52px;
+      }
+
+      .w--m .w__art {
+        height: 44px;
+      }
+
+      .lock {
+        border-radius: 20px;
+        padding: 20px 18px 18px;
+        color: #efe9dc;
+        text-align: center;
+        background: linear-gradient(180deg, #33302b 0%, #211e19 55%, #141210 100%);
+      }
+
+      .lock__clock {
+        font-size: 32px;
+        font-weight: 250;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .lock__inline {
+        margin: 11px auto 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 13px;
+        padding: 6px 12px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      .lock__pip {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #b85c3a;
+      }
+
+      .lock__row {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 13px;
+        flex-wrap: wrap;
+      }
+
+      .lock__circ {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .lock__rect {
+        width: 146px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.12);
+        padding: 8px 12px;
+        text-align: left;
+      }
+
+      .lock__rect b {
+        display: block;
+        font-size: 12.5px;
+        font-weight: 750;
+      }
+
+      .lock__rect span {
+        display: block;
+        font-size: 10px;
+        opacity: 0.75;
+        font-weight: 600;
+      }
+
+      /* ------------------------------------------------ the footer, twice */
+
+      .foot {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .foot--was {
+        outline: 2px dashed rgba(184, 64, 12, 0.32);
+        outline-offset: 7px;
+        border-radius: 4px;
+      }
+
+      .price-was {
+        margin: 0;
+        font-weight: 700;
+        font-size: 15px;
+      }
+
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--ember);
+        color: #f7efe3;
+        font-weight: 700;
+        font-size: 15px;
+        text-decoration: none;
+        border-radius: 999px;
+        padding: 11px 22px;
+        min-height: 44px;
+      }
+
+      .badge img {
+        display: block;
+        height: 40px;
+        width: auto;
+      }
+
+      .terms {
+        margin: 0;
+        font-size: 13.5px;
+        line-height: 1.5;
+        color: var(--ink-mid);
+      }
+
+      .dead {
+        display: inline-block;
+        font-family: var(--mono);
+        font-size: 11.5px;
+        background: var(--chip);
+        border: 1px solid var(--rule);
+        border-radius: 6px;
+        padding: 2px 7px;
+        color: var(--ink-mid);
+      }
+
+      /* --------------------------------------------------------- phone */
+
+      .phones {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 26px;
+        align-items: start;
+      }
+
+      .phone {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+        border-radius: 34px;
+        border: 9px solid #1d1a17;
+        background: #1d1a17;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .phone__screen {
+        border-radius: 26px;
+        overflow: hidden;
+        background: #fbf7ee;
+        position: relative;
+      }
+
+      .safari-chrome {
+        background: #efeae2;
+        border-bottom: 1px solid #ddd6ca;
+        padding: 9px 12px 8px;
+        display: flex;
+        justify-content: center;
+      }
+
+      .safari-chrome span {
+        font-size: 11.5px;
+        color: #6d665c;
+        background: #e2dcd2;
+        border-radius: 7px;
+        padding: 4px 14px;
+        font-family: var(--mono);
+      }
+
+      /* Apple's banner, reproduced at the proportions Safari draws it. */
+      .smartbanner {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 11px;
+        background: #f2f1f6;
+        border-bottom: 1px solid #d8d5cf;
+        color: #1c1c1e;
+      }
+
+      .smartbanner__x {
+        color: #8e8e93;
+        font-size: 15px;
+        line-height: 1;
+      }
+
+      .smartbanner__icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        flex: 0 0 auto;
+        background: linear-gradient(170deg, #c9c3b8 0%, #d6b183 55%, #a8562a 100%);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .smartbanner__icon::after {
+        content: '';
+        position: absolute;
+        left: -10%;
+        right: -10%;
+        bottom: 0;
+        height: 42%;
+        background: #4a3524;
+        clip-path: polygon(0 62%, 22% 34%, 44% 58%, 68% 22%, 100% 48%, 100% 100%, 0 100%);
+      }
+
+      .smartbanner__txt {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+
+      .smartbanner__txt b {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.25;
+      }
+
+      .smartbanner__txt span {
+        display: block;
+        font-size: 10.5px;
+        color: #6d6d72;
+        line-height: 1.3;
+      }
+
+      .smartbanner__get {
+        background: #007aff;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        border-radius: 999px;
+        padding: 5px 15px;
+        flex: 0 0 auto;
+      }
+
+      .page-body {
+        padding: 16px 15px 22px;
+      }
+
+      .page-body .eyebrow {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #8a8175;
+        margin: 0 0 5px;
+      }
+
+      .page-body h5 {
+        margin: 0 0 7px;
+        font-size: 19px;
+        letter-spacing: -0.015em;
+        line-height: 1.15;
+        color: #241f19;
+      }
+
+      .page-body p {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.5;
+        color: #5d564c;
+      }
+
+      .skel {
+        margin-top: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+      }
+
+      .skel i {
+        display: block;
+        height: 8px;
+        border-radius: 4px;
+        background: #e7e0d4;
+      }
+
+      .skel i:nth-child(2) {
+        width: 86%;
+      }
+
+      .skel i:nth-child(3) {
+        width: 64%;
+      }
+
+      .caption {
+        margin: 12px auto 0;
+        max-width: 300px;
+        font-size: 13.5px;
+        line-height: 1.5;
+        color: var(--ink-mid);
+        text-align: center;
+      }
+
+      /* ----------------------------------------------------- nudge sheet */
+
+      .nudge {
+        max-width: 300px;
+        margin: 0 auto;
+        background: #fbf7ee;
+        color: #26221b;
+        border-radius: 22px 22px 0 0;
+        padding: 12px 34px 16px 18px;
+        position: relative;
+        box-shadow: 0 -14px 34px -14px rgba(22, 15, 8, 0.4);
+        border: 1px solid var(--rule);
+        border-bottom: none;
+      }
+
+      .nudge::before {
+        content: '';
+        display: block;
+        width: 34px;
+        height: 4px;
+        border-radius: 2px;
+        background: #c9bfac;
+        margin: 0 auto 11px;
+      }
+
+      .nudge__x {
+        position: absolute;
+        top: 8px;
+        right: 11px;
+        color: #8a7c64;
+        font-size: 19px;
+        line-height: 1;
+      }
+
+      .nudge__pitch {
+        margin: 0 0 7px;
+        font-weight: 650;
+        font-size: 14px;
+        line-height: 1.35;
+        max-width: none;
+      }
+
+      .nudge__how {
+        margin: 0;
+        color: #8a7c64;
+        font-size: 12.5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-wrap: wrap;
+        max-width: none;
+      }
+
+      .nudge__how strong {
+        color: #26221b;
+      }
+
+      .nudge__glyph {
+        width: 16px;
+        height: 16px;
+        color: #0a84ff;
+      }
+
+      .nudge__arrow {
+        text-align: center;
+        font-size: 17px;
+        color: var(--ember);
+        margin-top: 3px;
+      }
+
+      .nudge__btn {
+        display: inline-flex;
+        align-items: center;
+        margin-top: 6px;
+        background: #8c3e10;
+        color: #f4e9d6;
+        font-weight: 700;
+        font-size: 14px;
+        border-radius: 999px;
+        padding: 9px 20px;
+        min-height: 44px;
+        text-decoration: none;
+      }
+
+      .nudge__terms {
+        margin: 7px 0 0;
+        color: #8a7c64;
+        font-size: 11.5px;
+        max-width: none;
+      }
+
+      /* -------------------------------------------------------- tables */
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 14px;
+        font-size: 14.5px;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 10px 12px 10px 0;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+      }
+
+      th {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+        font-weight: 600;
+      }
+
+      td code,
+      p code,
+      li code {
+        font-family: var(--mono);
+        font-size: 12.5px;
+        background: var(--chip);
+        border-radius: 5px;
+        padding: 1px 5px;
+      }
+
+      .strike {
+        color: var(--was);
+        text-decoration: line-through;
+      }
+
+      ul {
+        max-width: 70ch;
+        padding-left: 20px;
+      }
+
+      li {
+        margin-bottom: 9px;
+      }
+
+      .ask {
+        border-left: 3px solid var(--ember);
+        padding-left: 16px;
+        margin: 18px 0 0;
+      }
+
+      .ask h3 {
+        margin-bottom: 4px;
+      }
+
+      footer {
+        color: var(--ink-dim);
+        font-size: 13.5px;
+        text-align: center;
+        padding-bottom: 50px;
+      }
+
+      footer code {
+        font-family: var(--mono);
+        font-size: 12.5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="masthead">
+      <div class="wrap">
+        <p class="kicker">Internal review &middot; 15 August 2026</p>
+        <h1>The app CTA, before it goes live</h1>
+        <p class="standfirst">
+          Smokeshow shipped on the App Store. The forecast page did not notice: it still said
+          "coming soon", its badges were behind a flag that is off in production, and the URL
+          behind the App Store badge was a placeholder that resolves to nothing. Here is every
+          surface that changes, old beside new.
+        </p>
+      </div>
+      <svg viewBox="0 0 1440 300" preserveAspectRatio="none" aria-hidden="true">
+        <path
+          d="M0,300 L0,150 C160,120 300,175 470,150 C640,125 760,80 940,110 C1120,140 1280,130 1440,105 L1440,300 Z"
+          fill="rgba(20,16,12,0.10)"
+        />
+        <path
+          d="M0,300 L0,200 C200,175 360,215 560,195 C760,175 900,140 1120,165 C1280,183 1360,180 1440,170 L1440,300 Z"
+          fill="rgba(20,16,12,0.18)"
+        />
+      </svg>
+    </div>
+
+    <main class="wrap">
+      <!-- ==================================================== section 1 -->
+      <section>
+        <p class="num">01 &middot; The forecast page</p>
+        <h2>The panel is unchanged. Its last four lines are not.</h2>
+        <p class="sub">
+          Everything above the rule below stays exactly as it is: the widget mocks still paint the
+          reader's own sky and still track the timeline as they scrub it. That part was already the
+          best argument on the page. The problem was entirely in what came after it.
+        </p>
+
+        <div class="panel">
+          <p class="eyebrow">SMOKESHOW for iPhone and iPad &middot; 14-day free trial</p>
+          <h4>Your air, on your Home Screen.</h4>
+          <p class="lead">
+            See it without looking it up. These widgets are live, they're reading MISSOULA's
+            forecast right now, and they'll follow it as you scrub the timeline above.
+          </p>
+
+          <div class="home">
+            <div class="w w--s">
+              <div class="w__loc">MISSOULA</div>
+              <svg class="w__art" viewBox="0 0 136 52" preserveAspectRatio="none" aria-hidden="true">
+                <defs>
+                  <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#241d15" stop-opacity="0.34" />
+                    <stop offset="1" stop-color="#241d15" stop-opacity="0.02" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M0,52 L0,30 L14,26 L28,17 L42,11 L56,9 L70,14 L84,21 L98,30 L112,37 L126,43 L136,46 L136,52 Z"
+                  fill="url(#g1)"
+                />
+                <path
+                  d="M0,30 L14,26 L28,17 L42,11 L56,9 L70,14 L84,21 L98,30 L112,37 L126,43 L136,46"
+                  fill="none"
+                  stroke="#241d15"
+                  stroke-opacity="0.7"
+                  stroke-width="1.5"
+                  stroke-linejoin="round"
+                />
+                <line
+                  x1="0"
+                  x2="136"
+                  y1="24"
+                  y2="24"
+                  stroke="#241d15"
+                  stroke-opacity="0.22"
+                  stroke-dasharray="2 4"
+                />
+                <circle cx="56" cy="9" r="2.4" fill="#241d15" fill-opacity="0.9" />
+              </svg>
+              <div class="w__over">
+                <div class="w__word">Heavy haze</div>
+                <div class="w__sub">Clears Thursday ~6 PM</div>
+              </div>
+            </div>
+
+            <div class="w w--m">
+              <div class="w__loc">MISSOULA</div>
+              <svg class="w__art" viewBox="0 0 272 44" preserveAspectRatio="none" aria-hidden="true">
+                <defs>
+                  <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#241d15" stop-opacity="0.34" />
+                    <stop offset="1" stop-color="#241d15" stop-opacity="0.02" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M0,44 L0,25 L28,22 L56,14 L84,9 L112,7 L140,12 L168,18 L196,25 L224,31 L252,36 L272,39 L272,44 Z"
+                  fill="url(#g2)"
+                />
+                <path
+                  d="M0,25 L28,22 L56,14 L84,9 L112,7 L140,12 L168,18 L196,25 L224,31 L252,36 L272,39"
+                  fill="none"
+                  stroke="#241d15"
+                  stroke-opacity="0.7"
+                  stroke-width="1.5"
+                  stroke-linejoin="round"
+                />
+                <line
+                  x1="0"
+                  x2="272"
+                  y1="20"
+                  y2="20"
+                  stroke="#241d15"
+                  stroke-opacity="0.22"
+                  stroke-dasharray="2 4"
+                />
+                <circle cx="112" cy="7" r="2.4" fill="#241d15" fill-opacity="0.9" />
+              </svg>
+              <div class="w__over">
+                <div class="w__word">Heavy haze</div>
+                <div class="w__sub">Clears Thursday ~6 PM</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lock">
+            <div class="lock__clock">4:18</div>
+            <div class="lock__inline">
+              <span class="lock__pip"></span>
+              Heavy haze &middot; Clears Thursday ~6 PM
+            </div>
+            <div class="lock__row">
+              <div class="lock__circ">
+                <svg viewBox="0 0 60 60" width="56" height="56" aria-hidden="true">
+                  <circle cx="30" cy="30" r="24" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="4.5" />
+                  <circle
+                    cx="30"
+                    cy="30"
+                    r="24"
+                    fill="none"
+                    stroke="#b85c3a"
+                    stroke-width="4.5"
+                    stroke-linecap="round"
+                    stroke-dasharray="52 151"
+                    transform="rotate(-90 30 30)"
+                  />
+                  <text x="30" y="34" text-anchor="middle" font-size="15" font-weight="700" fill="#F4E9D6">86</text>
+                </svg>
+              </div>
+              <div class="lock__circ">
+                <svg viewBox="0 0 60 60" width="56" height="56" aria-hidden="true">
+                  <circle cx="30" cy="30" r="24" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="3.5" />
+                  <circle
+                    cx="30"
+                    cy="30"
+                    r="24"
+                    fill="none"
+                    stroke="#7fae8a"
+                    stroke-width="3.5"
+                    stroke-linecap="round"
+                    stroke-dasharray="82 151"
+                    transform="rotate(-90 30 30)"
+                  />
+                  <text x="30" y="31" text-anchor="middle" font-size="14" font-weight="700" fill="#F4E9D6">26h</text>
+                  <text
+                    x="30"
+                    y="43"
+                    text-anchor="middle"
+                    font-size="6.5"
+                    letter-spacing="1"
+                    fill="#F4E9D6"
+                    opacity="0.7"
+                  >
+                    TO CLEAR
+                  </text>
+                </svg>
+              </div>
+              <div class="lock__rect">
+                <b>Heavy haze</b>
+                <span>Clears Thursday ~6 PM</span>
+                <svg viewBox="0 0 146 17" preserveAspectRatio="none" width="122" height="17" aria-hidden="true">
+                  <path
+                    d="M0,10 L15,9 L30,6 L45,4 L60,3 L75,5 L90,7 L105,10 L120,12 L135,14 L146,15"
+                    fill="none"
+                    stroke="#F4E9D6"
+                    stroke-opacity="0.7"
+                    stroke-width="1.2"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <p class="secondary">
+            Plus notifications: threshold alerts when smoke arrives, peaks, or clears. No digests,
+            no streaks, no engagement pings.
+          </p>
+        </div>
+
+        <div class="ba" style="margin-top: 30px">
+          <div>
+            <div class="colhead was">
+              <b>What ships today</b>
+              <span class="where">the last line of the panel</span>
+            </div>
+            <div class="foot foot--was">
+              <p class="price-was">Coming soon to iOS, macOS &amp; Android. 14-day trial, $2.99/month.</p>
+            </div>
+            <p class="note">
+              That is the whole footer. No badge renders at all, because
+              <code>STORE_BADGES_ENABLED</code> reads an env var that is not set in production. Had
+              it been set, the badge pointed at
+              <span class="dead">apps.apple.com/app/smokeshow</span>, which is not a listing. So the
+              one surface built to sell the app has been telling every visitor,
+              <b>for the entire launch</b>, that it does not exist yet.
+            </p>
+          </div>
+
+          <div>
+            <div class="colhead now">
+              <b>What this replaces it with</b>
+              <span class="where">same slot</span>
+            </div>
+            <div class="foot">
+              <a class="cta" href="#0" onclick="return false">Put Missoula on your Home Screen</a>
+              <span class="badge">
+                <img
+                  src="/badges/app-store-badge.svg"
+                  alt="Download SMOKESHOW on the App Store"
+                  width="119"
+                  height="40"
+                />
+              </span>
+            </div>
+            <p class="terms" style="margin-top: 12px">
+              14-day free trial, then $2.99/month. Cancel any time. No account, no email.
+            </p>
+            <p class="note">
+              Two links, one destination. The button carries <b>the offer</b>, which is what a
+              reader decides on, and it names the city they are already looking at. The badge
+              carries Apple's mark, which is what tells them where the tap lands. The terms move
+              underneath both, where they read as terms rather than as the pitch. Google Play is
+              gone until there is a listing to link to.
+            </p>
+          </div>
+        </div>
+
+        <p class="note" style="margin-top: 22px">
+          <b>Worth deciding now:</b> the button text is fixed. On a clear day it is asking someone
+          with nothing to worry about to pay $2.99/month, and it will convert at roughly nothing
+          whatever it says. On a smoky day the panel already knows the answer to the only question
+          that matters, and could lead with it: <i>"Smoke clears Thursday ~6 PM. Get told when it
+          actually does."</i> The verdict and headline are already passed into this component. That
+          is a small change and probably the largest single lever on the page.
+        </p>
+      </section>
+
+      <!-- ==================================================== section 2 -->
+      <section>
+        <p class="num">02 &middot; Safari's Smart App Banner</p>
+        <h2>The one that reaches the traffic you actually have.</h2>
+        <p class="sub">
+          The panel above needs JavaScript, a geolocation answer, and a forecast fetch before it can
+          appear at all. A crawler never sees it. Nor does anyone on bad cellular during an active
+          smoke event, which is precisely the traffic that converts. The 30 static pages are the
+          search landing surface, and until now they made no mention of the app whatsoever.
+        </p>
+
+        <div class="phones">
+          <div>
+            <div class="phone">
+              <div class="phone__screen">
+                <div class="safari-chrome"><span>smokeshow.earth</span></div>
+                <div class="page-body">
+                  <p class="eyebrow">Smoke forecast</p>
+                  <h5>Wildfire smoke in Missoula, MT</h5>
+                  <p>
+                    Where the smoke over Missoula was, and where the model sends it next. Scrub back
+                    12 hours or forward 48.
+                  </p>
+                  <div class="skel"><i></i><i></i><i></i></div>
+                </div>
+              </div>
+            </div>
+            <p class="caption"><b>Today.</b> Nothing on the page says an app exists.</p>
+          </div>
+
+          <div>
+            <div class="phone">
+              <div class="phone__screen">
+                <div class="safari-chrome"><span>smokeshow.earth</span></div>
+                <div class="smartbanner">
+                  <span class="smartbanner__x">&times;</span>
+                  <span class="smartbanner__icon"></span>
+                  <span class="smartbanner__txt">
+                    <b>Smokeshow: Wildfire Forecast</b>
+                    <span>Watchcap Studio</span>
+                    <span>FREE &ndash; On the App Store</span>
+                  </span>
+                  <span class="smartbanner__get">GET</span>
+                </div>
+                <div class="page-body">
+                  <p class="eyebrow">Smoke forecast</p>
+                  <h5>Wildfire smoke in Missoula, MT</h5>
+                  <p>
+                    Where the smoke over Missoula was, and where the model sends it next. Scrub back
+                    12 hours or forward 48.
+                  </p>
+                  <div class="skel"><i></i><i></i><i></i></div>
+                </div>
+              </div>
+            </div>
+            <p class="caption">
+              <b>Proposed.</b> One meta tag, drawn by Safari itself, above the page, on the first
+              visit, at zero layout cost to us.
+            </p>
+          </div>
+        </div>
+
+        <p class="note" style="margin-top: 24px">
+          Apple draws this, not us, which is why it is worth having: it looks like part of iOS
+          rather than part of a marketing page, it hides itself once the app is installed, and it
+          costs one line in <code>&lt;head&gt;</code>. It renders only in Safari on iOS, so no other
+          browser pays anything for it. This ships on <b>every</b> page the site serves: the app
+          shell, all 25 city pages, the 3 corridor pages, the hub, /about/, and the guides. A test
+          fails the build if any generated page loses it.
+        </p>
+        <p class="note">
+          The banner shown here is a reproduction. The real one is drawn by Safari from the listing
+          itself, so the app name, seller and price line come from App Store Connect and will match
+          whatever is there, not what is typed above.
+        </p>
+      </section>
+
+      <!-- ==================================================== section 3 -->
+      <section>
+        <p class="num">03 &middot; The return-visit nudge</p>
+        <h2>It was sending your best iOS traffic to a bookmark.</h2>
+        <p class="sub">
+          This sheet appears six seconds into a second visit. It fired on iOS Safari only, and it
+          asked for an Add-to-Home-Screen. That is the highest-intent moment the website has, and it
+          was spending it on a free web shortcut instead of the listing.
+        </p>
+
+        <div class="ba">
+          <div>
+            <div class="colhead was">
+              <b>What ships today</b>
+              <span class="where">iOS Safari, visit 2+</span>
+            </div>
+            <div class="nudge">
+              <span class="nudge__x">&times;</span>
+              <p class="nudge__pitch">Clears Thursday ~6 PM. Keep watch, put SMOKESHOW one tap away.</p>
+              <p class="nudge__how">
+                Tap
+                <svg class="nudge__glyph" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M12 3 L12 14 M12 3 L8.5 6.5 M12 3 L15.5 6.5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M7 10 H5.5 V20.5 H18.5 V10 H17"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                below, then <strong>"Add to Home Screen"</strong>
+              </p>
+              <div class="nudge__arrow">&darr;</div>
+            </div>
+            <p class="note">
+              A bookmark. It competes with the listing for the same tap and wins, because it is
+              free and it is right there.
+            </p>
+          </div>
+
+          <div>
+            <div class="colhead now">
+              <b>What this replaces it with</b>
+              <span class="where">iOS Chrome / Firefox / Edge, visit 2+</span>
+            </div>
+            <div class="nudge">
+              <span class="nudge__x">&times;</span>
+              <p class="nudge__pitch">
+                Clears Thursday ~6 PM. Watch it from your Home Screen, without opening anything.
+              </p>
+              <a class="nudge__btn" href="#0" onclick="return false">Get the app</a>
+              <p class="nudge__terms">14-day free trial, cancel any time.</p>
+            </div>
+            <p class="note">
+              On iOS <b>Safari</b> this sheet no longer appears at all: the Smart App Banner above
+              already made the ask, natively, on the first visit. Two asks for one tap is one ask
+              too many.
+            </p>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Reader</th>
+              <th>Was</th>
+              <th>Now</th>
+              <th>Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>iOS Safari</td>
+              <td class="strike">Add to Home Screen sheet</td>
+              <td>Nothing (Smart App Banner has it)</td>
+              <td>Native ask, first visit, no sheet needed</td>
+            </tr>
+            <tr>
+              <td>iOS Chrome / Firefox / Edge</td>
+              <td class="strike">Nothing at all</td>
+              <td>Store link + terms</td>
+              <td>These never draw a Smart App Banner, so this is their only ask</td>
+            </tr>
+            <tr>
+              <td>Android</td>
+              <td>Native install prompt</td>
+              <td>Native install prompt, unchanged</td>
+              <td>There is no Play listing. The PWA is the Android product</td>
+            </tr>
+            <tr>
+              <td>Desktop, in-app browsers</td>
+              <td>Nothing</td>
+              <td>Nothing, unchanged</td>
+              <td>The gesture is impossible or the ask is wrong</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ==================================================== section 4 -->
+      <section>
+        <p class="num">04 &middot; Measurement</p>
+        <h2>There was none. Now there is some.</h2>
+        <p class="sub">
+          Google Analytics has been loaded on every page this whole time and not a single event was
+          ever fired from the app. Every store link now reports twice: once to GA4 naming the
+          placement, once to Apple as a campaign token on the URL.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Surface</th>
+              <th>GA4 event</th>
+              <th>Apple campaign</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>CTA button, forecast page</td>
+              <td><code>app_store_click</code> / <code>forecast-cta-button</code></td>
+              <td><code>ct=forecast-cta</code></td>
+            </tr>
+            <tr>
+              <td>CTA badge, forecast page</td>
+              <td><code>app_store_click</code> / <code>forecast-cta-badge</code></td>
+              <td><code>ct=forecast-cta</code></td>
+            </tr>
+            <tr>
+              <td>Return-visit nudge</td>
+              <td><code>app_store_click</code> / <code>install-nudge</code></td>
+              <td><code>ct=install-nudge</code></td>
+            </tr>
+            <tr>
+              <td>Smart App Banner</td>
+              <td>None available</td>
+              <td>Apple attributes it as web referral</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="note">
+          Both halves are wanted and neither is sufficient. GA4 says which placement got pressed;
+          App Store Connect says which press became a download. What is still missing is an
+          impression event on the CTA panel, so these become a rate rather than a count. Without it
+          you cannot tell "nobody sees it" from "everybody ignores it", and those two need opposite
+          fixes.
+        </p>
+      </section>
+
+      <!-- ==================================================== section 5 -->
+      <section>
+        <p class="num">05 &middot; Before this goes live</p>
+        <h2>Two things I need from you, and one I would not ship blind.</h2>
+
+        <div class="ask">
+          <h3>Which devices does the listing actually serve?</h3>
+          <p class="note">
+            Every line above says <b>"iPhone and iPad"</b>, from a single constant. The repository
+            builds macOS, watchOS and widget targets, and <code>apple/README.md</code> describes one
+            SwiftUI codebase across two platforms. If the listing covers Mac or Watch, that is one
+            word to change and a real selling point currently left on the table. I could not check:
+            the App Store is blocked from this environment, so every fact on this page about price
+            and platform comes from <code>Smokeshow.storekit</code> in the repo, not from the live
+            listing.
+          </p>
+        </div>
+
+        <div class="ask">
+          <h3>The App Store Connect provider token.</h3>
+          <p class="note">
+            <code>PROVIDER_TOKEN</code> in <code>src/lib/appStore.js</code> is empty. It comes from
+            App Store Connect under App Analytics, then Campaigns. Until it is filled in, Apple
+            reports all of this as generic web referral and the <code>ct</code> tokens above are
+            decoration. GA4 will still work either way.
+          </p>
+        </div>
+
+        <div class="ask">
+          <h3>The static store link on the city pages.</h3>
+          <p class="note">
+            Deliberately not in this change. It is the highest-leverage placement left, because it
+            would put the app in the initial HTML of all 30 SEO pages where the React panel cannot
+            reach. But those pages have hard house rules about what may sit beside a place name, and
+            a copy change across every one of them deserves its own pass rather than being smuggled
+            into this one. Say the word and it gets written properly.
+          </p>
+        </div>
+      </section>
+
+      <footer>
+        Branch <code>claude/smokeshow-app-promotion-d6mccj</code>. Unlisted and noindex. Sample
+        forecast throughout: Missoula, heavy haze, clearing Thursday. Nothing on this page reads a
+        live feed.
+      </footer>
+    </main>
+  </body>
+</html>
