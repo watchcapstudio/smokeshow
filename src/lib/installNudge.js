@@ -1,10 +1,21 @@
 import { getJSON, setJSON } from './storage.js';
 
-// Add-to-Home-Screen nudge policy (per share-spec zero-friction rules):
-// never on first visit, never twice in 14 days after a dismissal, never when
-// already installed, never in in-app browsers where the gesture is
-// impossible. iOS gets an instruction sheet (Safari has no install API);
-// Android gets the real native prompt via beforeinstallprompt.
+// Home-Screen nudge policy (per share-spec zero-friction rules): never on
+// first visit, never twice in 14 days after a dismissal, never when already
+// installed, never in in-app browsers where the gesture is impossible.
+//
+// What each platform gets changed when the iOS app shipped. Before that, iOS
+// Safari got Add-to-Home-Screen instructions — which now compete with the
+// listing for the same tap, and win, sending the reader to a bookmark instead
+// of a subscription. So:
+//
+//   ios-safari  none. Safari's own Smart App Banner (the apple-itunes-app
+//               meta in index.html) already makes the ask, natively, on the
+//               first visit. A second sheet saying the same thing is noise.
+//   ios-other   the store. Chrome/Firefox/Edge on iOS never draw the Smart
+//               App Banner, so this is the only ask those readers see.
+//   android     unchanged Add-to-Home-Screen, via the real native prompt.
+//               There is no Play listing yet; the PWA is the Android product.
 
 const VISITS_KEY = 'visits';
 const DISMISS_KEY = 'installNudgeDismissedAt';
@@ -57,8 +68,8 @@ function platform() {
   return 'desktop';
 }
 
-// Returns { kind: 'ios' | 'android', promptEvent? } or null when the nudge
-// should not show.
+// Returns { kind: 'ios-store' | 'android', promptEvent? } or null when the
+// nudge should not show.
 export function installNudgeEligibility() {
   if (isStandalone()) return null;
 
@@ -69,9 +80,9 @@ export function installNudgeEligibility() {
   if (visits < 2) return null; // return visitors only — first visits stay friction-free
 
   const p = platform();
-  if (p === 'ios-safari') return { kind: 'ios' };
+  if (p === 'ios-other') return { kind: 'ios-store' };
   if (p === 'android' && deferredInstallPrompt) {
     return { kind: 'android', promptEvent: deferredInstallPrompt };
   }
-  return null;
+  return null; // ios-safari: the Smart App Banner has it
 }

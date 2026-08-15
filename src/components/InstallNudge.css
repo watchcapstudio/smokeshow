@@ -58,48 +58,15 @@
   line-height: 1.35;
 }
 
-.install-nudge__how {
-  margin: 0;
-  color: var(--text-dim);
-  font-size: 0.88rem;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  flex-wrap: wrap;
-}
-
-.install-nudge__how strong {
-  color: var(--ink);
-  font-weight: 650;
-}
-
-.install-nudge__glyph {
-  width: 1.25rem;
-  height: 1.25rem;
-  color: #0a84ff; /* iOS share-button blue — matches what they're looking for */
-  vertical-align: middle;
-}
-
-.install-nudge__arrow {
-  text-align: center;
-  font-size: 1.3rem;
-  color: var(--accent);
-  animation: nudge-bounce var(--duration-bounce) var(--easing-bounce) infinite;
-  line-height: 1;
-  margin-top: 0.15rem;
-}
-
-@keyframes nudge-bounce {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(5px);
-  }
-}
-
+/* The Add-to-Home-Screen instruction sheet (share glyph, bouncing arrow) that
+   used to live here went with the iOS-Safari branch of installNudgeEligibility:
+   Safari draws its own Smart App Banner now, and two asks for the same tap is
+   one ask too many. The Android branch still uses the button below, and the
+   iOS-non-Safari branch uses it as a link to the listing. */
 .install-nudge__install {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin-top: 0.35rem;
   background: var(--accent);
   border: none;
@@ -108,12 +75,20 @@
   font-weight: 700;
   border-radius: var(--radius-pill);
   padding: 0.55rem 1.3rem;
+  min-height: 44px;
+  box-sizing: border-box;
   cursor: pointer;
   font-size: 0.95rem;
+  text-decoration: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .install-nudge__arrow {
-    animation: none;
-  }
+.install-nudge__install:hover,
+.install-nudge__install:focus-visible {
+  text-decoration: none;
+}
+
+.install-nudge__terms {
+  margin: 0.4rem 0 0;
+  color: var(--text-dim);
+  font-size: 0.8rem;
 }

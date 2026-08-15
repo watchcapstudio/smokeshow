@@ -319,10 +319,39 @@
   margin-top: 0.25rem;
 }
 
-.cta-widgets__price {
-  margin: 0;
+/* The offer, not the store's mark: a reader decides on "put my city on my Home
+   Screen", then looks for the badge to confirm where the tap goes. So the
+   button leads and the badge sits beside it, both pointing at the same URL. */
+.cta-widgets__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: var(--on-accent);
   font-weight: 700;
   font-size: 0.95rem;
+  text-decoration: none;
+  border-radius: var(--radius-pill);
+  padding: 0.7rem 1.4rem;
+  min-height: 44px; /* Apple's tap target, and this is mostly read on a phone */
+  box-sizing: border-box;
+}
+
+.cta-widgets__cta:hover,
+.cta-widgets__cta:focus-visible {
+  text-decoration: none;
+  filter: brightness(1.06);
+}
+
+/* The terms under the button, not beside it: trial length, price after, and
+   that it is cancellable are the three things a reader looks for before
+   tapping, and the paywall in the app states the same three (apple/docs
+   trial-and-lapse.md). They must not disagree. */
+.cta-widgets__price {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-dim);
 }
 
 .cta-widgets__badges {

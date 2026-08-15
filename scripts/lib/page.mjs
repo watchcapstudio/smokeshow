@@ -72,10 +72,19 @@ export const ANALYTICS_HEAD = `
     ></script>`;
 
 // The icon / manifest / web-app furniture, identical everywhere.
+//
+// The Smart App Banner is part of it because it is the cheapest install
+// surface the site has: Safari on iOS draws it natively above the page, on
+// the first visit, at zero layout cost to us, and it hides itself once the
+// app is installed. It renders nowhere else, so no other browser pays for it.
+// The id is the one in src/lib/appStore.js; there is no build step shared
+// between a .mjs generator and the client bundle, so this is the one place it
+// is repeated and appStore.test.js fails if the two drift.
 export const APP_ICON_HEAD = `
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="SMOKESHOW" />
+    <meta name="apple-itunes-app" content="app-id=6799511809" />
     <link rel="manifest" href="/site.webmanifest" />`;
 
 // The shared footer. Five sitewide links, deliberately NOT the 25 city links:

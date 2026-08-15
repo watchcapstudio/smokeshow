@@ -717,8 +717,20 @@ describe('editorial pages', () => {
     for (const source of ['NOAA HRRR-Smoke', 'Copernicus CAMS', 'NIFC WFIGS', 'NASA FIRMS']) {
       expect(html, source).toContain(source);
     }
-    // No store badges yet, so the page must not imply an app you can download.
-    expect(html).not.toMatch(/App Store|Google Play|download the app/i);
+    // The iOS app is live, so an App Store mention is allowed here now. Google
+    // Play is not: there is no Android listing, and this page said "coming
+    // soon" long enough already.
+    expect(html).not.toMatch(/Google Play/i);
+  });
+
+  // Safari's Smart App Banner is the site's cheapest install surface and it
+  // has to be on every page the site serves, not just the app shell -- most of
+  // these pages are the search landing, so they are where a first-time iOS
+  // reader arrives. The id is the live listing's.
+  it('carries the Smart App Banner on every generated page', () => {
+    for (const html of allPages()) {
+      expect(html).toContain('<meta name="apple-itunes-app" content="app-id=6799511809" />');
+    }
   });
 
   // Every credit is a link, and it is the link src/data/sources.js names. A

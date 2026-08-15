@@ -2,13 +2,15 @@ import { useId, useMemo } from 'react';
 import { ARRIVAL_THRESHOLD } from '../lib/rating.js';
 import { formatLocalTime } from '../lib/time.js';
 import Ridgeline from './Ridgeline.jsx';
-import { STORE_BADGES_ENABLED } from '../lib/featureFlags.js';
+import { appStoreUrl, PLATFORMS, PRICE_LABEL, TRIAL_LABEL } from '../lib/appStore.js';
+import { trackStoreClick } from '../lib/track.js';
 import './AppWidgetCTA.css';
 
-// TODO: point these at the real store listings once the apps ship — the
-// STORE_BADGES_ENABLED flag keeps them off the page (and un-clickable) until then.
-const APP_STORE_URL = 'https://apps.apple.com/app/smokeshow';
-const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=earth.smokeshow';
+// The iOS listing is live, so the badge links to it. There is no Play listing
+// yet: an Android badge here would be a promise the store cannot keep, and the
+// page said "coming soon" for months after iOS shipped, which is the same bug
+// in the other direction. Add Android back when there is a URL to add.
+const STORE_URL = appStoreUrl('forecast-cta');
 
 // A widget-sized version of Scrubber's buildCurve() (src/components/Scrubber.jsx):
 // same area-chart shape, plus a dot at the scrub position so the mock visibly
@@ -124,14 +126,17 @@ export default function AppWidgetCTA({
 
   const change = nextChange(verdict, nowIndex);
   const sub = headline || (level.index === 0 ? 'Stays clear' : level.name);
-  const loc = (placeName || 'your air').split(',')[0].toUpperCase();
+  const shortPlace = placeName ? placeName.split(',')[0] : '';
+  const loc = (shortPlace || 'your air').toUpperCase();
   const clockLabel = timesUTC?.[selectedIndex] ? formatLocalTime(timesUTC[selectedIndex], timezone) : '—';
   const pmArcLen = Math.min(1, pm / 250) * 151;
 
   return (
     <section className="cta-widgets" aria-labelledby="cta-widgets-heading">
       <div className="cta-widgets__panel panel">
-        <p className="eyebrow">SMOKESHOW app · $2.99/month</p>
+        <p className="eyebrow">
+          SMOKESHOW for {PLATFORMS} · {TRIAL_LABEL}
+        </p>
         <h2 id="cta-widgets-heading" className="cta-widgets__heading">
           Your air, on your Home Screen.
         </h2>
@@ -234,20 +239,33 @@ export default function AppWidgetCTA({
         </p>
 
         <div className="cta-widgets__footer">
-          <p className="cta-widgets__price">
-            Coming soon to iOS, macOS &amp; Android. 14-day trial, $2.99/month.
-          </p>
-          {STORE_BADGES_ENABLED && (
-            <div className="cta-widgets__badges">
-              <a href={APP_STORE_URL} className="cta-widgets__badge">
-                <img src="/badges/app-store-badge.svg" alt="Download on the App Store" width="119" height="40" />
-              </a>
-              <a href={PLAY_STORE_URL} className="cta-widgets__badge">
-                <img src="/badges/google-play-badge.png" alt="Get it on Google Play" width="172" height="60" />
-              </a>
-            </div>
-          )}
+          {/* Two links, one destination. The button carries the offer, which is
+              what a reader decides on; the badge carries Apple's mark, which is
+              what tells them where the tap lands. Both are tracked separately
+              so we can see which one people actually press. */}
+          <a
+            href={STORE_URL}
+            className="cta-widgets__cta"
+            onClick={() => trackStoreClick('forecast-cta-button')}
+          >
+            Put {shortPlace || 'your air'} on your Home Screen
+          </a>
+          <a
+            href={STORE_URL}
+            className="cta-widgets__badge"
+            onClick={() => trackStoreClick('forecast-cta-badge')}
+          >
+            <img
+              src="/badges/app-store-badge.svg"
+              alt="Download SMOKESHOW on the App Store"
+              width="119"
+              height="40"
+            />
+          </a>
         </div>
+        <p className="cta-widgets__price">
+          {TRIAL_LABEL}, then {PRICE_LABEL}. Cancel any time. No account, no email.
+        </p>
       </div>
     </section>
   );

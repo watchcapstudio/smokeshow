@@ -1,39 +1,26 @@
 import { useEffect, useState } from 'react';
 import { installNudgeEligibility, markDismissed } from '../lib/installNudge.js';
+import { appStoreUrl, TRIAL_LABEL } from '../lib/appStore.js';
+import { trackStoreClick } from '../lib/track.js';
 import './InstallNudge.css';
 
 const SHOW_DELAY_MS = 6000;
-
-function ShareGlyph() {
-  return (
-    <svg className="install-nudge__glyph" viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        d="M12 3 L12 14 M12 3 L8.5 6.5 M12 3 L15.5 6.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M7 10 H5.5 V20.5 H18.5 V10 H17"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
+const STORE_URL = appStoreUrl('install-nudge');
 
 // Bad-air visits get the live-verdict pitch; everyone else gets the
-// save-the-tap pitch. levelIndex >= 2 is "Hazy" or worse.
-function pitch(levelIndex, headline) {
+// save-the-tap pitch. levelIndex >= 2 is "Hazy" or worse. The bad-air line
+// leads with the reader's own verdict on purpose: the moment someone is
+// checking smoky air for the second time is the moment a widget is worth
+// something to them, and that is the only argument this sheet has room for.
+function pitch(levelIndex, headline, store) {
   if (levelIndex >= 2 && headline) {
-    return `${headline}. Keep watch, put SMOKESHOW one tap away.`;
+    return store
+      ? `${headline}. Watch it from your Home Screen, without opening anything.`
+      : `${headline}. Keep watch, put SMOKESHOW one tap away.`;
   }
-  return 'Coming back to check the smoke? Save the tap. Put SMOKESHOW on your Home Screen.';
+  return store
+    ? 'Coming back to check the smoke? The app puts it on your Home Screen and tells you when it changes.'
+    : 'Coming back to check the smoke? Save the tap. Put SMOKESHOW on your Home Screen.';
 }
 
 export default function InstallNudge({ levelIndex, headline }) {
@@ -73,20 +60,24 @@ export default function InstallNudge({ levelIndex, headline }) {
     }
   }
 
+  const store = mode.kind === 'ios-store';
+
   return (
-    <div className="install-nudge" role="dialog" aria-label="Add SMOKESHOW to your Home Screen">
+    <div className="install-nudge" role="dialog" aria-label="Put SMOKESHOW on your Home Screen">
       <button type="button" className="install-nudge__close" onClick={dismiss} aria-label="Not now">
         ×
       </button>
-      <p className="install-nudge__pitch">{pitch(levelIndex, headline)}</p>
-      {mode.kind === 'ios' ? (
+      <p className="install-nudge__pitch">{pitch(levelIndex, headline, store)}</p>
+      {store ? (
         <>
-          <p className="install-nudge__how">
-            Tap <ShareGlyph /> below, then <strong>“Add to Home Screen”</strong>
-          </p>
-          <div className="install-nudge__arrow" aria-hidden="true">
-            ↓
-          </div>
+          <a
+            href={STORE_URL}
+            className="install-nudge__install"
+            onClick={() => trackStoreClick('install-nudge')}
+          >
+            Get the app
+          </a>
+          <p className="install-nudge__terms">{TRIAL_LABEL}, cancel any time.</p>
         </>
       ) : (
         <button type="button" className="install-nudge__install" onClick={installAndroid}>
