@@ -14,7 +14,7 @@
 #   SmokeshowWatchWidgets complications) docs/watch-and-live-activity.md
 #
 # Everything shares the `group.earth.smokeshow` App Group: one cached payload,
-# one set of preferences, one entitlement snapshot.
+# one set of preferences.
 
 name: Smokeshow
 options:
@@ -71,11 +71,11 @@ targets:
     resources:
       - path: Sources/SmokeshowKit/Resources/Fixtures
     dependencies:
-      # RevenueCatEntitlementProvider lives in this target, so this target has
+      # RevenueCatSupportProvider lives in this target, so this target has
       # to link it — attaching the package to the app instead left the kit's
       # framework with undefined symbols. The watch build deliberately omits
-      # it: the watch reads the cached entitlement snapshot and never talks to
-      # the store, so `#if canImport(RevenueCat)` compiles that file out there.
+      # it: the watch never sells anything, so `#if canImport(RevenueCat)`
+      # compiles that file out there.
       - package: RevenueCat
         product: RevenueCat
     # A framework is a bundle, and an embedded bundle without an Info.plist
@@ -163,7 +163,7 @@ targets:
         # RevenueCat's public SDK key. Publishable (it ships in every binary
         # and is extractable from any build), so it lives in REVENUECAT_API_KEY
         # in settings.base below rather than being injected. Empty resolves to
-        # the stub entitlement provider, which is what keeps tests/CI running.
+        # the stub support provider, which is what keeps tests/CI running.
         RevenueCatAPIKey: $(REVENUECAT_API_KEY)
         # May point at a separately deployed notification service. An empty
         # value falls back to https://smokeshow.earth for same-origin routing.
@@ -178,6 +178,12 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Configuration/App.entitlements
         ENABLE_PREVIEWS: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # Supporter icons (SupporterIcon in SmokeshowKit, rendered by
+        # scripts/gen_alt_icons.py). Listed here so actool emits them into the
+        # Info.plist's CFBundleAlternateIcons; setAlternateIconName fails on
+        # any name that is not.
+        ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: "AppIcon-Clear AppIcon-Golden AppIcon-Night AppIcon-Smokeshow"
+        ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: NO
         # iPhone-only. The screen is a portrait window/map; universal would drag
         # in iPad multitasking, which demands all orientations we do not design
         # for. (This is what the upload's 90474 rejection was, wrapped in a
@@ -192,8 +198,8 @@ targets:
       testTargets:
         - SmokeshowKitTests
       gatherCoverageData: true
-      # Local StoreKit testing: the intro offer, the price, and the renewal
-      # cadence without App Store Connect.
+      # Local StoreKit testing: the tips and the supporter subscription
+      # without App Store Connect.
       storeKitConfiguration: Configuration/Smokeshow.storekit
 
   SmokeshowWidgets:

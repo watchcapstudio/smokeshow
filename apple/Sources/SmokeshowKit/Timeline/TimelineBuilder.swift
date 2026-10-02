@@ -13,13 +13,12 @@
 //   ─────────────  ─────────────────   ───────────────────   ────────────────
 //   smoke active   90 minutes          16                    24 (12h @ 30min)
 //   calm           3 hours             8                     24 (12h @ 30min)
-//   lapsed         6 hours             4                     1
 //   unavailable    20 min, backing     ≤ 12 (capped)         1
 //                  off to 2h
 //
 // Sixteen reloads a day is a quarter of the low end of the budget, which
 // leaves headroom for the reloads we ask for explicitly: app foreground, place
-// change, preference change, entitlement change, and a push that says the
+// change, preference change, and a push that says the
 // verdict moved. Those are events, not polling. Nothing in this codebase polls.
 
 import Foundation
@@ -46,7 +45,6 @@ public enum TimelineBuilder {
 
     public static let activeRefresh: TimeInterval = 90 * 60
     public static let calmRefresh: TimeInterval = 3 * 3600
-    public static let lapsedRefresh: TimeInterval = 6 * 3600
     /// First retry after a failure. Doubles up to `maxErrorRefresh`, so a
     /// backend outage costs a bounded number of reloads rather than a
     /// tight retry loop that exhausts the budget in an hour.
@@ -61,23 +59,13 @@ public enum TimelineBuilder {
     ///   - forecast: the payload, fetched once.
     ///   - place: the name to print. The contract carries no place name.
     ///   - preferences: unit and sensitive-household choice.
-    ///   - entitlement: whether this device may see a forecast at all.
     ///   - now: the instant to build from (injected for tests).
     public static func build(
         forecast: Forecast,
         place: Place,
         preferences: Preferences = PreferencesStore.shared.current,
-        entitlement: EntitlementSnapshot = EntitlementCache.shared.snapshot,
         now: Date = Date()
     ) -> WidgetTimeline {
-
-        guard entitlement.widgetsMayRenderForecast else {
-            return lapsedTimeline(place: place, now: now)
-        }
-
-        let trialDays = entitlement.isInChurnWindow(asOf: now)
-            ? entitlement.trialDaysRemaining(asOf: now)
-            : nil
 
         var entries: [WidgetEntryModel] = []
         var cursor = now
@@ -91,8 +79,7 @@ public enum TimelineBuilder {
                 at: cursor,
                 forecast: forecast,
                 place: place,
-                preferences: preferences,
-                trialDaysRemaining: trialDays
+                preferences: preferences
             ) {
                 entries.append(entry)
             }
@@ -132,8 +119,7 @@ public enum TimelineBuilder {
         at date: Date,
         forecast: Forecast,
         place: Place,
-        preferences: Preferences,
-        trialDaysRemaining: Int?
+        preferences: Preferences
     ) -> WidgetEntryModel? {
         guard let index = forecast.index(nearest: date), let hour = forecast.hour(at: index) else {
             return nil
@@ -169,27 +155,11 @@ public enum TimelineBuilder {
             days: forecast.days.map(pip(for:)),
             generatedAt: forecast.generatedAt,
             isStale: forecast.isStale(asOf: date),
-            agreementLabel: forecast.agreement.label,
-            trialDaysRemaining: trialDaysRemaining
+            agreementLabel: forecast.agreement.label
         )
     }
 
     // MARK: Non-forecast timelines
-
-    /// The lapsed state. The place name and the sky stay; the forecast does
-    /// not. This is the deliberate answer to "what does the widget show when
-    /// the trial ends" — a designed state instead of a blank tile that reads
-    /// as broken, and instead of a stale number that would be a lie.
-    public static func lapsedTimeline(place: Place, now: Date = Date()) -> WidgetTimeline {
-        WidgetTimeline(
-            entries: [WidgetEntryModel(
-                date: now,
-                state: .lapsed,
-                placeName: place.shortName
-            )],
-            refreshAt: now.addingTimeInterval(lapsedRefresh)
-        )
-    }
 
     /// No payload we are willing to show as current. `attempt` backs the
     /// retry off so an outage cannot drain the day's reloads.

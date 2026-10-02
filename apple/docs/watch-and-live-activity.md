@@ -20,14 +20,14 @@ complications render `AccessoryCircularPMView`, `AccessoryRectangularView`,
 - `SmokeshowWatchWidgets` — a complication bundle supporting
   `accessoryCircular`, `accessoryCorner`, `accessoryInline`, and
   `accessoryRectangular`.
-- Shared everything: contract, cache, preferences, entitlement snapshot.
+- Shared everything: contract, cache, preferences.
 
 ### Not built, and what it costs
 
 | Gap | Why it matters | Estimate |
 | --- | --- | --- |
 | **WatchConnectivity payload transfer** | Today the watch fetches for itself. It should prefer the phone's already-fetched payload and only fetch when the phone is unreachable. The watch's reload budget is tighter than the phone's and its radio is more expensive. | 1–2 d |
-| **App Group across the pairing** | A watch app does not share the phone's App Group container. The entitlement snapshot and preferences need to arrive over WatchConnectivity, not be assumed present. **This is the one real correctness gap**: as written, an unpaired-launch watch reads an empty snapshot, which is `.unknown`, which renders the forecast. Generous, but not the designed behaviour. | 1 d |
+| **App Group across the pairing** | A watch app does not share the phone's App Group container. The selected place and preferences need to arrive over WatchConnectivity, not be assumed present; as written the watch falls back to its own defaults. (This was a correctness gap while the apps were paid, because the entitlement snapshot did not cross either. The apps are free now, so it is a polish gap.) | 1 d |
 | **Complication tinting audit** | Watch faces tint aggressively; the arcs need checking against the full-colour and tinted rendering modes. | 0.5 d |
 | **watchOS-specific layouts** | 41 mm vs 49 mm, and the corner family's curved text. | 1 d |
 
@@ -53,7 +53,7 @@ endpoint already returns the instant to count to.
     same clear-time, same level means no update at all;
   - **end** when it clears, leaving the final frame up for 30 minutes so the
     user sees the payoff the product has been promising, then dismissing;
-  - **end immediately** on a lapsed entitlement.
+  - **end immediately** if the user switches Live Activities off for the app.
 - Push token observation, so B7 can update an activity without the app running.
 
 ### The design decision that matters
@@ -77,8 +77,8 @@ subscriber is watching.
 
 ## Suggested order
 
-1. **WatchConnectivity + entitlement transfer** — it is the only item on either
-   list that is a correctness gap rather than a polish gap.
+1. **WatchConnectivity place and preferences transfer** — so the watch follows
+   the phone's place instead of its own defaults.
 2. **B7 activity push** — turns the Live Activity from "accurate while the app
    runs" into "accurate always", which is the whole claim.
 3. Everything else, by taste.

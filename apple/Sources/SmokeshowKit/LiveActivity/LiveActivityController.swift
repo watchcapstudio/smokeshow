@@ -10,7 +10,6 @@
 //   • End when `above` goes false, i.e. it cleared. Then leave the final frame
 //     up briefly so the user sees the payoff — the one moment the product has
 //     been promising — and dismiss.
-//   • Never start one for a lapsed subscriber.
 
 import Foundation
 
@@ -40,11 +39,11 @@ public final class LiveActivityController: ObservableObject {
     public func sync(
         forecast: Forecast,
         place: Place,
-        preferences: Preferences = PreferencesStore.shared.current,
-        entitlement: EntitlementSnapshot = EntitlementCache.shared.snapshot
+        preferences: Preferences = PreferencesStore.shared.current
     ) async {
-        guard isSupported, entitlement.widgetsMayRenderForecast else {
-            await end(reason: .entitlement)
+        guard isSupported else {
+            // The user switched Live Activities off for the app.
+            await end(reason: .userDismissed)
             return
         }
 
@@ -81,7 +80,7 @@ public final class LiveActivityController: ObservableObject {
         }
     }
 
-    public enum EndReason { case cleared, entitlement, userDismissed }
+    public enum EndReason { case cleared, userDismissed }
 
     public func end(reason: EndReason) async {
         guard let activity else { return }

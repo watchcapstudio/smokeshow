@@ -89,7 +89,7 @@ struct WidgetOnboardingView: View {
         .foregroundStyle(Palette.dark.text)
         .task {
             installedCount = await model.installedWidgetCount()
-            if installedCount > 0 { TrialInstrumentation.record(.widgetInstalled) }
+            if installedCount > 0 { WidgetNudge.record(.widgetInstalled) }
         }
     }
 }

@@ -48,7 +48,8 @@ def vgrad(stops, w=S, h=S):
     return img
 
 
-def radial_sun(cx, cy, r_core, r_body, r_halo):
+def radial_sun(cx, cy, r_core, r_body, r_halo,
+               core=SUN_CORE, mid=SUN_MID, edge=SUN_EDGE):
     """Smoky sun: bright core -> orange body -> soft red halo -> clear."""
     g = Image.new("RGBA", (S, S), (0, 0, 0, 0))
     px = g.load()
@@ -58,13 +59,13 @@ def radial_sun(cx, cy, r_core, r_body, r_halo):
             if d >= r_halo:
                 continue
             if d <= r_core:
-                px[x, y] = SUN_CORE + (255,)
+                px[x, y] = core + (255,)
             elif d <= r_body:
                 t = (d - r_core) / (r_body - r_core)
-                px[x, y] = lerp(SUN_CORE, SUN_MID, t) + (255,)
+                px[x, y] = lerp(core, mid, t) + (255,)
             else:
                 t = (d - r_body) / (r_halo - r_body)
-                rgb = lerp(SUN_MID, SUN_EDGE, min(1, t * 1.3))
+                rgb = lerp(mid, edge, min(1, t * 1.3))
                 a = round(255 * (1 - t) ** 1.6)
                 px[x, y] = rgb + (a,)
     return g
@@ -184,12 +185,13 @@ SKY2 = [
     (1.0, lerp(SMK_HOR, SMK_DK, 0.25)),
 ]
 
-# flat: low distant hills, sun well above
-build("v2", (0.62, 0.40), (0.088, 0.165, 0.42), SKY2,
+if __name__ == "__main__":
+  # flat: low distant hills, sun well above
+  build("v2", (0.62, 0.40), (0.088, 0.165, 0.42), SKY2,
       far_a=0.55, near_a=0.95, far_ink=lerp(INK, SMK_DK, 0.4), near_ink=INK,
       smooth=6, far_blur=12, near_blur=8, amp=0.33)
 
-# flatter still
-build("v2soft", (0.62, 0.40), (0.088, 0.165, 0.42), SKY2,
+  # flatter still
+  build("v2soft", (0.62, 0.40), (0.088, 0.165, 0.42), SKY2,
       far_a=0.52, near_a=0.92, far_ink=lerp(INK, SMK_DK, 0.4), near_ink=INK,
       smooth=6, far_blur=14, near_blur=9, amp=0.24)

@@ -4,7 +4,7 @@
 // not-lines, and both guidance variants — precisely so it cannot drift into a
 // Swift file. What is left is the disclaimer (which CLAUDE.md requires to ship
 // verbatim from docs/smokeshow-build-brief.md), the labels that keep every
-// forecast honest, and the store-mandated paywall disclosure.
+// forecast honest, and the store-mandated purchase disclosures.
 //
 // Rules encoded here, not left to a designer:
 //   • every forecast number carries "model estimate";
@@ -104,45 +104,60 @@ public enum Copy {
     public static let notificationsPosture =
         "Threshold alerts only. No digests, no streaks, no engagement pings."
 
-    // MARK: - Paywall (App Review requires all three facts on the buy screen)
+    // MARK: - Support (everything is free; this is the thank-you jar)
 
-    public enum Paywall {
-        public static let title = "Your air, on your home screen"
-        public static let subtitle = """
-            Widgets on your home and lock screen, and a notification when the smoke arrives, \
-            peaks, or clears. Nothing else.
+    public enum Support {
+        public static let title = "Support Smokeshow"
+        public static let body = """
+            Smokeshow is free: the forecast, the widgets, the alerts. No ads, no account. If it \
+            got you through a smoky week, a tip keeps the forecast running.
             """
+        public static let tipsHeading = "Leave a tip"
+        public static let reward = "Any tip unlocks the supporter app icons."
+        /// Fallback names if the store has not answered yet. The store's own
+        /// display names win when they arrive.
+        public static let tipFallbackNames = ["Small tip", "Medium tip", "Large tip"]
 
-        /// Trial length, price after, and that it auto-renews — the three
-        /// disclosures App Review checks for on an introductory offer.
-        public static func terms(product: PaywallProduct?) -> String {
-            let price = product?.localizedPrice ?? TrialPolicy.monthlyPriceFallback
-            let period = product?.localizedPeriod ?? "month"
-            let days = product?.introductoryOfferDays ?? TrialPolicy.trialDays
-            return """
-                \(days)-day free trial, then \(price) per \(period). The subscription renews \
-                automatically until you cancel, and you can cancel any time in Settings at least \
-                24 hours before the trial ends. Payment is charged to your Apple Account.
-                """
+        public static let monthlyHeading = "Or support monthly"
+        public static let monthlyButton = "Support monthly"
+        /// Price, period, and that it auto-renews: App Review checks for all
+        /// three on any auto-renewing subscription, support or not.
+        public static func monthlyTerms(price: String, period: String) -> String {
+            """
+            \(price) per \(period). Renews automatically until you cancel in Settings. Payment \
+            is charged to your Apple Account. It unlocks the supporter icons and nothing else: \
+            everything in the app is free either way.
+            """
         }
+        public static let subscribedLine = "You support Smokeshow monthly. Thank you."
+        public static let tippedLine = "You've tipped. Thank you."
+        public static let manageSubscription = "Manage subscription"
 
-        /// Shown when the store says this Apple ID has already used its trial.
-        public static func termsWithoutTrial(product: PaywallProduct?) -> String {
-            let price = product?.localizedPrice ?? TrialPolicy.monthlyPriceFallback
-            let period = product?.localizedPeriod ?? "month"
-            return """
-                \(price) per \(period). The subscription renews automatically until you cancel, \
-                and you can cancel any time in Settings. Payment is charged to your Apple Account.
-                """
-        }
+        public static let thanks = "Thank you. The supporter icons are unlocked."
+        public static let pending = "Waiting on approval for this purchase."
+        public static let failed = "That didn't go through. Nothing was charged."
+
+        public static let iconsHeading = "App icon"
+        public static let iconsLocked = "Leave a tip to unlock these."
 
         public static let restore = "Restore purchases"
         public static let termsURL = URL(string: "https://watchcapstudio.com/terms")!
         public static let privacyURL = URL(string: "https://watchcapstudio.com/privacy")!
-        public static let noAccounts = "No account, no email. The subscription is tied to your Apple ID."
+        public static let noAccounts = "No account, no email. Purchases are tied to your Apple ID."
+
+        /// Shown once to anyone who was paying when the app went free. They
+        /// are still being billed and we cannot cancel it for them, so they
+        /// hear it from us, with the way out one tap away.
+        public static let freeNoticeTitle = "Smokeshow is free now"
+        public static let freeNoticeBody = """
+            Widgets, alerts and Live Activities are free for everyone. Your subscription is \
+            still active and now counts as support, with the supporter app icons unlocked. Keep \
+            it or cancel it any time; nothing in the app changes either way.
+            """
+        public static let freeNoticeKeep = "Keep supporting"
     }
 
-    // MARK: - Onboarding (the trial's job is a widget on the home screen, day 0)
+    // MARK: - Onboarding (day 0's job is a widget on the home screen)
 
     public enum Onboarding {
         public static let widgetTitle = "Put it on your home screen"
@@ -167,31 +182,8 @@ public enum Copy {
 
         public static let lockScreenTitle = "And the lock screen"
         public static let lockScreenBody = """
-            The inline and circular widgets sit under the clock. That's the glance that makes \
-            this worth paying for.
+            The inline and circular widgets sit under the clock. That's the glance this app is \
+            for.
             """
-    }
-
-    // MARK: - Trial end / lapse (designed, not left to fall out of the code)
-
-    public enum Lapse {
-        public static func churnWindow(daysRemaining: Int) -> String {
-            daysRemaining <= 1
-                ? "Trial ends tomorrow — keep this widget"
-                : "Trial ends in \(daysRemaining) days"
-        }
-
-        /// What the widget says once the trial has lapsed. It is deliberately
-        /// a *state*, not a blank tile and not a stale number: the place name
-        /// stays, the sky stays, the forecast does not.
-        public static let widgetTitle = "Trial ended"
-        public static let widgetBody = "Tap to keep your air on screen"
-        public static let appTitle = "Your trial has ended"
-        public static func appBody(price: String) -> String {
-            """
-            The widgets and alerts are off. \(price) a month turns them back on — same air, same \
-            forecast, back where you had it.
-            """
-        }
     }
 }
