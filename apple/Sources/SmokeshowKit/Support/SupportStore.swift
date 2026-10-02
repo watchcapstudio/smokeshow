@@ -77,6 +77,9 @@ public struct SupportProduct: Sendable, Equatable, Identifiable {
     }
 }
 
+/// The store did not return this product, so it cannot be bought right now.
+public struct ProductUnavailable: Error, Sendable {}
+
 public enum PurchaseOutcome: Sendable, Equatable {
     case purchased(SupporterSnapshot)
     case cancelled
@@ -182,7 +185,9 @@ public final class RevenueCatSupportProvider: SupportProviding, @unchecked Senda
 
     public func purchase(_ product: SupportProduct) async throws -> PurchaseOutcome {
         if storeProducts[product.id] == nil { _ = await products() }
-        guard let storeProduct = storeProducts[product.id] else { return .pending }
+        // Not loaded from the store (not yet created in App Store Connect, or
+        // offline). A failure, not "pending": nothing is awaiting approval.
+        guard let storeProduct = storeProducts[product.id] else { throw ProductUnavailable() }
 
         let result = try await Purchases.shared.purchase(product: storeProduct)
         if result.userCancelled { return .cancelled }

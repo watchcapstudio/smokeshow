@@ -68,3 +68,22 @@ free build is submitted:
 4. In RevenueCat, add the tips to the products list (no entitlement needed).
 5. Update the listing: no trial or price lines in the description or
    screenshots, and add the tips to the in-app purchases shown.
+
+## Shipping it
+
+`.github/workflows/testflight.yml` archives and uploads the iOS app from a
+GitHub macOS runner, signed with Xcode's cloud-managed signing. One-time setup:
+
+1. App Store Connect → Users and Access → Integrations → App Store Connect API:
+   generate a key with the **Admin** role (cloud-managed distribution
+   certificates are only issued to Admin keys). Download the `.p8` once.
+2. Add four repository secrets: `APPLE_TEAM_ID`, `ASC_KEY_ID`,
+   `ASC_ISSUER_ID`, and `ASC_KEY_P8` (the full text of the `.p8`).
+
+Then run the workflow (Actions → testflight → Run workflow) with version `1.1`.
+The build shows up in TestFlight once Apple finishes processing it. Submitting
+it for review stays in App Store Connect: attach the build to version 1.1, add
+the tip products and the renamed subscription to the submission, update the
+listing copy, and submit.
+
+Merge this branch's web change (the CTA says "Free") only once 1.1 is live.
