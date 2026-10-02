@@ -227,8 +227,6 @@ struct WidgetSurface<Content: View>: View {
                     .padding(.horizontal, 15)
                     .padding(.vertical, 13)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            case .lapsed:
-                LapsedTile(entry: entry, ink: ink)
             case .unavailable(let reason):
                 UnavailableTile(entry: entry, reason: reason, ink: ink)
             }
@@ -396,32 +394,6 @@ struct FooterNote: View {
             }
         }
         .foregroundStyle(ink)
-    }
-}
-
-/// What the widget shows when the trial lapses. Designed, per platform plan §4:
-/// the place and the sky stay so the tile still looks like itself; the forecast
-/// is withheld rather than frozen. A blank tile reads as broken and a stale
-/// number is a lie, and this is neither.
-struct LapsedTile: View {
-    let entry: WidgetEntryModel
-    let ink: Color
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            PlaceEyebrow(entry: entry, ink: ink)
-            Spacer(minLength: 0)
-            Text(Copy.Lapse.widgetTitle)
-                .font(Typography.widgetWord(15))
-            Text(Copy.Lapse.widgetBody)
-                .font(.system(size: 10.5, weight: .semibold))
-                .opacity(0.7)
-                .padding(.top, 2)
-                .lineLimit(2)
-        }
-        .foregroundStyle(ink)
-        .padding(15)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 

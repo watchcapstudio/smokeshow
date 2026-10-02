@@ -6,10 +6,9 @@
 // from computing something, and computing is the thing the endpoint exists to
 // prevent.
 //
-// Three states, all designed rather than implicit:
-//   • `.forecast` — the normal glance.
-//   • `.lapsed`   — the trial ended. Place and sky stay; the forecast goes.
-//                   Decided, not left to render blank (platform plan §4).
+// Two states, both designed rather than implicit:
+//   • `.forecast` — the normal glance. Free for everyone; there is no paywall
+//                   state, so a widget never withholds the forecast.
 //   • `.unavailable` — no payload we are willing to show as current.
 
 import Foundation
@@ -47,7 +46,6 @@ public struct WidgetEntryModel: Sendable, Equatable {
 
     public enum State: Sendable, Equatable {
         case forecast
-        case lapsed
         case unavailable(String)
         /// Redacted/placeholder rendering while WidgetKit takes a snapshot.
         case placeholder
@@ -94,9 +92,6 @@ public struct WidgetEntryModel: Sendable, Equatable {
     public let generatedAt: Date?
     public let isStale: Bool
     public let agreementLabel: String?
-    /// Set during the trial's last days; the widget carries the conversion
-    /// line instead of its usual subtitle (platform plan §4).
-    public let trialDaysRemaining: Int?
 
     public init(
         date: Date,
@@ -119,8 +114,7 @@ public struct WidgetEntryModel: Sendable, Equatable {
         days: [DayPip] = [],
         generatedAt: Date? = nil,
         isStale: Bool = false,
-        agreementLabel: String? = nil,
-        trialDaysRemaining: Int? = nil
+        agreementLabel: String? = nil
     ) {
         self.date = date
         self.state = state
@@ -143,19 +137,13 @@ public struct WidgetEntryModel: Sendable, Equatable {
         self.generatedAt = generatedAt
         self.isStale = isStale
         self.agreementLabel = agreementLabel
-        self.trialDaysRemaining = trialDaysRemaining
     }
 
     // MARK: Rendering conveniences (formatting only — no derivation)
 
-    /// The subtitle every system family shows under the level name. During the
-    /// churn window it becomes the conversion line; that swap is the single
-    /// most valuable pixel in the product's funnel.
+    /// The subtitle every system family shows under the level name.
     public var subtitle: String {
-        if let days = trialDaysRemaining {
-            return Copy.Lapse.churnWindow(daysRemaining: days)
-        }
-        return headline ?? Copy.unavailable
+        headline ?? Copy.unavailable
     }
 
     /// "41 µg/m³ · model estimate", or "— · model estimate" on a gap. The

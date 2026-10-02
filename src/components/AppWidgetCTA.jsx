@@ -5,9 +5,9 @@ import Ridgeline from './Ridgeline.jsx';
 import { STORE_BADGES_ENABLED } from '../lib/featureFlags.js';
 import './AppWidgetCTA.css';
 
-// TODO: point these at the real store listings once the apps ship — the
-// STORE_BADGES_ENABLED flag keeps them off the page (and un-clickable) until then.
-const APP_STORE_URL = 'https://apps.apple.com/app/smokeshow';
+// The iOS app is live, so its badge always shows. Android has no listing yet;
+// STORE_BADGES_ENABLED keeps the Play badge off the page until it does.
+const APP_STORE_URL = 'https://apps.apple.com/us/app/smokeshow-wildfire-forecast/id6799511809';
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=earth.smokeshow';
 
 // A widget-sized version of Scrubber's buildCurve() (src/components/Scrubber.jsx):
@@ -131,7 +131,7 @@ export default function AppWidgetCTA({
   return (
     <section className="cta-widgets" aria-labelledby="cta-widgets-heading">
       <div className="cta-widgets__panel panel">
-        <p className="eyebrow">SMOKESHOW app · $2.99/month</p>
+        <p className="eyebrow">SMOKESHOW app · Free</p>
         <h2 id="cta-widgets-heading" className="cta-widgets__heading">
           Your air, on your Home Screen.
         </h2>
@@ -235,18 +235,18 @@ export default function AppWidgetCTA({
 
         <div className="cta-widgets__footer">
           <p className="cta-widgets__price">
-            Coming soon to iOS, macOS &amp; Android. 14-day trial, $2.99/month.
+            Free on the App Store. Android coming soon.
           </p>
-          {STORE_BADGES_ENABLED && (
-            <div className="cta-widgets__badges">
-              <a href={APP_STORE_URL} className="cta-widgets__badge">
-                <img src="/badges/app-store-badge.svg" alt="Download on the App Store" width="119" height="40" />
-              </a>
+          <div className="cta-widgets__badges">
+            <a href={APP_STORE_URL} className="cta-widgets__badge">
+              <img src="/badges/app-store-badge.svg" alt="Download on the App Store" width="119" height="40" />
+            </a>
+            {STORE_BADGES_ENABLED && (
               <a href={PLAY_STORE_URL} className="cta-widgets__badge">
                 <img src="/badges/google-play-badge.png" alt="Get it on Google Play" width="172" height="60" />
               </a>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </section>

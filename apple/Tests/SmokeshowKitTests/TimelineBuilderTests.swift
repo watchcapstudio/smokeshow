@@ -18,17 +18,12 @@ final class TimelineBuilderTests: XCTestCase {
         return (forecast, forecast.now.exactUTC)
     }
 
-    private func subscribed() -> EntitlementSnapshot {
-        EntitlementSnapshot(status: .subscribed(renewsAt: nil))
-    }
-
     func testOneFetchProducesManyEntries() throws {
         let (forecast, now) = try loadFixture(.smokeNowClearing)
         let timeline = TimelineBuilder.build(
             forecast: forecast,
             place: place,
             preferences: .default,
-            entitlement: subscribed(),
             now: now
         )
 
@@ -48,7 +43,7 @@ final class TimelineBuilderTests: XCTestCase {
         let (active, activeNow) = try loadFixture(.smokeNowClearing)
         let activeTimeline = TimelineBuilder.build(
             forecast: active, place: place, preferences: .default,
-            entitlement: subscribed(), now: activeNow
+            now: activeNow
         )
         let activeGap = activeTimeline.refreshAt.timeIntervalSince(activeNow)
         XCTAssertEqual(activeGap, TimelineBuilder.activeRefresh, accuracy: 60)
@@ -57,7 +52,7 @@ final class TimelineBuilderTests: XCTestCase {
         let (calm, calmNow) = try loadFixture(.clearStayingClear)
         let calmTimeline = TimelineBuilder.build(
             forecast: calm, place: place, preferences: .default,
-            entitlement: subscribed(), now: calmNow
+            now: calmNow
         )
         let calmGap = calmTimeline.refreshAt.timeIntervalSince(calmNow)
         XCTAssertEqual(calmGap, TimelineBuilder.calmRefresh, accuracy: 60)
@@ -67,7 +62,7 @@ final class TimelineBuilderTests: XCTestCase {
         let (forecast, now) = try loadFixture(.smokeNowClearing)
         let timeline = TimelineBuilder.build(
             forecast: forecast, place: place, preferences: .default,
-            entitlement: subscribed(), now: now
+            now: now
         )
         // A clearing event must show *different* readings across the day —
         // that is the whole point of building many entries from one payload.
@@ -83,7 +78,7 @@ final class TimelineBuilderTests: XCTestCase {
         let (forecast, now) = try loadFixture(.smokeNowClearing)
         let timeline = TimelineBuilder.build(
             forecast: forecast, place: place, preferences: .default,
-            entitlement: subscribed(), now: now
+            now: now
         )
         // The verdict is the server's, computed once. Entries render the hour
         // they sit on, but the sentence never mutates.
@@ -95,7 +90,7 @@ final class TimelineBuilderTests: XCTestCase {
         let (forecast, now) = try loadFixture(.modelGaps)
         let timeline = TimelineBuilder.build(
             forecast: forecast, place: place, preferences: .default,
-            entitlement: subscribed(), now: now
+            now: now
         )
         let gapEntries = timeline.entries.filter { $0.reading == nil }
         XCTAssertFalse(gapEntries.isEmpty, "the gap must reach the entries")
@@ -111,7 +106,7 @@ final class TimelineBuilderTests: XCTestCase {
         let (forecast, now) = try loadFixture(.modelGaps)
         let timeline = TimelineBuilder.build(
             forecast: forecast, place: place, preferences: .default,
-            entitlement: subscribed(), now: now
+            now: now
         )
         let curve = try XCTUnwrap(timeline.entries.first?.curve)
         XCTAssertTrue(curve.contains { $0.value == nil })
@@ -122,7 +117,7 @@ final class TimelineBuilderTests: XCTestCase {
         let (forecast, now) = try loadFixture(.shortWindow)
         let timeline = TimelineBuilder.build(
             forecast: forecast, place: place, preferences: .default,
-            entitlement: subscribed(), now: now
+            now: now
         )
         let lastHour = try XCTUnwrap(forecast.hours.last?.t)
         for entry in timeline.entries {
@@ -136,7 +131,7 @@ final class TimelineBuilderTests: XCTestCase {
         let later = try XCTUnwrap(forecast.hours.last?.t).addingTimeInterval(365 * 86400)
         let timeline = TimelineBuilder.build(
             forecast: forecast, place: place, preferences: .default,
-            entitlement: subscribed(), now: later
+            now: later
         )
         XCTAssertEqual(timeline.entries.count, 1)
         guard case .unavailable = timeline.entries[0].state else {
@@ -149,7 +144,7 @@ final class TimelineBuilderTests: XCTestCase {
         let late = forecast.generatedAt.addingTimeInterval(Forecast.staleAfter + 600)
         let timeline = TimelineBuilder.build(
             forecast: forecast, place: place, preferences: .default,
-            entitlement: subscribed(), now: late
+            now: late
         )
         XCTAssertLessThanOrEqual(
             timeline.refreshAt.timeIntervalSince(late),
@@ -164,7 +159,7 @@ final class TimelineBuilderTests: XCTestCase {
         preferences.unit = .aqi
         let timeline = TimelineBuilder.build(
             forecast: forecast, place: place, preferences: preferences,
-            entitlement: subscribed(), now: now
+            now: now
         )
         let entry = try XCTUnwrap(timeline.entries.first)
         XCTAssertEqual(entry.reading.map { Int($0) }, forecast.nowHour?.aqi)

@@ -25,8 +25,6 @@ public struct AccessoryInlineView: View {
 
     public var body: some View {
         switch entry.state {
-        case .lapsed:
-            Text(Copy.Lapse.widgetTitle)
         case .unavailable:
             Text(Copy.unavailable)
         case .forecast, .placeholder:
@@ -48,7 +46,7 @@ public struct AccessoryCircularPMView: View {
         ZStack {
             AccessoryWidgetBackground()
             switch entry.state {
-            case .lapsed, .unavailable:
+            case .unavailable:
                 VStack(spacing: 1) {
                     Image(systemName: "aqi.medium")
                         .font(.system(size: 15, weight: .semibold))
@@ -93,8 +91,10 @@ public struct AccessoryCircularCountdownView: View {
         ZStack {
             AccessoryWidgetBackground()
             switch entry.state {
-            case .lapsed, .unavailable:
-                Image(systemName: "lock")
+            case .unavailable:
+                // Not a lock: nothing here is paywalled, and a padlock on a
+                // free widget reads as one.
+                Image(systemName: "aqi.medium")
                     .font(.system(size: 16, weight: .semibold))
             case .forecast, .placeholder:
                 Gauge(value: fraction) {
@@ -127,9 +127,6 @@ public struct AccessoryRectangularView: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 1) {
             switch entry.state {
-            case .lapsed:
-                Text(Copy.Lapse.widgetTitle).font(.headline)
-                Text(Copy.Lapse.widgetBody).font(.caption2).opacity(0.8)
             case .unavailable:
                 Text(Copy.unavailable).font(.headline)
                 if let generatedAt = entry.generatedAt {

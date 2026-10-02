@@ -1,6 +1,8 @@
-// Routing. Subscribe-to-use means there are exactly three destinations:
-// the verdict, the paywall, and the widget-install flow that the trial exists
-// to reach (platform plan §4).
+// Routing. The app is free, so the verdict is the only destination a launch
+// lands on. Everything else is a sheet the reader opens: settings, the widget
+// install flow, and the Support screen. The one sheet the app opens on its
+// own, besides the single widget ask, is the "Smokeshow is free now" notice
+// for people who were paying when the app went free.
 
 import SwiftUI
 import SmokeshowKit
@@ -8,7 +10,8 @@ import SmokeshowKit
 struct RootView: View {
     @EnvironmentObject private var model: AppModel
 
-    @State private var showsPaywall = false
+    @State private var showsSupport = false
+    @State private var showsFreeNotice = false
     @State private var showsWidgetOnboarding = false
     @State private var showsSettings = false
     @State private var showsExplain = false
@@ -18,15 +21,15 @@ struct RootView: View {
     var body: some View {
         ZStack {
             if !acknowledged {
-                // Ahead of everything: ahead of the entitlement switch, ahead
-                // of the widget nudge, and ahead of the location prompt. A
-                // consent screen that arrives third is not consent, and the
-                // OS prompt on top of it looks like the app asking twice.
+                // Ahead of everything: ahead of the widget nudge, and ahead
+                // of the location prompt. A consent screen that arrives third
+                // is not consent, and the OS prompt on top of it looks like
+                // the app asking twice.
                 OnboardingFlow {
                     PreferencesStore.shared.acknowledgedDisclaimer = true
                     acknowledged = true
                     Task {
-                        await model.refreshEntitlement()
+                        await model.refreshSupporter()
                         await model.refresh()
                         await evaluateNudges()
                     }
@@ -43,8 +46,11 @@ struct RootView: View {
         .sheet(isPresented: $showsWidgetOnboarding) {
             WidgetOnboardingView()
         }
-        .sheet(isPresented: $showsPaywall) {
-            PaywallView(isModal: true)
+        .sheet(isPresented: $showsSupport) {
+            SupportView()
+        }
+        .sheet(isPresented: $showsFreeNotice) {
+            FreeNoticeView()
         }
         .sheet(isPresented: $showsSettings) {
             SettingsView()
@@ -55,7 +61,7 @@ struct RootView: View {
         .onReceive(NotificationCenter.default.publisher(for: .smokeshowDeepLink)) { note in
             guard let destination = note.object as? DeepLink.Destination else { return }
             switch destination {
-            case .paywall: showsPaywall = true
+            case .support: showsSupport = true
             case .widgetSetup: showsWidgetOnboarding = true
             case .settings: showsSettings = true
             case .verdict(let placeName):
@@ -67,62 +73,32 @@ struct RootView: View {
         }
     }
 
-    @ViewBuilder
     private var content: some View {
-        ZStack {
-            switch model.entitlement.status {
-            case .unknown:
-                // Checking with the store. Not a lock — just not decided yet.
-                LoadingView()
-            case .trial, .subscribed:
-                VerdictScreen(
-                    showsExplain: $showsExplain,
-                    showsSettings: $showsSettings
-                )
-            case .lapsed, .never:
-                PaywallView(isModal: false)
-            }
-        }
-    }
-
-    /// Day 0 asks for a widget; day 12–14 asks again, or asks for the money.
-    /// Both come out of `TrialInstrumentation`, which is local-only.
-    private func evaluateNudges() async {
-        let installed = await model.installedWidgetCount()
-        let nudge = TrialInstrumentation.evaluate(
-            entitlement: model.entitlement,
-            installedWidgetCount: installed
+        VerdictScreen(
+            showsExplain: $showsExplain,
+            showsSettings: $showsSettings
         )
-        switch nudge {
-        case .installWidget:
-            guard model.entitlement.status.isActive else { return }
-            // Not on arrival. Someone who has not yet seen a forecast has no
-            // reason to want a widget of it, and a sheet between the welcome
-            // and the product reads as a third thing to dismiss. Let them use
-            // the app first; the ask lands better once the answer has proved
-            // useful. Settings has the same flow for anyone who says no.
-            try? await Task.sleep(for: .seconds(20))
-            guard !Task.isCancelled, model.entitlement.status.isActive else { return }
-            TrialInstrumentation.record(.widgetPromptShown)
-            showsWidgetOnboarding = true
-        case .subscribe:
-            // Only nudge an *active* trial that is nearing expiry. When the
-            // reader is not subscribed, `content` is already the hard paywall
-            // gate, so a second modal over it is just a doubled paywall.
-            guard model.entitlement.status.isActive else { return }
-            showsPaywall = true
-        case nil:
-            break
-        }
     }
-}
 
-struct LoadingView: View {
-    var body: some View {
-        ZStack {
-            Palette.dark.bg.ignoresSafeArea()
-            ProgressView()
-                .tint(Palette.dark.text)
+    /// At most one thing, once: the free notice for a paid-build subscriber,
+    /// otherwise the first-session widget ask. Both are local-only.
+    private func evaluateNudges() async {
+        if SupporterCache.shared.shouldShowFreeNotice(for: model.supporter.status) {
+            SupporterCache.shared.hasShownFreeNotice = true
+            showsFreeNotice = true
+            return
         }
+
+        let installed = await model.installedWidgetCount()
+        guard WidgetNudge.shouldAsk(installedWidgetCount: installed) else { return }
+        // Not on arrival. Someone who has not yet seen a forecast has no
+        // reason to want a widget of it, and a sheet between the welcome and
+        // the product reads as a third thing to dismiss. Let them use the app
+        // first; the ask lands better once the answer has proved useful.
+        // Settings has the same flow for anyone who says no.
+        try? await Task.sleep(for: .seconds(20))
+        guard !Task.isCancelled else { return }
+        WidgetNudge.record(.widgetPromptShown)
+        showsWidgetOnboarding = true
     }
 }

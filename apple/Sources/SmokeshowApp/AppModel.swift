@@ -1,6 +1,6 @@
 // The app's one piece of state.
 //
-// It owns the place, the payload, the entitlement snapshot, and the widget
+// It owns the place, the payload, the supporter snapshot, and the widget
 // reloads — and it owns exactly none of the forecast maths. Every string this
 // object hands a view came from `/api/forecast`.
 
@@ -9,6 +9,9 @@ import SwiftUI
 import SmokeshowKit
 #if canImport(WidgetKit)
 import WidgetKit
+#endif
+#if os(iOS)
+import UIKit
 #endif
 
 @MainActor
@@ -32,11 +35,13 @@ public final class AppModel: ObservableObject {
             Task { await push.syncRegistration() }
         }
     }
-    @Published public private(set) var entitlement: EntitlementSnapshot
+    /// Tips and the supporter subscription. Gates nothing but the icons.
+    @Published public private(set) var supporter: SupporterSnapshot
+    @Published public private(set) var appIcon: SupporterIcon = .standard
 
     public let push: PushCoordinator
     private let repository: ForecastRepository
-    private let entitlementProvider: EntitlementProviding
+    private let supportProvider: SupportProviding
     private let locationProvider: LocationProviding
 
     /// `push` defaults to the shared coordinator, but not as a default
@@ -44,29 +49,32 @@ public final class AppModel: ObservableObject {
     /// default argument is evaluated in the caller's context, which need not be.
     public init(
         repository: ForecastRepository = .shared,
-        entitlementProvider: EntitlementProviding,
+        supportProvider: SupportProviding,
         locationProvider: LocationProviding = LocationProvider(),
         push: PushCoordinator? = nil
     ) {
         self.repository = repository
-        self.entitlementProvider = entitlementProvider
+        self.supportProvider = supportProvider
         self.locationProvider = locationProvider
         self.push = push ?? PushCoordinator.shared
         preferences = PreferencesStore.shared.current
-        entitlement = EntitlementCache.shared.snapshot
+        supporter = SupporterCache.shared.snapshot
         place = PlaceStore.shared.selected
     }
 
     // MARK: Lifecycle
 
     public func onLaunch() async {
-        await refreshEntitlement()
+        #if os(iOS)
+        appIcon = SupporterIcon(assetName: UIApplication.shared.alternateIconName)
+        #endif
+        await refreshSupporter()
         if place == nil { await useCurrentLocation() }
         await refresh()
     }
 
     public func onForeground() async {
-        await refreshEntitlement()
+        await refreshSupporter()
         await refresh()
         // Foreground is a free reload: the widget gets the payload the app
         // just fetched instead of spending one of its own.
@@ -113,8 +121,7 @@ public final class AppModel: ObservableObject {
             await LiveActivityController.shared.sync(
                 forecast: forecast,
                 place: place,
-                preferences: preferences,
-                entitlement: entitlement
+                preferences: preferences
             )
         }
         #endif
@@ -139,37 +146,26 @@ public final class AppModel: ObservableObject {
         await select(resolved, fetch: fetch)
     }
 
-    // MARK: Entitlement
+    // MARK: Support
 
-    public func refreshEntitlement() async {
-        entitlement = await entitlementProvider.refresh()
-        // The widget reads the snapshot, so a lapse must reach the home screen
-        // immediately rather than at the widget's next natural refresh.
-        reloadWidgets()
+    public func refreshSupporter() async {
+        supporter = await supportProvider.refresh()
     }
 
-    #if DEBUG
-    /// Grant a trial locally so the paywall can be walked past on a build
-    /// without a StoreKit sandbox purchase. Debug builds only — never shipped.
-    /// A real `refreshEntitlement()` will overwrite this from the store.
-    public func debugUnlock() {
-        entitlement = EntitlementSnapshot(status: .trial(endsAt: Date().addingTimeInterval(14 * 86400)))
-        EntitlementCache.shared.snapshot = entitlement
-        reloadWidgets()
-    }
-    #endif
-
-    public func product() async -> PaywallProduct? {
-        await entitlementProvider.product()
+    public func supportProducts() async -> [SupportProduct] {
+        await supportProvider.products()
     }
 
-    public func subscribe() async -> PurchaseOutcome? {
+    /// Nil means the purchase failed; the store has already told the user why.
+    public func purchase(_ product: SupportProduct) async -> PurchaseOutcome? {
         do {
-            let outcome = try await entitlementProvider.purchase()
+            let outcome = try await supportProvider.purchase(product)
             if case .purchased(let snapshot) = outcome {
-                entitlement = snapshot
-                TrialInstrumentation.record(.converted)
-                reloadWidgets()
+                supporter = snapshot
+                // Someone who subscribes from the Support screen in this build
+                // knows the app is free; the notice is for the paid builds'
+                // subscribers only.
+                if product.kind == .monthly { SupporterCache.shared.hasShownFreeNotice = true }
             }
             return outcome
         } catch {
@@ -178,8 +174,31 @@ public final class AppModel: ObservableObject {
     }
 
     public func restore() async {
-        entitlement = (try? await entitlementProvider.restore()) ?? entitlement
-        reloadWidgets()
+        supporter = (try? await supportProvider.restore()) ?? supporter
+    }
+
+    public var supportsAlternateIcons: Bool {
+        #if os(iOS)
+        return UIApplication.shared.supportsAlternateIcons
+        #else
+        return false
+        #endif
+    }
+
+    /// Supporter icons only for supporters; the standard icon for anyone.
+    public func setAppIcon(_ icon: SupporterIcon) async {
+        guard !icon.requiresSupport || supporter.status.isSupporter else { return }
+        #if os(iOS)
+        guard UIApplication.shared.supportsAlternateIcons,
+              UIApplication.shared.alternateIconName != icon.assetName
+        else { return }
+        do {
+            try await UIApplication.shared.setAlternateIconName(icon.assetName)
+            appIcon = icon
+        } catch {
+            appIcon = SupporterIcon(assetName: UIApplication.shared.alternateIconName)
+        }
+        #endif
     }
 
     // MARK: Widgets

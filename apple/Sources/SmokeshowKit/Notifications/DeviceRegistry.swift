@@ -3,8 +3,8 @@
 // The service, not the app, creates the registry identity. It returns an
 // opaque device ID and a secret once; both are kept in the Keychain and used
 // as bearer credentials for later updates and deletion. DeviceIdentity remains
-// the RevenueCat app-user ID, which lets the webhook attach an entitlement to
-// this registry record without identifying a person.
+// the RevenueCat app-user ID. The service no longer gates alerts on it: alerts
+// are free, so every registered device is evaluated.
 
 import Foundation
 import Security

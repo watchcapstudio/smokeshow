@@ -38,7 +38,7 @@ Target: the SmokeShow project in Vercel scope `joseph-6007s-projects`.
 | --- | --- |
 | `NOTIFY_DATABASE_URL` | Supabase **Transaction pooler** connection string, port `6543`; insert the database password Kelly saved at project creation |
 | `CRON_SECRET` | A new random hex secret, e.g. `openssl rand -hex 32` |
-| `NOTIFY_REQUIRE_ENTITLEMENT` | `false` for the initial ungated launch; change to `true` after RevenueCat is connected and its entitlement table is populated |
+| `NOTIFY_REQUIRE_ENTITLEMENT` | `false`. Alerts are free for everyone; leave it unset or `false` |
 | `REVENUECAT_WEBHOOK_SECRET` | Add later with RevenueCat; use the identical value in its Authorization header |
 | `REVENUECAT_ENTITLEMENT_ID` | `smokeshow_pro` |
 | `APNS_KEY_ID` | Apple APNs authentication key ID |
@@ -69,9 +69,9 @@ RevenueCat can send all event types; the service ignores irrelevant ones and
 handles purchase, renewal, cancellation, billing issue, expiration, refund,
 alias, and transfer events.
 
-Keep `NOTIFY_REQUIRE_ENTITLEMENT=false` until webhook tests have populated and
-verified subscriber entitlements. Turning it on earlier would correctly—but
-silently—exclude every device that does not yet have an entitlement row.
+Keep `NOTIFY_REQUIRE_ENTITLEMENT=false`. Alerts are free, and turning it on
+would silently exclude every device without an active supporter subscription.
+The webhook still records supporters; nothing reads it for delivery.
 
 ## 3. Confirm Apple capabilities
 

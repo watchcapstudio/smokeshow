@@ -82,7 +82,7 @@ asks for **8–16**, because one fetch returns a whole timeline and
 | unavailable | 20 min → 2 h backoff | ≤ 12 | 1 |
 
 Nothing polls. The extra reloads are all event-driven: app foreground, place
-change, preference change, entitlement change, and a silent push from B7 that
+change, preference change, and a silent push from B7 that
 says the verdict moved. `TimelineBuilderTests` asserts the cadences.
 
 ## What is mocked, and what is real
@@ -93,7 +93,7 @@ says the verdict moved. `TimelineBuilderTests` asserts the cadences.
 | `design/tokens.json` | **Real.** `Tokens.generated.swift` is generated from it; `ParityTests` re-checks the values against the JSON. |
 | Notification registry | **Integrated.** `DeviceRegistry.swift` implements the `/v1/devices` contract, stores the one-time bearer credential in the Keychain, and sends the same anonymous ID RevenueCat uses. The service URL is injected with `NOTIFICATION_SERVICE_BASE_URL`. |
 | RevenueCat | **Real integration, compiled conditionally.** All SDK calls are behind `#if canImport(RevenueCat)`; the package is added by the Xcode project, not by `Package.swift`, so `swift test` runs without it. |
-| App Store Connect | Product ID `earth.smokeshow.subscription.monthly`, group `smokeshow`, $2.99/month, 14-day introductory offer — mirrored in `Configuration/Smokeshow.storekit` for local StoreKit testing. |
+| App Store Connect | Tips `earth.smokeshow.tip.small/medium/large` (consumable) and the supporter subscription `earth.smokeshow.subscription.monthly`, group `smokeshow`, $2.99/month, no introductory offer — mirrored in `Configuration/Smokeshow.storekit` for local StoreKit testing. See `docs/free-and-support.md` for the by-hand steps. |
 
 ### Verified, and not
 
@@ -105,7 +105,7 @@ latest push, all four jobs are green:
 | --- | --- |
 | `web tests` | the web suite still passes (145 tests) |
 | `generated artifacts are current` | tokens and fixtures match their sources, and every fixture still validates against the v1 schema |
-| `SmokeshowKit tests` | the shared framework compiles and its 38 tests pass — decoding, the timeline budget, trial/lapse policy, and the parity guards |
+| `SmokeshowKit tests` | the shared framework compiles and its tests pass — decoding, the timeline budget, the free-app guarantees, and the parity guards |
 | `iOS + macOS build` | the app, the widget extension, the Live Activity, and the watch app compile and link for iOS Simulator, macOS, and watchOS Simulator |
 
 Seven real defects came out of that loop: line-continuations in non-multiline
@@ -120,8 +120,8 @@ the AppIntents build phase.
 - that the widgets *look* right — `systemLarge` and `systemExtraLarge` were
   designed without ever being rendered, place-name truncation at 148pt is
   untested, and the `isDark` ink inversion needs a contrast audit;
-- that billing works — no App Store Connect product exists yet, so the
-  trial → day 14 → lapse path has never run against a real receipt;
+- that tips and the supporter subscription work against real receipts, and
+  that the alternate icons switch on a device;
 - that the watch is correct — see `docs/watch-and-live-activity.md` for the
   one known correctness gap (entitlement transfer over WatchConnectivity).
 
@@ -138,6 +138,6 @@ follow.
 
 - `docs/widget-families.md` — every family, including the two the demo never
   designed (`systemLarge`, `systemExtraLarge`), and why macOS gets no accessories
-- `docs/trial-and-lapse.md` — day 0 widget onboarding, day 12–14 instrumentation,
-  and exactly what the widget shows when the trial ends
+- `docs/free-and-support.md` — why the apps are free, the tip jar and supporter
+  icons, and what paid-build subscribers see
 - `docs/watch-and-live-activity.md` — what is built, what is left, and the cost

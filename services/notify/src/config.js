@@ -30,7 +30,10 @@ export function loadConfig(env = process.env) {
     databasePoolMax: num(env.NOTIFY_DATABASE_POOL_MAX, 5),
     cellConcurrency: num(env.NOTIFY_CELL_CONCURRENCY, 8),
     minGapMs: num(env.NOTIFY_MIN_GAP_MS, DEFAULT_MIN_GAP_MS),
-    requireEntitlement: bool(env.NOTIFY_REQUIRE_ENTITLEMENT, true),
+    // Alerts are free, so delivery is open by default. The gate is kept,
+    // switched off, rather than deleted: it is the cost control if the free
+    // model ever changes, and the webhook still records supporters.
+    requireEntitlement: bool(env.NOTIFY_REQUIRE_ENTITLEMENT, false),
 
     revenuecat: {
       webhookSecret: env.REVENUECAT_WEBHOOK_SECRET || null,
