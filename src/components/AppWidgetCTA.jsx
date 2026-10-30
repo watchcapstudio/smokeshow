@@ -131,7 +131,7 @@ export default function AppWidgetCTA({
   return (
     <section className="cta-widgets" aria-labelledby="cta-widgets-heading">
       <div className="cta-widgets__panel panel">
-        <p className="eyebrow">SMOKESHOW app · $2.99/month</p>
+        <p className="eyebrow">SMOKESHOW app · Free</p>
         <h2 id="cta-widgets-heading" className="cta-widgets__heading">
           Your air, on your Home Screen.
         </h2>
@@ -235,7 +235,7 @@ export default function AppWidgetCTA({
 
         <div className="cta-widgets__footer">
           <p className="cta-widgets__price">
-            On the App Store now. Android coming soon.
+            Free on the App Store. Android coming soon.
           </p>
           <div className="cta-widgets__badges">
             <a href={APP_STORE_URL} className="cta-widgets__badge">

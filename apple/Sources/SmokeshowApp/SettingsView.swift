@@ -11,6 +11,7 @@ struct SettingsView: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.dismiss) private var dismiss
     @State private var showsWidgetOnboarding = false
+    @State private var showsSupport = false
 
     var body: some View {
         ZStack {
@@ -97,10 +98,10 @@ struct SettingsView: View {
                         }
                     }
 
-                    section("Subscription") {
-                        Text(subscriptionLine).font(Typography.sm).opacity(0.8)
-                        Button("Restore purchases") { Task { await model.restore() } }
-                            .font(Typography.sm)
+                    section("Support") {
+                        Button(Copy.Support.title) { showsSupport = true }
+                            .font(Typography.md)
+                        Text(supportLine).font(Typography.xs).opacity(0.6)
                     }
 
                     section("About") {
@@ -124,17 +125,16 @@ struct SettingsView: View {
         .sheet(isPresented: $showsWidgetOnboarding) {
             WidgetOnboardingView()
         }
+        .sheet(isPresented: $showsSupport) {
+            SupportView()
+        }
     }
 
-    private var subscriptionLine: String {
-        switch model.entitlement.status {
-        case .trial:
-            let days = model.entitlement.trialDaysRemaining() ?? 0
-            return "Free trial · \(days) day\(days == 1 ? "" : "s") left"
-        case .subscribed: return "Subscribed"
-        case .lapsed: return "Subscription ended"
-        case .never: return "Not subscribed"
-        case .unknown: return "Checking…"
+    private var supportLine: String {
+        switch model.supporter.status {
+        case .subscribed: return Copy.Support.subscribedLine
+        case .tipped: return Copy.Support.tippedLine
+        case .unknown, .notSupporting: return "Everything here is free. Tips unlock app icons."
         }
     }
 

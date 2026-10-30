@@ -42,14 +42,6 @@ struct ForecastTimelineProvider: AppIntentTimelineProvider {
     func timeline(for configuration: SelectPlaceIntent, in context: Context) async -> Timeline<ForecastEntry> {
         let place = configuration.resolvedPlace
         let preferences = PreferencesStore.shared.current
-        let entitlement = EntitlementCache.shared.snapshot
-
-        // A lapsed subscriber gets the designed lapse tile and a cheap refresh
-        // cadence. No fetch: we are not going to render the forecast anyway,
-        // and the network call would be pure cost (platform plan §4).
-        guard entitlement.widgetsMayRenderForecast else {
-            return timeline(from: TimelineBuilder.lapsedTimeline(place: place))
-        }
 
         let request = ForecastRequest(place: place, source: preferences.source)
         let repository = ForecastRepository(
@@ -70,8 +62,7 @@ struct ForecastTimelineProvider: AppIntentTimelineProvider {
         return timeline(from: TimelineBuilder.build(
             forecast: forecast,
             place: place,
-            preferences: preferences,
-            entitlement: entitlement
+            preferences: preferences
         ))
     }
 

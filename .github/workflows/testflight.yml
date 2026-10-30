@@ -1,0 +1,145 @@
+name: testflight
+
+# Archives the iOS app and uploads it to App Store Connect, where it lands in
+# TestFlight. Run by hand (Actions tab, or the API): it never runs on push.
+#
+# Signing is Xcode's cloud-managed automatic signing, authenticated with an
+# App Store Connect API key, so no certificate or profile lives in the repo or
+# in secrets. The key needs the Admin role: cloud-managed distribution
+# certificates are only issued to Admin keys.
+#
+# Secrets (Settings -> Secrets and variables -> Actions):
+#   APPLE_TEAM_ID        10-character Team ID (developer.apple.com -> Membership)
+#   ASC_KEY_ID           the API key's Key ID
+#   ASC_ISSUER_ID        the Issuer ID shown above the keys list
+#   ASC_KEY_P8           the full text of the downloaded AuthKey_XXXX.p8
+#
+# This uploads a build. Submitting it for review stays a human step in App
+# Store Connect, where the release notes, in-app purchases, and screenshots
+# are attached.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Marketing version (must be higher than the live 1.0)
+        required: true
+        default: "1.1"
+      build:
+        description: Build number (blank = 100 + this workflow's run number)
+        required: false
+        default: ""
+
+concurrency:
+  group: testflight
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    name: Archive and upload
+    runs-on: macos-14
+    timeout-minutes: 60
+    env:
+      DEVELOPMENT_TEAM: ${{ secrets.APPLE_TEAM_ID }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      VERSION: ${{ inputs.version }}
+      BUILD_INPUT: ${{ inputs.build }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the secrets are set
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          missing=""
+          [ -n "$DEVELOPMENT_TEAM" ] || missing="$missing APPLE_TEAM_ID"
+          [ -n "$ASC_KEY_ID" ] || missing="$missing ASC_KEY_ID"
+          [ -n "$ASC_ISSUER_ID" ] || missing="$missing ASC_ISSUER_ID"
+          [ -n "$ASC_KEY_P8" ] || missing="$missing ASC_KEY_P8"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:$missing"
+            exit 1
+          fi
+
+      # Expressions cannot add, so the default build number is computed here.
+      - name: Pick the build number
+        run: echo "BUILD=${BUILD_INPUT:-$(( GITHUB_RUN_NUMBER + 100 ))}" >> "$GITHUB_ENV"
+
+      - name: Select the newest Xcode
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+          xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Write the API key
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/asc"
+          printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/asc/AuthKey.p8"
+          echo "ASC_KEY_PATH=$RUNNER_TEMP/asc/AuthKey.p8" >> "$GITHUB_ENV"
+
+      - name: Generate the Xcode project
+        working-directory: apple
+        run: xcodegen generate --spec project.yml
+
+      - name: Resolve package dependencies
+        working-directory: apple
+        timeout-minutes: 15
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project Smokeshow.xcodeproj \
+            -clonedSourcePackagesDirPath .spm
+
+      - name: Archive
+        working-directory: apple
+        timeout-minutes: 40
+        run: |
+          echo "Archiving $VERSION ($BUILD)"
+          xcodebuild archive -quiet \
+            -project Smokeshow.xcodeproj \
+            -scheme Smokeshow \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/Smokeshow.xcarchive" \
+            -clonedSourcePackagesDirPath .spm \
+            -skipPackageUpdates \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM" \
+            MARKETING_VERSION="$VERSION" \
+            CURRENT_PROJECT_VERSION="$BUILD"
+
+      - name: Upload to App Store Connect
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>teamID</key><string>${DEVELOPMENT_TEAM}</string>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict>
+          </plist>
+          EOF
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/Smokeshow.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+          echo "Uploaded $VERSION ($BUILD). It appears in TestFlight after Apple finishes processing (usually 10 to 30 minutes)."
+
+      - name: Remove the API key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/asc"

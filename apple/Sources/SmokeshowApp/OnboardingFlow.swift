@@ -42,8 +42,7 @@ struct OnboardingFlow: View {
         guard let mock else { return nil }
         return TimelineBuilder.build(
             forecast: mock.forecast,
-            place: mock.place,
-            entitlement: EntitlementSnapshot(status: .subscribed(renewsAt: nil))
+            place: mock.place
         ).entries.first ?? TimelineBuilder.placeholder(place: mock.place)
     }()
 

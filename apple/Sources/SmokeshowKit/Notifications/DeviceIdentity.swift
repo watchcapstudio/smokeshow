@@ -3,11 +3,12 @@
 // A device-scoped opaque ID is the whole of the user model (platform plan §4).
 // It lives in the Keychain rather than UserDefaults so it survives an app
 // reinstall — otherwise every reinstall orphans a push registration on B7's
-// side and the user quietly stops getting alerts they are paying for.
+// side and the user quietly stops getting alerts they asked for.
 //
-// The same ID is handed to RevenueCat as the app user ID, so entitlement and
-// push registration describe the same device without either of them knowing a
-// person.
+// The same ID is handed to RevenueCat as the app user ID, so supporter status
+// and push registration describe the same device without either of them
+// knowing a person. Keeping it across reinstalls is also what lets a tip, which
+// StoreKit cannot restore, still unlock the supporter icons.
 
 import Foundation
 import Security

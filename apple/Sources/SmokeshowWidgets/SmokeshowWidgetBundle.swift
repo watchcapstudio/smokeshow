@@ -128,7 +128,7 @@ struct SmokeshowWidgetEntryView: View {
             // container background stays clear rather than drawing it twice.
             // iOS 17 still requires the modifier to be present.
             .containerBackground(for: .widget) { Color.clear }
-            .widgetURL(DeepLink.widgetTap(place: entry.model.placeName, lapsed: !entry.model.isForecast))
+            .widgetURL(DeepLink.widgetTap(place: entry.model.placeName))
     }
 
     private var layout: WidgetLayout {

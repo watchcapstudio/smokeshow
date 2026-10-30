@@ -1,8 +1,14 @@
-# SMOKESHOW platform plan — free web, paid apps
+# SMOKESHOW platform plan — free web, free apps
 
 Product architecture and phased delivery for: a free HTML site that works in
-any browser, plus paid iOS, macOS, and Android apps at $2.99/month where
-notifications and widgets live. All four surfaces must read as one product.
+any browser, plus free iOS, macOS, and Android apps where notifications and
+widgets live, with an optional tip jar. All four surfaces must read as one
+product.
+
+> **October 2026: the apps went free.** The paid model this plan was written
+> around ($2.99/month, 14-day trial, no free tier) shipped in iOS 1.0 and was
+> replaced. §1, §4 and §9 are updated; the reasoning and the tip jar live in
+> `apple/docs/free-and-support.md`.
 
 Companion docs:
 - `docs/smokeshow-demo-implementation-plan.md` — the web re-skin (Phase A)
@@ -15,9 +21,9 @@ Companion docs:
 | Surface | Price | Has | Does not have |
 | --- | --- | --- | --- |
 | **Web** (smokeshow.earth) | Free | Everything on the site today, re-skinned; store badges + widget showcase | Notification settings, widgets |
-| **iOS** | $2.99/mo | Everything web has, native; home + lock-screen widgets; push | — |
-| **macOS** | included | Same, desktop widget families | Lock-screen accessories (no such surface) |
-| **Android** | $2.99/mo | Same; Glance widgets; push | — |
+| **iOS** | Free (optional tips) | Everything web has, native; home + lock-screen widgets; push | — |
+| **macOS** | Free | Same, desktop widget families | Lock-screen accessories (no such surface) |
+| **Android** | Free (optional tips) | Same; Glance widgets; push | — |
 
 The web keeps its `CLAUDE.md` hard rules intact — static-first, no accounts,
 no email capture. Server state (device tokens, entitlements) lives on the app
@@ -26,7 +32,7 @@ element is a call to action.
 
 **What you're actually selling.** Not alerts — glanceability. "People want to
 see the data without needing to look it up" is the pitch, and the widget is the
-product. Alerts are the retention mechanic that keeps the subscription alive
+product. Alerts are the retention mechanic that keeps the app on the phone
 between smoke events. Sequence the marketing accordingly: the widget is the
 hero, notifications are the second bullet.
 
@@ -113,42 +119,31 @@ The demo already renders live widget mocks driven by real data
 (`renderWidgets()`, demo:921). That is a finished marketing asset: a
 "your air, on your home screen" block whose widgets update as the visitor
 scrubs the timeline. Reuse it nearly verbatim for the web CTA section — it
-demonstrates the paid feature using the visitor's own air, which is a far
+demonstrates the widget using the visitor's own air, which is a far
 stronger pitch than a screenshot.
 
 ---
 
-## 4. Subscriptions
+## 4. Purchases (tips and the supporter subscription)
 
 - **StoreKit 2** (iOS/macOS) + **Google Play Billing** (Android).
-- **Use RevenueCat for v1.** It handles both stores, receipt validation, and
-  the entitlement webhook you need to gate push server-side. Roughly 1% of
-  revenue and it saves well over a week of billing plumbing you do not want to
-  own. Revisit once volume justifies it.
-- **Entitlement must be checked server-side** before the notification worker
-  fans out to a device. Client-side gating alone means you keep paying APNs/FCM
-  and compute for lapsed subscribers.
+- **RevenueCat stays.** It already knows the paid builds' subscribers by their
+  anonymous device ID, and it keeps the record of consumable tips that StoreKit
+  cannot restore.
+- **No server-side gate.** The notification worker delivers to every
+  registered device (`NOTIFY_REQUIRE_ENTITLEMENT=false`). The gate is kept,
+  switched off, as the cost control if the model ever changes.
 - **Identity stays anonymous.** A device-scoped opaque ID, no email, no
   password. Keeps the spirit of the no-accounts rule and removes a signup step
   from the funnel.
 
-**Free tier — decided: none. Subscribe, with a 14-day free trial.** Standard
-weather-app model. Configure the trial as a store-native introductory offer
-(StoreKit introductory offer / Play base-plan free trial) so eligibility is
-enforced by the store, one per account per subscription group, and RevenueCat
-reports it uniformly across both.
-
-Two consequences worth designing for rather than discovering:
-
-- **The trial's job is to get a widget onto the home screen on day 0.** A trial
-  that never becomes a glance never converts — the product's value is ambient,
-  and it can't be felt from inside the app. Widget installation is the
-  onboarding step, not a settings-screen afterthought.
-- **Day 12–14 is the churn cliff, and the widget is the surface it happens on.**
-  When the trial lapses the widget either disappears (iOS) or keeps rendering
-  something (Android). What it shows at that moment is a deliberate design
-  decision — your best conversion prompt, or a blank tile that reads as broken.
-  Decide it; don't let it fall out of the implementation.
+**Free tier — superseded.** The original decision was "none: subscribe, with
+a 14-day free trial", and iOS 1.0 shipped that way. In October 2026 the apps
+went free, with tips for supporters. Smoke is seasonal, so a 14-day trial
+covered whole smoke events and churned before charging, and free costs almost
+nothing to serve because evaluation is per cell (§5). The day-0 widget ask
+survives: the product's value is still ambient, and a widget on the home screen
+is still the whole point. Details in `apple/docs/free-and-support.md`.
 
 ---
 
@@ -335,8 +330,9 @@ Web re-skin: ~4–6 days elapsed with the concurrency above (vs. ~8 serial).
   `assets/gen_smokeshow_art.py` generator stays in the repo as an archive.
 - **Web has no notification settings** — CTA only.
 - **Widgets are marketing on web, UI on native.**
-- **No free tier in the apps.** Subscribe at $2.99/mo with a **14-day free
-  trial**, store-native introductory offer (§4).
+- **The apps are free** (October 2026, replacing "no free tier, $2.99/mo with
+  a 14-day trial"). Optional tips unlock alternate app icons and nothing else;
+  see `apple/docs/free-and-support.md`.
 - **The web re-skin ships first**, before any platform work (§8).
 
 ## 10. Still open

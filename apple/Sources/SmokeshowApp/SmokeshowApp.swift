@@ -15,7 +15,7 @@ struct SmokeshowApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     #endif
 
-    @StateObject private var model = AppModel(entitlementProvider: EntitlementFactory.make())
+    @StateObject private var model = AppModel(supportProvider: SupportFactory.make())
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
@@ -49,17 +49,18 @@ extension Notification.Name {
     static let smokeshowDeepLink = Notification.Name("smokeshow.deeplink")
 }
 
-/// Chooses the entitlement implementation at launch. RevenueCat when the SDK
-/// is linked and a key is present; the stub otherwise, so the app is runnable
-/// in the simulator, in previews, and in CI without billing configured.
-enum EntitlementFactory {
-    static func make() -> EntitlementProviding {
+/// Chooses the tip-jar implementation at launch. RevenueCat when the SDK is
+/// linked and a key is present; the stub otherwise, so the app is runnable in
+/// the simulator, in previews, and in CI without billing configured. Nothing
+/// is gated on it either way.
+enum SupportFactory {
+    static func make() -> SupportProviding {
         #if canImport(RevenueCat)
         if let key = Bundle.main.object(forInfoDictionaryKey: "RevenueCatAPIKey") as? String,
            !key.isEmpty {
-            return RevenueCatEntitlementProvider(apiKey: key, appUserID: DeviceIdentity.current)
+            return RevenueCatSupportProvider(apiKey: key, appUserID: DeviceIdentity.current)
         }
         #endif
-        return StubEntitlementProvider()
+        return StubSupportProvider()
     }
 }

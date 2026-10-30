@@ -1,48 +1,90 @@
 {
-  "identifier" : "SMOKESHOW_STOREKIT_CONFIG",
-  "nonRenewingSubscriptions" : [],
-  "products" : [],
-  "settings" : {
-    "_askToBuyEnabled" : false,
-    "_billingIssuesEnabled" : false,
-    "_storeKitErrors" : []
-  },
-  "subscriptionGroups" : [
+  "identifier": "SMOKESHOW_STOREKIT_CONFIG",
+  "nonRenewingSubscriptions": [],
+  "products": [
     {
-      "id" : "smokeshow",
-      "localizations" : [],
-      "name" : "smokeshow",
-      "subscriptions" : [
+      "displayPrice": "2.99",
+      "familyShareable": false,
+      "internalID": "SMOKESHOW_TIP_S",
+      "localizations": [
         {
-          "adHocOffers" : [],
-          "codeOffers" : [],
-          "displayPrice" : "2.99",
-          "familyShareable" : false,
-          "groupNumber" : 1,
-          "internalID" : "SMOKESHOW_MONTHLY",
-          "introductoryOffer" : {
-            "internalID" : "SMOKESHOW_TRIAL_14D",
-            "paymentMode" : "free",
-            "subscriptionPeriod" : "P2W"
-          },
-          "localizations" : [
+          "description": "A one-time tip. Unlocks the supporter app icons.",
+          "displayName": "Small tip",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "earth.smokeshow.tip.small",
+      "referenceName": "Small tip",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "5.99",
+      "familyShareable": false,
+      "internalID": "SMOKESHOW_TIP_M",
+      "localizations": [
+        {
+          "description": "A one-time tip. Unlocks the supporter app icons.",
+          "displayName": "Medium tip",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "earth.smokeshow.tip.medium",
+      "referenceName": "Medium tip",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "11.99",
+      "familyShareable": false,
+      "internalID": "SMOKESHOW_TIP_L",
+      "localizations": [
+        {
+          "description": "A one-time tip. Unlocks the supporter app icons.",
+          "displayName": "Large tip",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "earth.smokeshow.tip.large",
+      "referenceName": "Large tip",
+      "type": "Consumable"
+    }
+  ],
+  "settings": {
+    "_askToBuyEnabled": false,
+    "_billingIssuesEnabled": false,
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [
+    {
+      "id": "smokeshow",
+      "localizations": [],
+      "name": "smokeshow",
+      "subscriptions": [
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "2.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "SMOKESHOW_MONTHLY",
+          "localizations": [
             {
-              "description" : "Widgets and alerts for wildfire smoke where you are. 14-day free trial, then $2.99 per month. Renews automatically until cancelled.",
-              "displayName" : "Smokeshow",
-              "locale" : "en_US"
+              "description": "Monthly support for a free app. Unlocks the supporter app icons. Renews automatically until cancelled.",
+              "displayName": "Smokeshow Supporter",
+              "locale": "en_US"
             }
           ],
-          "productID" : "earth.smokeshow.subscription.monthly",
-          "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "Smokeshow Monthly",
-          "subscriptionGroupID" : "smokeshow",
-          "type" : "RecurringSubscription"
+          "productID": "earth.smokeshow.subscription.monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Smokeshow Supporter Monthly",
+          "subscriptionGroupID": "smokeshow",
+          "type": "RecurringSubscription",
+          "introductoryOffer": null
         }
       ]
     }
   ],
-  "version" : {
-    "major" : 3,
-    "minor" : 0
+  "version": {
+    "major": 3,
+    "minor": 0
   }
 }

@@ -48,12 +48,6 @@ struct WatchForecastProvider: TimelineProvider {
         Task {
             let place = PlaceStore.shared.selected ?? .preview
             let preferences = PreferencesStore.shared.current
-            let entitlement = EntitlementCache.shared.snapshot
-
-            guard entitlement.widgetsMayRenderForecast else {
-                completion(timeline(from: TimelineBuilder.lapsedTimeline(place: place)))
-                return
-            }
 
             let request = ForecastRequest(place: place, source: preferences.source)
             let result = await ForecastRepository(
@@ -71,8 +65,7 @@ struct WatchForecastProvider: TimelineProvider {
             completion(timeline(from: TimelineBuilder.build(
                 forecast: forecast,
                 place: place,
-                preferences: preferences,
-                entitlement: entitlement
+                preferences: preferences
             )))
         }
     }

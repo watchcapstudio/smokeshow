@@ -1,8 +1,7 @@
 // Where a tap goes.
 //
-// A tap on a lapsed widget must land on the paywall, not the home screen —
-// that tile is the conversion prompt, and bouncing the user into an app that
-// then tells them the same thing is a wasted moment (platform plan §4).
+// A widget tap always lands on the verdict for that place. There is no paywall
+// to route to: the app is free, and `support` is only ever reached on purpose.
 
 import Foundation
 
@@ -11,13 +10,13 @@ public enum DeepLink {
 
     public enum Destination: Equatable, Sendable {
         case verdict(place: String?)
-        case paywall
+        case support
         case widgetSetup
         case settings
     }
 
-    public static func widgetTap(place: String?, lapsed: Bool) -> URL? {
-        lapsed ? url(.paywall) : url(.verdict(place: place))
+    public static func widgetTap(place: String?) -> URL? {
+        url(.verdict(place: place))
     }
 
     public static func url(_ destination: Destination) -> URL? {
@@ -27,8 +26,8 @@ public enum DeepLink {
         case .verdict(let place):
             components.host = "verdict"
             if let place { components.queryItems = [URLQueryItem(name: "place", value: place)] }
-        case .paywall:
-            components.host = "subscribe"
+        case .support:
+            components.host = "support"
         case .widgetSetup:
             components.host = "add-widget"
         case .settings:
@@ -44,7 +43,9 @@ public enum DeepLink {
             let place = URLComponents(url: url, resolvingAgainstBaseURL: false)?
                 .queryItems?.first(where: { $0.name == "place" })?.value
             return .verdict(place: place)
-        case "subscribe": return .paywall
+        // `subscribe` is what lapsed-trial widgets from the paid builds still
+        // carry until their timeline reloads. Land them somewhere useful.
+        case "support", "subscribe": return .support
         case "add-widget": return .widgetSetup
         case "settings": return .settings
         default: return nil

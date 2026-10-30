@@ -92,8 +92,8 @@ Three states, all designed rather than implicit:
   and the hour is hatched.
 - **Unavailable** — no payload we will show as current. The tile says so and
   prints the age of what it last had.
-- **Lapsed** — the trial ended. Place name and sky stay so the tile still looks
-  like itself; the forecast is withheld, not frozen. See `trial-and-lapse.md`.
+- There is no lapsed or locked state: the apps are free, and every widget
+  always renders the forecast. See `free-and-support.md`.
 
 ## Place selection
 
