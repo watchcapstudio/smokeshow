@@ -150,7 +150,7 @@ jobs:
   # no verdict maths in Swift).
   apple-kit:
     name: SmokeshowKit tests
-    runs-on: macos-14
+    runs-on: macos-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -165,7 +165,7 @@ jobs:
   # links, not that it can be shipped.
   apple-app:
     name: iOS + macOS build
-    runs-on: macos-14
+    runs-on: macos-latest
     # RevenueCat is compiled from source for three platforms on the first run;
     # the cache below makes later runs cheap, but the cold one is genuinely long.
     timeout-minutes: 60
