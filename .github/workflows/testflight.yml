@@ -21,10 +21,13 @@ name: testflight
 on:
   workflow_dispatch:
     inputs:
+      ref:
+        description: Branch, tag or commit to build (blank = the branch picked above)
+        required: false
+        default: ""
       version:
-        description: Marketing version (must be higher than the live 1.0)
+        description: Marketing version, as set in App Store Connect (e.g. 0.1.2)
         required: true
-        default: "1.1"
       build:
         description: Build number (blank = 100 + this workflow's run number)
         required: false
@@ -37,7 +40,7 @@ concurrency:
 jobs:
   upload:
     name: Archive and upload
-    runs-on: macos-14
+    runs-on: macos-latest
     timeout-minutes: 60
     env:
       DEVELOPMENT_TEAM: ${{ secrets.APPLE_TEAM_ID }}
@@ -46,7 +49,11 @@ jobs:
       VERSION: ${{ inputs.version }}
       BUILD_INPUT: ${{ inputs.build }}
     steps:
+      # Run this from main and name the branch here, so a feature branch with an
+      # older copy of this file can still be built with the current one.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
 
       - name: Check the secrets are set
         env:
